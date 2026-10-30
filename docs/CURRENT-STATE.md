@@ -26,6 +26,10 @@
       `project.inlang/` não estavam no `.prettierignore` (localmente passava porque um
       `format` anterior os tinha formatado). Corrigido e conferido numa cópia limpa.
       Dockerfile sem corepack; Dependabot agrupa minor/patch e isola major.
+- [x] Segundo CI falhou em `pnpm run test`: com `BASE_PATH=/dotree` no job inteiro, o
+      Vitest em modo navegador não acha a própria página ("Failed to connect to the browser
+      session"). O `vite.config.ts` ignora o prefixo sob Vitest e o CI só aplica
+      `BASE_PATH` na build e no e2e. Reproduzido antes e conferido depois da correção.
 - [ ] MT-0: o autor lê e aprova a spec revisada.
 - [ ] Próximo ticket de código: MT-3 (analisar a expressão), depois MT-4.
 

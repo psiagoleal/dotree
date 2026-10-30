@@ -41,8 +41,6 @@ jobs:
     defaults:
       run:
         working-directory: app/web
-    env:
-      BASE_PATH: /dotree
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -65,8 +63,13 @@ jobs:
       - run: pnpm run check
       - run: pnpm run lint
       - run: pnpm run test
+      # O prefixo do Pages vale só para a build e para o e2e, que roda contra ela (ENT-03).
       - run: pnpm run build
+        env:
+          BASE_PATH: /dotree
       - run: pnpm run test:e2e
+        env:
+          BASE_PATH: /dotree
       - name: Relatório do Playwright em caso de falha
         if: failure()
         uses: actions/upload-artifact@v4

@@ -31,8 +31,9 @@ updates:
         patterns: ['*']
     ignore:
       # A v6 falha ao instalar o pnpm 11.12 ("@pnpm/exe ... shipped without a binary").
+      # Major do pnpm/action-setup só por decisão manual.
       - dependency-name: pnpm/action-setup
-        versions: ['6.x']
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directory: /

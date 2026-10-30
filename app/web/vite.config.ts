@@ -6,7 +6,9 @@ import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 
 // GitHub Pages serves the site under /dotree/ (ENT-03); Docker and local dev serve at the root.
-const base = (process.env.BASE_PATH ?? '') as '' | `/${string}`;
+// Vitest's browser runner serves its tester page at the root and cannot find it under a base
+// path ("Failed to connect to the browser session"), so the base is ignored under Vitest.
+const base = (process.env.VITEST ? '' : (process.env.BASE_PATH ?? '')) as '' | `/${string}`;
 
 export default defineConfig({
 	plugins: [
