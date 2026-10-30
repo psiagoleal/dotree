@@ -31,10 +31,12 @@
       session"). O `vite.config.ts` ignora o prefixo sob Vitest e o CI só aplica
       `BASE_PATH` na build e no e2e. Reproduzido antes e conferido depois da correção.
 - [x] MT-2 concluído: CI verde no `main`, site no ar, PRs #11 e #12 do Dependabot mesclados.
-- [>] MT-18: governança pronta em `.github/governanca/` (ADR 0003); falta o autor aplicar.
-      Depois disso, **todo** trabalho entra por branch + PR (o `main` recusa push direto).
-- [ ] MT-0: o autor lê e aprova a spec revisada.
-- [ ] Próximo ticket de código: MT-3 (analisar a expressão), depois MT-4.
+- [x] MT-18: governança aplicada (`aplicar.sh --conferir` com 0 falhas). **Todo** trabalho
+      entra por branch + PR: o `main` recusa push direto.
+- [x] MT-0: spec v0.1 aprovada pelo autor.
+- [x] MT-3: `dotree_core::expr` com 27 testes (verificados com 3 mutações). A spec ganhou
+      EXP-13 (constantes recusadas) e EXP-14 (coeficiente grande demais).
+- [ ] Próximo: MT-4 (matriz de pontos a partir do `Analysis`).
 
 ## Observações para a próxima sessão
 
