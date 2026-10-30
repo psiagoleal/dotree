@@ -43,8 +43,8 @@ roda**.
   navegador.
 - **Impacto negativo:** duas cadeias de ferramentas (cargo + wasm-pack, Node + pnpm); a
   fronteira WASM ↔ TypeScript precisa de tipos mantidos nos dois lados.
-- **Trade-offs aceitos:** o pacote WASM aumenta o primeiro carregamento (alvo: < 500 kB
-  comprimido, a confirmar quando houver código).
+- **Trade-offs aceitos:** o pacote WASM aumenta o primeiro carregamento. Nota, não critério:
+  mirar < 500 kB comprimido e medir quando houver código.
 
 ## Diretriz de Conformidade de Código
 
@@ -52,9 +52,13 @@ roda**.
   em TypeScript ou em componente Svelte; a interface só exibe e encaminha ações.
 - **Proibido:** dependência de `wasm-bindgen`, `web-sys` ou `js-sys` em `dotree-core`.
 - **Proibido:** texto em linguagem natural para o usuário dentro do núcleo; o núcleo devolve
-  códigos (IDI-05).
-- **Obrigatório:** todo critério das specs que trate de regra de domínio tem teste em
-  `cargo test -p dotree-core`.
+  códigos (IDI-05). **Exceção:** os modelos de comentário do VHDL gerado (VHD-06) ficam no
+  núcleo, nos dois idiomas, com teste de paridade, porque o VHDL é artefato gerado pelo
+  núcleo e não texto de interface.
+- **Obrigatório:** toda regra de domínio (montagem da matriz, células, CPA, métricas, ajuda
+  calculada, verificação, leiaute do diagrama, geração de VHDL) tem teste em
+  `cargo test -p dotree-core`. Critérios de interface (foco, confirmação, persistência,
+  troca de visão) provam-se em teste de componente ou de ponta a ponta.
 
 > Qualquer desvio desta regra viola as diretrizes de conformidade arquitetural do projeto
 > e deve ser reportado para revisão antes de prosseguir.

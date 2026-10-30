@@ -48,17 +48,23 @@
 ## 2. Linguagens e frameworks preferenciais
 
 <!-- USER:BEGIN id=linguagens-frameworks -->
-**Deste projeto** (ver [ADR 0001](docs/adr/0001-nucleo-rust-em-webassembly.md)):
+**Deste projeto** (ver [ADR 0001](docs/adr/0001-nucleo-rust-em-webassembly.md) e
+[ADR 0002](docs/adr/0002-entrega-github-pages-e-actions.md)):
 
-- **Rust** (edição 2024) → núcleo de domínio na crate `dotree-core`, sem dependência de
-  navegador; ponte para o navegador na crate `dotree-wasm` (`wasm-bindgen`, `wasm-pack`).
-- **SvelteKit / Svelte 5 + TypeScript** → interface, com `adapter-static` (site estático,
-  sem servidor de aplicação).
-- **Docker** → build reprodutível (Rust → WASM, Node → site) e imagem que só serve estático.
-- **GHDL** (em contêiner) → só em CI, para analisar e simular o VHDL gerado (spec `VHD-01`).
-- Sem banco de dados.
-- _Pendente (questionário de stack, bloco B/D/E):_ gerenciador Node, ferramentas de teste
-  da interface, biblioteca de i18n, estilização, hospedagem.
+- **Rust** estável (edição 2024; `rust-toolchain.toml`) → núcleo de domínio na crate
+  `dotree-core`, sem dependência de navegador; ponte na crate `dotree-wasm`
+  (`wasm-bindgen`, compilada com `wasm-pack`).
+- **SvelteKit 3 / Svelte 5 (runas) + TypeScript 6 + Vite 8**, `adapter-static`, só
+  renderização no cliente (`ssr = false`). Caminho base `/dotree` no Pages via `BASE_PATH`.
+- **pnpm 11** (Node 24) · **Vitest 4** (unidade em Node; componente no Chromium via
+  Playwright) · **Playwright** (ponta a ponta contra a build estática) · **ESLint + Prettier**.
+- **Paraglide 2** para i18n (pt-br, en), estratégia `localStorage` + detecção própria na
+  primeira visita (`src/lib/locale.ts`).
+- **CSS puro com tokens** em `app/web/src/app.css` (claro/escuro); sem framework de CSS.
+- **Docker** → imagem em etapas (Rust → WASM, Node → site, nginx sem privilégio na 8080).
+- **GitHub Actions** (CI e publicação), **GitHub Pages**, **GHCR** (imagem nas *tags*).
+- **GHDL** em contêiner só no CI, quando houver gerador de VHDL (spec `ENT-06`).
+- Sem banco de dados, sem servidor de aplicação.
 
 **Padrão do perfil** (referência para outros projetos):
 
@@ -72,14 +78,28 @@
 ## 3. Comandos exatos (ajuste por projeto)
 
 <!-- USER:BEGIN id=comandos-exatos -->
+Todos executados com sucesso em 2026-10-30. O CI (`.github/workflows/ci.yml`) roda os
+mesmos.
+
 ```bash
-# Nenhum comando foi executado ainda: o código começa depois da aprovação da spec.
-# Cada linha abaixo só perde o comentário depois de rodar com sucesso neste repositório.
-# cargo test -p dotree-core            # núcleo — ainda não configurado (ver docs/TICKETS.md)
-# cargo clippy --all-targets -- -D warnings && cargo fmt --check
-# wasm-pack build app/wasm --target web
-# pnpm --dir app/web install && pnpm --dir app/web test
-# docker build -t dotree .
+# Núcleo Rust (raiz do repositório)
+cargo fmt --check
+cargo clippy --all-targets -- -D warnings
+cargo test
+
+# Interface (app/web) — pnpm run wasm/i18n são chamados pelos scripts abaixo
+pnpm --dir app/web install --frozen-lockfile
+pnpm --dir app/web exec playwright install chromium   # uma vez por máquina
+pnpm --dir app/web run check          # gera WASM e i18n, svelte-check
+pnpm --dir app/web run lint           # prettier --check + eslint
+pnpm --dir app/web run format         # prettier --write
+pnpm --dir app/web run test           # vitest: unidade (node) + componente (chromium)
+BASE_PATH=/dotree pnpm --dir app/web run build      # site estático em app/web/build
+BASE_PATH=/dotree pnpm --dir app/web run test:e2e   # playwright contra a build, porta 4180
+pnpm --dir app/web run dev            # desenvolvimento local
+
+# Imagem
+docker build -t dotree . && docker run --rm -p 8080:8080 dotree
 ```
 <!-- USER:END -->
 
@@ -103,36 +123,41 @@
 <!-- USER:BEGIN id=estrutura-diretorios -->
 ```
 Cargo.toml           # workspace Rust (membros em app/)
+rust-toolchain.toml  # Rust estável + rustfmt, clippy, alvo wasm32
+Dockerfile           # imagem em etapas (ENT-04)
 app/                 # RAIZ ÚNICA do código do sistema
   core/              # crate dotree-core: domínio puro (expressão, matriz, células, VHDL)
   wasm/              # crate dotree-wasm: ponte wasm-bindgen, sem regra de domínio
-  web/               # SvelteKit (Svelte 5), adapter-static
+  web/               # SvelteKit: src/ (rotas, componentes), messages/ (i18n), e2e/
+.github/             # workflows (ci.yml, release.yml) e dependabot.yml
 docs/specs/          # A SPEC — contrato do que conta como pronto (ler antes de codar)
 docs/adr/            # Registros de Decisão de Arquitetura — LEITURA OBRIGATÓRIA
+docs/plano.md        # plano descartável: detalhe de cada ticket
+docs/TICKETS.md      # painel de tickets (skill micro-ticket-planner)
+docs/architecture.md # arquitetura efetiva (skill mapa-de-arquitetura)
 docs/insumos/        # briefing e referências recebidas
 docs/CURRENT-STATE.md# handoff entre turnos (skill handoff-updater)
-docs/TICKETS.md      # painel de tickets (skill micro-ticket-planner)
 ```
-_Layout proposto; os diretórios de `app/` nascem no primeiro ticket de código._
+Gerados e fora do git: `target/`, `app/web/src/lib/wasm/` (wasm-pack),
+`app/web/src/lib/paraglide/` (Paraglide), `app/web/build/`.
 <!-- USER:END -->
 
 ## 4. Estilo de codificação
 
 <!-- USER:BEGIN id=estilo-codificacao -->
-- **Comentário de caminho relativo** no topo de cada arquivo: `// Caminho relativo: src/...`.
-- **Doxygen** em C++:
-  ```cpp
-  /// \file src/module/example.cpp
-  /// \brief Exemplo de implementação
-  /// \author Iago Leal
-  /// \date AAAA-MM-DD
-  ```
-- **Type Hints** em Python; assinaturas explícitas.
-- Formatadores: `clang-format` (C++), `black`+`isort` (Python), `rustfmt` (Rust),
-  `prettier` (JS/Svelte).
+- **Comentário de caminho relativo** no topo de cada arquivo: `// Caminho relativo: app/...`.
+- **Idiomas:** identificadores e comentários de código em **inglês**; documentação, specs e
+  mensagens de commit em **português**. Textos da interface só nos catálogos
+  `app/web/messages/{pt-br,en}.json` (IDI-01).
+- **Imports na interface:** SvelteKit 3 usa *subpath imports*: `#lib/...` com extensão
+  (`#lib/core.ts`, `#lib/paraglide/messages.js`). Não existe `$lib`.
+- **Svelte 5 com runas** (`$state`, `$props`, `$effect`); nada de API de stores legada em
+  componente novo.
+- Formatadores: `rustfmt` (Rust), `prettier` (TS/Svelte/JSON/CSS). Lint: `clippy -D warnings`,
+  `eslint`.
 - Documentação em **Markdown** com **Mermaid** (diagramas) e **LaTeX** (fórmulas).
 - **Código modular e reutilizável**; preferir **ferramentas open-source**; buscar
-  **portabilidade** (Windows/Linux/Mac/Web/iOS/Android); compatibilidade com Docker.
+  **portabilidade**; compatibilidade com Docker.
 - **Evitar viés de confirmação:** propor alternativas, validar hipóteses, basear-se em
   documentação oficial e/ou artigos científicos; apresentar mudanças como *diff* estilo git.
 <!-- USER:END -->
@@ -221,7 +246,11 @@ _(nenhum — acrescente aqui o cofre, caminhos de credencial e regras de segredo
   muda no mesmo trabalho.
 - **Casos de referência** (`docs/specs/00-transversal.md`, R1–R4) são testes do núcleo e não
   podem regredir.
-- _Pendente:_ convenção de mensagem de commit e idioma dos identificadores de código.
+- **Commits:** Conventional Commits em português, com escopo pelo componente
+  (`feat(core): …`, `fix(web): …`, `ci: …`, `docs(spec): …`), seguidos da marcação de
+  proveniência da seção 7 quando houver agente.
+- **Tickets:** painel em `docs/TICKETS.md`, detalhe em `docs/plano.md`; um ticket por
+  commit ou PR, citando o identificador (`MT-3`).
 <!-- USER:END -->
 
 ### git: o agente propõe, a pessoa executa

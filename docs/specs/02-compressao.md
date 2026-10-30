@@ -10,82 +10,102 @@ nível, como nos painéis das aulas.
 
 ## Mecânica
 
-- O usuário trabalha sempre no **nível atual**. Ele seleciona pontos do nível atual e forma
-  uma célula:
-  - 3 pontos da mesma coluna formam um **FA**;
-  - 2 pontos da mesma coluna formam um **HA**.
-- A soma da célula vai para a mesma coluna e o vai-um para a coluna seguinte, ambos **no
-  nível seguinte**. As saídas recebem rótulos `s<n>` e `k<n>`, onde `<n>` é o número da
-  célula.
+- O usuário trabalha sempre no **nível atual**. Seleciona pontos do nível atual e forma uma
+  célula. O tipo sai do número de pontos: **3 pontos formam um FA; 2 formam um HA.**
+- A soma vai para a mesma coluna e o vai-um para a coluna seguinte, ambos **no nível
+  seguinte**. As saídas da célula $n$ carregam os sinais `s<n>` e `k<n>`.
+- As células formadas **sobre** o nível $n$ consomem pontos dele e produzem o nível $n+1$.
 - **Concluir nível** cria o nível seguinte: os pontos não usados passam direto, e as saídas
   das células entram.
-- As células são numeradas na ordem nível → coluna crescente → ordem de criação, como na
-  tabela de ligações das aulas (FA1, FA2…).
+- **Numeração das células:** em ordem de nível; dentro do nível, por coluna crescente; dentro
+  da coluna, pela ordem em que foram formadas. A numeração é refeita ao concluir o nível, e
+  é a mesma do diagrama, da tabela de ligações e do VHDL.
+- **Ordem das entradas** de uma célula (x, y, z), usada no diagrama e no VHDL: ordem
+  canônica dos pontos, que é: menor prontidão primeiro; empatando, pontos de entrada antes
+  de saídas de célula; entre entradas, a ordem de geração (EXP-01); entre saídas, o número
+  da célula, soma antes do vai-um. No CPA, o vai-um da coluna anterior é sempre a última
+  entrada.
 
 ## Critérios — células e níveis
 
-- **CMP-01** — QUANDO o usuário formar um FA com 3 pontos da coluna $j$, o sistema DEVE
-  removê-los do nível atual e criar no nível seguinte uma soma na coluna $j$ e um vai-um na
-  coluna $j+1$, ambos com prontidão $\max(t_{entradas}) + 1\,T_{FA}$.
+- **CMP-01** — QUANDO o usuário formar uma célula com 3 pontos da coluna $j$, o sistema DEVE
+  criar um FA: remover os pontos do nível atual e criar no nível seguinte a soma na coluna
+  $j$ e o vai-um na coluna $j+1$, ambos com prontidão $\max(t_{entradas}) + 1\,T_{FA}$.
   *Prova:* teste do núcleo.
-- **CMP-02** — QUANDO o usuário formar um HA com 2 pontos da coluna $j$, o sistema DEVE fazer
-  o mesmo com prontidão $\max(t_{entradas}) + 0{,}5\,T_{FA}$.
+- **CMP-02** — QUANDO o usuário formar uma célula com 2 pontos da coluna $j$, o sistema DEVE
+  criar um HA do mesmo modo, com prontidão $\max(t_{entradas}) + 0{,}5\,T_{FA}$.
   *Prova:* teste do núcleo.
 - **CMP-03** — O sistema DEVE permitir desfazer e refazer qualquer formação de célula e
-  qualquer conclusão de nível, sem limite dentro da sessão.
-  *Prova:* teste do núcleo (sequência formar → desfazer → refazer devolve o mesmo estado).
+  qualquer conclusão de nível, até o início do exercício.
+  *Prova:* teste do núcleo: 1000 operações aleatórias seguidas de 1000 desfazer devolvem o
+  estado inicial, e de 1000 refazer devolvem o estado final.
 - **CMP-04** — O sistema DEVE permitir voltar a um nível anterior; as células dos níveis
   posteriores são descartadas depois de confirmação.
-  *Prova:* teste de ponta a ponta.
-- **CMP-05** — O sistema DEVE mostrar os níveis já concluídos lado a lado (ou empilhados),
-  cada um com suas células destacadas, no estilo dos painéis de aula.
-  *Prova:* teste de componente.
+  *Prova:* teste do núcleo (estado após voltar) e teste de ponta a ponta (confirmação).
+- **CMP-05** — O sistema DEVE mostrar os níveis já concluídos em painéis, um por nível, com
+  as colunas alinhadas por peso e o cabeçalho $2^j$, cada célula como um retângulo
+  envolvendo os pontos que consumiu, e uma seta de cada painel para o seguinte.
+  *Prova:* teste de componente (R2: 5 painéis, um por nível de 0 a 3 e um do resultado;
+  17 retângulos).
 
-### Seleções inválidas (cada recusa cita a regra, sem sugerir a correção — GER-02)
+### Ações recusadas (cada recusa cita a regra, sem sugerir a correção — GER-02)
 
 - **CMP-06** — SE os pontos selecionados estiverem em colunas diferentes, ENTÃO o sistema
   DEVE recusar: "uma célula soma bits do mesmo peso".
-- **CMP-07** — SE forem selecionados 1 ou mais de 3 pontos, ENTÃO o sistema DEVE recusar:
+- **CMP-07** — SE a seleção tiver 0, 1 ou mais de 3 pontos, ENTÃO o sistema DEVE recusar:
   "FA usa 3 pontos; HA usa 2".
 - **CMP-08** — SE um ponto selecionado já pertencer a outra célula do mesmo nível, ENTÃO o
   sistema DEVE recusar: "cada ponto entra em uma célula só por nível".
-- **CMP-09** — SE o vai-um de uma célula cair numa coluna $\ge W$, ENTÃO o sistema DEVE aceitar
-  a célula, marcar esse vai-um como "sempre 0" e explicar que a soma total não ultrapassa
-  $2^W - 1$.
+- **CMP-16** — SE o usuário pedir para concluir um nível sem nenhuma célula formada nele,
+  ENTÃO o sistema DEVE recusar: "um nível precisa de pelo menos uma célula".
 
-*Prova de CMP-06 a CMP-09:* um teste do núcleo para cada recusa, conferindo o código da
-regra.
+*Prova de CMP-06, CMP-07, CMP-08 e CMP-16:* um teste do núcleo para cada recusa, conferindo
+o código da regra.
+
+### Vai-um além da saída
+
+- **CMP-09** — QUANDO o vai-um de uma célula cair numa coluna $\ge W$, o sistema DEVE aceitar
+  a célula, não criar o ponto do vai-um e marcá-lo como "sempre 0". ENQUANTO $W$ estiver
+  oculto (EXP-09), a explicação do porquê fica atrás de pedido e confirmação, porque ela
+  revela $W$.
+  *Prova:* teste do núcleo (célula na coluna $W-1$ com vai-um descartado) e teste de ponta a
+  ponta (a explicação não aparece sem pedido).
 
 ## Critérios — CPA
 
-- **CMP-10** — ENQUANTO houver no nível atual uma coluna com mais de 3 pontos, ou uma coluna
-  com 3 pontos que não seja a menor coluna com 2 ou mais pontos, o sistema DEVE manter
-  desabilitada a ação "Fechar com CPA", explicando a condição.
-  *Prova:* teste do núcleo.
-- **CMP-11** — QUANDO o usuário fechar com CPA, o sistema DEVE montar um somador *ripple* da
-  menor coluna com 2 ou mais pontos até a última coluna não vazia. Cada coluna recebe um FA
-  se tiver 3 entradas (pontos mais o vai-um da anterior), um HA se tiver 2, e um fio se
-  tiver 1. Uma coluna inicial com 3 pontos usa o terceiro como *carry-in*.
-  *Prova:* R2 → CPA de 4 FA, de $2^1$ a $2^4$, com o vai-um do FA de $2^0$ como *carry-in*.
+- **CMP-10** — O sistema DEVE habilitar "Fechar com CPA" somente quando, no nível atual:
+  nenhuma coluna tiver mais de 3 pontos; houver no máximo uma coluna com 3 pontos, e ela for
+  a menor coluna com 2 ou mais pontos; e houver pelo menos uma coluna com 2 ou mais pontos.
+  Fora disso, o botão fica desabilitado com a condição que falta.
+  *Prova:* teste do núcleo (tabela de alturas habilitadas e desabilitadas).
+- **CMP-11** — QUANDO o usuário fechar com CPA, o sistema DEVE montar um somador *ripple* que
+  começa na menor coluna com 2 ou mais pontos e segue para a esquerda enquanto houver ponto
+  ou vai-um chegando. Cada coluna recebe:
+  - um **FA**, se tiver 3 entradas (pontos mais o vai-um da coluna anterior);
+  - um **HA**, se tiver 2;
+  - um **fio**, se tiver 1 (o próprio ponto, ou o vai-um, vira o bit do resultado).
+
+  Uma primeira coluna com 3 pontos usa o terceiro como *carry-in*. O vai-um da última célula
+  que cair numa coluna $\ge W$ segue CMP-09.
+  *Prova:* R2 → CPA de $2^0$ a $2^5$ com FA, FA, HA, FA, FA, HA; o vai-um do HA de $2^5$ é
+  $R_6$.
 - **CMP-12** — QUANDO todas as colunas tiverem no máximo 1 ponto, o sistema DEVE declarar o
-  circuito completo e nomear os bits do resultado $R_0 \dots R_{W-1}$.
-  *Prova:* R2 e R3.
+  circuito completo e nomear os bits do resultado $R_0 \dots R_{W-1}$. Uma coluna sem ponto
+  é o bit constante 0.
+  *Prova:* R2, R3 e `2A` com $A$ de 2 bits ($R_0 = 0$).
 
 ## Critérios — métricas do circuito do usuário
 
 - **CMP-13** — O sistema DEVE exibir, para o nível atual, a altura de cada coluna.
 - **CMP-14** — O sistema DEVE exibir a contagem de FA, HA e AND do circuito montado até o
   momento.
-- **D-3 ⚠ A CONFIRMAR** — área e atraso do circuito montado ficam visíveis o tempo todo. Eles
-  são retorno sobre o trabalho do próprio usuário, não a resposta. A alternativa seria
-  pedir que o usuário estime antes de ver.
-- **CMP-15** — ONDE área e atraso estiverem visíveis, o sistema DEVE mostrar área em
-  $A_{FA}$, atraso em $T_{FA}$ e, ao pedir, destacar o caminho crítico.
-
-*Prova de CMP-13 a CMP-15:* R2 → 12 FA, 0 HA, 12 AND, 12 $A_{FA}$, 5 $T_{FA}$; caminho
-crítico FA de $2^0$ → os quatro FA do CPA.
+- **CMP-15** — O sistema DEVE exibir a área em $A_{FA}$ e o atraso em $T_{FA}$ do circuito
+  montado até o momento (D-3) e, quando o usuário pedir, destacar **todos** os caminhos
+  críticos (todas as células que estão em algum caminho de atraso máximo).
+  *Prova de CMP-13 a CMP-15:* R2 → 13 FA, 4 HA, 13 AND, 15 $A_{FA}$, 6 $T_{FA}$; o conjunto
+  de células críticas é conferido contra o cálculo de prontidão do caso de referência.
 
 ## Fora de escopo
 
-Escolher manualmente a coluna da soma ou do vai-um; células com mais de 3 entradas;
-reordenar níveis; CPA com antecipação de vai-um.
+Escolher manualmente a coluna da soma ou do vai-um ("modo de ligação manual", candidato à
+v0.2); células com mais de 3 entradas; reordenar níveis; CPA com antecipação de vai-um.

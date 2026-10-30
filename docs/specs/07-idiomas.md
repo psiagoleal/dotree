@@ -9,28 +9,30 @@ Todo texto da interface existe em português do Brasil e em inglês desde a prim
 ## Critérios
 
 - **IDI-01** — O sistema DEVE obter todo texto da interface de um catálogo de mensagens por
-  idioma; nenhum texto visível pode ficar fixo no código dos componentes.
-  *Prova:* checagem em CI que falha se um componente tiver texto literal visível fora do
-  catálogo (lint de i18n).
+  idioma (Paraglide); nenhum texto visível fica fixo no código dos componentes.
+  *Prova:* regra de lint em CI que falha com texto literal visível em componente Svelte.
 - **IDI-02** — Os catálogos pt-BR e en DEVEM ter exatamente o mesmo conjunto de chaves.
   *Prova:* teste que compara as chaves dos dois catálogos.
-- **IDI-03** — Na primeira visita, o sistema DEVE escolher pt-BR quando o idioma do navegador
-  começar com `pt` e inglês nos demais casos.
-  *Prova:* teste de ponta a ponta com os dois idiomas de navegador.
+- **IDI-03** — Na primeira visita, o sistema DEVE escolher pt-BR quando o idioma preferido do
+  navegador começar com `pt` (inclusive `pt-PT`, por ser o idioma mais próximo disponível) e
+  inglês nos demais casos.
+  *Prova:* teste de ponta a ponta com `pt-BR`, `pt-PT` e `en-US`.
 - **IDI-04** — QUANDO o usuário trocar de idioma, o sistema DEVE traduzir a interface sem
-  perder o exercício em andamento, e DEVE lembrar a escolha nas próximas visitas.
+  perder o exercício em andamento e DEVE lembrar a escolha nas próximas visitas.
   *Prova:* teste de ponta a ponta (troca no meio da compressão; estado preservado).
-- **IDI-05** — As mensagens de recusa e de ajuda geradas pelo núcleo DEVEM sair como
-  **códigos** com parâmetros, traduzidos na interface. O núcleo não contém texto em
-  linguagem natural para o usuário.
-  *Prova:* teste do núcleo (as recusas de CMP-06 a CMP-09 são códigos) e IDI-02 cobrindo
-  esses códigos.
+- **IDI-05** — As recusas, dicas e avisos produzidos pelo núcleo DEVEM sair como **códigos**
+  com parâmetros, traduzidos na interface. A única exceção são os comentários do VHDL
+  gerado (VHD-06), cujos modelos de texto ficam no núcleo nos dois idiomas
+  ([ADR 0001](../adr/0001-nucleo-rust-em-webassembly.md)).
+  *Prova:* teste do núcleo (recusas de `02-compressao.md` e dicas de `03` são códigos);
+  IDI-02 cobrindo esses códigos; teste de paridade dos modelos de comentário VHDL.
 
 ## Convenção de termos
 
-FA, HA, CPA, AND e os rótulos de sinal são iguais nos dois idiomas. "Vai-um" ↔ *carry*,
-"ponto" ↔ *dot*, "nível" ↔ *level*, "matriz de pontos" ↔ *dot matrix* (ou *dot diagram*).
+FA, HA, CPA, AND e os identificadores de sinal são iguais nos dois idiomas. "Vai-um" ↔
+*carry*, "ponto" ↔ *dot*, "nível" ↔ *level*, "matriz de pontos" ↔ *dot diagram*, "variáveis
+indexadas" ↔ *indexed variables*, "limite inferior" ↔ *lower bound*.
 
 ## Fora de escopo
 
-Outros idiomas; tradução da documentação do repositório (que fica em português).
+Outros idiomas; tradução da documentação do repositório, que fica em português.

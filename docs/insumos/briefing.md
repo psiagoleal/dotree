@@ -8,8 +8,8 @@
 ## Origem
 
 O projeto nasceu de um exercício de Circuitos Aritméticos (mestrado, UFSC, 2026): projetar
-o circuito de uma expressão como $A \times B + C \times D + 2(E+F) + G$, com operandos de
-poucos bits, usando a **notação de pontos** — cada bit é um ponto, cada coluna é um peso
+o circuito de uma soma de produtos com operandos de poucos bits, usando a **notação de
+pontos** — cada bit é um ponto, cada coluna é um peso
 $2^j$ — e comprimindo a matriz com somadores completos (FA), meio-somadores (HA) e um
 somador de propagação de vai-um (CPA) final.
 
@@ -41,6 +41,20 @@ Resolver à mão envolveu sempre os mesmos passos:
 | Idiomas | pt-BR e inglês desde o início |
 | Repositório | Público, na conta pessoal do GitHub |
 | Postura didática | A interface **não** entrega resposta nem sugestão de imediato: **pergunta** se o usuário quer a resposta automática ou a dica, para incentivá-lo a raciocinar antes |
+
+## Acréscimos do autor (2026-10-30, segunda rodada)
+
+- Hospedagem no **GitHub Pages** enquanto o app for só WASM, para enviar o link ao professor.
+- Preparar desde já toda a estrutura de **CI/CD**.
+- Pontos **diferenciados por cores**, como nas figuras das aulas (cada termo uma cor; pontos
+  gerados por FA em preto).
+- Alternar, a qualquer momento, entre a **representação por pontos** e a representação com
+  **variáveis indexadas** ($a_i b_j$).
+- **Revelar uma resposta em duas etapas** quando fizer sentido: o resultado final e a fórmula
+  que leva até ele, na ordem mais didática (escolhida: resultado primeiro).
+- Escopo da v0.1 reduzido: a solução de Wallace e a exportação em CSV ficam para a v0.2.
+- Os exemplos do app e da spec são **próprios do projeto**: o exercício que deu origem à
+  ideia não é reproduzido aqui.
 
 ## Material de terceiros
 
