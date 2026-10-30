@@ -118,10 +118,30 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # Único check exigido pela regra do main (.github/governanca/main.json). Falha se qualquer
+  # job falhar, for cancelado ou pulado; assim renomear um job não afrouxa a regra.
+  ci-ok:
+    name: CI ok
+    if: always()
+    needs: [rust, web, docker, segredos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Todos os jobs passaram
+        env:
+          RESULTADOS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "resultados: $RESULTADOS"
+          for r in $RESULTADOS; do
+            if [ "$r" != "success" ]; then
+              echo "algum job terminou como '$r'" >&2
+              exit 1
+            fi
+          done
+
   pages:
     name: Publicar no GitHub Pages
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [rust, web, docker, segredos]
+    needs: [ci-ok]
     runs-on: ubuntu-latest
     permissions:
       pages: write

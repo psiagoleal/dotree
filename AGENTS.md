@@ -129,7 +129,8 @@ app/                 # RAIZ ÚNICA do código do sistema
   core/              # crate dotree-core: domínio puro (expressão, matriz, células, VHDL)
   wasm/              # crate dotree-wasm: ponte wasm-bindgen, sem regra de domínio
   web/               # SvelteKit: src/ (rotas, componentes), messages/ (i18n), e2e/
-.github/             # workflows (ci.yml, release.yml) e dependabot.yml
+.github/             # workflows, dependabot, SECURITY.md, modelo de PR
+.github/governanca/  # regras do main e das tags (JSON) + aplicar.sh (ADR 0003)
 docs/specs/          # A SPEC — contrato do que conta como pronto (ler antes de codar)
 docs/adr/            # Registros de Decisão de Arquitetura — LEITURA OBRIGATÓRIA
 docs/plano.md        # plano descartável: detalhe de cada ticket
@@ -208,7 +209,15 @@ Postura relaxada de confidencialidade, mas **segredos continuam proibidos no rep
   Controle estrutural: hook `commit-msg` da skill `pr-review-guard`.
 
 <!-- USER:BEGIN id=adendos-seguranca -->
-_(nenhum — acrescente aqui o cofre, caminhos de credencial e regras de segredo deste projeto.)_
+- **Governança do repositório público** ([ADR 0003](docs/adr/0003-governanca-do-repositorio.md)),
+  configurada por `.github/governanca/aplicar.sh` e conferida por
+  `.github/governanca/aplicar.sh --conferir` (só leitura; o agente pode rodar):
+  `main` só por PR com `CI ok` verde; só o dono tem escrita e mescla; tags `v*` só por
+  admin; workflows de fork só com aprovação; token de workflow só leitura; varredura de
+  segredos com bloqueio no push; alertas e correções do Dependabot; relato privado de
+  vulnerabilidade (`.github/SECURITY.md`).
+- Nenhum segredo é necessário ao projeto: o CI usa só o `GITHUB_TOKEN`. Se um dia houver,
+  vai em *secrets* do repositório, nunca em arquivo.
 <!-- USER:END -->
 
 ## 8. Fluxo ágil
@@ -251,6 +260,16 @@ _(nenhum — acrescente aqui o cofre, caminhos de credencial e regras de segredo
   proveniência da seção 7 quando houver agente.
 - **Tickets:** painel em `docs/TICKETS.md`, detalhe em `docs/plano.md`; um ticket por
   commit ou PR, citando o identificador (`MT-3`).
+- **Tudo entra no `main` por PR**, inclusive o trabalho do dono ([ADR 0003](docs/adr/0003-governanca-do-repositorio.md)):
+  o `main` recusa push direto, e o merge (só *squash*) exige o check `CI ok` verde. Ao
+  propor comandos git (seção 8), o agente propõe branch + PR, nunca push no `main`:
+  ```bash
+  git switch -c <tipo>/<mt>-<assunto>     # ex.: feat/mt-3-expressao
+  git add <arquivos> && git commit -m "<mensagem>" -m "{agente: …; modelo: …}"
+  git push -u origin HEAD
+  gh pr create --fill                      # o modelo do PR pede critérios e ticket
+  gh pr merge --squash --auto --delete-branch   # mescla sozinho quando o CI ficar verde
+  ```
 <!-- USER:END -->
 
 ### git: o agente propõe, a pessoa executa
