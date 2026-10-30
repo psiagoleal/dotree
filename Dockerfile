@@ -17,7 +17,7 @@ RUN wasm-pack build app/wasm --release --target web \
       --out-dir ../web/src/lib/wasm --out-name dotree --no-pack
 
 # ---- 2. site estático ----
-FROM node:24-slim AS web
+FROM node:25-slim AS web
 ARG BASE_PATH=""
 ENV BASE_PATH=${BASE_PATH} CI=1
 RUN corepack enable
