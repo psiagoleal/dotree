@@ -2,3 +2,11 @@
 .claude/skills/
 .agents/skills/
 skills/privado/
+
+# Rust
+/target/
+
+# Gerados pela build da interface (ver app/web/.gitignore)
+app/web/build/
+app/web/test-results/
+app/web/playwright-report/

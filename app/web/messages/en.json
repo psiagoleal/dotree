@@ -1,0 +1,15 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"app_title": "dotree",
+	"app_tagline": "Build the dot diagram, compress it with FA, HA and CPA, and see the circuit you built.",
+	"status_loading": "Loading the core…",
+	"status_ready": "Core loaded (version {version}).",
+	"status_error_title": "The dotree core failed to load.",
+	"status_error_reason": "Reason: {reason}",
+	"status_error_report": "Open an issue on GitHub",
+	"wip_notice": "Under construction: this is the skeleton release. Features arrive as the specification is implemented.",
+	"spec_link": "Read the specification",
+	"language_label": "Language",
+	"language_pt_br": "Português",
+	"language_en": "English"
+}

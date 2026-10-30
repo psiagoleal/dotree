@@ -1,0 +1,17 @@
+# Caminho relativo: Cargo.toml
+[workspace]
+resolver = "3"
+members = ["app/core", "app/wasm"]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+repository = "https://github.com/psiagoleal/dotree"
+authors = ["Iago Leal"]
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1

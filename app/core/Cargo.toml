@@ -1,0 +1,12 @@
+# Caminho relativo: app/core/Cargo.toml
+[package]
+name = "dotree-core"
+description = "Domain core of dotree: dot diagrams, FA/HA reduction, verification and VHDL."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]

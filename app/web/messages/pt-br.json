@@ -1,0 +1,15 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"app_title": "dotree",
+	"app_tagline": "Monte a matriz de pontos, comprima com FA, HA e CPA, e veja o circuito que você montou.",
+	"status_loading": "Carregando o núcleo…",
+	"status_ready": "Núcleo carregado (versão {version}).",
+	"status_error_title": "O núcleo do dotree não carregou.",
+	"status_error_reason": "Motivo: {reason}",
+	"status_error_report": "Abrir uma issue no GitHub",
+	"wip_notice": "Em construção: esta é a versão de esqueleto. As funcionalidades chegam conforme a especificação.",
+	"spec_link": "Ler a especificação",
+	"language_label": "Idioma",
+	"language_pt_br": "Português",
+	"language_en": "English"
+}
