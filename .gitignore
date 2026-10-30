@@ -1,0 +1,4 @@
+# Adaptadores são gerados pelo setup-profile.sh; biblioteca privada é local (ADR 0015)
+.claude/skills/
+.agents/skills/
+skills/privado/
