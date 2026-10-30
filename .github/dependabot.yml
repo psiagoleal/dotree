@@ -1,20 +1,43 @@
 # Caminho relativo: .github/dependabot.yml
 # Atualização semanal de dependências (ENT-07).
+# - minor e patch chegam agrupados num PR por ecossistema;
+# - major chega em PR próprio, para ser avaliado um de cada vez;
+# - Node só em versão LTS, e por decisão manual (major ignorado aqui).
 version: 2
 updates:
   - package-ecosystem: cargo
     directory: /
     schedule: { interval: weekly }
     groups:
-      rust: { patterns: ['*'] }
+      rust-minor-patch:
+        update-types: [minor, patch]
+
   - package-ecosystem: npm
     directory: /app/web
     schedule: { interval: weekly }
     groups:
-      web: { patterns: ['*'] }
+      web-minor-patch:
+        update-types: [minor, patch]
+    ignore:
+      # @types/node acompanha o Node do projeto (24 LTS), não a última versão.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
+
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
+    groups:
+      actions:
+        patterns: ['*']
+    ignore:
+      # A v6 falha ao instalar o pnpm 11.12 ("@pnpm/exe ... shipped without a binary").
+      - dependency-name: pnpm/action-setup
+        versions: ['6.x']
+
   - package-ecosystem: docker
     directory: /
     schedule: { interval: weekly }
+    ignore:
+      # Node só em LTS, trocado à mão (o 25 nem traz corepack).
+      - dependency-name: node
+        update-types: [version-update:semver-major]

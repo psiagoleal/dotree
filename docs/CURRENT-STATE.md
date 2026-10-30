@@ -22,6 +22,10 @@
 - [>] MT-2: CI/CD, Pages e Docker. Imagem construída e testada localmente; workflows
       validados com actionlint. **Falta:** habilitar o Pages com origem "GitHub Actions",
       fazer o push e ver o CI verde.
+- [x] Primeiro CI no GitHub falhou no lint: arquivos que o Paraglide gera em
+      `project.inlang/` não estavam no `.prettierignore` (localmente passava porque um
+      `format` anterior os tinha formatado). Corrigido e conferido numa cópia limpa.
+      Dockerfile sem corepack; Dependabot agrupa minor/patch e isola major.
 - [ ] MT-0: o autor lê e aprova a spec revisada.
 - [ ] Próximo ticket de código: MT-3 (analisar a expressão), depois MT-4.
 

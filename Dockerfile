@@ -19,8 +19,11 @@ RUN wasm-pack build app/wasm --release --target web \
 # ---- 2. site estático ----
 FROM node:24-slim AS web
 ARG BASE_PATH=""
+# Mesma versão do campo packageManager de app/web/package.json. Instalada pelo npm, e não
+# pelo corepack, porque o corepack não vem mais com o Node a partir do 25.
+ARG PNPM_VERSION=11.12.0
 ENV BASE_PATH=${BASE_PATH} CI=1
-RUN corepack enable
+RUN npm install -g "pnpm@${PNPM_VERSION}"
 WORKDIR /src/app/web
 COPY app/web/package.json app/web/pnpm-lock.yaml app/web/pnpm-workspace.yaml app/web/.npmrc ./
 RUN pnpm install --frozen-lockfile

@@ -9,3 +9,6 @@ bun.lockb
 /static/
 src/lib/wasm
 src/lib/paraglide
+# Gerados pelo Paraglide (ignorados pelo git via project.inlang/.gitignore)
+project.inlang/*
+!project.inlang/settings.json
