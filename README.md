@@ -92,7 +92,8 @@ University Press — caps. 11 e 12 (árvores de redução e multiplicação).
 
 1. Leia [`AGENTS.md`](AGENTS.md) e a spec em [`docs/specs/`](docs/specs/README.md).
 2. Faça um *fork* e crie uma branch (`feature/minha-feature`).
-3. Cite no PR o critério da spec (ex.: `CMP-11`) e o ticket (ex.: `MT-5`).
+3. Abra um PR (o `main` só aceita mudanças por PR com o CI verde) citando o critério da
+   spec (ex.: `CMP-11`) e o ticket (ex.: `MT-5`); o modelo do PR já pede isso.
 4. Garanta que os comandos de checagem acima passam.
 
 ## Licença

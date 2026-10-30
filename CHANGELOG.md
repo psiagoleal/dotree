@@ -18,6 +18,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   por *tag* com imagem no GHCR, Dependabot.
 - Spec v0.1 revisada: cores por termo, visão de variáveis indexadas, revelação em duas
   etapas, exemplos próprios, entrega (`docs/specs/09-entrega.md`).
+- Governança do repositório público (ADR 0003): `main` só por PR com o check `CI ok`, só
+  *squash*, tags `v*` só por admin, aprovação de workflows de fork, `SECURITY.md`, modelo de
+  PR e `.github/governanca/aplicar.sh` para aplicar e conferir.
 - ADR 0002 (entrega por GitHub Actions, Pages e GHCR); plano por tickets em `docs/plano.md`;
   mapa de arquitetura em `docs/architecture.md`.
 

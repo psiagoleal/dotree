@@ -78,6 +78,16 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Fora de escopo:** job de GHDL (MT-10).
 - **Depende de:** MT-1, ADR-0002
 
+### MT-18: Proteger o repositório público
+- **Objetivo:** `main` só por PR com `CI ok` verde, só o dono mescla, tags `v*` só por admin,
+  aprovação de workflow de fork, alertas e correções do Dependabot, relato privado.
+- **Arquivos no escopo:** `.github/governanca/**`, `.github/workflows/ci.yml` (job `CI ok`),
+  `.github/SECURITY.md`, `.github/pull_request_template.md`, `docs/adr/0003-*`
+- **Critério de aceite:** `.github/governanca/aplicar.sh --conferir` termina com 0 falhas, e
+  um PR de teste mostra o merge bloqueado até o `CI ok` ficar verde.
+- **Fora de escopo:** CODEOWNERS e aprovação obrigatória (ver ADR 0003).
+- **Depende de:** MT-2, ADR-0003
+
 ### MT-3: Analisar a expressão
 - **Objetivo:** do texto à soma de monômios expandida, combinada e com coeficientes; erros
   com posição.

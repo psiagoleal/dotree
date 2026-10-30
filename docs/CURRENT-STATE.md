@@ -19,7 +19,7 @@
 - [x] Stack fechada e registrada nas ilhas do `AGENTS.md`; ADR 0002 (entrega).
 - [x] MT-1: esqueleto (Rust core + wasm, SvelteKit estático, i18n, testes) com todos os
       comandos executados localmente.
-- [>] MT-2: CI/CD, Pages e Docker. Imagem construída e testada localmente; workflows
+- [x] MT-2: CI/CD, Pages e Docker. Imagem construída e testada localmente; workflows
       validados com actionlint. **Falta:** habilitar o Pages com origem "GitHub Actions",
       fazer o push e ver o CI verde.
 - [x] Primeiro CI no GitHub falhou no lint: arquivos que o Paraglide gera em
@@ -30,6 +30,9 @@
       Vitest em modo navegador não acha a própria página ("Failed to connect to the browser
       session"). O `vite.config.ts` ignora o prefixo sob Vitest e o CI só aplica
       `BASE_PATH` na build e no e2e. Reproduzido antes e conferido depois da correção.
+- [x] MT-2 concluído: CI verde no `main`, site no ar, PRs #11 e #12 do Dependabot mesclados.
+- [>] MT-18: governança pronta em `.github/governanca/` (ADR 0003); falta o autor aplicar.
+      Depois disso, **todo** trabalho entra por branch + PR (o `main` recusa push direto).
 - [ ] MT-0: o autor lê e aprova a spec revisada.
 - [ ] Próximo ticket de código: MT-3 (analisar a expressão), depois MT-4.
 
