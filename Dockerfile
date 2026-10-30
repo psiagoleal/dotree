@@ -5,7 +5,7 @@
 # BASE_PATH vazio serve na raiz; o GitHub Pages usa /dotree (definido no CI, não aqui).
 
 # ---- 1. núcleo em WebAssembly ----
-FROM rust:1.97-slim AS wasm
+FROM rust:1.98-slim AS wasm
 ARG WASM_PACK_VERSION=0.15.0
 RUN rustup target add wasm32-unknown-unknown \
  && cargo install wasm-pack --version "${WASM_PACK_VERSION}" --locked
