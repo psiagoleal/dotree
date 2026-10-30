@@ -1,9 +1,10 @@
 // Caminho relativo: app/core/src/lib.rs
 //! Domain core of dotree.
 //!
-//! Pure Rust, with no browser or WebAssembly dependency (ADR 0001). The domain modules
-//! (expression, dot matrix, cells, verification, VHDL) arrive with their tickets; this
-//! skeleton only proves the build chain end to end.
+//! Pure Rust, with no browser or WebAssembly dependency (ADR 0001). Modules arrive with
+//! their tickets (docs/plano.md): `expr` (MT-3) is the first.
+
+pub mod expr;
 
 /// Version of the core crate, shown by the interface to prove the WASM module loaded.
 pub fn version() -> &'static str {

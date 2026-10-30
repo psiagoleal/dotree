@@ -2,9 +2,9 @@
 
 # Specs do dotree
 
-> **Estado: v0.1 revisada em 2026-10-30.** Decisões D-1 a D-6 confirmadas pelo autor; spec
-> criticada em contexto limpo e corrigida. **Aguarda a leitura final do autor** antes do
-> primeiro ticket de domínio. O esqueleto de build e CI (spec 09) não depende dela.
+> **Estado: v0.1 aprovada pelo autor em 2026-10-30.** Decisões D-1 a D-6 confirmadas; spec
+> criticada em contexto limpo e corrigida. Mudanças daqui em diante seguem a regra de
+> manutenção abaixo (EXP-13 e EXP-14 entraram com o MT-3).
 
 A spec fixa **o resultado** e dura. A sequência de trabalho (o plano) mora em
 `docs/TICKETS.md`, e as decisões com alternativa descartada moram em `docs/adr/`. Os testes

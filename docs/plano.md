@@ -92,8 +92,8 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Objetivo:** do texto à soma de monômios expandida, combinada e com coeficientes; erros
   com posição.
 - **Arquivos no escopo:** `app/core/src/expr/**`
-- **Critério de aceite:** `cargo test -p dotree-core expr` cobrindo EXP-05, EXP-06, EXP-07,
-  EXP-08 (limite de bits) e os casos de expansão de EXP-01.
+- **Critério de aceite:** `cargo test -p dotree-core --test expr` cobrindo EXP-05, EXP-06,
+  EXP-07, EXP-08 (limite de bits), EXP-11, EXP-13, EXP-14 e os casos de expansão de EXP-01.
 - **Fora de escopo:** geração de pontos.
 - **Depende de:** MT-1
 

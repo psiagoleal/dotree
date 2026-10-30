@@ -3,13 +3,14 @@
 # Arquitetura efetiva
 
 > Derivada das dependências reais entre módulos (skill `mapa-de-arquitetura`). Atualizada no
-> mesmo trabalho que mudar módulos ou dependências. Estado: **esqueleto** (MT-1, MT-2).
+> mesmo trabalho que mudar módulos ou dependências. Estado: esqueleto + `expr` (MT-3).
 
 ## Componentes
 
 | Componente | Onde | Responsabilidade | Depende de |
 |---|---|---|---|
-| `dotree-core` | `app/core` | Domínio puro. Hoje expõe só `version()`. | — |
+| `dotree-core` | `app/core` | Domínio puro. Expõe `version()` e o módulo `expr`. | — |
+| `dotree_core::expr` | `app/core/src/expr/` | Linguagem da expressão: lexer e analisador recursivo (`parser.rs`) que expande enquanto lê; `analyze()` valida larguras e limite de bits. Erros como códigos (IDI-05). | — |
 | `dotree-wasm` | `app/wasm` | Ponte `wasm-bindgen`. Hoje exporta `coreVersion()`. | `dotree-core`, `wasm-bindgen` |
 | Pacote WASM gerado | `app/web/src/lib/wasm/` (fora do git) | Saída do `wasm-pack` (`dotree.js`, `dotree_bg.wasm`). | `dotree-wasm` |
 | `#lib/core.ts` | `app/web/src/lib/core.ts` | Carrega o WASM e oferece a API do núcleo à interface. | pacote WASM |

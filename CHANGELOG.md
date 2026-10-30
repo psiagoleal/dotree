@@ -9,6 +9,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Núcleo: linguagem da expressão (`dotree_core::expr`). Expande produtos de somas, combina
+  termos iguais, valida larguras e o limite de 32 bits de entrada, e devolve erros como
+  códigos com a coluna do problema (MT-3).
 - Esqueleto do código: workspace Rust (`dotree-core`, `dotree-wasm`) e interface SvelteKit
   estática que carrega o núcleo em WebAssembly, com pt-BR e inglês (Paraglide).
 - Testes de unidade e componente (Vitest) e de ponta a ponta (Playwright) contra a build com

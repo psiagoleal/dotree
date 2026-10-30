@@ -17,7 +17,7 @@ os pontos pelas variáveis indexadas que eles representam ($a_1 b_0$).
 | Largura | inteiro de 1 a 16 bits, informado à parte para cada variável | `A: 3` |
 | Soma | `+` | `A + B` |
 | Produto | `*`, `×`, `·` ou justaposição | `A*B`, `A×B`, `AB`, `3(E+F)` |
-| Coeficiente | inteiro decimal $\ge 1$, antes de variável ou parêntese | `3(E+F)`, `2A` |
+| Coeficiente | inteiro decimal de 1 a 4 294 967 295; por justaposição só **antes** de variável ou parêntese (`A2` é erro; `A*2` vale) | `3(E+F)`, `2A` |
 | Parênteses | agrupam e se distribuem, inclusive produto de somas | `(A+B)(C+D)` = `AC + AD + BC + BD` |
 | Espaços | ignorados | `3 (E + F)` = `3(E+F)` |
 
@@ -127,7 +127,14 @@ consumiram.
   de 257 pontos (recusa).
 - **EXP-11** — ONDE houver largura informada para uma variável que a expressão não usa, o
   sistema DEVE ignorá-la e avisar.
-  *Prova:* teste de componente.
+  *Prova:* teste do núcleo (aviso `UnusedWidth`) e teste de componente (o aviso aparece).
+- **EXP-13** — SE a expressão expandida tiver um termo constante (`A + 5`, `3(A + 1)`, `2`),
+  ENTÃO o sistema DEVE recusá-la: constantes aditivas estão fora da v0.1.
+  *Prova:* teste do núcleo.
+- **EXP-14** — SE um coeficiente literal passar de 4 294 967 295, ou um coeficiente expandido
+  não couber em 64 bits, ENTÃO o sistema DEVE recusar a expressão com o código do erro, sem
+  travar.
+  *Prova:* teste do núcleo (`99999999999A` e o produto de três coeficientes máximos).
 
 ## Exemplos embutidos
 
