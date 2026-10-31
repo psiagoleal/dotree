@@ -3,15 +3,16 @@
 # Arquitetura efetiva
 
 > Derivada das dependências reais entre módulos (skill `mapa-de-arquitetura`). Atualizada no
-> mesmo trabalho que mudar módulos ou dependências. Estado: esqueleto + `expr` (MT-3) + `matrix` (MT-4).
+> mesmo trabalho que mudar módulos ou dependências. Estado: esqueleto + `expr` (MT-3) + `matrix` (MT-4) + `reduce` (MT-5).
 
 ## Componentes
 
 | Componente | Onde | Responsabilidade | Depende de |
 |---|---|---|---|
-| `dotree-core` | `app/core` | Domínio puro. Expõe `version()` e os módulos `expr` e `matrix`. | — |
+| `dotree-core` | `app/core` | Domínio puro. Expõe `version()` e os módulos `expr`, `matrix` e `reduce`. | — |
 | `dotree_core::expr` | `app/core/src/expr/` | Linguagem da expressão: lexer e analisador recursivo (`parser.rs`) que expande enquanto lê; `analyze()` valida larguras e limite de bits. Erros como códigos (IDI-05). | — |
 | `dotree_core::matrix` | `app/core/src/matrix/` | Matriz de pontos do nível 0: cópias por bit do coeficiente, sinais compartilhados, ANDs, $v_{max}$, $W$, ordem canônica. | `expr` |
+| `dotree_core::reduce` | `app/core/src/reduce/` | Compressão nível a nível: células FA/HA, prontidão em meios $T_{FA}$, numeração, recusas, histórico de desfazer/refazer por cópia de estado. | `matrix` |
 | `dotree-wasm` | `app/wasm` | Ponte `wasm-bindgen`. Hoje exporta `coreVersion()`. | `dotree-core`, `wasm-bindgen` |
 | Pacote WASM gerado | `app/web/src/lib/wasm/` (fora do git) | Saída do `wasm-pack` (`dotree.js`, `dotree_bg.wasm`). | `dotree-wasm` |
 | `#lib/core.ts` | `app/web/src/lib/core.ts` | Carrega o WASM e oferece a API do núcleo à interface. | pacote WASM |

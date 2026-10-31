@@ -110,8 +110,8 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Objetivo:** FA/HA, prontidão, recusas, concluir nível, numeração, ordem canônica,
   desfazer e refazer, voltar de nível, vai-um descartado.
 - **Arquivos no escopo:** `app/core/src/reduce/**`
-- **Critério de aceite:** `cargo test -p dotree-core reduce` (CMP-01 a CMP-04, CMP-06 a
-  CMP-09, CMP-16; 1000 operações de CMP-03).
+- **Critério de aceite:** `cargo test -p dotree-core --test reduce` (CMP-01 a CMP-04, CMP-06
+  a CMP-09, CMP-16, CMP-17; 1000 operações de CMP-03; R2 até o CPA).
 - **Fora de escopo:** CPA.
 - **Depende de:** MT-4
 

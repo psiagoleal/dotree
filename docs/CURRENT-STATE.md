@@ -38,7 +38,9 @@
       EXP-13 (constantes recusadas) e EXP-14 (coeficiente grande demais).
 - [x] MT-4: `dotree_core::matrix` com 15 testes (R1: 20 pontos, alturas 5,7,5,2,1, W = 7,
       13 AND). Ordem canônica de geração escrita na spec 01 (passo 5).
-- [ ] Próximo: MT-5 (formar células e níveis).
+- [x] MT-5: `dotree_core::reduce` com 18 testes; reproduz R2 até o CPA igual à tabela da
+      spec 05; 8 mutações pegas. Spec 02 ganhou CMP-17 e deixou CMP-03/CMP-04 explícitos.
+- [ ] Próximo: MT-6 (CPA, métricas, caminho crítico; R2 completo: 13 FA, 4 HA, 6 $T_{FA}$).
 
 ## Observações para a próxima sessão
 
