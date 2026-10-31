@@ -36,7 +36,9 @@
 - [x] MT-0: spec v0.1 aprovada pelo autor.
 - [x] MT-3: `dotree_core::expr` com 27 testes (verificados com 3 mutações). A spec ganhou
       EXP-13 (constantes recusadas) e EXP-14 (coeficiente grande demais).
-- [ ] Próximo: MT-4 (matriz de pontos a partir do `Analysis`).
+- [x] MT-4: `dotree_core::matrix` com 15 testes (R1: 20 pontos, alturas 5,7,5,2,1, W = 7,
+      13 AND). Ordem canônica de geração escrita na spec 01 (passo 5).
+- [ ] Próximo: MT-5 (formar células e níveis).
 
 ## Observações para a próxima sessão
 
