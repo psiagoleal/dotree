@@ -9,6 +9,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Núcleo: matriz de pontos (`dotree_core::matrix`). Decompõe coeficientes em cópias
+  deslocadas, compartilha sinais entre cópias, conta portas AND, calcula $v_{max}$ e a
+  largura de saída, e fixa a ordem canônica dos pontos (MT-4).
 - Núcleo: linguagem da expressão (`dotree_core::expr`). Expande produtos de somas, combina
   termos iguais, valida larguras e o limite de 32 bits de entrada, e devolve erros como
   códigos com a coluna do problema (MT-3).

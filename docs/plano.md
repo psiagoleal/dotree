@@ -101,8 +101,8 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Objetivo:** decomposição binária, pontos, sinais compartilhados, ANDs, $v_{max}$, $W$,
   termo de origem de cada ponto (para a cor).
 - **Arquivos no escopo:** `app/core/src/matrix/**`
-- **Critério de aceite:** `cargo test -p dotree-core matrix` com R1, R3, R4 (EXP-01 a EXP-03,
-  EXP-08 em pontos, base de COR-01).
+- **Critério de aceite:** `cargo test -p dotree-core --test matrix` com R1, R3, R4 (EXP-01 a
+  EXP-03, EXP-08 em pontos, base de COR-01).
 - **Fora de escopo:** células.
 - **Depende de:** MT-3
 

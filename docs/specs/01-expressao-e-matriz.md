@@ -40,6 +40,11 @@ Variáveis de uma letra tornam a justaposição inequívoca (`AB` só pode ser $
    - As cópias de um mesmo monômio carregam **os mesmos sinais**: em $3E$, o ponto de $e_0$
      na coluna $2^0$ e o da coluna $2^1$ são o mesmo fio (*fan-out*), e nenhuma porta é
      duplicada.
+5. **Ordem de geração.** Os pontos são gerados, e numerados, nesta ordem: termo (na ordem da
+   expressão combinada), depois cópia (deslocamento crescente), depois combinação de bits em
+   ordem lexicográfica, com a **primeira** variável do monômio variando mais devagar
+   ($a_0b_0, a_0b_1, a_0b_2, a_1b_0, \dots$). É a ordem que desempata a ordem canônica de
+   `02-compressao.md`; em R1, a coluna $2^1$ fica `a0_b1, a1_b0, c0_d1, c1_d0, e1, e0, f0`.
 
 ## Critérios — expressão e matriz
 

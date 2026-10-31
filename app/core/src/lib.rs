@@ -2,9 +2,10 @@
 //! Domain core of dotree.
 //!
 //! Pure Rust, with no browser or WebAssembly dependency (ADR 0001). Modules arrive with
-//! their tickets (docs/plano.md): `expr` (MT-3) is the first.
+//! their tickets (docs/plano.md): `expr` (MT-3), `matrix` (MT-4).
 
 pub mod expr;
+pub mod matrix;
 
 /// Version of the core crate, shown by the interface to prove the WASM module loaded.
 pub fn version() -> &'static str {
