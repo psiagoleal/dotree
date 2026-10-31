@@ -118,9 +118,9 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 ### MT-6: Fechar com CPA e calcular métricas
 - **Objetivo:** habilitação do CPA, *ripple* com FA/HA/fio, resultado $R_j$, área, atraso,
   caminhos críticos; reprodução de R2 célula a célula.
-- **Arquivos no escopo:** `app/core/src/reduce/**`, `app/core/tests/r2.rs`
-- **Critério de aceite:** `cargo test -p dotree-core` com R2 → 13 FA, 4 HA, 15 $A_{FA}$,
-  6 $T_{FA}$ (CMP-10 a CMP-15, GER-04).
+- **Arquivos no escopo:** `app/core/src/reduce/**`, `app/core/tests/cpa.rs`
+- **Critério de aceite:** `cargo test -p dotree-core --test cpa` com R2 → 13 FA, 4 HA,
+  15 $A_{FA}$, 6 $T_{FA}$ (CMP-10 a CMP-15, GER-04).
 - **Fora de escopo:** verificação por simulação.
 - **Depende de:** MT-5
 

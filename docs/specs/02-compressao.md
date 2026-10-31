@@ -79,7 +79,7 @@ conferindo o código da regra; outro confere que recusas não mudam o estado nem
 ## Critérios — CPA
 
 - **CMP-10** — O sistema DEVE habilitar "Fechar com CPA" somente quando, no nível atual:
-  nenhuma coluna tiver mais de 3 pontos; houver no máximo uma coluna com 3 pontos, e ela for
+  não houver células pendentes; nenhuma coluna tiver mais de 3 pontos; houver no máximo uma coluna com 3 pontos, e ela for
   a menor coluna com 2 ou mais pontos; e houver pelo menos uma coluna com 2 ou mais pontos.
   Fora disso, o botão fica desabilitado com a condição que falta.
   *Prova:* teste do núcleo (tabela de alturas habilitadas e desabilitadas).
@@ -107,8 +107,10 @@ conferindo o código da regra; outro confere que recusas não mudam o estado nem
 - **CMP-15** — O sistema DEVE exibir a área em $A_{FA}$ e o atraso em $T_{FA}$ do circuito
   montado até o momento (D-3) e, quando o usuário pedir, destacar **todos** os caminhos
   críticos (todas as células que estão em algum caminho de atraso máximo).
-  *Prova de CMP-13 a CMP-15:* R2 → 13 FA, 4 HA, 13 AND, 15 $A_{FA}$, 6 $T_{FA}$; o conjunto
-  de células críticas é conferido contra o cálculo de prontidão do caso de referência.
+  As métricas contam também as células pendentes do nível atual, para que formar uma célula
+  já mostre o efeito.
+  *Prova de CMP-13 a CMP-15:* R2 → 13 FA, 4 HA, 13 AND, 15 $A_{FA}$, 6 $T_{FA}$; células
+  críticas 1, 2, 4, 6, 8, 9 e 12 a 17, obtidas à mão das prontidões do caso de referência.
 
 ## Fora de escopo
 

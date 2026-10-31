@@ -1,73 +1,10 @@
 // Caminho relativo: app/core/tests/reduce.rs
 //! Spec 02 — cells and levels (MT-5). The R2 replay follows the wiring table of spec 05.
 
-use std::collections::BTreeMap;
+mod common;
 
-use dotree_core::expr::analyze;
-use dotree_core::matrix::DotMatrix;
+use common::{form, pick, r1, reduction, replay_r2_tree};
 use dotree_core::reduce::{CellKind, Origin, PointId, Reduction, Rejection, Time};
-
-fn reduction(src: &str, widths: &[(char, u32)]) -> Reduction {
-    let w: BTreeMap<char, u32> = widths.iter().copied().collect();
-    Reduction::new(&DotMatrix::build(&analyze(src, &w).unwrap()).unwrap())
-}
-
-fn r1() -> Reduction {
-    reduction(
-        "A*B + C*D + 3(E+F) + G",
-        &[
-            ('A', 3),
-            ('B', 3),
-            ('C', 2),
-            ('D', 2),
-            ('E', 2),
-            ('F', 1),
-            ('G', 1),
-        ],
-    )
-}
-
-/// Ids of the current-level points with these signals in this column (signals repeat
-/// across columns, e.g. `e0` in columns 0 and 1).
-fn pick(r: &Reduction, column: u32, signals: &[&str]) -> Vec<PointId> {
-    signals
-        .iter()
-        .map(|s| {
-            r.points()
-                .iter()
-                .find(|p| p.column == column && r.signal(p) == *s)
-                .unwrap_or_else(|| panic!("no {s} in column {column} at level {}", r.level()))
-                .id
-        })
-        .collect()
-}
-
-fn form(r: &mut Reduction, column: u32, signals: &[&str]) -> CellKind {
-    // Selected back to front on purpose: the cell must still list its inputs in canonical
-    // order, so the R2 table below also guards that rule.
-    let mut ids = pick(r, column, signals);
-    ids.reverse();
-    r.form_cell(&ids)
-        .unwrap_or_else(|e| panic!("{signals:?}: {e:?}"))
-}
-
-/// Levels 0 to 2 of R2 (spec 00), i.e. everything before the CPA.
-fn replay_r2_tree(r: &mut Reduction) {
-    form(r, 1, &["a0_b1", "a1_b0", "c0_d1"]);
-    form(r, 1, &["c1_d0", "e1", "e0"]);
-    form(r, 2, &["a0_b2", "a1_b1"]);
-    r.conclude_level().unwrap();
-    form(r, 1, &["f0", "s1", "s2"]);
-    form(r, 2, &["a2_b0", "c1_d1", "e1"]);
-    form(r, 2, &["s3", "k1", "k2"]);
-    form(r, 3, &["a1_b2", "a2_b1", "k3"]);
-    r.conclude_level().unwrap();
-    form(r, 0, &["a0_b0", "c0_d0", "e0"]);
-    form(r, 2, &["s5", "k4", "s6"]);
-    form(r, 3, &["k5", "s7", "k6"]);
-    form(r, 4, &["a2_b2", "k7"]);
-    r.conclude_level().unwrap();
-}
 
 /// Snapshot of everything observable, to compare states across undo/redo.
 fn observe(r: &Reduction) -> String {
