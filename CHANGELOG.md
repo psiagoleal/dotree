@@ -9,6 +9,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Núcleo: compressão nível a nível (`dotree_core::reduce`). FA e HA com prontidão exata em
+  meios $T_{FA}$, recusas por código, numeração das células, ordem canônica das entradas,
+  vai-um além de $W$ descartado, voltar de nível, desfazer e refazer (MT-5).
 - Núcleo: matriz de pontos (`dotree_core::matrix`). Decompõe coeficientes em cópias
   deslocadas, compartilha sinais entre cópias, conta portas AND, calcula $v_{max}$ e a
   largura de saída, e fixa a ordem canônica dos pontos (MT-4).

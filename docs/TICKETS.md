@@ -10,7 +10,6 @@
 ## Em aberto
 
 - [ ] [MT-0d](plano.md#mt-0d-escrever-o-contrato-visual-docsdesignmd) — Contrato visual (`DESIGN.md`) com a paleta dos termos.
-- [ ] [MT-5](plano.md#mt-5-formar-células-e-níveis) — Núcleo: formar células e níveis.
 - [ ] [MT-6](plano.md#mt-6-fechar-com-cpa-e-calcular-métricas) — Núcleo: CPA, métricas e reprodução de R2.
 - [ ] [MT-7](plano.md#mt-7-verificar-o-circuito) — Núcleo: verificação exaustiva e por amostra.
 - [ ] [MT-8](plano.md#mt-8-solução-dadda-próxima-jogada-dicas-e-limite-inferior) — Núcleo: Dadda, próxima jogada, dicas e limite.
@@ -26,6 +25,7 @@
 
 ## Concluídos
 
+- [x] [MT-5](plano.md#mt-5-formar-células-e-níveis) — Núcleo: células e níveis (18 testes; R2 até o CPA bate com a tabela da spec 05).
 - [x] [MT-4](plano.md#mt-4-gerar-a-matriz-de-pontos) — Núcleo: matriz de pontos (15 testes; R1, R3, R4, EXP-01 a EXP-03, EXP-08).
 - [x] [MT-3](plano.md#mt-3-analisar-a-expressão) — Núcleo: analisar a expressão (27 testes; EXP-01, 05 a 08, 11, 13, 14).
 - [x] [MT-18](plano.md#mt-18-proteger-o-repositório-público) — Repositório protegido: `aplicar.sh --conferir` com 0 falhas; PR #13 mesclado pelo novo fluxo.

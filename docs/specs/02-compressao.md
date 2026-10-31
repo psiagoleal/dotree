@@ -35,12 +35,14 @@ nível, como nos painéis das aulas.
 - **CMP-02** — QUANDO o usuário formar uma célula com 2 pontos da coluna $j$, o sistema DEVE
   criar um HA do mesmo modo, com prontidão $\max(t_{entradas}) + 0{,}5\,T_{FA}$.
   *Prova:* teste do núcleo.
-- **CMP-03** — O sistema DEVE permitir desfazer e refazer qualquer formação de célula e
-  qualquer conclusão de nível, até o início do exercício.
+- **CMP-03** — O sistema DEVE permitir desfazer e refazer qualquer formação de célula,
+  conclusão de nível e volta de nível, até o início do exercício. Uma ação nova depois de
+  desfazer apaga o que poderia ser refeito.
   *Prova:* teste do núcleo: 1000 operações aleatórias seguidas de 1000 desfazer devolvem o
   estado inicial, e de 1000 refazer devolvem o estado final.
-- **CMP-04** — O sistema DEVE permitir voltar a um nível anterior; as células dos níveis
-  posteriores são descartadas depois de confirmação.
+- **CMP-04** — O sistema DEVE permitir voltar a um nível anterior $k$: as células formadas
+  sobre $k$ voltam a ficar pendentes, para edição, e as dos níveis posteriores são
+  descartadas depois de confirmação. Voltar também é uma ação que se desfaz.
   *Prova:* teste do núcleo (estado após voltar) e teste de ponta a ponta (confirmação).
 - **CMP-05** — O sistema DEVE mostrar os níveis já concluídos em painéis, um por nível, com
   as colunas alinhadas por peso e o cabeçalho $2^j$, cada célula como um retângulo
@@ -59,8 +61,11 @@ nível, como nos painéis das aulas.
 - **CMP-16** — SE o usuário pedir para concluir um nível sem nenhuma célula formada nele,
   ENTÃO o sistema DEVE recusar: "um nível precisa de pelo menos uma célula".
 
-*Prova de CMP-06, CMP-07, CMP-08 e CMP-16:* um teste do núcleo para cada recusa, conferindo
-o código da regra.
+- **CMP-17** — SE a seleção tiver um ponto que não pertence ao nível atual, ou o mesmo ponto
+  duas vezes, ENTÃO o sistema DEVE recusar sem alterar o estado.
+
+*Prova de CMP-06, CMP-07, CMP-08, CMP-16 e CMP-17:* um teste do núcleo para cada recusa,
+conferindo o código da regra; outro confere que recusas não mudam o estado nem o histórico.
 
 ### Vai-um além da saída
 
