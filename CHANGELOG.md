@@ -9,6 +9,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Núcleo: fechamento com CPA *ripple* (FA, HA ou fio por coluna, *carry-in* na primeira
+  coluna), circuito completo com os bits do resultado, métricas (FA, HA, AND, área, atraso)
+  e caminhos críticos. R2 reproduzido inteiro: 13 FA, 4 HA, 15 $A_{FA}$, 6 $T_{FA}$ (MT-6).
 - Núcleo: compressão nível a nível (`dotree_core::reduce`). FA e HA com prontidão exata em
   meios $T_{FA}$, recusas por código, numeração das células, ordem canônica das entradas,
   vai-um além de $W$ descartado, voltar de nível, desfazer e refazer (MT-5).

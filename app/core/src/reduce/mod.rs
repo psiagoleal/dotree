@@ -91,6 +91,52 @@ pub struct Cell {
 pub struct Level {
     pub points: Vec<Point>,
     pub cells: Vec<Cell>,
+    /// True for the final ripple-carry adder (CMP-11).
+    pub cpa: bool,
+}
+
+/// Why "close with CPA" is not available on the current level (CMP-10).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum CpaBlock {
+    /// A column has more than 3 points.
+    ColumnTooTall { column: u32, height: u32 },
+    /// A column with 3 points that is not the lowest column with 2 or more.
+    ThreeNotFirst { column: u32 },
+    /// No column has 2 or more points: there is nothing to add.
+    NothingToAdd,
+    /// Cells were formed over this level and not concluded yet.
+    PendingCells,
+}
+
+/// Counts and costs of the circuit built so far (CMP-14, CMP-15, GER-04).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Metrics {
+    pub fa: usize,
+    pub ha: usize,
+    pub and_gates: usize,
+    /// Latest readiness among the current points and the pending cells.
+    pub delay: Time,
+}
+
+impl Metrics {
+    /// Area in half `A_FA` units (FA = 2, HA = 1), exact.
+    pub fn area_halves(&self) -> u32 {
+        (2 * self.fa + self.ha) as u32
+    }
+
+    /// Area in `A_FA`.
+    pub fn area_a_fa(&self) -> f64 {
+        f64::from(self.area_halves()) / 2.0
+    }
+}
+
+/// Cells on some path of maximum delay (CMP-15, DIA-05).
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct Critical {
+    /// Numbers of concluded cells, ascending.
+    pub cells: Vec<usize>,
+    /// Indices into [`Reduction::pending`], ascending.
+    pub pending: Vec<usize>,
 }
 
 /// Why an action was refused (GER-02). Carries only ids the user selected.
@@ -108,6 +154,8 @@ pub enum Rejection {
     DuplicateSelection { point: PointId },
     /// CMP-16: "a level needs at least one cell".
     EmptyLevel,
+    /// CMP-10: the CPA cannot close this level yet.
+    CpaUnavailable(CpaBlock),
     /// Going back to a level that is not before the current one.
     NoSuchLevel { level: usize },
 }
@@ -118,14 +166,28 @@ struct State {
     levels: Vec<Level>,
     points: Vec<Point>,
     pending: Vec<PendingCell>,
-    /// Next free point id; ids are never reused, even after going back.
-    next_point: PointId,
+    /// Every point ever created, indexed by id; ids are never reused, even after going back.
+    registry: Vec<Point>,
+}
+
+impl State {
+    fn new_point(&mut self, column: u32, ready: Time, origin: Origin) -> Point {
+        let p = Point {
+            id: self.registry.len(),
+            column,
+            ready,
+            origin,
+        };
+        self.registry.push(p);
+        p
+    }
 }
 
 /// A reduction in progress, with its undo history.
 #[derive(Debug, Clone)]
 pub struct Reduction {
     output_width: u32,
+    and_gates: usize,
     input_signals: Vec<String>,
     history: Vec<State>,
     cursor: usize,
@@ -134,7 +196,7 @@ pub struct Reduction {
 impl Reduction {
     pub fn new(matrix: &DotMatrix) -> Reduction {
         // Dots come in canonical generation order, which is the canonical order at t = 0.
-        let points = matrix
+        let points: Vec<Point> = matrix
             .dots
             .iter()
             .map(|d| Point {
@@ -151,12 +213,13 @@ impl Reduction {
             .collect();
         let initial = State {
             levels: Vec::new(),
-            points,
             pending: Vec::new(),
-            next_point: matrix.dots.len(),
+            registry: points.clone(),
+            points,
         };
         Reduction {
             output_width: matrix.output_width,
+            and_gates: matrix.and_gates(),
             input_signals,
             history: vec![initial],
             cursor: 0,
@@ -279,22 +342,10 @@ impl Reduction {
         let mut outputs = Vec::with_capacity(2 * order.len());
         for (i, pc) in order.into_iter().enumerate() {
             let number = first_number + i;
-            let sum = Point {
-                id: next.next_point,
-                column: pc.column,
-                ready: pc.ready,
-                origin: Origin::Sum { cell: number },
-            };
-            next.next_point += 1;
+            let sum = next.new_point(pc.column, pc.ready, Origin::Sum { cell: number });
             outputs.push(sum);
             let carry = if pc.column + 1 < self.output_width {
-                let k = Point {
-                    id: next.next_point,
-                    column: pc.column + 1,
-                    ready: pc.ready,
-                    origin: Origin::Carry { cell: number },
-                };
-                next.next_point += 1;
+                let k = next.new_point(pc.column + 1, pc.ready, Origin::Carry { cell: number });
                 outputs.push(k);
                 Some(k.id)
             } else {
@@ -329,6 +380,7 @@ impl Reduction {
         next.levels.push(Level {
             points: std::mem::replace(&mut next.points, points),
             cells,
+            cpa: false,
         });
         next.pending.clear();
         self.commit(next);
@@ -358,6 +410,209 @@ impl Reduction {
             .collect();
         self.commit(next);
         Ok(())
+    }
+
+    /// Any point ever created in this reduction, including the CPA's internal carries.
+    pub fn point(&self, id: PointId) -> Option<&Point> {
+        self.state().registry.get(id)
+    }
+
+    /// Whether the current level can be closed with a CPA (CMP-10).
+    pub fn cpa_status(&self) -> Result<(), CpaBlock> {
+        if !self.pending().is_empty() {
+            return Err(CpaBlock::PendingCells);
+        }
+        let h = self.heights();
+        if let Some((column, &height)) = h.iter().enumerate().find(|&(_, &x)| x > 3) {
+            return Err(CpaBlock::ColumnTooTall {
+                column: column as u32,
+                height,
+            });
+        }
+        let first = h
+            .iter()
+            .position(|&x| x >= 2)
+            .ok_or(CpaBlock::NothingToAdd)?;
+        if let Some(column) = h
+            .iter()
+            .enumerate()
+            .position(|(c, &x)| x == 3 && c != first)
+        {
+            return Err(CpaBlock::ThreeNotFirst {
+                column: column as u32,
+            });
+        }
+        Ok(())
+    }
+
+    /// Closes the current level with a ripple-carry adder (CMP-11).
+    pub fn close_with_cpa(&mut self) -> Result<(), Rejection> {
+        self.cpa_status().map_err(Rejection::CpaUnavailable)?;
+        let st = self.state();
+        let mut next = st.clone();
+        let level = next.levels.len();
+        let mut number = next.levels.iter().map(|l| l.cells.len()).sum::<usize>();
+        let first = self.heights().iter().position(|&x| x >= 2).unwrap_or(0) as u32;
+
+        let mut cells = Vec::new();
+        let mut result: Vec<Point> = Vec::new();
+        let mut carry: Option<Point> = None;
+        for column in 0..self.output_width {
+            let mut inputs: Vec<Point> = st
+                .points
+                .iter()
+                .filter(|p| p.column == column)
+                .copied()
+                .collect();
+            // Below the CPA every column already holds its result bit (at most one point).
+            if column < first {
+                result.extend(inputs);
+                continue;
+            }
+            // The incoming carry is always the last input (spec 02, "Ordem das entradas").
+            inputs.extend(carry.take());
+            let kind = match inputs.len() {
+                0 => continue,
+                1 => {
+                    result.push(inputs[0]); // a wire: the point itself is the result bit
+                    continue;
+                }
+                2 => CellKind::Ha,
+                _ => CellKind::Fa, // 3: CMP-10 guarantees no more
+            };
+            number += 1;
+            let delay = if kind == CellKind::Fa {
+                Time::FA_DELAY
+            } else {
+                Time::HA_DELAY
+            };
+            let ready = Time(inputs.iter().map(|p| p.ready.0).max().unwrap_or(0) + delay.0);
+            let sum = next.new_point(column, ready, Origin::Sum { cell: number });
+            result.push(sum);
+            carry = (column + 1 < self.output_width)
+                .then(|| next.new_point(column + 1, ready, Origin::Carry { cell: number }));
+            cells.push(Cell {
+                number,
+                kind,
+                level,
+                column,
+                inputs: inputs.iter().map(|p| p.id).collect(),
+                sum: sum.id,
+                carry: carry.map(|k| k.id),
+                ready,
+            });
+        }
+
+        result.sort_by(canonical);
+        next.levels.push(Level {
+            points: std::mem::replace(&mut next.points, result),
+            cells,
+            cpa: true,
+        });
+        self.commit(next);
+        Ok(())
+    }
+
+    /// Every column has at most one point (CMP-12).
+    pub fn is_complete(&self) -> bool {
+        self.heights().iter().all(|&h| h <= 1)
+    }
+
+    /// Result bits `R_0 .. R_{W-1}` when complete: the point that carries each bit, or `None`
+    /// for a constant 0 (CMP-12).
+    pub fn result(&self) -> Option<Vec<Option<PointId>>> {
+        self.is_complete().then(|| {
+            (0..self.output_width)
+                .map(|c| self.points().iter().find(|p| p.column == c).map(|p| p.id))
+                .collect()
+        })
+    }
+
+    /// FA, HA and AND counts and the current delay (CMP-14, CMP-15).
+    pub fn metrics(&self) -> Metrics {
+        let kinds = self
+            .levels()
+            .iter()
+            .flat_map(|l| l.cells.iter().map(|c| c.kind))
+            .chain(self.pending().iter().map(|c| c.kind));
+        let (mut fa, mut ha) = (0, 0);
+        for k in kinds {
+            match k {
+                CellKind::Fa => fa += 1,
+                CellKind::Ha => ha += 1,
+            }
+        }
+        let delay = self
+            .points()
+            .iter()
+            .map(|p| p.ready)
+            .chain(self.pending().iter().map(|c| c.ready))
+            .max()
+            .unwrap_or_default();
+        Metrics {
+            fa,
+            ha,
+            and_gates: self.and_gates,
+            delay,
+        }
+    }
+
+    /// Every cell on a path of maximum delay (CMP-15).
+    pub fn critical(&self) -> Critical {
+        let delay = self.metrics().delay;
+        let mut out = Critical::default();
+        if delay == Time(0) {
+            return out;
+        }
+        let delay_of = |k: CellKind| {
+            if k == CellKind::Fa {
+                Time::FA_DELAY.0
+            } else {
+                Time::HA_DELAY.0
+            }
+        };
+        // Walk back from every point (or pending cell) that finishes at the maximum delay:
+        // a cell is critical when it produces a critical point; its critical inputs are those
+        // ready exactly one cell delay before it.
+        let mut stack: Vec<PointId> = self
+            .points()
+            .iter()
+            .filter(|p| p.ready == delay)
+            .map(|p| p.id)
+            .collect();
+        for (i, pc) in self.pending().iter().enumerate() {
+            if pc.ready == delay {
+                out.pending.push(i);
+                let want = pc.ready.0 - delay_of(pc.kind);
+                stack.extend(
+                    pc.inputs
+                        .iter()
+                        .copied()
+                        .filter(|&id| self.state().registry[id].ready.0 == want),
+                );
+            }
+        }
+        let cells: Vec<&Cell> = self.levels().iter().flat_map(|l| &l.cells).collect();
+        while let Some(id) = stack.pop() {
+            let number = match self.state().registry[id].origin {
+                Origin::Input { .. } => continue,
+                Origin::Sum { cell } | Origin::Carry { cell } => cell,
+            };
+            if out.cells.contains(&number) {
+                continue;
+            }
+            out.cells.push(number);
+            let cell = cells[number - 1];
+            let want = cell.ready.0 - delay_of(cell.kind);
+            stack.extend(
+                cell.inputs
+                    .iter()
+                    .copied()
+                    .filter(|&i| self.state().registry[i].ready.0 == want),
+            );
+        }
+        out.cells.sort_unstable();
+        out
     }
 
     pub fn undo(&mut self) -> bool {

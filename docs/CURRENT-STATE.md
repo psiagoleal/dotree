@@ -40,7 +40,10 @@
       13 AND). Ordem canônica de geração escrita na spec 01 (passo 5).
 - [x] MT-5: `dotree_core::reduce` com 18 testes; reproduz R2 até o CPA igual à tabela da
       spec 05; 8 mutações pegas. Spec 02 ganhou CMP-17 e deixou CMP-03/CMP-04 explícitos.
-- [ ] Próximo: MT-6 (CPA, métricas, caminho crítico; R2 completo: 13 FA, 4 HA, 6 $T_{FA}$).
+- [x] MT-6: CPA, métricas e caminho crítico; R2 completo reproduzido (13 FA, 4 HA,
+      15 $A_{FA}$, 6 $T_{FA}$, críticas 1, 2, 4, 6, 8, 9, 12–17); 6 mutações pegas.
+- [ ] Próximo: MT-7 (verificação por simulação), MT-8 (Dadda e ajuda) e MT-9 (diagrama)
+      dependem só do MT-6 e podem andar em qualquer ordem.
 
 ## Observações para a próxima sessão
 
