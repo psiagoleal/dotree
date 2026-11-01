@@ -9,6 +9,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Contrato visual (`docs/DESIGN.md`): cores dos pontos no estilo das aulas (um termo por cor,
+  saídas de célula em preto, resultado em roxo), desenho de células e painéis, interação;
+  paleta em *tokens* CSS conferida por teste de contraste e distância de cor (MT-0d).
 - Núcleo: `help` com o método de Dadda (próxima jogada a partir do estado do aluno e solução
   automática, que é seguir a próxima jogada até o fim), catálogo de dicas e limite inferior
   de FA. O R4 do job `vhdl` passou a usar a solução Dadda (MT-8).

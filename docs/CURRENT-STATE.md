@@ -53,10 +53,11 @@
       `use work.all`). R2 deu 16 384 casos corretos no GHDL e no ModelSim ASE 10.1d.
 - [x] MT-8: `help` (Dadda, próxima jogada, dicas, limite); R1 e R4 batem com as contas à
       mão; 6 mutações pegas. **O núcleo da v0.1 está completo (MT-3 a MT-10).**
-- [ ] Próximo: interface — MT-0d (contrato visual, `DESIGN.md`) e MT-11 (expressão, matriz,
-      cores e visão indexada), que precisa de uma ponte WASM maior em `app/wasm`.
-- [ ] Pendente do autor: decidir sobre os alertas do Dependabot (`minimatch` e `deepmerge`,
-      só de desenvolvimento, sem versão corrigida instalável).
+- [x] Alertas do Dependabot (`minimatch`, `deepmerge`) dispensados pelo autor como risco
+      tolerável (só ferramentas de desenvolvimento).
+- [x] MT-0d: `docs/DESIGN.md` e paleta em `app.css`, conferida por `palette.spec.ts`.
+- [ ] Próximo: MT-11 (expressão, matriz, cores e visão indexada), que precisa de uma ponte
+      WASM maior em `app/wasm`.
 
 ## Observações para a próxima sessão
 

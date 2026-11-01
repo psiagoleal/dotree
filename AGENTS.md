@@ -141,6 +141,7 @@ docs/adr/            # Registros de Decisão de Arquitetura — LEITURA OBRIGAT�
 docs/plano.md        # plano descartável: detalhe de cada ticket
 docs/TICKETS.md      # painel de tickets (skill micro-ticket-planner)
 docs/architecture.md # arquitetura efetiva (skill mapa-de-arquitetura)
+docs/DESIGN.md       # contrato visual: cores, desenho, interação (ler antes de mexer na UI)
 docs/insumos/        # briefing e referências recebidas
 docs/CURRENT-STATE.md# handoff entre turnos (skill handoff-updater)
 ```
