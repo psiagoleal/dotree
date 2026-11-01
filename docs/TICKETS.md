@@ -10,7 +10,6 @@
 ## Em aberto
 
 - [ ] [MT-0d](plano.md#mt-0d-escrever-o-contrato-visual-docsdesignmd) — Contrato visual (`DESIGN.md`) com a paleta dos termos.
-- [ ] [MT-7](plano.md#mt-7-verificar-o-circuito) — Núcleo: verificação exaustiva e por amostra.
 - [ ] [MT-8](plano.md#mt-8-solução-dadda-próxima-jogada-dicas-e-limite-inferior) — Núcleo: Dadda, próxima jogada, dicas e limite.
 - [ ] [MT-9](plano.md#mt-9-leiaute-do-diagrama-e-tabela-de-ligações) — Núcleo: leiaute do diagrama e tabela de ligações.
 - [ ] [MT-10](plano.md#mt-10-gerar-vhdl-e-verificá-lo-com-ghdl-no-ci) — Núcleo: VHDL e GHDL no CI.
@@ -24,6 +23,7 @@
 
 ## Concluídos
 
+- [x] [MT-7](plano.md#mt-7-verificar-o-circuito) — Núcleo: netlist e verificação bit-paralela (14 testes + proptest; R2: 16 384 casos corretos).
 - [x] [MT-6](plano.md#mt-6-fechar-com-cpa-e-calcular-métricas) — Núcleo: CPA, métricas e caminho crítico (15 testes; R2 completo: 13 FA, 4 HA, 15 A_FA, 6 T_FA).
 - [x] [MT-5](plano.md#mt-5-formar-células-e-níveis) — Núcleo: células e níveis (18 testes; R2 até o CPA bate com a tabela da spec 05).
 - [x] [MT-4](plano.md#mt-4-gerar-a-matriz-de-pontos) — Núcleo: matriz de pontos (15 testes; R1, R3, R4, EXP-01 a EXP-03, EXP-08).

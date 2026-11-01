@@ -9,6 +9,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Núcleo: `netlist` (o circuito como fios e células, com os identificadores de todos os
+  artefatos) e `verify` (simulação bit-paralela, 64 vetores por vez; exaustiva até 24 bits de
+  entrada, amostra xorshift64\* acima; contraexemplo; execução em blocos para progresso e
+  cancelamento). R2: 16 384 casos corretos (MT-7).
 - Núcleo: fechamento com CPA *ripple* (FA, HA ou fio por coluna, *carry-in* na primeira
   coluna), circuito completo com os bits do resultado, métricas (FA, HA, AND, área, atraso)
   e caminhos críticos. R2 reproduzido inteiro: 13 FA, 4 HA, 15 $A_{FA}$, 6 $T_{FA}$ (MT-6).

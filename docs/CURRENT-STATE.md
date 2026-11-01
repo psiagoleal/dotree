@@ -42,8 +42,10 @@
       spec 05; 8 mutações pegas. Spec 02 ganhou CMP-17 e deixou CMP-03/CMP-04 explícitos.
 - [x] MT-6: CPA, métricas e caminho crítico; R2 completo reproduzido (13 FA, 4 HA,
       15 $A_{FA}$, 6 $T_{FA}$, críticas 1, 2, 4, 6, 8, 9, 12–17); 6 mutações pegas.
-- [ ] Próximo: MT-7 (verificação por simulação), MT-8 (Dadda e ajuda) e MT-9 (diagrama)
-      dependem só do MT-6 e podem andar em qualquer ordem.
+- [x] MT-7: `netlist` + `verify`; R2 com 16 384 casos corretos; proptest de 64 reduções
+      aleatórias; 6 mutações pegas (uma só depois de reforçar o teste com um simulador
+      escalar independente). Pior caso exaustivo (2^24 vetores, 245 células): 1,6 s nativo.
+- [ ] Próximo: MT-8 (Dadda e ajuda) ou MT-9 (diagrama); MT-10 (VHDL) depende de MT-7 e MT-9.
 
 ## Observações para a próxima sessão
 

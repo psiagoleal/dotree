@@ -29,6 +29,11 @@ A amostra começa sempre por "todas as entradas zeradas" e "todas no máximo" e 
 gerador **xorshift64\*** de semente fixa `0x00D0_7EE5`. Os 4096 vetores do testbench são os
 4096 primeiros da mesma sequência do app.
 
+**Vetor empacotado.** Um vetor de entrada é um inteiro com as variáveis em ordem alfabética,
+a primeira nos bits menos significativos (em R1: $A$ nos bits 2..0, $B$ em 5..3, …, $G$ no
+bit 13). Na varredura exaustiva, os vetores são 0, 1, 2, … nessa codificação; a amostra é
+mascarada para a largura total. A mesma codificação vale para o testbench VHDL.
+
 ## Critérios
 
 - **VER-01** — QUANDO o circuito estiver completo e o usuário pedir verificação, o sistema
@@ -49,8 +54,14 @@ gerador **xorshift64\*** de semente fixa `0x00D0_7EE5`. Os 4096 vetores do testb
   desabilitada, explicando que ela exige circuito completo.
   *Prova:* teste de componente.
 - **VER-06** — O núcleo DEVE ter um teste de propriedade: para expressões e larguras
-  aleatórias dentro dos limites, a solução Dadda passa na verificação.
-  *Prova:* `cargo test` com proptest, semente registrada no relatório de falha.
+  aleatórias, qualquer redução montada pela API (células e CPA escolhidos ao acaso) e a
+  solução Dadda passam na verificação.
+  *Prova:* `cargo test` com proptest (64 casos), caso que falha registrado pelo proptest. A
+  parte das reduções aleatórias entrou no MT-7; a da solução Dadda entra no MT-8.
+- **VER-07** — O contraexemplo relatado DEVE ser o primeiro vetor que falha na ordem de
+  varredura, e a contagem de casos conferidos DEVE incluí-lo.
+  *Prova:* teste do núcleo contra um simulador escalar independente, escrito no próprio
+  teste.
 
 ## Fora de escopo
 
