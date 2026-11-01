@@ -174,6 +174,9 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Depende de:** MT-4, MT-0d
 
 ### MT-11b: Interface — visão indexada e desafio da largura
+> **Concluído em 2026-11-01.** O núcleo ganhou `input_max` e `term_max`, para que a conta
+> da etapa 2 use valores do núcleo. VIS-02 com seleção fica para o MT-12.
+
 - **Objetivo:** alternância pontos ↔ variáveis indexadas em toda tela com pontos (lembrada e
   com atalho), desafio da largura de saída com revelação em duas etapas, diálogo de
   confirmação reutilizável com foco em "vou tentar mais um pouco".

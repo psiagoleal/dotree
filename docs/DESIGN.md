@@ -61,7 +61,11 @@ ou métrica fica em segundo plano.
 ## Interação
 
 - **Ajuda sob demanda** (AJU-02): todo pedido de resposta abre um diálogo com o foco inicial
-  em "vou tentar mais um pouco"; confirmar é a segunda opção, nunca a padrão.
+  em "vou tentar mais um pouco"; confirmar é a segunda opção, nunca a padrão. Esc também
+  conta como "vou tentar". Um só componente (`ConfirmDialog`, `<dialog>` nativo) serve a
+  todos os pedidos.
+- **Visão** (VIS-01, VIS-03): botões "Pontos" e "Variáveis indexadas" ao lado do título da
+  matriz, com a tecla V como atalho; a escolha fica no `localStorage` do navegador.
 - **Revelação em duas etapas** (GER-03): resultado primeiro; o caminho fica atrás de um
   segundo botão, que só aparece depois da etapa 1.
 - **Recusas** (GER-02): mensagem curta junto aos pontos selecionados, dizendo a regra

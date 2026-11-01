@@ -8,8 +8,12 @@ import type { Matrix } from '#lib/core.ts';
 // 2A + B with A of 2 bits, B of 1 bit: terms 2A (shifted) and B.
 const matrix: Matrix = {
 	terms: [
-		{ coefficient: '2', vars: 'A' },
-		{ coefficient: '1', vars: 'B' }
+		{ coefficient: '2', vars: 'A', max: '6' },
+		{ coefficient: '1', vars: 'B', max: '1' }
+	],
+	inputs: [
+		{ var: 'A', width: 2, max: '3' },
+		{ var: 'B', width: 1, max: '1' }
 	],
 	dots: [
 		{ id: 0, column: 1, term: 0, signal: 'a0', factors: [{ var: 'A', bit: 0 }] },
@@ -43,6 +47,31 @@ describe('DotMatrix', () => {
 	});
 });
 
+describe('DotMatrix, indexed view', () => {
+	const signalsByColumn = (container: HTMLElement) =>
+		[...container.querySelectorAll('.column')].map((c) =>
+			[...c.querySelectorAll<HTMLElement>('.dot')].map((d) => d.dataset.signal)
+		);
+
+	it('writes each signal with subscripts, in the same place and colour (VIS-01, VIS-02)', async () => {
+		const dots = await render(DotMatrix, { matrix, view: 'dots' });
+		const before = signalsByColumn(dots.container);
+		const indexed = await render(DotMatrix, { matrix, view: 'indexed' });
+		expect(signalsByColumn(indexed.container)).toEqual(before);
+		const a1 = indexed.container.querySelector<HTMLElement>('[data-signal="a1"]')!;
+		expect(a1.textContent).toBe('a1');
+		expect(a1.querySelector('sub')?.textContent).toBe('1');
+		expect(a1.style.getPropertyValue('--c')).toBe('var(--dot-term-1)');
+		expect(a1.getAttribute('aria-label')).toBe('a1');
+	});
+
+	it('once W is revealed, draws every column up to 2^(W-1) (EXP-09)', async () => {
+		const { container } = await render(DotMatrix, { matrix, width: 4 });
+		const weights = [...container.querySelectorAll('.weight')].map((w) => w.textContent);
+		expect(weights).toEqual(['23', '22', '21', '20']);
+	});
+});
+
 describe('TermLegend', () => {
 	it('lists each term once, in its colour (COR-01)', async () => {
 		const { container } = await render(TermLegend, { terms: matrix.terms });
@@ -55,7 +84,8 @@ describe('TermLegend', () => {
 	it('colours repeat from the 9th term on, and entries stay numbered (COR-03)', async () => {
 		const terms = Array.from({ length: 10 }, (_, i) => ({
 			coefficient: '1',
-			vars: String.fromCharCode(65 + i)
+			vars: String.fromCharCode(65 + i),
+			max: '1'
 		}));
 		const { container } = await render(TermLegend, { terms });
 		const swatches = [...container.querySelectorAll<HTMLElement>('.swatch')];

@@ -24,11 +24,24 @@ fn r1_matrix() {
     assert_eq!(
         m["terms"],
         json!([
-            {"coefficient": "1", "vars": "AB"},
-            {"coefficient": "1", "vars": "CD"},
-            {"coefficient": "3", "vars": "E"},
-            {"coefficient": "3", "vars": "F"},
-            {"coefficient": "1", "vars": "G"}
+            {"coefficient": "1", "vars": "AB", "max": "49"},
+            {"coefficient": "1", "vars": "CD", "max": "9"},
+            {"coefficient": "3", "vars": "E", "max": "9"},
+            {"coefficient": "3", "vars": "F", "max": "3"},
+            {"coefficient": "1", "vars": "G", "max": "1"}
+        ])
+    );
+    // Step 2 of the width challenge substitutes these maxima (GER-03).
+    assert_eq!(
+        m["inputs"],
+        json!([
+            {"var": "A", "width": 3, "max": "7"},
+            {"var": "B", "width": 3, "max": "7"},
+            {"var": "C", "width": 2, "max": "3"},
+            {"var": "D", "width": 2, "max": "3"},
+            {"var": "E", "width": 2, "max": "3"},
+            {"var": "F", "width": 1, "max": "1"},
+            {"var": "G", "width": 1, "max": "1"}
         ])
     );
     // First dot of column 1, in canonical order.

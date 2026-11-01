@@ -136,25 +136,18 @@ impl DotMatrix {
             }
         }
 
-        let v_max: u128 = terms
-            .iter()
-            .map(|t| {
-                t.vars.iter().fold(u128::from(t.coefficient), |acc, v| {
-                    acc * ((1u128 << width_of(v)) - 1)
-                })
-            })
-            .sum();
-        // v_max >= 1: every coefficient and every width is at least 1.
-        let output_width = u128::BITS - v_max.leading_zeros();
-
-        Ok(DotMatrix {
+        let mut m = DotMatrix {
             terms,
             widths,
             signals,
             dots,
-            v_max,
-            output_width,
-        })
+            v_max: 0,
+            output_width: 0,
+        };
+        m.v_max = (0..m.terms.len()).map(|i| m.term_max(i)).sum();
+        // v_max >= 1: every coefficient and every width is at least 1.
+        m.output_width = u128::BITS - m.v_max.leading_zeros();
+        Ok(m)
     }
 
     /// Number of dots in each column `0..W`.
@@ -165,6 +158,19 @@ impl DotMatrix {
             h[d.column as usize] += 1;
         }
         h
+    }
+
+    /// Largest value of input `var`: `2^width - 1`.
+    pub fn input_max(&self, var: char) -> u128 {
+        (1u128 << self.widths[&var]) - 1
+    }
+
+    /// Value of term `term` with every input at its maximum. `v_max` is their sum.
+    pub fn term_max(&self, term: usize) -> u128 {
+        let t = &self.terms[term];
+        t.vars
+            .iter()
+            .fold(u128::from(t.coefficient), |acc, &v| acc * self.input_max(v))
     }
 
     /// Number of AND gates: distinct partial products (EXP-03).
