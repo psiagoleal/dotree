@@ -1,7 +1,7 @@
 // Caminho relativo: app/web/src/lib/errors.ts
 // Words the codes the core returns (IDI-05), in the current or a given language.
 import { m } from '#lib/paraglide/messages.js';
-import type { CoreError, CoreWarning } from '#lib/core.ts';
+import type { CoreError, CoreWarning, Rejection } from '#lib/core.ts';
 
 type Locale = 'pt-br' | 'en';
 
@@ -62,4 +62,29 @@ export function errorMessage(e: CoreError, locale?: Locale): string {
 
 export function warningMessage(w: CoreWarning, locale?: Locale): string {
 	return m.warning_unused_width({ var: w.var }, locale ? { locale } : {});
+}
+
+/** Refusals state the rule that was broken, never which points to pick (GER-02). */
+export function rejectionMessage(r: Rejection, locale?: Locale): string {
+	const o = locale ? { locale } : {};
+	switch (r.code) {
+		case 'mixedColumns':
+			return m.reject_mixed_columns({}, o);
+		case 'wrongCount':
+			return m.reject_wrong_count({ count: r.count }, o);
+		case 'alreadyInCell':
+			return m.reject_already_in_cell({}, o);
+		case 'notInCurrentLevel':
+			return m.reject_not_in_current_level({}, o);
+		case 'duplicateSelection':
+			return m.reject_duplicate_selection({}, o);
+		case 'emptyLevel':
+			return m.reject_empty_level({}, o);
+		case 'cpaUnavailable':
+			return m.reject_cpa_unavailable({}, o);
+		case 'noSuchLevel':
+			return m.reject_no_such_level({}, o);
+		case 'badSelection':
+			return m.reject_bad_selection({}, o);
+	}
 }

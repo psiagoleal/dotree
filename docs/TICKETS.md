@@ -9,7 +9,7 @@
 
 ## Em aberto
 
-- [ ] [MT-12](plano.md#mt-12-interface--compressão) — Interface: compressão.
+- [ ] [MT-12b](plano.md#mt-12b-interface--cpa-circuito-completo-e-caminho-crítico) — Interface: CPA, circuito completo, caminho crítico, voltar de nível.
 - [ ] [MT-13](plano.md#mt-13-interface--ajuda-sob-demanda-em-duas-etapas) — Interface: ajuda sob demanda em duas etapas.
 - [ ] [MT-14](plano.md#mt-14-interface--diagrama-tabela-verificação-e-vhdl) — Interface: diagrama, tabela, verificação e VHDL.
 - [ ] [MT-15](plano.md#mt-15-salvar-abrir-e-retomar) — Salvar, abrir e retomar.
@@ -18,6 +18,7 @@
 
 ## Concluídos
 
+- [x] [MT-12a](plano.md#mt-12-interface--compressão) — Interface: sessão WASM, seleção por mouse e teclado, células, recusas, painéis por nível, desfazer/refazer e métricas (árvore do R2 pela interface).
 - [x] [MT-11b](plano.md#mt-11b-interface--visão-indexada-e-desafio-da-largura) — Interface: visão indexada (tecla V, lembrada), desafio de $W$ em duas etapas e diálogo de confirmação.
 - [x] [MT-11a](plano.md#mt-11-interface--expressão-matriz-cores-e-visão-indexada) — Interface: expressão, larguras, exemplos, matriz colorida com legenda e erros traduzidos (ponte WASM `buildMatrix`).
 - [x] [MT-0d](plano.md#mt-0d-escrever-o-contrato-visual-docsdesignmd) — Contrato visual em `docs/DESIGN.md`; paleta dos pontos conferida por teste nos dois temas.

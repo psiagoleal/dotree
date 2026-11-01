@@ -46,7 +46,10 @@ nível, como nos painéis das aulas.
   *Prova:* teste do núcleo (estado após voltar) e teste de ponta a ponta (confirmação).
 - **CMP-05** — O sistema DEVE mostrar os níveis já concluídos em painéis, um por nível, com
   as colunas alinhadas por peso e o cabeçalho $2^j$, cada célula como um retângulo
-  envolvendo os pontos que consumiu, e uma seta de cada painel para o seguinte.
+  envolvendo os pontos que consumiu, e uma seta de cada painel para o seguinte. Dentro da
+  coluna, as células vêm primeiro, cada uma com as entradas na ordem $x, y, z$, e depois os
+  pontos soltos, na ordem canônica. O nível atual fica no último painel, com as células
+  pendentes também em retângulos.
   *Prova:* teste de componente (R2: 5 painéis, um por nível de 0 a 3 e um do resultado;
   17 retângulos).
 
@@ -98,6 +101,13 @@ conferindo o código da regra; outro confere que recusas não mudam o estado nem
   circuito completo e nomear os bits do resultado $R_0 \dots R_{W-1}$. Uma coluna sem ponto
   é o bit constante 0.
   *Prova:* R2, R3 e `2A` com $A$ de 2 bits ($R_0 = 0$).
+
+## Interação (MT-12a)
+
+Seleção pelo mouse (clique alterna) ou pelo teclado (Tab até o ponto, Espaço alterna). Atalhos
+fora de campos de texto: **F** forma a célula, **Esc** limpa a seleção, **Ctrl+Z** desfaz,
+**Ctrl+Y** ou **Ctrl+Shift+Z** refaz. Uma recusa aparece junto aos botões, mantém a seleção
+para o aluno ver o que escolheu e some na próxima mudança de seleção.
 
 ## Critérios — métricas do circuito do usuário
 

@@ -64,6 +64,10 @@ ou métrica fica em segundo plano.
   em "vou tentar mais um pouco"; confirmar é a segunda opção, nunca a padrão. Esc também
   conta como "vou tentar". Um só componente (`ConfirmDialog`, `<dialog>` nativo) serve a
   todos os pedidos.
+- **Compressão** (MT-12a): métricas numa faixa acima dos painéis; um painel por nível
+  concluído, seta para o seguinte, e o nível atual por último, com a altura de cada coluna
+  embaixo. No nível atual os pontos são botões (`aria-pressed`); fora dele, imagens com o
+  sinal como nome. Ações abaixo do painel atual; a dica de teclado logo abaixo.
 - **Visão** (VIS-01, VIS-03): botões "Pontos" e "Variáveis indexadas" ao lado do título da
   matriz, com a tecla V como atalho; a escolha fica no `localStorage` do navegador.
 - **Revelação em duas etapas** (GER-03): resultado primeiro; o caminho fica atrás de um

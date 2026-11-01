@@ -9,7 +9,7 @@
 
 - **Data:** 2026-11-01
 - **Branch:** `main`
-- **Commit:** `dca3ca6` (MT-11a, #24). O MT-11b ainda não foi commitado.
+- **Commit:** `8b15e7d` (MT-11b, #25). O MT-12a ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -62,7 +62,12 @@
 - [x] MT-11b: visão indexada (tecla V, lembrada), desafio de $W$ em duas etapas, diálogo
       de confirmação reutilizável; núcleo expõe `input_max` e `term_max`. 132 testes Rust,
       50 de unidade/componente, 13 e2e; mutação "revelar sem perguntar" pega.
-- [ ] Próximo: MT-12 (compressão na interface). VIS-02 com seleção entra nele.
+- [x] MT-11b mesclado (#25).
+- [x] MT-12a: `Session` na ponte (6 testes de contrato), `can_undo`/`can_redo` no núcleo,
+      `LevelPanel` (substitui `DotMatrix`) e `Compression`; e2e monta a árvore do R2 (níveis
+      0 e 1 pelo mouse, nível 2 só pelo teclado) com 9 FA, 2 HA, 10 $A_{FA}$, 3 $T_{FA}$.
+      139 testes Rust, 64 de unidade/componente, 15 e2e; mutação "recusa engolida" pega.
+- [ ] Próximo: MT-12b (CPA, circuito completo, caminho crítico, voltar de nível, EXP-04).
 
 ## Observações para a próxima sessão
 
@@ -71,6 +76,8 @@
   `AGENTS.md` proíbe o agente de rodar `git worktree`.
 - Não use `pkill -f` com um padrão que apareça na própria linha de comando: mata o shell
   da ferramenta (exit 144). Guarde o PID do servidor e use `kill`.
+- O rótulo de coluna diz "1 pontos" (sem plural); corrigir no MT-16 com variantes do
+  Paraglide.
 - SvelteKit 3 não tem `$lib`: use `#lib/...` com extensão.
 - A porta 4173 costuma estar ocupada nesta máquina; o e2e usa 4180 (`E2E_PORT`).
 - Os testes de propriedade não gravam `*.proptest-regressions` (`failure_persistence: None`):
@@ -84,6 +91,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-01 | `8b15e7d` | visão indexada e desafio de W (#25); compressão na interface até o CPA | MT-11b, MT-12a |
 | 2026-11-01 | `dca3ca6` | matriz colorida na interface; depois, visão indexada e desafio de W | MT-11a, MT-11b |
 | 2026-10-30 | — | spec revisada, esqueleto, CI/CD, plano e tickets | MT-1, MT-2 |
 | 2026-10-30 | `44c96dd` | inicialização: framework, briefing, spec v0.1 (rascunho), ADR 0001 | — |

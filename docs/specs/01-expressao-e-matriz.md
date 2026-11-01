@@ -95,8 +95,8 @@ consumiram.
   virou o texto do seu sinal, na mesma posição.
 - **VIS-02** — QUANDO o usuário alternar a visão, o sistema DEVE manter a posição de cada
   ponto, a seleção em andamento, as cores e o estado do exercício.
-  *Prova:* teste de componente (posição e cor, MT-11b; seleciona 2 pontos, alterna, a
-  seleção continua, MT-12, quando a seleção existir).
+  *Prova:* teste de componente (posição e cor; seleciona 2 pontos, alterna, a seleção
+  continua — `Compression.svelte.spec.ts`).
 - **VIS-03** — O sistema DEVE oferecer atalho de teclado para alternar a visão e lembrar a
   última escolha nas próximas visitas. O atalho é a tecla V, fora de campos de texto (onde
   V é uma variável) e sem modificadores.

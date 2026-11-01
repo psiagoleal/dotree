@@ -1,8 +1,8 @@
 // Caminho relativo: app/web/src/lib/errors.spec.ts
 // Every error code the core can return has a message in both languages (IDI-05).
 import { describe, expect, it } from 'vitest';
-import type { CoreError } from '#lib/core.ts';
-import { errorMessage, warningMessage } from './errors';
+import type { CoreError, Rejection } from '#lib/core.ts';
+import { errorMessage, rejectionMessage, warningMessage } from './errors';
 
 const ALL: CoreError[] = [
 	...(
@@ -71,5 +71,43 @@ describe('errorMessage', () => {
 
 	it('words the unused-width warning (EXP-11)', () => {
 		expect(warningMessage({ code: 'unusedWidth', var: 'Z' }, 'en')).toContain('Z');
+	});
+});
+
+const REJECTIONS: Rejection[] = [
+	{ code: 'mixedColumns' },
+	{ code: 'wrongCount', count: 4 },
+	{ code: 'alreadyInCell', point: 3 },
+	{ code: 'notInCurrentLevel', point: 3 },
+	{ code: 'duplicateSelection', point: 3 },
+	{ code: 'emptyLevel' },
+	{ code: 'cpaUnavailable', block: { code: 'nothingToAdd' } },
+	{ code: 'noSuchLevel', level: 9 },
+	{ code: 'badSelection' }
+];
+
+describe('rejectionMessage (GER-02)', () => {
+	it.each(['pt-br', 'en'] as const)('words every refusal in %s', (locale) => {
+		const texts = REJECTIONS.map((r) => rejectionMessage(r, locale));
+		for (const t of texts) {
+			expect(t.length).toBeGreaterThan(5);
+			expect(t).not.toMatch(/[{}]/);
+		}
+		expect(new Set(texts).size).toBe(texts.length);
+	});
+
+	it('states the rule from spec 02, never which points to pick', () => {
+		expect(rejectionMessage({ code: 'mixedColumns' }, 'pt-br')).toBe(
+			'Uma célula soma bits do mesmo peso.'
+		);
+		expect(rejectionMessage({ code: 'wrongCount', count: 4 }, 'pt-br')).toBe(
+			'Um FA usa 3 pontos; um HA usa 2. A seleção tem 4.'
+		);
+		expect(rejectionMessage({ code: 'alreadyInCell', point: 3 }, 'pt-br')).toBe(
+			'Cada ponto entra em uma célula só por nível.'
+		);
+		expect(rejectionMessage({ code: 'emptyLevel' }, 'pt-br')).toBe(
+			'Um nível precisa de pelo menos uma célula.'
+		);
 	});
 });

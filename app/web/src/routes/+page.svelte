@@ -4,13 +4,14 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import LanguageSwitch from '#lib/components/LanguageSwitch.svelte';
 	import ExpressionForm from '#lib/components/ExpressionForm.svelte';
-	import DotMatrix from '#lib/components/DotMatrix.svelte';
+	import Compression from '#lib/components/Compression.svelte';
 	import TermLegend from '#lib/components/TermLegend.svelte';
 	import ViewToggle from '#lib/components/ViewToggle.svelte';
 	import WidthChallenge from '#lib/components/WidthChallenge.svelte';
-	import { loadCore, type BuildResult, type Core } from '#lib/core.ts';
+	import { loadCore, type BuildResult, type CompressionSession, type Core } from '#lib/core.ts';
 	import { errorMessage, warningMessage } from '#lib/errors.ts';
-	import { browserStorage, isViewShortcut, readView, writeView, type ViewMode } from '#lib/view.ts';
+	import { keyAction } from '#lib/keys.ts';
+	import { browserStorage, readView, writeView, type ViewMode } from '#lib/view.ts';
 
 	const ISSUES_URL = 'https://github.com/psiagoleal/dotree/issues/new';
 	const SPEC_URL = 'https://github.com/psiagoleal/dotree/blob/main/docs/specs/README.md';
@@ -20,6 +21,8 @@
 
 	let status = $state<Status>({ kind: 'loading' });
 	let result = $state<BuildResult | null>(null);
+	// The compression in progress, held by the core; freed when a new matrix replaces it.
+	let session = $state.raw<CompressionSession | null>(null);
 	// Dots or indexed variables, remembered across visits (VIS-01, VIS-03).
 	let view = $state<ViewMode>(readView(browserStorage()));
 	// W shows only after the width challenge is answered or revealed (EXP-09, GER-01).
@@ -28,6 +31,8 @@
 	function build(core: Core, expression: string, widths: Record<string, number>) {
 		result = core.buildMatrix(expression, widths);
 		widthRevealed = false;
+		session?.free();
+		session = result.ok ? core.openSession(expression, widths) : null;
 	}
 
 	function setView(mode: ViewMode) {
@@ -36,7 +41,7 @@
 	}
 
 	function onkeydown(e: KeyboardEvent) {
-		if (!isViewShortcut(e)) return;
+		if (keyAction(e) !== 'toggleView') return;
 		e.preventDefault();
 		setView(view === 'dots' ? 'indexed' : 'dots');
 	}
@@ -82,11 +87,15 @@
 				<p class="summary" data-testid="matrix-summary">
 					{m.matrix_summary({ dots: mx.dots.length, ands: mx.andGates })}
 				</p>
-				<DotMatrix matrix={mx} {view} width={widthRevealed ? mx.outputWidth : null} />
 				<TermLegend terms={mx.terms} />
 				{#key mx}
 					<WidthChallenge matrix={mx} onreveal={() => (widthRevealed = true)} />
 				{/key}
+				{#if session}
+					{#key session}
+						<Compression {session} {view} width={widthRevealed ? mx.outputWidth : null} />
+					{/key}
+				{/if}
 			</section>
 		{/if}
 

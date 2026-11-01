@@ -187,6 +187,25 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Depende de:** MT-11a
 
 ### MT-12: Interface — compressão
+
+> Dividido na execução. **MT-12a** (concluído em 2026-11-01): sessão WASM com estado
+> (`Session`), seleção por mouse e teclado, formar célula, recusas, painéis por nível,
+> concluir nível, desfazer e refazer, métricas ao vivo; o e2e monta a árvore do R2 até o
+> CPA. **MT-12b**: o resto, abaixo.
+
+### MT-12b: Interface — CPA, circuito completo e caminho crítico
+- **Objetivo:** "Fechar com CPA" com a condição que falta quando desabilitado (CMP-10,
+  CMP-11); circuito completo com os bits $R_j$ na cor de resultado (CMP-12, COR-02);
+  destaque do caminho crítico a pedido (CMP-15); voltar a um nível anterior com confirmação
+  (CMP-04); explicação do vai-um descartado atrás de confirmação (CMP-09); trocar a
+  expressão no meio da compressão só depois de confirmar (EXP-04).
+- **Arquivos no escopo:** `app/web/src/**`, `app/wasm/src/**`, `app/web/messages/*`
+- **Critério de aceite:** e2e completando R2 só pelo teclado com 13 FA, 4 HA, 13 AND,
+  15 $A_{FA}$, 6 $T_{FA}$ e as células críticas 1, 2, 4, 6, 8, 9, 12 a 17.
+- **Fora de escopo:** ajuda (MT-13).
+- **Depende de:** MT-12a
+
+### MT-12 (texto original do ticket)
 - **Objetivo:** seleção por mouse e teclado, formar célula, recusas, painéis por nível,
   concluir nível, desfazer, CPA, métricas, caminho crítico.
 - **Arquivos no escopo:** `app/web/src/**`, `app/wasm/src/**`
