@@ -5,6 +5,7 @@
 	import LanguageSwitch from '#lib/components/LanguageSwitch.svelte';
 	import ExpressionForm from '#lib/components/ExpressionForm.svelte';
 	import Compression from '#lib/components/Compression.svelte';
+	import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
 	import TermLegend from '#lib/components/TermLegend.svelte';
 	import ViewToggle from '#lib/components/ViewToggle.svelte';
 	import WidthChallenge from '#lib/components/WidthChallenge.svelte';
@@ -27,8 +28,12 @@
 	let view = $state<ViewMode>(readView(browserStorage()));
 	// W shows only after the width challenge is answered or revealed (EXP-09, GER-01).
 	let widthRevealed = $state(false);
+	// Mounted only once the core is ready, hence state.
+	let discardDialog = $state<ConfirmDialog>();
 
-	function build(core: Core, expression: string, widths: Record<string, number>) {
+	async function build(core: Core, expression: string, widths: Record<string, number>) {
+		// EXP-04: a compression with any action in it is discarded only after confirmation.
+		if (session?.snapshot().canUndo && !(await discardDialog?.ask())) return;
 		result = core.buildMatrix(expression, widths);
 		widthRevealed = false;
 		session?.free();
@@ -71,6 +76,13 @@
 	{:else if status.kind === 'ready'}
 		{@const core = status.core}
 		<ExpressionForm onbuild={(e, w) => build(core, e, w)} />
+		<ConfirmDialog
+			bind:this={discardDialog}
+			title={m.discard_confirm_title()}
+			body={m.discard_confirm_body()}
+			cancelLabel={m.discard_confirm_cancel()}
+			confirmLabel={m.discard_confirm_ok()}
+		/>
 
 		{#if result && !result.ok}
 			<p role="alert" class="error" data-testid="build-error">{errorMessage(result.error)}</p>
@@ -93,7 +105,13 @@
 				{/key}
 				{#if session}
 					{#key session}
-						<Compression {session} {view} width={widthRevealed ? mx.outputWidth : null} />
+						<Compression
+							{session}
+							{view}
+							outputWidth={mx.outputWidth}
+							vMax={mx.vMax}
+							{widthRevealed}
+						/>
 					{/key}
 				{/if}
 			</section>

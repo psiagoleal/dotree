@@ -4,8 +4,12 @@
      colour (COR-01, COR-02), each cell as a box around the points it consumes (CMP-05).
      Columns run from `top` down to 2^0, so W stays hidden until revealed (EXP-09). In the
      indexed view each point becomes its signal, a₁b₀, in the same place and colour (VIS-01).
-     In the current level the points are toggle buttons for selection (GER-07). -->
+     In the current level the points are toggle buttons for selection (GER-07). The result
+     panel (`result`) draws the bits R_j in the result colour, an empty column as a constant 0
+     (CMP-12, COR-02). Critical cells get a thicker accent border (CMP-15); a cell whose carry
+     was dropped is marked k=0 (CMP-09). -->
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import type { LevelPoint } from '#lib/core.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { signalParts } from '#lib/signal.ts';
@@ -22,18 +26,24 @@
 		heights = false,
 		selectable = false,
 		selected = [],
-		ontoggle = () => {}
+		ontoggle = () => {},
+		result = null,
+		children
 	}: {
 		title: string;
 		testid: string;
 		points: LevelPoint[];
-		groups: (Group & { label: string })[];
+		groups: (Group & { label: string; critical?: boolean; dropped?: boolean })[];
 		top: number;
 		view: ViewMode;
 		heights?: boolean;
 		selectable?: boolean;
 		selected?: number[];
 		ontoggle?: (id: number) => void;
+		/** Point id of each bit R_j, null for a constant 0; set only on the result panel. */
+		result?: (number | null)[] | null;
+		/** Controls shown next to the title. */
+		children?: Snippet;
 	} = $props();
 
 	const columns = $derived(
@@ -47,7 +57,15 @@
 		})
 	);
 
+	function columnLabel(column: number, height: number): string {
+		if (result === null) return m.matrix_column_label({ column, height });
+		return result[column] === null || result[column] === undefined
+			? m.result_column_zero({ column })
+			: m.result_column({ column });
+	}
+
 	function color(p: LevelPoint): string {
+		if (result !== null) return 'var(--dot-result)';
 		return p.term === null ? 'var(--dot-generated)' : `var(--dot-term-${(p.term % 8) + 1})`;
 	}
 </script>
@@ -89,23 +107,35 @@
 {/snippet}
 
 <section class="panel" data-testid={testid} aria-label={title}>
-	<h3>{title}</h3>
+	<div class="head">
+		<h3>{title}</h3>
+		{@render children?.()}
+	</div>
 	<div class="matrix">
 		{#each columns as col (col.column)}
-			<div
-				class="column"
-				role="group"
-				aria-label={m.matrix_column_label({ column: col.column, height: col.height })}
-			>
+			<div class="column" role="group" aria-label={columnLabel(col.column, col.height)}>
 				<div class="weight">2<sup>{col.column}</sup></div>
 				<div class="dots">
 					{#each col.layout.groups as g (g.index)}
-						<div class="cell {g.kind}" role="group" aria-label={groups[g.index].label}>
+						{@const group = groups[g.index]}
+						<div
+							class="cell {g.kind}"
+							class:critical={group.critical}
+							role="group"
+							aria-label={group.label}
+						>
 							{#each g.points as p (p.id)}{@render dot(p)}{/each}
+							{#if group.dropped}<span class="dropped" aria-hidden="true">k=0</span>{/if}
 						</div>
 					{/each}
 					{#each col.layout.loose as p (p.id)}{@render dot(p)}{/each}
+					{#if result !== null && col.height === 0}
+						<span class="zero" aria-hidden="true">0</span>
+					{/if}
 				</div>
+				{#if result !== null}
+					<div class="bit" aria-hidden="true">R<sub>{col.column}</sub></div>
+				{/if}
 				{#if heights}
 					<div class="height" aria-hidden="true">{col.height}</div>
 				{/if}
@@ -118,6 +148,12 @@
 	.panel {
 		display: grid;
 		gap: var(--space-1);
+	}
+	.head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2);
 	}
 	h3 {
 		margin: 0;
@@ -137,7 +173,8 @@
 		min-width: 2.25rem;
 	}
 	.weight,
-	.height {
+	.height,
+	.bit {
 		font-family: var(--font-mono);
 		font-variant-numeric: tabular-nums;
 		color: var(--color-muted);
@@ -145,9 +182,17 @@
 	.weight {
 		margin-bottom: var(--space-1);
 	}
-	.height {
+	.height,
+	.bit {
 		margin-top: var(--space-1);
 		font-size: 0.85rem;
+	}
+	.bit {
+		color: var(--dot-result);
+	}
+	.zero {
+		font: 600 0.85rem/14px var(--font-mono);
+		color: var(--dot-result);
 	}
 	.dots,
 	.cell {
@@ -163,6 +208,15 @@
 	}
 	.cell.ha {
 		border-style: dashed;
+	}
+	/* CMP-15, DESIGN.md: 3 px in the accent colour on every critical cell. */
+	.cell.critical {
+		border-width: 3px;
+		border-color: var(--color-accent);
+	}
+	.dropped {
+		font: 0.7rem var(--font-mono);
+		color: var(--color-muted);
 	}
 	.dot {
 		position: relative;

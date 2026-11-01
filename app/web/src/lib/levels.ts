@@ -9,7 +9,8 @@ export interface Group {
 }
 
 export interface ColumnLayout {
-	/** Cells of this column, each with its inputs in input order; `index` is into `groups`. */
+	/** Cells of this column, each with its inputs of this level in input order; `index` is into
+	 * `groups`. */
 	groups: { index: number; kind: CellKind; points: LevelPoint[] }[];
 	/** Points of this column in no cell, in canonical order. */
 	loose: LevelPoint[];
@@ -22,10 +23,12 @@ export function columnLayout(points: LevelPoint[], groups: Group[], column: numb
 	const used = new Set<number>();
 	const out: ColumnLayout['groups'] = [];
 	groups.forEach((g, index) => {
-		const ps = g.inputs.map((id) => byId.get(id));
-		if (ps.length === 0 || ps.some((p) => p === undefined)) return;
-		for (const p of ps) used.add(p!.id);
-		out.push({ index, kind: g.kind, points: ps as LevelPoint[] });
+		// A CPA cell also takes the carry of the column before, which is not a point of the
+		// level: the box goes around the points it does take from here.
+		const ps = g.inputs.flatMap((id) => byId.get(id) ?? []);
+		if (ps.length === 0) return;
+		for (const p of ps) used.add(p.id);
+		out.push({ index, kind: g.kind, points: ps });
 	});
 	return { groups: out, loose: here.filter((p) => !used.has(p.id)) };
 }

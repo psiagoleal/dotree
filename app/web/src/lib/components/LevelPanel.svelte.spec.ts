@@ -82,4 +82,37 @@ describe('LevelPanel', () => {
 		await page.getByRole('button', { name: 'b0' }).click();
 		expect(ontoggle).toHaveBeenCalledWith(2);
 	});
+
+	it('the result panel names each bit R_j in the result colour; an empty column is 0 (CMP-12, COR-02)', async () => {
+		// 2A with A of 2 bits: R0 = 0, R1 = a0, R2 = a1.
+		const { container } = await render(LevelPanel, {
+			...base,
+			title: 'Resultado',
+			points: [pt(0, 1, 'a0', 0), pt(1, 2, 'a1', 0)],
+			result: [null, 0, 1]
+		});
+		await expect
+			.element(page.getByRole('group', { name: 'Coluna de peso 2^1, bit R1' }))
+			.toBeVisible();
+		await expect
+			.element(page.getByRole('group', { name: 'Coluna de peso 2^0, bit R0 constante 0' }))
+			.toHaveTextContent(/0\s*R0$/);
+		const a0 = container.querySelector<HTMLElement>('[data-signal="a0"]')!;
+		expect(a0.style.getPropertyValue('--c')).toBe('var(--dot-result)');
+	});
+
+	it('marks critical cells and dropped carries (CMP-15, CMP-09)', async () => {
+		const { container } = await render(LevelPanel, {
+			...base,
+			groups: [
+				{ kind: 'ha', inputs: [2, 3], label: 'HA 1', critical: true, dropped: true },
+				{ kind: 'ha', inputs: [0], label: 'HA 2' }
+			]
+		});
+		const box = page.getByRole('group', { name: 'HA 1' });
+		await expect.element(box).toHaveClass(/critical/);
+		await expect.element(box).toHaveTextContent('k=0');
+		expect(container.querySelectorAll('.cell.critical')).toHaveLength(1);
+		expect(container.querySelectorAll('.dropped')).toHaveLength(1);
+	});
 });

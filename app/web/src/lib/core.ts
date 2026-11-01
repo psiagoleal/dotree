@@ -118,6 +118,12 @@ export interface Snapshot {
 	metrics: { fa: number; ha: number; andGates: number; area: number; delay: number };
 	canUndo: boolean;
 	canRedo: boolean;
+	/** Why "close with CPA" is disabled, or null when it is available (CMP-10). */
+	cpa: CpaBlock | null;
+	/** Once complete: the point carrying each bit R_0..R_{W-1}, null for a constant 0 (CMP-12). */
+	result: (number | null)[] | null;
+	/** Cells on a path of maximum delay: numbers, and indices into `current.pending` (CMP-15). */
+	critical: { cells: number[]; pending: number[] };
 }
 
 export type CpaBlock =
@@ -139,11 +145,13 @@ export type Rejection =
 
 export type ActionResult = { ok: true; kind?: CellKind } | { ok: false; rejection: Rejection };
 
-/** A compression in progress, held by the core (MT-12a). */
+/** A compression in progress, held by the core (MT-12a, MT-12b). */
 export interface CompressionSession {
 	snapshot(): Snapshot;
 	formCell(ids: number[]): ActionResult;
 	concludeLevel(): ActionResult;
+	closeWithCpa(): ActionResult;
+	goToLevel(level: number): ActionResult;
 	undo(): boolean;
 	redo(): boolean;
 	/** Releases the WASM memory; the session is unusable afterwards. */
@@ -162,6 +170,8 @@ function wrap(s: Session): CompressionSession {
 		snapshot: () => JSON.parse(s.snapshot()),
 		formCell: (ids) => JSON.parse(s.formCell(JSON.stringify(ids))),
 		concludeLevel: () => JSON.parse(s.concludeLevel()),
+		closeWithCpa: () => JSON.parse(s.closeWithCpa()),
+		goToLevel: (level) => JSON.parse(s.goToLevel(level)),
 		undo: () => s.undo(),
 		redo: () => s.redo(),
 		free: () => s.free()

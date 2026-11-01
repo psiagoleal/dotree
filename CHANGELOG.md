@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Interface: compressão até o circuito completo. "Fechar com CPA" fica desabilitado com a
+  condição que falta; o painel do CPA e o do resultado, com os bits $R_j$ em roxo e a coluna
+  vazia como 0; destaque do caminho crítico a pedido; voltar a um nível anterior, com
+  confirmação quando algo seria descartado; marca "vai-um sempre 0" com a explicação atrás
+  de confirmação enquanto $W$ estiver oculto; confirmação antes de descartar a compressão ao
+  montar outra matriz. A `Session` ganhou `closeWithCpa`, `goToLevel` e, no snapshot, o
+  motivo do bloqueio do CPA, o resultado e as células críticas (MT-12b).
 - Interface: compressão nível a nível. Selecionar pontos com o mouse ou o teclado, formar
   FA e HA (retângulos em volta dos pontos, como nas aulas), recusas que citam a regra,
   concluir nível com um painel por nível, desfazer e refazer (botões e Ctrl+Z/Ctrl+Y),
@@ -72,6 +79,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ### Alterado
 - Casos de referência trocados por exemplos próprios do projeto.
 - Wallace e exportação CSV saem da v0.1.
+
+### Corrigido
+- Núcleo: voltar ao nível que o CPA fechou reabria as células do CPA como pendentes, com
+  entradas de vai-um que não são pontos do nível; agora só remove o CPA (MT-12b).
 
 ## [0.0.0] - 2026-10-30
 

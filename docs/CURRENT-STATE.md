@@ -9,7 +9,7 @@
 
 - **Data:** 2026-11-01
 - **Branch:** `main`
-- **Commit:** `8b15e7d` (MT-11b, #25). O MT-12a ainda não foi commitado.
+- **Commit:** `109697f` (MT-12a, #26). O MT-12b ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -67,7 +67,15 @@
       `LevelPanel` (substitui `DotMatrix`) e `Compression`; e2e monta a árvore do R2 (níveis
       0 e 1 pelo mouse, nível 2 só pelo teclado) com 9 FA, 2 HA, 10 $A_{FA}$, 3 $T_{FA}$.
       139 testes Rust, 64 de unidade/componente, 15 e2e; mutação "recusa engolida" pega.
-- [ ] Próximo: MT-12b (CPA, circuito completo, caminho crítico, voltar de nível, EXP-04).
+- [x] MT-12a mesclado (#26).
+- [x] MT-12b: CPA com o motivo do bloqueio, painel do resultado ($R_j$ em roxo), caminho
+      crítico a pedido, voltar de nível com confirmação, vai-um descartado explicado atrás
+      de confirmação, EXP-04. Correção no núcleo: voltar ao nível do CPA só remove o CPA.
+      e2e completa o R2 só com Tab, Espaço, F e Enter (13 FA, 4 HA, 15 $A_{FA}$,
+      6 $T_{FA}$, críticas 1, 2, 4, 6, 8, 9, 12–17). 145 testes Rust, 78 de
+      unidade/componente, 19 e2e; 3 mutações pegas (volta sem confirmação, explicação sem
+      confirmação, caminho crítico sem pedido).
+- [ ] Próximo: MT-13 (ajuda sob demanda em duas etapas).
 
 ## Observações para a próxima sessão
 
@@ -91,6 +99,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-01 | `109697f` | compressão até o CPA (#26); CPA, resultado e caminho crítico na interface | MT-12a, MT-12b |
 | 2026-11-01 | `8b15e7d` | visão indexada e desafio de W (#25); compressão na interface até o CPA | MT-11b, MT-12a |
 | 2026-11-01 | `dca3ca6` | matriz colorida na interface; depois, visão indexada e desafio de W | MT-11a, MT-11b |
 | 2026-10-30 | — | spec revisada, esqueleto, CI/CD, plano e tickets | MT-1, MT-2 |

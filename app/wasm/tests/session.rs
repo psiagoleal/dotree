@@ -215,3 +215,118 @@ fn undo_and_redo() {
     assert_eq!(snap(&s)["current"]["pending"].as_array().unwrap().len(), 1);
     assert!(!s.redo());
 }
+
+// ---------------------------------------------------------------- MT-12b
+
+/// Levels 0 to 2 of the R2 tree (spec 00), leaving level 3 ready for the CPA.
+fn r2_before_the_cpa() -> Session {
+    let mut s = r1();
+    let levels: [&[(u64, &[&str])]; 3] = [
+        &[
+            (1, &["a0_b1", "a1_b0", "c0_d1"]),
+            (1, &["c1_d0", "e1", "e0"]),
+            (2, &["a0_b2", "a1_b1"]),
+        ],
+        &[
+            (1, &["f0", "s1", "s2"]),
+            (2, &["a2_b0", "c1_d1", "e1"]),
+            (2, &["s3", "k1", "k2"]),
+            (3, &["a1_b2", "a2_b1", "k3"]),
+        ],
+        &[
+            (0, &["a0_b0", "c0_d0", "e0"]),
+            (2, &["s5", "k4", "s6"]),
+            (3, &["k5", "s7", "k6"]),
+            (4, &["a2_b2", "k7"]),
+        ],
+    ];
+    for cells in levels {
+        for (col, sigs) in cells {
+            assert_eq!(form(&mut s, *col, sigs)["ok"], true);
+        }
+        assert_eq!(act(s.conclude_level()), json!({"ok": true}));
+    }
+    s
+}
+
+#[test]
+fn the_snapshot_says_why_the_cpa_is_blocked() {
+    let mut s = r1();
+    let v = snap(&s);
+    assert_eq!(
+        v["cpa"],
+        json!({"code": "columnTooTall", "column": 0, "height": 5})
+    );
+    assert_eq!(v["result"], Value::Null);
+    form(&mut s, 2, &["a0_b2", "a1_b1"]);
+    assert_eq!(snap(&s)["cpa"], json!({"code": "pendingCells"}));
+    assert_eq!(
+        act(s.close_with_cpa()),
+        json!({"ok": false, "rejection": {"code": "cpaUnavailable", "block": {"code": "pendingCells"}}})
+    );
+}
+
+#[test]
+fn r2_closed_with_the_cpa_is_complete() {
+    let mut s = r2_before_the_cpa();
+    assert_eq!(snap(&s)["cpa"], Value::Null);
+    assert_eq!(act(s.close_with_cpa()), json!({"ok": true}));
+    let v = snap(&s);
+    assert_eq!(v["level"], 4);
+    assert_eq!(v["levels"][3]["cpa"], true);
+    let kinds: Vec<&str> = v["levels"][3]["cells"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|c| c["kind"].as_str().unwrap())
+        .collect();
+    assert_eq!(kinds, ["fa", "fa", "ha", "fa", "fa", "ha"]);
+    // CMP-12: W = 7 result bits, each carried by one point of the final level.
+    let result = v["result"].as_array().unwrap();
+    assert_eq!(result.len(), 7);
+    let points = v["current"]["points"].as_array().unwrap();
+    for (j, id) in result.iter().enumerate() {
+        let p = points.iter().find(|p| p["id"] == *id).unwrap();
+        assert_eq!(p["column"], j);
+    }
+    assert_eq!(v["cpa"], json!({"code": "nothingToAdd"}));
+    // GER-04 / CMP-15: 13 FA, 4 HA, 15 A_FA, 6 T_FA; critical cells counted by hand.
+    assert_eq!(
+        v["metrics"],
+        json!({"fa": 13, "ha": 4, "andGates": 13, "area": 30, "delay": 12})
+    );
+    assert_eq!(
+        v["critical"],
+        json!({"cells": [1, 2, 4, 6, 8, 9, 12, 13, 14, 15, 16, 17], "pending": []})
+    );
+}
+
+#[test]
+fn a_constant_zero_bit_is_null_in_the_result() {
+    // 2A with A of 2 bits: complete from the start, R0 = 0 (CMP-12).
+    let s = Session::open("2A", r#"{"A":2}"#).unwrap();
+    assert_eq!(snap(&s)["result"], json!([null, 0, 1]));
+}
+
+#[test]
+fn critical_pending_cells_are_indices() {
+    let mut s = r1();
+    form(&mut s, 2, &["a0_b2", "a1_b1"]);
+    form(&mut s, 1, &["a0_b1", "a1_b0", "c0_d1"]);
+    assert_eq!(snap(&s)["critical"], json!({"cells": [], "pending": [1]}));
+}
+
+#[test]
+fn going_back_to_a_level_reopens_its_cells() {
+    let mut s = r2_before_the_cpa();
+    assert_eq!(act(s.go_to_level(1)), json!({"ok": true}));
+    let v = snap(&s);
+    assert_eq!(v["level"], 1);
+    assert_eq!(v["current"]["pending"].as_array().unwrap().len(), 4);
+    assert_eq!(
+        act(s.go_to_level(1)),
+        json!({"ok": false, "rejection": {"code": "noSuchLevel", "level": 1}})
+    );
+    assert!(s.undo());
+    assert_eq!(snap(&s)["level"], 3);
+}

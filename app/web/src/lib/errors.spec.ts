@@ -1,8 +1,8 @@
 // Caminho relativo: app/web/src/lib/errors.spec.ts
 // Every error code the core can return has a message in both languages (IDI-05).
 import { describe, expect, it } from 'vitest';
-import type { CoreError, Rejection } from '#lib/core.ts';
-import { errorMessage, rejectionMessage, warningMessage } from './errors';
+import type { CoreError, CpaBlock, Rejection } from '#lib/core.ts';
+import { cpaBlockMessage, errorMessage, rejectionMessage, warningMessage } from './errors';
 
 const ALL: CoreError[] = [
 	...(
@@ -108,6 +108,34 @@ describe('rejectionMessage (GER-02)', () => {
 		);
 		expect(rejectionMessage({ code: 'emptyLevel' }, 'pt-br')).toBe(
 			'Um nível precisa de pelo menos uma célula.'
+		);
+	});
+});
+
+const BLOCKS: CpaBlock[] = [
+	{ code: 'columnTooTall', column: 0, height: 5 },
+	{ code: 'threeNotFirst', column: 3 },
+	{ code: 'nothingToAdd' },
+	{ code: 'pendingCells' }
+];
+
+describe('cpaBlockMessage (CMP-10)', () => {
+	it.each(['pt-br', 'en'] as const)('words every block in %s', (locale) => {
+		const texts = BLOCKS.map((b) => cpaBlockMessage(b, locale));
+		for (const t of texts) expect(t).not.toMatch(/[{}]/);
+		expect(new Set(texts).size).toBe(texts.length);
+	});
+
+	it('names the condition that is missing', () => {
+		expect(cpaBlockMessage(BLOCKS[0], 'pt-br')).toBe(
+			'A coluna 2^0 tem 5 pontos; o CPA aceita no máximo 3.'
+		);
+		expect(cpaBlockMessage(BLOCKS[1], 'pt-br')).toContain('2^3');
+	});
+
+	it('a refused CPA says the same as the disabled button', () => {
+		expect(rejectionMessage({ code: 'cpaUnavailable', block: BLOCKS[3] }, 'pt-br')).toBe(
+			cpaBlockMessage(BLOCKS[3], 'pt-br')
 		);
 	});
 });

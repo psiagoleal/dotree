@@ -25,6 +25,14 @@ describe('columnLayout (CMP-05)', () => {
 		expect(columnLayout(points, groups, 0).loose.map((p) => p.id)).toEqual([4]);
 		expect(columnLayout(points, groups, 0).groups).toEqual([]);
 	});
+
+	it('boxes a CPA cell around the points it takes from the level; the carry-in is not one', () => {
+		// FA in column 1 of a CPA: two points of the level plus the carry (id 7) from column 0.
+		const points = [pt(0, 1), pt(1, 1), pt(2, 0)];
+		const layout = columnLayout(points, [{ kind: 'fa', inputs: [0, 1, 7] }], 1);
+		expect(layout.groups).toEqual([{ index: 0, kind: 'fa', points: [points[0], points[1]] }]);
+		expect(layout.loose).toEqual([]);
+	});
 });
 
 describe('visibleTop (EXP-09)', () => {

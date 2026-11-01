@@ -1,11 +1,18 @@
 <!-- Caminho relativo: app/web/src/lib/components/ConfirmDialog.svelte -->
 <!-- The question asked before any answer is shown (AJU-02, D-5): the focus starts on "keep
      trying", confirming is the second option, and Escape counts as keep trying. Callers do
-     `if (await dialog.ask()) reveal()`; every request asks again. -->
+     `if (await dialog.ask()) reveal()`; every request asks again. Destructive questions
+     (CMP-04, EXP-04) pass their own labels; the safe option keeps the first place and the
+     focus. -->
 <script lang="ts">
 	import { m } from '#lib/paraglide/messages.js';
 
-	let { title, body }: { title: string; body: string } = $props();
+	let {
+		title,
+		body,
+		cancelLabel,
+		confirmLabel
+	}: { title: string; body: string; cancelLabel?: string; confirmLabel?: string } = $props();
 
 	const id = $props.id();
 	let dialog: HTMLDialogElement;
@@ -42,10 +49,10 @@
 	{/if}
 	<div class="actions">
 		<button bind:this={keepTrying} type="button" class="primary" onclick={() => finish(false)}>
-			{m.confirm_keep_trying()}
+			{cancelLabel ?? m.confirm_keep_trying()}
 		</button>
 		<button type="button" class="secondary" onclick={() => finish(true)}>
-			{m.confirm_show()}
+			{confirmLabel ?? m.confirm_show()}
 		</button>
 	</div>
 </dialog>
