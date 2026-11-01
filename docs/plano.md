@@ -153,10 +153,10 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 
 ### MT-10: Gerar VHDL e verificá-lo com GHDL no CI
 - **Objetivo:** `full_adder`, `half_adder`, topo, testbench; job `vhdl` no CI.
-- **Arquivos no escopo:** `app/core/src/vhdl/**`, `.github/workflows/ci.yml`
-- **Critério de aceite:** `cargo test -p dotree-core vhdl`; GHDL em contêiner analisa e
-  simula R2 com "16384 CASOS CORRETOS" e acusa o circuito corrompido (VHD-01 a VHD-04,
-  VHD-06, ENT-06).
+- **Arquivos no escopo:** `app/core/src/vhdl/**`, `app/core/examples/**`, `.github/workflows/ci.yml`
+- **Critério de aceite:** `cargo test -p dotree-core --test vhdl`; GHDL em contêiner
+  analisa e simula R2 com "16384 CASOS CORRETOS" e acusa o circuito corrompido (VHD-01 a
+  VHD-04, VHD-06 a VHD-08, ENT-06).
 - **Fora de escopo:** download e zip (MT-14).
 - **Depende de:** MT-7, MT-9
 

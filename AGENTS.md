@@ -98,6 +98,11 @@ BASE_PATH=/dotree pnpm --dir app/web run build      # site estático em app/web/
 BASE_PATH=/dotree pnpm --dir app/web run test:e2e   # playwright contra a build, porta 4180
 pnpm --dir app/web run dev            # desenvolvimento local
 
+# VHDL gerado, simulado no GHDL (o mesmo do job `vhdl` do CI)
+cargo run -q -p dotree-core --example vhdl_referencia -- /tmp/vhdl
+docker run --rm -v /tmp/vhdl:/w -v "$PWD/app/core/examples:/x:ro" \
+  ghdl/ghdl:6.0.0-mcode-ubuntu-24.04 bash /x/ghdl_casos.sh /w
+
 # Imagem
 docker build -t dotree . && docker run --rm -p 8080:8080 dotree
 ```
