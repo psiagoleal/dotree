@@ -9,7 +9,6 @@
 
 ## Em aberto
 
-- [ ] [MT-0d](plano.md#mt-0d-escrever-o-contrato-visual-docsdesignmd) — Contrato visual (`DESIGN.md`) com a paleta dos termos.
 - [ ] [MT-11](plano.md#mt-11-interface--expressão-matriz-cores-e-visão-indexada) — Interface: expressão, matriz, cores e visão indexada.
 - [ ] [MT-12](plano.md#mt-12-interface--compressão) — Interface: compressão.
 - [ ] [MT-13](plano.md#mt-13-interface--ajuda-sob-demanda-em-duas-etapas) — Interface: ajuda sob demanda em duas etapas.
@@ -20,6 +19,7 @@
 
 ## Concluídos
 
+- [x] [MT-0d](plano.md#mt-0d-escrever-o-contrato-visual-docsdesignmd) — Contrato visual em `docs/DESIGN.md`; paleta dos pontos conferida por teste nos dois temas.
 - [x] [MT-8](plano.md#mt-8-solução-dadda-próxima-jogada-dicas-e-limite-inferior) — Núcleo: Dadda, próxima jogada, dicas e limite inferior (13 testes; R1 e R4 conferidos à mão).
 - [x] [MT-10](plano.md#mt-10-gerar-vhdl-e-verificá-lo-com-ghdl-no-ci) — Núcleo: VHDL-93 e job GHDL no CI (R2: 16 384 casos corretos no GHDL e no ModelSim ASE 10.1d).
 - [x] [MT-9](plano.md#mt-9-leiaute-do-diagrama-e-tabela-de-ligações) — Núcleo: leiaute do diagrama e tabela de ligações (10 testes; tabela de R2 idêntica à da spec 05).
