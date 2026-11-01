@@ -37,6 +37,14 @@ O núcleo lista as dicas que se aplicam ao estado atual, na ordem do catálogo; 
 a interface mostra a seguinte, em ciclo. (A versão anterior desta regra, "a primeira que se
 aplica", mostraria quase sempre a mesma dica.)
 
+## Interação (MT-13)
+
+Os quatro pedidos ficam numa seção "Ajuda" abaixo das ações da compressão. Dica e próxima
+jogada falam do estado atual e somem na ação seguinte, para que uma resposta velha não
+fique na tela. Cada chamada à ajuda do núcleo é uma revelação e é contada (AJU-07); por
+isso a interface só chama depois da confirmação. O ciclo das dicas usa o próprio contador:
+o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
+
 ## Critérios
 
 - **AJU-01** — O sistema DEVE manter as Regras acessíveis a qualquer momento, sem

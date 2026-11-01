@@ -28,6 +28,7 @@
 		selected = [],
 		ontoggle = () => {},
 		result = null,
+		suggested = [],
 		children
 	}: {
 		title: string;
@@ -42,6 +43,8 @@
 		ontoggle?: (id: number) => void;
 		/** Point id of each bit R_j, null for a constant 0; set only on the result panel. */
 		result?: (number | null)[] | null;
+		/** Points of the suggested next cell, highlighted (AJU-04). */
+		suggested?: number[];
 		/** Controls shown next to the title. */
 		children?: Snippet;
 	} = $props();
@@ -82,6 +85,7 @@
 			type="button"
 			class="dot"
 			class:indexed={view === 'indexed'}
+			class:suggested={suggested.includes(p.id)}
 			style:--c={color(p)}
 			aria-pressed={selected.includes(p.id)}
 			aria-label={p.signal}
@@ -231,6 +235,11 @@
 	}
 	button.dot {
 		cursor: pointer;
+	}
+	/* AJU-04: a dashed outline, unlike any cell box; selecting the point replaces it. */
+	.dot.suggested {
+		outline: 2px dashed var(--color-accent);
+		outline-offset: 3px;
 	}
 	.dot[aria-pressed='true'] {
 		outline: 2px solid var(--color-accent);

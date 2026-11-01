@@ -292,3 +292,52 @@ describe('Compression up to the result (CMP-04, CMP-09 to CMP-12, CMP-15)', () =
 		await expect.element(page.getByTestId('dropped-explanation')).toBeVisible();
 	});
 });
+
+describe('Compression with help (AJU-04, AJU-07)', () => {
+	const show = () => page.getByRole('dialog').getByRole('button', { name: 'Mostrar' });
+
+	it('the next move is highlighted in the matrix; nothing is formed until asked', async () => {
+		const { container } = await open();
+		await page.getByRole('button', { name: 'Próxima jogada' }).click();
+		await show().click();
+		const suggested = () =>
+			[...container.querySelectorAll('.dot.suggested')].map((d) => d.getAttribute('data-signal'));
+		expect(suggested()).toEqual(['a0_b1', 'a1_b0']);
+		const pending = page.getByTestId('level-current').getByRole('group', { name: 'HA pendente' });
+		await expect.element(pending).not.toBeInTheDocument();
+
+		await page.getByRole('button', { name: 'Formar esta célula' }).click();
+		await expect.element(pending).toBeVisible();
+		expect(suggested()).toEqual([]);
+		await expect.element(page.getByTestId('next-move')).not.toBeInTheDocument();
+	});
+
+	it('an answer about the current level disappears after the next action', async () => {
+		await open();
+		await page.getByRole('button', { name: 'Dica' }).click();
+		await show().click();
+		await expect.element(page.getByTestId('hint')).toBeVisible();
+		await point('a0_b2', 2).click();
+		await point('a1_b1', 2).click();
+		await page.getByRole('button', { name: 'Formar célula' }).click();
+		await expect.element(page.getByTestId('hint')).not.toBeInTheDocument();
+	});
+
+	it('the complete circuit summary lists the help used (AJU-07)', async () => {
+		await render(Compression, { session: r2BeforeTheCpa(), view: 'dots', ...R1_WIDTH });
+		await page.getByRole('button', { name: 'Dica' }).click();
+		await show().click();
+		await page.getByRole('button', { name: 'Limite inferior' }).click();
+		await show().click();
+		await page.getByRole('button', { name: 'Fechar com CPA' }).click();
+		await expect
+			.element(page.getByTestId('help-log'))
+			.toHaveTextContent('Ajudas usadas: dicas: 1 · limite inferior: 1 (conta: 0)');
+	});
+
+	it('with no help used, the summary says so (AJU-07)', async () => {
+		await render(Compression, { session: r2BeforeTheCpa(), view: 'dots', ...R1_WIDTH });
+		await page.getByRole('button', { name: 'Fechar com CPA' }).click();
+		await expect.element(page.getByTestId('help-log')).toHaveTextContent('Ajudas usadas: nenhuma.');
+	});
+});

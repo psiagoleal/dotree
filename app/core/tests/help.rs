@@ -8,7 +8,8 @@ use std::collections::BTreeMap;
 use common::{form, pick, r1, replay_r2_tree};
 use dotree_core::expr::analyze;
 use dotree_core::help::{
-    Hint, LowerBound, NextMove, dadda_solution, dadda_target, hints, lower_bound, next_move,
+    HelpLog, HelpStep, Hint, LowerBound, NextMove, dadda_solution, dadda_target, hints,
+    lower_bound, next_move,
 };
 use dotree_core::matrix::DotMatrix;
 use dotree_core::netlist::Netlist;
@@ -236,6 +237,36 @@ fn aju06_lower_bound() {
     );
     // Never negative: 2A has 2 dots and W = 3.
     assert_eq!(lower_bound(&matrix("2A", &[('A', 2)])).value, 0);
+}
+
+// ---------------------------------------------------------------- AJU-07
+
+#[test]
+fn aju07_the_log_counts_each_step_of_each_help() {
+    let mut log = HelpLog::default();
+    assert!(log.is_empty());
+    for step in [
+        HelpStep::Hint,
+        HelpStep::Hint,
+        HelpStep::NextMove,
+        HelpStep::LowerBound,
+        HelpStep::LowerBoundPath,
+        HelpStep::Solution,
+    ] {
+        log.record(step);
+    }
+    assert_eq!(
+        log,
+        HelpLog {
+            hints: 2,
+            next_moves: 1,
+            lower_bound: 1,
+            lower_bound_path: 1,
+            solution: 1,
+            solution_path: 0,
+        }
+    );
+    assert!(!log.is_empty());
 }
 
 // ---------------------------------------------------------------- hints (AJU-08)

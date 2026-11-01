@@ -222,6 +222,9 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
   de GER-03 (GER-01, GER-03, AJU-01 a AJU-04, AJU-07).
 - **Fora de escopo:** novos tipos de dica.
 - **Depende de:** MT-8, MT-12
+- **Nota (execução):** o escopo real incluiu `app/wasm/src/**` (a ajuda do núcleo ainda não
+  passava pela ponte) e `app/core/src/help/**` (o contador `HelpLog`, que o AJU-07 prova no
+  núcleo).
 
 ### MT-14: Interface — diagrama, tabela, verificação e VHDL
 - **Objetivo:** diagrama SVG, tabela de ligações, exportações SVG e Markdown, verificação

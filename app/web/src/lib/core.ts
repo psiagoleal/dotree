@@ -145,7 +145,39 @@ export type Rejection =
 
 export type ActionResult = { ok: true; kind?: CellKind } | { ok: false; rejection: Rejection };
 
-/** A compression in progress, held by the core (MT-12a, MT-12b). */
+// ---------------------------------------------------------------- help (MT-13)
+
+/** Only numbers, never a point or a cell (AJU-08). */
+export type Hint =
+	| { code: 'minLevelsLeft'; height: number; levels: number }
+	| { code: 'tallestColumn'; column: number; height: number }
+	| { code: 'idlePoints' }
+	| { code: 'cpaReady' };
+
+/** What Dadda's method would do now (AJU-04). */
+export type NextMove =
+	| { move: 'formCell'; kind: CellKind; points: number[] }
+	| { move: 'concludeLevel' }
+	| { move: 'closeWithCpa' }
+	| { move: 'complete' };
+
+export interface LowerBound {
+	dots: number;
+	outputWidth: number;
+	value: number;
+}
+
+/** Revealed help steps (AJU-07). */
+export interface HelpLog {
+	hints: number;
+	nextMoves: number;
+	lowerBound: number;
+	lowerBoundPath: number;
+	solution: number;
+	solutionPath: number;
+}
+
+/** A compression in progress, held by the core (MT-12a, MT-12b, MT-13). */
 export interface CompressionSession {
 	snapshot(): Snapshot;
 	formCell(ids: number[]): ActionResult;
@@ -154,6 +186,13 @@ export interface CompressionSession {
 	goToLevel(level: number): ActionResult;
 	undo(): boolean;
 	redo(): boolean;
+	/** Each help call is a reveal, counted by the core: call it only after confirmation. */
+	hint(): Hint | null;
+	nextMove(): NextMove;
+	lowerBound(path: boolean): LowerBound;
+	/** Dadda's solution from level 0, as a separate session; free it after use. */
+	solution(path: boolean): CompressionSession;
+	helpLog(): HelpLog;
 	/** Releases the WASM memory; the session is unusable afterwards. */
 	free(): void;
 }
@@ -174,6 +213,11 @@ function wrap(s: Session): CompressionSession {
 		goToLevel: (level) => JSON.parse(s.goToLevel(level)),
 		undo: () => s.undo(),
 		redo: () => s.redo(),
+		hint: () => JSON.parse(s.hint()).hint,
+		nextMove: () => JSON.parse(s.nextMove()),
+		lowerBound: (path) => JSON.parse(s.lowerBound(path)),
+		solution: (path) => wrap(s.solution(path)),
+		helpLog: () => JSON.parse(s.helpLog()),
 		free: () => s.free()
 	};
 }

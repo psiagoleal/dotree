@@ -195,3 +195,48 @@ pub fn hints(reduction: &Reduction) -> Vec<Hint> {
     }
     out
 }
+
+/// One revealed step of a help (AJU-07). The rules are not counted: they are always visible.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HelpStep {
+    Hint,
+    NextMove,
+    /// Step 1 of the lower bound: the number.
+    LowerBound,
+    /// Step 2: the formula and why.
+    LowerBoundPath,
+    /// Step 1 of the automatic solution: its final metrics.
+    Solution,
+    /// Step 2: the solution level by level.
+    SolutionPath,
+}
+
+/// How many times each help step was revealed, for the summary of a complete circuit
+/// (AJU-07). It is not part of the undo history: undoing does not take a help back.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct HelpLog {
+    pub hints: u32,
+    pub next_moves: u32,
+    pub lower_bound: u32,
+    pub lower_bound_path: u32,
+    pub solution: u32,
+    pub solution_path: u32,
+}
+
+impl HelpLog {
+    pub fn record(&mut self, step: HelpStep) {
+        let n = match step {
+            HelpStep::Hint => &mut self.hints,
+            HelpStep::NextMove => &mut self.next_moves,
+            HelpStep::LowerBound => &mut self.lower_bound,
+            HelpStep::LowerBoundPath => &mut self.lower_bound_path,
+            HelpStep::Solution => &mut self.solution,
+            HelpStep::SolutionPath => &mut self.solution_path,
+        };
+        *n += 1;
+    }
+
+    pub fn is_empty(&self) -> bool {
+        *self == HelpLog::default()
+    }
+}
