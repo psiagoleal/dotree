@@ -1,7 +1,7 @@
 // Caminho relativo: app/web/src/lib/errors.ts
 // Words the codes the core returns (IDI-05), in the current or a given language.
 import { m } from '#lib/paraglide/messages.js';
-import type { CoreError, CoreWarning, Rejection } from '#lib/core.ts';
+import type { CoreError, CoreWarning, CpaBlock, Rejection } from '#lib/core.ts';
 
 type Locale = 'pt-br' | 'en';
 
@@ -81,10 +81,25 @@ export function rejectionMessage(r: Rejection, locale?: Locale): string {
 		case 'emptyLevel':
 			return m.reject_empty_level({}, o);
 		case 'cpaUnavailable':
-			return m.reject_cpa_unavailable({}, o);
+			return cpaBlockMessage(r.block, locale);
 		case 'noSuchLevel':
 			return m.reject_no_such_level({}, o);
 		case 'badSelection':
 			return m.reject_bad_selection({}, o);
+	}
+}
+
+/** The condition "close with CPA" still lacks (CMP-10). */
+export function cpaBlockMessage(b: CpaBlock, locale?: Locale): string {
+	const o = locale ? { locale } : {};
+	switch (b.code) {
+		case 'columnTooTall':
+			return m.cpa_block_column_too_tall({ column: b.column, height: b.height }, o);
+		case 'threeNotFirst':
+			return m.cpa_block_three_not_first({ column: b.column }, o);
+		case 'nothingToAdd':
+			return m.cpa_block_nothing_to_add({}, o);
+		case 'pendingCells':
+			return m.cpa_block_pending_cells({}, o);
 	}
 }

@@ -209,3 +209,21 @@ fn cmp15_critical_path_includes_pending_cells() {
     assert_eq!(c.pending, vec![1]);
     assert!(c.cells.is_empty());
 }
+
+// ---------------------------------------------------------------- CMP-04 over the CPA
+
+#[test]
+fn cmp04_going_back_to_the_cpa_level_drops_the_cpa() {
+    // The CPA's cells chain carries that are not points of the level it closed, so they
+    // cannot come back as pending cells: going back to that level just removes the CPA.
+    let mut r = r2();
+    r.go_to_level(3).unwrap();
+    assert_eq!(r.level(), 3);
+    assert!(r.pending().is_empty());
+    assert_eq!(r.heights(), vec![3, 2, 1, 2, 2, 1, 0]);
+    assert_eq!(r.cpa_status(), Ok(()));
+    assert_eq!(r.metrics().fa, 9);
+    r.close_with_cpa().unwrap();
+    assert!(r.is_complete());
+    assert_eq!(r.metrics().fa, 13);
+}

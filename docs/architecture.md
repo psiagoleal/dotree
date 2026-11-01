@@ -3,7 +3,7 @@
 # Arquitetura efetiva
 
 > Derivada das dependências reais entre módulos (skill `mapa-de-arquitetura`). Atualizada no
-> mesmo trabalho que mudar módulos ou dependências. Estado: esqueleto + `expr` (MT-3) + `matrix` (MT-4) + `reduce` (MT-5, MT-6) + `netlist` e `verify` (MT-7) + `diagram` (MT-9) + `vhdl` (MT-10) + `help` (MT-8) + interface da matriz (MT-11a) + visão indexada e desafio de $W$ (MT-11b) + compressão na interface (MT-12a).
+> mesmo trabalho que mudar módulos ou dependências. Estado: esqueleto + `expr` (MT-3) + `matrix` (MT-4) + `reduce` (MT-5, MT-6) + `netlist` e `verify` (MT-7) + `diagram` (MT-9) + `vhdl` (MT-10) + `help` (MT-8) + interface da matriz (MT-11a) + visão indexada e desafio de $W$ (MT-11b) + compressão na interface (MT-12a) + CPA, resultado e caminho crítico na interface (MT-12b).
 
 ## Componentes
 
@@ -18,10 +18,10 @@
 | `dotree_core::diagram` | `app/core/src/diagram/` | Leiaute em grade do diagrama de blocos, ligações rotuladas, células críticas recalculadas da netlist, tabela de ligações e Markdown (cabeçalhos vindos da interface). | `netlist` |
 | `dotree_core::vhdl` | `app/core/src/vhdl/` | Gera VHDL-93 ASCII: `full_adder`, `half_adder`, topo estrutural e testbench (exaustivo ou amostra); comentários e mensagens em pt-BR/en; validação do nome da entidade. Exemplo `vhdl_referencia` + `ghdl_casos.sh` alimentam o job de CI. | `netlist`, `matrix`, `verify` |
 | `dotree_core::verify` | `app/core/src/verify/` | Simulação bit-paralela (64 vetores por `u64`), exaustiva até 24 bits ou por amostra xorshift64\*, em blocos (progresso e cancelamento), contraexemplo. | `netlist` |
-| `dotree-wasm` | `app/wasm` | Ponte `wasm-bindgen`: `coreVersion()`, `buildMatrix(src, widthsJson)` e a classe `Session` (estado da compressão no núcleo: `snapshot`, `formCell`, `concludeLevel`, `undo`, `redo`), tudo em JSON com códigos (contratos em `app/wasm/tests/bridge.rs` e `session.rs`). | `dotree-core`, `wasm-bindgen`, `serde_json` |
+| `dotree-wasm` | `app/wasm` | Ponte `wasm-bindgen`: `coreVersion()`, `buildMatrix(src, widthsJson)` e a classe `Session` (estado da compressão no núcleo: `snapshot`, `formCell`, `concludeLevel`, `closeWithCpa`, `goToLevel`, `undo`, `redo`; o snapshot traz o motivo do bloqueio do CPA, o resultado e as células críticas), tudo em JSON com códigos (contratos em `app/wasm/tests/bridge.rs` e `session.rs`). | `dotree-core`, `wasm-bindgen`, `serde_json` |
 | Pacote WASM gerado | `app/web/src/lib/wasm/` (fora do git) | Saída do `wasm-pack` (`dotree.js`, `dotree_bg.wasm`). | `dotree-wasm` |
 | `#lib/core.ts` | `app/web/src/lib/core.ts` | Carrega o WASM e tipa o JSON da ponte (`Matrix`, `CoreError`, `Snapshot`, `Rejection`); `openSession` embrulha a `Session`. | pacote WASM |
-| `#lib/errors.ts` | `app/web/src/lib/errors.ts` | Traduz códigos de erro e aviso do núcleo (IDI-05). | Paraglide, `core.ts` (tipos) |
+| `#lib/errors.ts` | `app/web/src/lib/errors.ts` | Traduz códigos de erro, aviso, recusa e bloqueio do CPA do núcleo (IDI-05). | Paraglide, `core.ts` (tipos) |
 | `#lib/expression.ts` | `app/web/src/lib/expression.ts` | Variáveis do texto (um campo de largura cada) e exemplos embutidos. | — |
 | `#lib/signal.ts` | `app/web/src/lib/signal.ts` | Separa o identificador do sinal em letra e índice para a visão indexada. | — |
 | `#lib/view.ts` | `app/web/src/lib/view.ts` | Visão pontos/indexada: preferência guardada. | — |
@@ -30,8 +30,8 @@
 | `#lib/width.ts` | `app/web/src/lib/width.ts` | Arruma a conta da etapa 2 do desafio de $W$ com os valores do núcleo. | `core.ts` (tipos) |
 | `#lib/locale.ts` | `app/web/src/lib/locale.ts` | Idioma da primeira visita (IDI-03). | — |
 | Catálogos i18n | `app/web/messages/`, gerados em `src/lib/paraglide/` | Textos pt-br e en (Paraglide). | — |
-| Rotas | `app/web/src/routes/` | Layout (idioma, tokens CSS) e página inicial: formulário → `buildMatrix` + `openSession` → legenda, desafio de $W$ e compressão, ou erro; estado da visão e atalho V. | `#lib/core.ts`, `#lib/errors.ts`, `#lib/locale.ts`, Paraglide, componentes |
-| Componentes | `app/web/src/lib/components/` | `LanguageSwitch`, `ExpressionForm`, `TermLegend`, `ViewToggle`, `WidthChallenge`, `ConfirmDialog` (reutilizado por toda ajuda), `LevelPanel` (um nível, só leitura ou selecionável), `Compression` (painéis, ações, métricas, teclado). | Paraglide, `expression.ts`, `signal.ts`, `view.ts`, `keys.ts`, `levels.ts`, `width.ts`, `errors.ts`, `core.ts` |
+| Rotas | `app/web/src/routes/` | Layout (idioma, tokens CSS) e página inicial: formulário → `buildMatrix` + `openSession` (confirmando antes de descartar uma compressão, EXP-04) → legenda, desafio de $W$ e compressão, ou erro; estado da visão e atalho V. | `#lib/core.ts`, `#lib/errors.ts`, `#lib/locale.ts`, Paraglide, componentes |
+| Componentes | `app/web/src/lib/components/` | `LanguageSwitch`, `ExpressionForm`, `TermLegend`, `ViewToggle`, `WidthChallenge`, `ConfirmDialog` (reutilizado por toda ajuda), `LevelPanel` (um nível, só leitura, selecionável ou resultado), `Compression` (painéis, ações, CPA, resultado, caminho crítico, volta de nível, métricas, teclado). | Paraglide, `expression.ts`, `signal.ts`, `view.ts`, `keys.ts`, `levels.ts`, `width.ts`, `errors.ts`, `core.ts` |
 
 ## Dependências
 

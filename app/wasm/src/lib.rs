@@ -307,6 +307,7 @@ impl Session {
             })
             .collect();
         let m = r.metrics();
+        let critical = r.critical();
         json!({
             "level": r.level(),
             "levels": levels,
@@ -319,6 +320,12 @@ impl Session {
                         "area": m.area_halves(), "delay": m.delay.0},
             "canUndo": r.can_undo(),
             "canRedo": r.can_redo(),
+            // Why "close with CPA" is disabled, or null when it is available (CMP-10).
+            "cpa": r.cpa_status().err().as_ref().map(cpa_block),
+            // Result bits R_0..R_{W-1} once complete; null marks a constant 0 (CMP-12).
+            "result": r.result(),
+            // Shown only on request (CMP-15); pending cells by index into current.pending.
+            "critical": {"cells": critical.cells, "pending": critical.pending},
         })
         .to_string()
     }
@@ -339,6 +346,18 @@ impl Session {
     #[wasm_bindgen(js_name = concludeLevel)]
     pub fn conclude_level(&mut self) -> String {
         outcome(self.reduction.conclude_level().map(|()| Value::Null))
+    }
+
+    /// Closes the current level with a ripple-carry adder (CMP-11).
+    #[wasm_bindgen(js_name = closeWithCpa)]
+    pub fn close_with_cpa(&mut self) -> String {
+        outcome(self.reduction.close_with_cpa().map(|()| Value::Null))
+    }
+
+    /// Goes back to concluded level `level` (CMP-04).
+    #[wasm_bindgen(js_name = goToLevel)]
+    pub fn go_to_level(&mut self, level: usize) -> String {
+        outcome(self.reduction.go_to_level(level).map(|()| Value::Null))
     }
 
     pub fn undo(&mut self) -> bool {

@@ -43,6 +43,9 @@ nível, como nos painéis das aulas.
 - **CMP-04** — O sistema DEVE permitir voltar a um nível anterior $k$: as células formadas
   sobre $k$ voltam a ficar pendentes, para edição, e as dos níveis posteriores são
   descartadas depois de confirmação. Voltar também é uma ação que se desfaz.
+  Voltar ao nível que o CPA fechou remove o CPA: as células dele não voltam como pendentes,
+  porque encadeiam vai-uns que não são pontos do nível. Quando voltar não descarta nada (o
+  nível anterior ao atual, sem células pendentes), não há o que confirmar.
   *Prova:* teste do núcleo (estado após voltar) e teste de ponta a ponta (confirmação).
 - **CMP-05** — O sistema DEVE mostrar os níveis já concluídos em painéis, um por nível, com
   as colunas alinhadas por peso e o cabeçalho $2^j$, cada célula como um retângulo
@@ -108,6 +111,15 @@ Seleção pelo mouse (clique alterna) ou pelo teclado (Tab até o ponto, Espaço
 fora de campos de texto: **F** forma a célula, **Esc** limpa a seleção, **Ctrl+Z** desfaz,
 **Ctrl+Y** ou **Ctrl+Shift+Z** refaz. Uma recusa aparece junto aos botões, mantém a seleção
 para o aluno ver o que escolheu e some na próxima mudança de seleção.
+
+## Interação (MT-12b)
+
+"Fechar com CPA" fica ao lado das outras ações; desabilitado, mostra embaixo a condição que
+falta (CMP-10), com o mesmo texto que uma recusa daria. Com o circuito completo, as ações de
+formar e concluir saem de cena, e o último painel vira o resultado, com $R_0 \dots R_{W-1}$
+(CMP-12). O caminho crítico é um botão de alternância, sem confirmação, porque mostra só o
+circuito do próprio usuário (CMP-15). A célula com vai-um descartado leva a marca "k=0", e
+uma nota abaixo dos painéis oferece "Por quê?" (CMP-09).
 
 ## Critérios — métricas do circuito do usuário
 

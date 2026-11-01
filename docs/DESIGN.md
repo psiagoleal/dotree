@@ -63,11 +63,22 @@ ou métrica fica em segundo plano.
 - **Ajuda sob demanda** (AJU-02): todo pedido de resposta abre um diálogo com o foco inicial
   em "vou tentar mais um pouco"; confirmar é a segunda opção, nunca a padrão. Esc também
   conta como "vou tentar". Um só componente (`ConfirmDialog`, `<dialog>` nativo) serve a
-  todos os pedidos.
+  todos os pedidos, e também às perguntas antes de descartar trabalho (CMP-04, EXP-04),
+  com rótulos próprios ("Ficar onde estou" / "Voltar"); a opção segura continua primeiro e
+  com o foco.
 - **Compressão** (MT-12a): métricas numa faixa acima dos painéis; um painel por nível
   concluído, seta para o seguinte, e o nível atual por último, com a altura de cada coluna
   embaixo. No nível atual os pontos são botões (`aria-pressed`); fora dele, imagens com o
   sinal como nome. Ações abaixo do painel atual; a dica de teclado logo abaixo.
+- **CPA e resultado** (MT-12b): "Fechar com CPA" desabilitado mostra embaixo a condição que
+  falta. O painel do CPA leva o título "Nível n: CPA"; cada célula do CPA é desenhada em
+  volta dos pontos do nível que ela consome (o vai-um que chega da coluna anterior não é
+  ponto). O último painel vira "Resultado": pontos em roxo, $R_j$ embaixo de cada coluna e
+  um 0 roxo na coluna vazia. Cada painel concluído tem o link "Voltar a este nível".
+- **Caminho crítico** (CMP-15): botão de alternância ao lado das métricas; as células
+  críticas ganham a borda de 3 px e o nome acessível "…, no caminho crítico".
+- **Vai-um descartado** (CMP-09): "k=0" pequeno dentro da caixa da célula e uma nota abaixo
+  dos painéis, com "Por quê?".
 - **Visão** (VIS-01, VIS-03): botões "Pontos" e "Variáveis indexadas" ao lado do título da
   matriz, com a tecla V como atalho; a escolha fica no `localStorage` do navegador.
 - **Revelação em duas etapas** (GER-03): resultado primeiro; o caminho fica atrás de um

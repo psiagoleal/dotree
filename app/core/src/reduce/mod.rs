@@ -398,8 +398,14 @@ impl Reduction {
         let reopened = next.levels.swap_remove(level);
         next.levels.truncate(level);
         next.points = reopened.points;
-        next.pending = reopened
-            .cells
+        // The CPA's cells chain carries that are not points of the level, so they cannot be
+        // edited as pending cells: going back to the CPA's level just removes it.
+        let cells = if reopened.cpa {
+            Vec::new()
+        } else {
+            reopened.cells
+        };
+        next.pending = cells
             .into_iter()
             .map(|c| PendingCell {
                 kind: c.kind,

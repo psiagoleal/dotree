@@ -42,4 +42,17 @@ describe('ConfirmDialog (AJU-02)', () => {
 		await page.getByRole('button', { name: 'Mostrar' }).click();
 		await expect(second).resolves.toBe(true);
 	});
+
+	it('a destructive question names its own options; the safe one still comes first', async () => {
+		const { component } = await render(ConfirmDialog, {
+			title: 'Voltar ao nível 0?',
+			body: 'As células seguintes são descartadas.',
+			cancelLabel: 'Ficar onde estou',
+			confirmLabel: 'Voltar'
+		});
+		const answer = component.ask();
+		await expect.element(page.getByRole('button', { name: 'Ficar onde estou' })).toHaveFocus();
+		await page.getByRole('button', { name: 'Voltar', exact: true }).click();
+		await expect(answer).resolves.toBe(true);
+	});
 });
