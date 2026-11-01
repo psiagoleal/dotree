@@ -239,7 +239,13 @@ fn ver02_sample_run_on_32_bits() {
 // ---------------------------------------------------------------- VER-06 property
 
 proptest! {
-    #![proptest_config(ProptestConfig::with_cases(64))]
+    // No regressions file: mutation runs used to leave cases that only fail on mutated code.
+    // A real failure is printed, already shrunk, in the test output.
+    #![proptest_config(ProptestConfig {
+        cases: 64,
+        failure_persistence: None,
+        ..ProptestConfig::default()
+    })]
 
     /// VER-06: any reduction the user can build verifies (correct by construction).
     #[test]

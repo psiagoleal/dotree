@@ -56,8 +56,10 @@ mascarada para a largura total. A mesma codificação vale para o testbench VHDL
 - **VER-06** — O núcleo DEVE ter um teste de propriedade: para expressões e larguras
   aleatórias, qualquer redução montada pela API (células e CPA escolhidos ao acaso) e a
   solução Dadda passam na verificação.
-  *Prova:* `cargo test` com proptest (64 casos), caso que falha registrado pelo proptest. A
-  parte das reduções aleatórias entrou no MT-7; a da solução Dadda entra no MT-8.
+  *Prova:* `cargo test` com proptest (64 casos em cada propriedade): reduções aleatórias
+  (MT-7, `tests/verify.rs`) e solução Dadda (MT-8, `tests/help.rs`), esta também conferindo
+  as alturas-alvo e o limite inferior. O caso que falha aparece já reduzido na saída do
+  teste; não se grava arquivo de regressão.
 - **VER-07** — O contraexemplo relatado DEVE ser o primeiro vetor que falha na ordem de
   varredura, e a contagem de casos conferidos DEVE incluí-lo.
   *Prova:* teste do núcleo contra um simulador escalar independente, escrito no próprio

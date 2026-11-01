@@ -9,6 +9,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Núcleo: `help` com o método de Dadda (próxima jogada a partir do estado do aluno e solução
+  automática, que é seguir a próxima jogada até o fim), catálogo de dicas e limite inferior
+  de FA. O R4 do job `vhdl` passou a usar a solução Dadda (MT-8).
 - Núcleo: `vhdl` gera `full_adder`, `half_adder`, o topo estrutural e o testbench (exaustivo
   até 20 bits, amostra de 4096 vetores acima), em VHDL-93 ASCII, com comentários e mensagens
   em pt-BR ou inglês. O CI ganhou o job `vhdl`, que simula os casos de referência no GHDL 6 e

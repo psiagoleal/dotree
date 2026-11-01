@@ -51,8 +51,12 @@
 - [x] MT-10: `vhdl` + job `vhdl` no CI. O GHDL achou dois defeitos que os testes de
       estrutura não viam (caractere fora do Latin-1 e células sem ligação por falta de
       `use work.all`). R2 deu 16 384 casos corretos no GHDL e no ModelSim ASE 10.1d.
-- [ ] Próximo: MT-8 (Dadda, próxima jogada, dicas, limite), último ticket só de núcleo;
-      depois a interface (MT-0d e MT-11 em diante).
+- [x] MT-8: `help` (Dadda, próxima jogada, dicas, limite); R1 e R4 batem com as contas à
+      mão; 6 mutações pegas. **O núcleo da v0.1 está completo (MT-3 a MT-10).**
+- [ ] Próximo: interface — MT-0d (contrato visual, `DESIGN.md`) e MT-11 (expressão, matriz,
+      cores e visão indexada), que precisa de uma ponte WASM maior em `app/wasm`.
+- [ ] Pendente do autor: decidir sobre os alertas do Dependabot (`minimatch` e `deepmerge`,
+      só de desenvolvimento, sem versão corrigida instalável).
 
 ## Observações para a próxima sessão
 
@@ -61,8 +65,8 @@
   `AGENTS.md` proíbe o agente de rodar `git worktree`.
 - SvelteKit 3 não tem `$lib`: use `#lib/...` com extensão.
 - A porta 4173 costuma estar ocupada nesta máquina; o e2e usa 4180 (`E2E_PORT`).
-- Testes de mutação deixam `app/core/tests/*.proptest-regressions` com casos que só falham no
-  código mutado: apagar antes de commitar (aconteceu no MT-7 e no MT-9).
+- Os testes de propriedade não gravam `*.proptest-regressions` (`failure_persistence: None`):
+  as mutações deixavam ali casos que só falham no código mutado (MT-7, MT-9, MT-8).
 - O exercício que originou o projeto não pode vir para cá (material de terceiros e
   solução de lista avaliada).
 

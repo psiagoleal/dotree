@@ -3,10 +3,11 @@
 //!
 //! Pure Rust, with no browser or WebAssembly dependency (ADR 0001). Modules arrive with
 //! their tickets (docs/plano.md): `expr` (MT-3), `matrix` (MT-4), `reduce` (MT-5, MT-6),
-//! `netlist` and `verify` (MT-7), `diagram` (MT-9), `vhdl` (MT-10).
+//! `netlist` and `verify` (MT-7), `help` (MT-8), `diagram` (MT-9), `vhdl` (MT-10).
 
 pub mod diagram;
 pub mod expr;
+pub mod help;
 pub mod matrix;
 pub mod netlist;
 pub mod reduce;
