@@ -42,11 +42,13 @@ O identificador é o mesmo em todos os artefatos gerados e é um identificador V
 - **DIA-04** — O sistema DEVE gerar a tabela de ligações com uma linha por célula: nome,
   nível, coluna, entradas x, y, z (na ordem canônica de `02-compressao.md`), soma e vai-um
   (`—` quando descartado ou inexistente).
-  *Prova:* R2 → igual à tabela de referência abaixo.
+  *Prova:* R2 → igual, caractere a caractere, à tabela de referência abaixo: o teste do núcleo
+  lê este arquivo. Mudar a tabela daqui sem mudar o código (ou o contrário) quebra o teste.
 - **DIA-05** — QUANDO o usuário pedir, o sistema DEVE destacar no diagrama todas as células
   em algum caminho crítico (CMP-15).
-  *Prova:* teste do núcleo: R2 → o conjunto de células críticas calculado é o mesmo destacado
-  (teste de componente).
+  *Prova:* teste do núcleo: o diagrama recalcula as células críticas a partir da netlist, de
+  forma independente da redução, e as duas contas concordam em R2 e em 64 reduções
+  aleatórias; teste de componente para o destaque.
 - **DIA-06** — O sistema DEVE exportar o diagrama em SVG e a tabela de ligações em Markdown.
   *Prova:* teste de ponta a ponta (arquivos baixados; SVG válido; tabela igual a DIA-04).
 - **DIA-07** — ENQUANTO o circuito estiver incompleto, o sistema DEVE desenhar o diagrama até

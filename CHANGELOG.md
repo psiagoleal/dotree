@@ -9,6 +9,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Núcleo: `diagram` com o leiaute do diagrama de blocos em grade (linha por nível, coluna por
+  peso), ligações rotuladas, saídas, células críticas recalculadas da netlist, tabela de
+  ligações e sua exportação em Markdown com cabeçalhos vindos da interface (MT-9).
 - Núcleo: `netlist` (o circuito como fios e células, com os identificadores de todos os
   artefatos) e `verify` (simulação bit-paralela, 64 vetores por vez; exaustiva até 24 bits de
   entrada, amostra xorshift64\* acima; contraexemplo; execução em blocos para progresso e
