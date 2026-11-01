@@ -3,7 +3,7 @@
 # Arquitetura efetiva
 
 > Derivada das dependências reais entre módulos (skill `mapa-de-arquitetura`). Atualizada no
-> mesmo trabalho que mudar módulos ou dependências. Estado: esqueleto + `expr` (MT-3) + `matrix` (MT-4) + `reduce` (MT-5, MT-6) + `netlist` e `verify` (MT-7) + `diagram` (MT-9) + `vhdl` (MT-10) + `help` (MT-8).
+> mesmo trabalho que mudar módulos ou dependências. Estado: esqueleto + `expr` (MT-3) + `matrix` (MT-4) + `reduce` (MT-5, MT-6) + `netlist` e `verify` (MT-7) + `diagram` (MT-9) + `vhdl` (MT-10) + `help` (MT-8) + interface da matriz (MT-11a).
 
 ## Componentes
 
@@ -18,13 +18,15 @@
 | `dotree_core::diagram` | `app/core/src/diagram/` | Leiaute em grade do diagrama de blocos, ligações rotuladas, células críticas recalculadas da netlist, tabela de ligações e Markdown (cabeçalhos vindos da interface). | `netlist` |
 | `dotree_core::vhdl` | `app/core/src/vhdl/` | Gera VHDL-93 ASCII: `full_adder`, `half_adder`, topo estrutural e testbench (exaustivo ou amostra); comentários e mensagens em pt-BR/en; validação do nome da entidade. Exemplo `vhdl_referencia` + `ghdl_casos.sh` alimentam o job de CI. | `netlist`, `matrix`, `verify` |
 | `dotree_core::verify` | `app/core/src/verify/` | Simulação bit-paralela (64 vetores por `u64`), exaustiva até 24 bits ou por amostra xorshift64\*, em blocos (progresso e cancelamento), contraexemplo. | `netlist` |
-| `dotree-wasm` | `app/wasm` | Ponte `wasm-bindgen`. Hoje exporta `coreVersion()`. | `dotree-core`, `wasm-bindgen` |
+| `dotree-wasm` | `app/wasm` | Ponte `wasm-bindgen`: `coreVersion()` e `buildMatrix(src, widthsJson)`, que devolve JSON com a matriz ou um erro por código (contrato em `app/wasm/tests/bridge.rs`). | `dotree-core`, `wasm-bindgen`, `serde_json` |
 | Pacote WASM gerado | `app/web/src/lib/wasm/` (fora do git) | Saída do `wasm-pack` (`dotree.js`, `dotree_bg.wasm`). | `dotree-wasm` |
-| `#lib/core.ts` | `app/web/src/lib/core.ts` | Carrega o WASM e oferece a API do núcleo à interface. | pacote WASM |
+| `#lib/core.ts` | `app/web/src/lib/core.ts` | Carrega o WASM e tipa o JSON da ponte (`Matrix`, `CoreError`). | pacote WASM |
+| `#lib/errors.ts` | `app/web/src/lib/errors.ts` | Traduz códigos de erro e aviso do núcleo (IDI-05). | Paraglide, `core.ts` (tipos) |
+| `#lib/expression.ts` | `app/web/src/lib/expression.ts` | Variáveis do texto (um campo de largura cada) e exemplos embutidos. | — |
 | `#lib/locale.ts` | `app/web/src/lib/locale.ts` | Idioma da primeira visita (IDI-03). | — |
 | Catálogos i18n | `app/web/messages/`, gerados em `src/lib/paraglide/` | Textos pt-br e en (Paraglide). | — |
-| Rotas | `app/web/src/routes/` | Layout (idioma, tokens CSS) e página inicial. | `#lib/core.ts`, `#lib/locale.ts`, Paraglide, componentes |
-| Componentes | `app/web/src/lib/components/` | Hoje: `LanguageSwitch`. | Paraglide |
+| Rotas | `app/web/src/routes/` | Layout (idioma, tokens CSS) e página inicial: formulário → `buildMatrix` → matriz e legenda, ou erro. | `#lib/core.ts`, `#lib/errors.ts`, `#lib/locale.ts`, Paraglide, componentes |
+| Componentes | `app/web/src/lib/components/` | `LanguageSwitch`, `ExpressionForm`, `DotMatrix`, `TermLegend`. | Paraglide, `expression.ts`, tipos de `core.ts` |
 
 ## Dependências
 

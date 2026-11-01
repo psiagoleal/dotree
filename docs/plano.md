@@ -161,6 +161,10 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Depende de:** MT-7, MT-9
 
 ### MT-11: Interface — expressão, matriz, cores e visão indexada
+
+> Dividido na execução: **MT-11a** (concluído) fez a ponte `buildMatrix`, o formulário, os
+> exemplos, a matriz colorida, a legenda e os erros traduzidos; o resto foi para o MT-11b.
+
 - **Objetivo:** entrada da expressão e larguras, exemplos, matriz colorida por termo,
   legenda, alternância pontos ↔ variáveis indexadas, desafio de $W$.
 - **Arquivos no escopo:** `app/web/src/**`, `app/web/messages/*`, `app/wasm/src/**`
@@ -168,6 +172,16 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
   COR-01 a COR-03, VIS-01 a VIS-04).
 - **Fora de escopo:** compressão.
 - **Depende de:** MT-4, MT-0d
+
+### MT-11b: Interface — visão indexada e desafio da largura
+- **Objetivo:** alternância pontos ↔ variáveis indexadas em toda tela com pontos (lembrada e
+  com atalho), desafio da largura de saída com revelação em duas etapas, diálogo de
+  confirmação reutilizável com foco em "vou tentar mais um pouco".
+- **Arquivos no escopo:** `app/web/src/**`, `app/web/messages/*`
+- **Critério de aceite:** `pnpm --dir app/web run test` e `test:e2e` (VIS-01 a VIS-03,
+  EXP-09, EXP-10, GER-01 e GER-03 para $W$).
+- **Fora de escopo:** compressão.
+- **Depende de:** MT-11a
 
 ### MT-12: Interface — compressão
 - **Objetivo:** seleção por mouse e teclado, formar célula, recusas, painéis por nível,

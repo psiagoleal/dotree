@@ -56,8 +56,10 @@
 - [x] Alertas do Dependabot (`minimatch`, `deepmerge`) dispensados pelo autor como risco
       tolerável (só ferramentas de desenvolvimento).
 - [x] MT-0d: `docs/DESIGN.md` e paleta em `app.css`, conferida por `palette.spec.ts`.
-- [ ] Próximo: MT-11 (expressão, matriz, cores e visão indexada), que precisa de uma ponte
-      WASM maior em `app/wasm`.
+- [x] MT-11a: ponte `buildMatrix`, formulário, exemplos, matriz colorida e legenda, erros
+      traduzidos. A largura de saída fica oculta: a matriz só mostra colunas até a mais alta
+      com ponto.
+- [ ] Próximo: MT-11b (visão indexada e desafio da largura, com o diálogo de confirmação).
 
 ## Observações para a próxima sessão
 
