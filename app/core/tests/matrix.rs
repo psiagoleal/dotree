@@ -48,6 +48,38 @@ fn r1_counts_heights_and_width() {
     assert_eq!(m.and_gates(), 13);
 }
 
+/// The path from inputs to v_max shown in step 2 of the width challenge (GER-03): each
+/// input at its maximum, each term at its maximum, and their sum.
+#[test]
+fn r1_v_max_by_term_and_input() {
+    let m = r1();
+    let inputs: Vec<(char, u128)> = m.widths.keys().map(|&v| (v, m.input_max(v))).collect();
+    assert_eq!(
+        inputs,
+        [
+            ('A', 7),
+            ('B', 7),
+            ('C', 3),
+            ('D', 3),
+            ('E', 3),
+            ('F', 1),
+            ('G', 1)
+        ]
+    );
+    let terms: Vec<u128> = (0..m.terms.len()).map(|i| m.term_max(i)).collect();
+    assert_eq!(terms, [49, 9, 9, 3, 1]);
+    assert_eq!(terms.iter().sum::<u128>(), m.v_max);
+}
+
+#[test]
+fn term_max_with_large_coefficient_and_widths() {
+    // Largest coefficient; 32 copies of 8 dots is exactly the 256-dot limit.
+    let m = matrix("4294967295A", &[('A', 8)]);
+    assert_eq!(m.input_max('A'), 255);
+    assert_eq!(m.term_max(0), 4_294_967_295 * 255);
+    assert_eq!(m.v_max, m.term_max(0));
+}
+
 #[test]
 fn r1_terms_are_the_combined_terms() {
     let m = r1();

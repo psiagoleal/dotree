@@ -9,6 +9,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Interface: alternância entre pontos e variáveis indexadas ($a_1 b_0$), pelos botões ou
+  pela tecla V, lembrada entre visitas; desafio "quantos bits tem a saída?", que diz se o
+  aluno acertou e revela $W$ (etapa 1) e, num segundo pedido, a conta de $v_{max}$ a $W$
+  (etapa 2); diálogo de confirmação reutilizável, com o foco em "vou tentar mais um pouco".
+  O núcleo passou a expor o máximo de cada entrada e de cada termo (MT-11b).
 - Interface: formulário da expressão com uma largura por variável e os exemplos R1, R3 e R4;
   matriz de pontos colorida por termo, com legenda, no estilo das figuras de aula; erros e
   avisos do núcleo traduzidos nos dois idiomas. Ponte WASM `buildMatrix` (JSON com códigos)

@@ -95,10 +95,12 @@ consumiram.
   virou o texto do seu sinal, na mesma posição.
 - **VIS-02** — QUANDO o usuário alternar a visão, o sistema DEVE manter a posição de cada
   ponto, a seleção em andamento, as cores e o estado do exercício.
-  *Prova:* teste de componente (seleciona 2 pontos, alterna, a seleção continua).
+  *Prova:* teste de componente (posição e cor, MT-11b; seleciona 2 pontos, alterna, a
+  seleção continua, MT-12, quando a seleção existir).
 - **VIS-03** — O sistema DEVE oferecer atalho de teclado para alternar a visão e lembrar a
-  última escolha nas próximas visitas.
-  *Prova:* teste de ponta a ponta.
+  última escolha nas próximas visitas. O atalho é a tecla V, fora de campos de texto (onde
+  V é uma variável) e sem modificadores.
+  *Prova:* teste de ponta a ponta; teste de unidade do atalho.
 - **VIS-04** — O sistema DEVE mostrar o sinal de um ponto, na visão de pontos, ao passar o
   cursor ou focá-lo pelo teclado.
   *Prova:* teste de componente.
@@ -107,11 +109,17 @@ consumiram.
 
 - **EXP-09** — ENQUANTO o desafio da largura de saída não tiver sido respondido nem revelado,
   o sistema DEVE ocultar $W$ e $v_{max}$ e mostrar só as colunas que têm pontos; a matriz
-  cresce à esquerda conforme surgem vai-uns.
-  *Prova:* teste de ponta a ponta.
+  cresce à esquerda conforme surgem vai-uns. Depois da revelação, a matriz mostra as $W$
+  colunas, inclusive as vazias.
+  *Prova:* teste de ponta a ponta (`e2e/challenge.e2e.ts`).
 - **EXP-10** — QUANDO o usuário responder o desafio, o sistema DEVE dizer se acertou e, em
-  qualquer caso, revelar $W$ (etapa 1). A conta $v_{max} \to W$ é a etapa 2 (GER-03).
-  *Prova:* teste de ponta a ponta com resposta certa e errada.
+  qualquer caso, revelar $W$ (etapa 1). A conta $v_{max} \to W$ é a etapa 2 (GER-03):
+  cada entrada no máximo ($2^n - 1$), a expressão com esses valores substituídos, o valor de
+  cada termo, $v_{max}$ e $W = \lceil \log_2(v_{max}+1) \rceil$, justificado pelas potências
+  de dois vizinhas ($2^{W-1} \le v_{max} < 2^W$). Os valores vêm do núcleo. Uma resposta que
+  não seja inteiro $\ge 1$ é recusada sem revelar nada. Uma matriz nova recomeça o desafio.
+  *Prova:* teste de ponta a ponta com resposta certa e errada; teste de componente da
+  recusa e das duas etapas; teste do núcleo dos máximos por termo e por entrada.
 
 ## Casos de erro
 

@@ -7,9 +7,9 @@
 
 ## Último turno
 
-- **Data:** 2026-10-30
+- **Data:** 2026-11-01
 - **Branch:** `main`
-- **Commit:** `44c96dd` (inicialização). As mudanças desta rodada ainda não foram commitadas.
+- **Commit:** `dca3ca6` (MT-11a, #24). O MT-11b ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -59,13 +59,18 @@
 - [x] MT-11a: ponte `buildMatrix`, formulário, exemplos, matriz colorida e legenda, erros
       traduzidos. A largura de saída fica oculta: a matriz só mostra colunas até a mais alta
       com ponto.
-- [ ] Próximo: MT-11b (visão indexada e desafio da largura, com o diálogo de confirmação).
+- [x] MT-11b: visão indexada (tecla V, lembrada), desafio de $W$ em duas etapas, diálogo
+      de confirmação reutilizável; núcleo expõe `input_max` e `term_max`. 132 testes Rust,
+      50 de unidade/componente, 13 e2e; mutação "revelar sem perguntar" pega.
+- [ ] Próximo: MT-12 (compressão na interface). VIS-02 com seleção entra nele.
 
 ## Observações para a próxima sessão
 
 - A trava de worktree para sessões em segundo plano foi desligada neste repositório
   (`.claude/settings.json`, `worktree.bgIsolation = none`) a pedido do autor, porque o
   `AGENTS.md` proíbe o agente de rodar `git worktree`.
+- Não use `pkill -f` com um padrão que apareça na própria linha de comando: mata o shell
+  da ferramenta (exit 144). Guarde o PID do servidor e use `kill`.
 - SvelteKit 3 não tem `$lib`: use `#lib/...` com extensão.
 - A porta 4173 costuma estar ocupada nesta máquina; o e2e usa 4180 (`E2E_PORT`).
 - Os testes de propriedade não gravam `*.proptest-regressions` (`failure_persistence: None`):
@@ -79,5 +84,6 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-01 | `dca3ca6` | matriz colorida na interface; depois, visão indexada e desafio de W | MT-11a, MT-11b |
 | 2026-10-30 | — | spec revisada, esqueleto, CI/CD, plano e tickets | MT-1, MT-2 |
 | 2026-10-30 | `44c96dd` | inicialização: framework, briefing, spec v0.1 (rascunho), ADR 0001 | — |

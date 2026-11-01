@@ -3,7 +3,7 @@
 # Arquitetura efetiva
 
 > Derivada das dependências reais entre módulos (skill `mapa-de-arquitetura`). Atualizada no
-> mesmo trabalho que mudar módulos ou dependências. Estado: esqueleto + `expr` (MT-3) + `matrix` (MT-4) + `reduce` (MT-5, MT-6) + `netlist` e `verify` (MT-7) + `diagram` (MT-9) + `vhdl` (MT-10) + `help` (MT-8) + interface da matriz (MT-11a).
+> mesmo trabalho que mudar módulos ou dependências. Estado: esqueleto + `expr` (MT-3) + `matrix` (MT-4) + `reduce` (MT-5, MT-6) + `netlist` e `verify` (MT-7) + `diagram` (MT-9) + `vhdl` (MT-10) + `help` (MT-8) + interface da matriz (MT-11a) + visão indexada e desafio de $W$ (MT-11b).
 
 ## Componentes
 
@@ -23,10 +23,13 @@
 | `#lib/core.ts` | `app/web/src/lib/core.ts` | Carrega o WASM e tipa o JSON da ponte (`Matrix`, `CoreError`). | pacote WASM |
 | `#lib/errors.ts` | `app/web/src/lib/errors.ts` | Traduz códigos de erro e aviso do núcleo (IDI-05). | Paraglide, `core.ts` (tipos) |
 | `#lib/expression.ts` | `app/web/src/lib/expression.ts` | Variáveis do texto (um campo de largura cada) e exemplos embutidos. | — |
+| `#lib/signal.ts` | `app/web/src/lib/signal.ts` | Separa o identificador do sinal em letra e índice para a visão indexada. | — |
+| `#lib/view.ts` | `app/web/src/lib/view.ts` | Visão pontos/indexada: preferência guardada e atalho V. | — |
+| `#lib/width.ts` | `app/web/src/lib/width.ts` | Arruma a conta da etapa 2 do desafio de $W$ com os valores do núcleo. | `core.ts` (tipos) |
 | `#lib/locale.ts` | `app/web/src/lib/locale.ts` | Idioma da primeira visita (IDI-03). | — |
 | Catálogos i18n | `app/web/messages/`, gerados em `src/lib/paraglide/` | Textos pt-br e en (Paraglide). | — |
-| Rotas | `app/web/src/routes/` | Layout (idioma, tokens CSS) e página inicial: formulário → `buildMatrix` → matriz e legenda, ou erro. | `#lib/core.ts`, `#lib/errors.ts`, `#lib/locale.ts`, Paraglide, componentes |
-| Componentes | `app/web/src/lib/components/` | `LanguageSwitch`, `ExpressionForm`, `DotMatrix`, `TermLegend`. | Paraglide, `expression.ts`, tipos de `core.ts` |
+| Rotas | `app/web/src/routes/` | Layout (idioma, tokens CSS) e página inicial: formulário → `buildMatrix` → matriz, legenda e desafio de $W$, ou erro; estado da visão e atalho V. | `#lib/core.ts`, `#lib/errors.ts`, `#lib/locale.ts`, Paraglide, componentes |
+| Componentes | `app/web/src/lib/components/` | `LanguageSwitch`, `ExpressionForm`, `DotMatrix`, `TermLegend`, `ViewToggle`, `WidthChallenge`, `ConfirmDialog` (reutilizado por toda ajuda). | Paraglide, `expression.ts`, `signal.ts`, `view.ts`, `width.ts`, tipos de `core.ts` |
 
 ## Dependências
 

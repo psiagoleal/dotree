@@ -7,6 +7,15 @@ export interface Term {
 	/** Decimal string: coefficients can exceed a JS number. */
 	coefficient: string;
 	vars: string;
+	/** Value of the term with every input at its maximum (decimal string). */
+	max: string;
+}
+
+/** A variable in use, with its width and largest value `2^width - 1`. */
+export interface Input {
+	var: string;
+	width: number;
+	max: string;
 }
 
 export interface Factor {
@@ -26,6 +35,7 @@ export interface Dot {
 
 export interface Matrix {
 	terms: Term[];
+	inputs: Input[];
 	dots: Dot[];
 	heights: number[];
 	outputWidth: number;

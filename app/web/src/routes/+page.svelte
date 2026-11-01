@@ -6,8 +6,11 @@
 	import ExpressionForm from '#lib/components/ExpressionForm.svelte';
 	import DotMatrix from '#lib/components/DotMatrix.svelte';
 	import TermLegend from '#lib/components/TermLegend.svelte';
+	import ViewToggle from '#lib/components/ViewToggle.svelte';
+	import WidthChallenge from '#lib/components/WidthChallenge.svelte';
 	import { loadCore, type BuildResult, type Core } from '#lib/core.ts';
 	import { errorMessage, warningMessage } from '#lib/errors.ts';
+	import { browserStorage, isViewShortcut, readView, writeView, type ViewMode } from '#lib/view.ts';
 
 	const ISSUES_URL = 'https://github.com/psiagoleal/dotree/issues/new';
 	const SPEC_URL = 'https://github.com/psiagoleal/dotree/blob/main/docs/specs/README.md';
@@ -17,9 +20,25 @@
 
 	let status = $state<Status>({ kind: 'loading' });
 	let result = $state<BuildResult | null>(null);
+	// Dots or indexed variables, remembered across visits (VIS-01, VIS-03).
+	let view = $state<ViewMode>(readView(browserStorage()));
+	// W shows only after the width challenge is answered or revealed (EXP-09, GER-01).
+	let widthRevealed = $state(false);
 
 	function build(core: Core, expression: string, widths: Record<string, number>) {
 		result = core.buildMatrix(expression, widths);
+		widthRevealed = false;
+	}
+
+	function setView(mode: ViewMode) {
+		view = mode;
+		writeView(browserStorage(), mode);
+	}
+
+	function onkeydown(e: KeyboardEvent) {
+		if (!isViewShortcut(e)) return;
+		e.preventDefault();
+		setView(view === 'dots' ? 'indexed' : 'dots');
 	}
 
 	onMount(() => {
@@ -31,6 +50,8 @@
 			});
 	});
 </script>
+
+<svelte:window {onkeydown} />
 
 <header>
 	<h1>{m.app_title()}</h1>
@@ -51,15 +72,21 @@
 		{:else if result && result.ok}
 			{@const mx = result.matrix}
 			<section class="result" aria-labelledby="matrix-title">
-				<h2 id="matrix-title">{m.matrix_title()}</h2>
+				<div class="result-head">
+					<h2 id="matrix-title">{m.matrix_title()}</h2>
+					<ViewToggle mode={view} onchange={setView} />
+				</div>
 				{#each mx.warnings as w, i (i)}
 					<p class="warning" role="status">{warningMessage(w)}</p>
 				{/each}
 				<p class="summary" data-testid="matrix-summary">
 					{m.matrix_summary({ dots: mx.dots.length, ands: mx.andGates })}
 				</p>
-				<DotMatrix matrix={mx} />
+				<DotMatrix matrix={mx} {view} width={widthRevealed ? mx.outputWidth : null} />
 				<TermLegend terms={mx.terms} />
+				{#key mx}
+					<WidthChallenge matrix={mx} onreveal={() => (widthRevealed = true)} />
+				{/key}
 			</section>
 		{/if}
 
@@ -108,6 +135,13 @@
 		display: grid;
 		gap: var(--space-2);
 		margin-top: var(--space-4);
+	}
+	.result-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-2);
 	}
 	.result h2 {
 		margin: 0;

@@ -9,7 +9,6 @@
 
 ## Em aberto
 
-- [ ] [MT-11b](plano.md#mt-11b-interface--visão-indexada-e-desafio-da-largura) — Interface: visão indexada e desafio da largura de saída.
 - [ ] [MT-12](plano.md#mt-12-interface--compressão) — Interface: compressão.
 - [ ] [MT-13](plano.md#mt-13-interface--ajuda-sob-demanda-em-duas-etapas) — Interface: ajuda sob demanda em duas etapas.
 - [ ] [MT-14](plano.md#mt-14-interface--diagrama-tabela-verificação-e-vhdl) — Interface: diagrama, tabela, verificação e VHDL.
@@ -19,6 +18,7 @@
 
 ## Concluídos
 
+- [x] [MT-11b](plano.md#mt-11b-interface--visão-indexada-e-desafio-da-largura) — Interface: visão indexada (tecla V, lembrada), desafio de $W$ em duas etapas e diálogo de confirmação.
 - [x] [MT-11a](plano.md#mt-11-interface--expressão-matriz-cores-e-visão-indexada) — Interface: expressão, larguras, exemplos, matriz colorida com legenda e erros traduzidos (ponte WASM `buildMatrix`).
 - [x] [MT-0d](plano.md#mt-0d-escrever-o-contrato-visual-docsdesignmd) — Contrato visual em `docs/DESIGN.md`; paleta dos pontos conferida por teste nos dois temas.
 - [x] [MT-8](plano.md#mt-8-solução-dadda-próxima-jogada-dicas-e-limite-inferior) — Núcleo: Dadda, próxima jogada, dicas e limite inferior (13 testes; R1 e R4 conferidos à mão).

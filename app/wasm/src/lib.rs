@@ -23,6 +23,15 @@ struct TermDto {
     /// As a string: coefficients can exceed what a JS number holds exactly.
     coefficient: String,
     vars: String,
+    /// Value of the term with every input at its maximum.
+    max: String,
+}
+
+#[derive(Serialize)]
+struct InputDto {
+    var: char,
+    width: u32,
+    max: String,
 }
 
 #[derive(Serialize)]
@@ -45,6 +54,7 @@ struct DotDto {
 #[serde(rename_all = "camelCase")]
 struct MatrixDto {
     terms: Vec<TermDto>,
+    inputs: Vec<InputDto>,
     dots: Vec<DotDto>,
     heights: Vec<u32>,
     output_width: u32,
@@ -124,9 +134,20 @@ pub fn build_matrix(src: &str, widths_json: &str) -> String {
         terms: m
             .terms
             .iter()
-            .map(|t| TermDto {
+            .enumerate()
+            .map(|(i, t)| TermDto {
                 coefficient: t.coefficient.to_string(),
                 vars: t.vars.iter().collect(),
+                max: m.term_max(i).to_string(),
+            })
+            .collect(),
+        inputs: m
+            .widths
+            .iter()
+            .map(|(&var, &width)| InputDto {
+                var,
+                width,
+                max: m.input_max(var).to_string(),
             })
             .collect(),
         dots: m
