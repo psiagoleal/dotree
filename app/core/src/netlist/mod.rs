@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 
 use crate::expr::Monomial;
 use crate::matrix::{DotMatrix, Signal};
-use crate::reduce::{CellKind, Origin, Reduction};
+use crate::reduce::{CellKind, Origin, Reduction, Time};
 
 /// A wire of the circuit. Its identifier is the one used by every artifact (spec 05).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -156,6 +156,40 @@ impl Netlist {
     }
 
     /// Value of the expression for a packed input vector.
+    /// Readiness of each cell's outputs, indexed by cell number (index 0 unused).
+    pub fn ready(&self) -> Vec<Time> {
+        let mut ready = vec![Time(0); self.cells.len() + 1];
+        for c in &self.cells {
+            let latest = c
+                .inputs
+                .iter()
+                .map(|&w| match w {
+                    Wire::Input(_) => 0,
+                    Wire::Sum(p) | Wire::Carry(p) => ready[p].0,
+                })
+                .max()
+                .unwrap_or(0);
+            ready[c.number] = Time(latest + cell_delay(c.kind).0);
+        }
+        ready
+    }
+
+    /// Delay of the circuit: the latest cell output (0 without cells).
+    pub fn delay(&self) -> Time {
+        self.ready().into_iter().max().unwrap_or_default()
+    }
+
+    /// Number of FA and HA cells.
+    pub fn cell_counts(&self) -> (usize, usize) {
+        let fa = self.cells.iter().filter(|c| c.kind == CellKind::Fa).count();
+        (fa, self.cells.len() - fa)
+    }
+
+    /// Number of AND gates: input signals that are partial products.
+    pub fn and_gates(&self) -> usize {
+        self.signals.iter().filter(|s| s.is_and()).count()
+    }
+
     pub fn expected(&self, packed: u64) -> u128 {
         let v = self.unpack(packed);
         self.terms
@@ -166,5 +200,13 @@ impl Netlist {
                     .fold(u128::from(t.coefficient), |acc, x| acc * u128::from(v[x]))
             })
             .sum()
+    }
+}
+
+/// Delay of one cell kind (spec 00, "Convenção de custo").
+pub fn cell_delay(kind: CellKind) -> Time {
+    match kind {
+        CellKind::Fa => Time::FA_DELAY,
+        CellKind::Ha => Time::HA_DELAY,
     }
 }

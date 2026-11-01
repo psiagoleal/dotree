@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Núcleo: `vhdl` gera `full_adder`, `half_adder`, o topo estrutural e o testbench (exaustivo
+  até 20 bits, amostra de 4096 vetores acima), em VHDL-93 ASCII, com comentários e mensagens
+  em pt-BR ou inglês. O CI ganhou o job `vhdl`, que simula os casos de referência no GHDL 6 e
+  exige que um circuito estragado de propósito falhe (MT-10).
+- Conferido à mão: o R2 gerado compila sem avisos no ModelSim ASE 10.1d e dá "TODOS OS 16384
+  CASOS CORRETOS".
 - Núcleo: `diagram` com o leiaute do diagrama de blocos em grade (linha por nível, coluna por
   peso), ligações rotuladas, saídas, células críticas recalculadas da netlist, tabela de
   ligações e sua exportação em Markdown com cabeçalhos vindos da interface (MT-9).

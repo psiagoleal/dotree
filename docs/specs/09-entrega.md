@@ -35,7 +35,8 @@ Decisão e alternativas: [ADR 0002](../adr/0002-entrega-github-pages-e-actions.m
   *Prova:* workflow `release.yml`; conferido na primeira *tag*.
 - **ENT-06** — ONDE houver gerador de VHDL (spec 06), o CI DEVE analisar e simular o VHDL
   gerado com GHDL em contêiner (VHD-01, VHD-04).
-  *Prova:* job `vhdl` no `ci.yml`, ligado quando o gerador existir.
+  *Prova:* job `vhdl` no `ci.yml` (desde o MT-10): `examples/vhdl_referencia.rs` gera os
+  casos e `examples/ghdl_casos.sh` confere o veredito de cada um; o `CI ok` depende dele.
 - **ENT-07** — O repositório DEVE ter atualização automática de dependências (Dependabot)
   para cargo, npm, GitHub Actions e Docker, semanal.
   *Prova:* `.github/dependabot.yml`.

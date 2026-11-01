@@ -48,7 +48,11 @@
 - [x] MT-9: `diagram`; a tabela de R2 sai idêntica à da spec 05 (o teste lê a spec); o
       caminho crítico calculado pela netlist concorda com o da redução em R2 e em 64 casos
       aleatórios; 6 mutações pegas. A netlist ganhou nível, CPA, `W` e versão parcial.
-- [ ] Próximo: MT-10 (VHDL + GHDL no CI) ou MT-8 (Dadda e ajuda).
+- [x] MT-10: `vhdl` + job `vhdl` no CI. O GHDL achou dois defeitos que os testes de
+      estrutura não viam (caractere fora do Latin-1 e células sem ligação por falta de
+      `use work.all`). R2 deu 16 384 casos corretos no GHDL e no ModelSim ASE 10.1d.
+- [ ] Próximo: MT-8 (Dadda, próxima jogada, dicas, limite), último ticket só de núcleo;
+      depois a interface (MT-0d e MT-11 em diante).
 
 ## Observações para a próxima sessão
 

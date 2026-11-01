@@ -8,8 +8,8 @@
 
 use std::collections::{BTreeSet, HashMap};
 
-use crate::netlist::{Netlist, Wire};
-use crate::reduce::{CellKind, Time};
+use crate::netlist::{Netlist, Wire, cell_delay};
+use crate::reduce::CellKind;
 
 /// A cell drawn as a block.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -170,29 +170,10 @@ pub fn wiring_table(netlist: &Netlist) -> Vec<WiringRow> {
         .collect()
 }
 
-/// Readiness of every cell (indexed by number) and the cells on a path of maximum delay.
+/// Cells on a path of maximum delay: walk back from the latest cells through inputs that are
+/// ready exactly one cell delay earlier.
 fn critical_cells(n: &Netlist) -> Vec<usize> {
-    let delay_of = |k: CellKind| {
-        if k == CellKind::Fa {
-            Time::FA_DELAY.0
-        } else {
-            Time::HA_DELAY.0
-        }
-    };
-    let mut ready = vec![0u32; n.cells.len() + 1];
-    let wire_ready = |w: Wire, ready: &[u32]| match w {
-        Wire::Input(_) => 0,
-        Wire::Sum(c) | Wire::Carry(c) => ready[c],
-    };
-    for c in &n.cells {
-        ready[c.number] = c
-            .inputs
-            .iter()
-            .map(|&w| wire_ready(w, &ready))
-            .max()
-            .unwrap_or(0)
-            + delay_of(c.kind);
-    }
+    let ready: Vec<u32> = n.ready().into_iter().map(|t| t.0).collect();
     let delay = ready.iter().copied().max().unwrap_or(0);
     if delay == 0 {
         return Vec::new();
@@ -209,7 +190,7 @@ fn critical_cells(n: &Netlist) -> Vec<usize> {
             continue;
         }
         let c = &n.cells[number - 1];
-        let want = ready[number] - delay_of(c.kind);
+        let want = ready[number] - cell_delay(c.kind).0;
         for &w in &c.inputs {
             if let Wire::Sum(p) | Wire::Carry(p) = w {
                 if ready[p] == want {
