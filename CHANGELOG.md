@@ -9,6 +9,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Interface: formulário da expressão com uma largura por variável e os exemplos R1, R3 e R4;
+  matriz de pontos colorida por termo, com legenda, no estilo das figuras de aula; erros e
+  avisos do núcleo traduzidos nos dois idiomas. Ponte WASM `buildMatrix` (JSON com códigos)
+  (MT-11a).
 - Contrato visual (`docs/DESIGN.md`): cores dos pontos no estilo das aulas (um termo por cor,
   saídas de célula em preto, resultado em roxo), desenho de células e painéis, interação;
   paleta em *tokens* CSS conferida por teste de contraste e distância de cor (MT-0d).

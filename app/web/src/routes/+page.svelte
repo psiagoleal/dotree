@@ -3,7 +3,11 @@
 	import { onMount } from 'svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import LanguageSwitch from '#lib/components/LanguageSwitch.svelte';
-	import { loadCore, type Core } from '#lib/core.ts';
+	import ExpressionForm from '#lib/components/ExpressionForm.svelte';
+	import DotMatrix from '#lib/components/DotMatrix.svelte';
+	import TermLegend from '#lib/components/TermLegend.svelte';
+	import { loadCore, type BuildResult, type Core } from '#lib/core.ts';
+	import { errorMessage, warningMessage } from '#lib/errors.ts';
 
 	const ISSUES_URL = 'https://github.com/psiagoleal/dotree/issues/new';
 	const SPEC_URL = 'https://github.com/psiagoleal/dotree/blob/main/docs/specs/README.md';
@@ -12,6 +16,11 @@
 		{ kind: 'loading' } | { kind: 'ready'; core: Core } | { kind: 'error'; reason: string };
 
 	let status = $state<Status>({ kind: 'loading' });
+	let result = $state<BuildResult | null>(null);
+
+	function build(core: Core, expression: string, widths: Record<string, number>) {
+		result = core.buildMatrix(expression, widths);
+	}
 
 	onMount(() => {
 		loadCore()
@@ -34,8 +43,28 @@
 	{#if status.kind === 'loading'}
 		<p role="status">{m.status_loading()}</p>
 	{:else if status.kind === 'ready'}
-		<p role="status" data-testid="core-status">
-			{m.status_ready({ version: status.core.version })}
+		{@const core = status.core}
+		<ExpressionForm onbuild={(e, w) => build(core, e, w)} />
+
+		{#if result && !result.ok}
+			<p role="alert" class="error" data-testid="build-error">{errorMessage(result.error)}</p>
+		{:else if result && result.ok}
+			{@const mx = result.matrix}
+			<section class="result" aria-labelledby="matrix-title">
+				<h2 id="matrix-title">{m.matrix_title()}</h2>
+				{#each mx.warnings as w, i (i)}
+					<p class="warning" role="status">{warningMessage(w)}</p>
+				{/each}
+				<p class="summary" data-testid="matrix-summary">
+					{m.matrix_summary({ dots: mx.dots.length, ands: mx.andGates })}
+				</p>
+				<DotMatrix matrix={mx} />
+				<TermLegend terms={mx.terms} />
+			</section>
+		{/if}
+
+		<p class="version" data-testid="core-status">
+			{m.status_ready({ version: core.version })}
 		</p>
 	{:else}
 		<section role="alert" class="error" data-testid="core-error">
@@ -70,7 +99,31 @@
 	.tagline {
 		font-size: 1.15rem;
 	}
-	.notice {
+	.notice,
+	.version {
+		color: var(--color-muted);
+		font-size: 0.9rem;
+	}
+	.result {
+		display: grid;
+		gap: var(--space-2);
+		margin-top: var(--space-4);
+	}
+	.result h2 {
+		margin: 0;
+		font-size: 1.2rem;
+	}
+	.summary {
+		margin: 0;
+		color: var(--color-muted);
+		font-variant-numeric: tabular-nums;
+	}
+	p.error {
+		color: var(--color-danger);
+		margin-top: var(--space-3);
+	}
+	.warning {
+		margin: 0;
 		color: var(--color-muted);
 	}
 	.error {
