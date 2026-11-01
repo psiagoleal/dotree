@@ -615,8 +615,16 @@ impl Reduction {
         out
     }
 
+    pub fn can_undo(&self) -> bool {
+        self.cursor > 0
+    }
+
+    pub fn can_redo(&self) -> bool {
+        self.cursor + 1 < self.history.len()
+    }
+
     pub fn undo(&mut self) -> bool {
-        if self.cursor == 0 {
+        if !self.can_undo() {
             return false;
         }
         self.cursor -= 1;
@@ -624,7 +632,7 @@ impl Reduction {
     }
 
     pub fn redo(&mut self) -> bool {
-        if self.cursor + 1 >= self.history.len() {
+        if !self.can_redo() {
             return false;
         }
         self.cursor += 1;

@@ -5,8 +5,11 @@
 
 use std::collections::BTreeMap;
 
-use dotree_core::expr::{self, Expected, ExprError, SyntaxErrorKind, Warning};
+use dotree_core::expr::{self, Analysis, Expected, ExprError, SyntaxErrorKind, Warning};
 use dotree_core::matrix::{DotMatrix, MatrixError};
+use dotree_core::reduce::{
+    CellKind, CpaBlock, Origin, PendingCell, Point, PointId, Reduction, Rejection,
+};
 use serde::Serialize;
 use serde_json::{Value, json};
 use wasm_bindgen::prelude::*;
@@ -103,12 +106,11 @@ fn failure(error: Value) -> String {
     json!({"ok": false, "error": error}).to_string()
 }
 
-/// Builds the level-0 matrix of `src` with the widths in `widths_json` (an object such as
-/// `{"A": 3, "B": 2}`). Returns `{"ok": true, "matrix": …}` or `{"ok": false, "error": …}`.
-#[wasm_bindgen(js_name = buildMatrix)]
-pub fn build_matrix(src: &str, widths_json: &str) -> String {
+/// Parses the widths, analyses the expression and builds the level-0 matrix, or returns the
+/// error object shared by `buildMatrix` and `Session.open`.
+fn analyze_and_build(src: &str, widths_json: &str) -> Result<(Analysis, DotMatrix), Value> {
     let Ok(raw) = serde_json::from_str::<BTreeMap<String, u32>>(widths_json) else {
-        return failure(json!({"code": "badWidths"}));
+        return Err(json!({"code": "badWidths"}));
     };
     let mut widths = BTreeMap::new();
     for (k, w) in raw {
@@ -117,18 +119,25 @@ pub fn build_matrix(src: &str, widths_json: &str) -> String {
             (Some(c), None) => {
                 widths.insert(c, w);
             }
-            _ => return failure(json!({"code": "badWidths"})),
+            _ => return Err(json!({"code": "badWidths"})),
         }
     }
-    let analysis = match expr::analyze(src, &widths) {
-        Ok(a) => a,
-        Err(e) => return failure(expr_error(&e)),
-    };
-    let m = match DotMatrix::build(&analysis) {
-        Ok(m) => m,
-        Err(MatrixError::TooManyDots { count, limit }) => {
-            return failure(json!({"code": "tooManyDots", "count": count, "limit": limit}));
+    let analysis = expr::analyze(src, &widths).map_err(|e| expr_error(&e))?;
+    let m = DotMatrix::build(&analysis).map_err(|e| match e {
+        MatrixError::TooManyDots { count, limit } => {
+            json!({"code": "tooManyDots", "count": count, "limit": limit})
         }
+    })?;
+    Ok((analysis, m))
+}
+
+/// Builds the level-0 matrix of `src` with the widths in `widths_json` (an object such as
+/// `{"A": 3, "B": 2}`). Returns `{"ok": true, "matrix": …}` or `{"ok": false, "error": …}`.
+#[wasm_bindgen(js_name = buildMatrix)]
+pub fn build_matrix(src: &str, widths_json: &str) -> String {
+    let (analysis, m) = match analyze_and_build(src, widths_json) {
+        Ok(built) => built,
+        Err(e) => return failure(e),
     };
     let dto = MatrixDto {
         terms: m
@@ -184,4 +193,159 @@ pub fn build_matrix(src: &str, widths_json: &str) -> String {
             .collect(),
     };
     json!({"ok": true, "matrix": dto}).to_string()
+}
+
+// ------------------------------------------------------------------ compression (MT-12a)
+
+fn kind_code(k: CellKind) -> &'static str {
+    match k {
+        CellKind::Fa => "fa",
+        CellKind::Ha => "ha",
+    }
+}
+
+fn cpa_block(b: &CpaBlock) -> Value {
+    match b {
+        CpaBlock::ColumnTooTall { column, height } => {
+            json!({"code": "columnTooTall", "column": column, "height": height})
+        }
+        CpaBlock::ThreeNotFirst { column } => json!({"code": "threeNotFirst", "column": column}),
+        CpaBlock::NothingToAdd => json!({"code": "nothingToAdd"}),
+        CpaBlock::PendingCells => json!({"code": "pendingCells"}),
+    }
+}
+
+/// Refusals travel as rule codes, carrying only ids the user selected (GER-02).
+fn rejection(r: &Rejection) -> Value {
+    match r {
+        Rejection::MixedColumns => json!({"code": "mixedColumns"}),
+        Rejection::WrongCount { count } => json!({"code": "wrongCount", "count": count}),
+        Rejection::AlreadyInCell { point } => json!({"code": "alreadyInCell", "point": point}),
+        Rejection::NotInCurrentLevel { point } => {
+            json!({"code": "notInCurrentLevel", "point": point})
+        }
+        Rejection::DuplicateSelection { point } => {
+            json!({"code": "duplicateSelection", "point": point})
+        }
+        Rejection::EmptyLevel => json!({"code": "emptyLevel"}),
+        Rejection::CpaUnavailable(b) => json!({"code": "cpaUnavailable", "block": cpa_block(b)}),
+        Rejection::NoSuchLevel { level } => json!({"code": "noSuchLevel", "level": level}),
+    }
+}
+
+fn outcome(r: Result<Value, Rejection>) -> String {
+    match r {
+        Ok(Value::Null) => json!({"ok": true}),
+        Ok(v) => {
+            let mut o = json!({"ok": true});
+            o.as_object_mut()
+                .unwrap()
+                .extend(v.as_object().cloned().unwrap_or_default());
+            o
+        }
+        Err(e) => json!({"ok": false, "rejection": rejection(&e)}),
+    }
+    .to_string()
+}
+
+/// A compression in progress (MT-12a). Every action returns JSON; `snapshot` returns the
+/// whole state the interface draws. Times and areas are in half units (FA = 2, HA = 1).
+#[wasm_bindgen]
+pub struct Session {
+    reduction: Reduction,
+    /// Term of each input dot, for its colour (COR-01).
+    dot_terms: Vec<usize>,
+}
+
+impl Session {
+    fn point(&self, p: &Point) -> Value {
+        let (origin, term) = match p.origin {
+            Origin::Input { dot } => ("input", Some(self.dot_terms[dot])),
+            Origin::Sum { .. } => ("sum", None),
+            Origin::Carry { .. } => ("carry", None),
+        };
+        json!({"id": p.id, "column": p.column, "ready": p.ready.0,
+               "signal": self.reduction.signal(p), "origin": origin, "term": term})
+    }
+
+    fn points(&self, ps: &[Point]) -> Vec<Value> {
+        ps.iter().map(|p| self.point(p)).collect()
+    }
+}
+
+fn pending(c: &PendingCell) -> Value {
+    json!({"kind": kind_code(c.kind), "column": c.column, "inputs": c.inputs, "ready": c.ready.0})
+}
+
+#[wasm_bindgen]
+impl Session {
+    /// Opens a session on the level-0 matrix, or returns the error JSON of `buildMatrix`.
+    pub fn open(src: &str, widths_json: &str) -> Result<Session, String> {
+        let (_, m) = analyze_and_build(src, widths_json).map_err(|e| e.to_string())?;
+        Ok(Session {
+            reduction: Reduction::new(&m),
+            dot_terms: m.dots.iter().map(|d| d.term).collect(),
+        })
+    }
+
+    pub fn snapshot(&self) -> String {
+        let r = &self.reduction;
+        let levels: Vec<Value> = r
+            .levels()
+            .iter()
+            .map(|l| {
+                let cells: Vec<Value> = l
+                    .cells
+                    .iter()
+                    .map(|c| {
+                        json!({"number": c.number, "kind": kind_code(c.kind), "column": c.column,
+                               "inputs": c.inputs, "sum": c.sum, "carry": c.carry,
+                               "ready": c.ready.0})
+                    })
+                    .collect();
+                json!({"points": self.points(&l.points), "cells": cells, "cpa": l.cpa})
+            })
+            .collect();
+        let m = r.metrics();
+        json!({
+            "level": r.level(),
+            "levels": levels,
+            "current": {
+                "points": self.points(r.points()),
+                "pending": r.pending().iter().map(pending).collect::<Vec<_>>(),
+            },
+            "heights": r.heights(),
+            "metrics": {"fa": m.fa, "ha": m.ha, "andGates": m.and_gates,
+                        "area": m.area_halves(), "delay": m.delay.0},
+            "canUndo": r.can_undo(),
+            "canRedo": r.can_redo(),
+        })
+        .to_string()
+    }
+
+    /// Forms an FA or HA from the selected point ids (a JSON array).
+    #[wasm_bindgen(js_name = formCell)]
+    pub fn form_cell(&mut self, selection_json: &str) -> String {
+        let Ok(selection) = serde_json::from_str::<Vec<PointId>>(selection_json) else {
+            return json!({"ok": false, "rejection": {"code": "badSelection"}}).to_string();
+        };
+        outcome(
+            self.reduction
+                .form_cell(&selection)
+                .map(|k| json!({"kind": kind_code(k)})),
+        )
+    }
+
+    #[wasm_bindgen(js_name = concludeLevel)]
+    pub fn conclude_level(&mut self) -> String {
+        outcome(self.reduction.conclude_level().map(|()| Value::Null))
+    }
+
+    pub fn undo(&mut self) -> bool {
+        self.reduction.undo()
+    }
+
+    pub fn redo(&mut self) -> bool {
+        self.reduction.redo()
+    }
 }

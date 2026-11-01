@@ -9,6 +9,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Interface: compressão nível a nível. Selecionar pontos com o mouse ou o teclado, formar
+  FA e HA (retângulos em volta dos pontos, como nas aulas), recusas que citam a regra,
+  concluir nível com um painel por nível, desfazer e refazer (botões e Ctrl+Z/Ctrl+Y),
+  métricas ao vivo (FA, HA, AND, área, atraso) e altura de cada coluna. A ponte WASM ganhou
+  a `Session`, que guarda o exercício no núcleo (MT-12a).
 - Interface: alternância entre pontos e variáveis indexadas ($a_1 b_0$), pelos botões ou
   pela tecla V, lembrada entre visitas; desafio "quantos bits tem a saída?", que diz se o
   aluno acertou e revela $W$ (etapa 1) e, num segundo pedido, a conta de $v_{max}$ a $W$

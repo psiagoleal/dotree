@@ -1,6 +1,6 @@
 // Caminho relativo: app/web/src/lib/view.spec.ts
 import { describe, expect, it } from 'vitest';
-import { VIEW_STORAGE_KEY, isViewShortcut, readView, writeView } from './view';
+import { VIEW_STORAGE_KEY, readView, writeView } from './view';
 
 function memory(): Storage {
 	const data = new Map<string, string>();
@@ -41,27 +41,5 @@ describe('view preference (VIS-03)', () => {
 		expect(readView(throwing)).toBe('dots');
 		expect(readView(undefined)).toBe('dots');
 		expect(() => writeView(throwing, 'indexed')).not.toThrow();
-	});
-});
-
-describe('isViewShortcut (VIS-03)', () => {
-	const key = (k: string, target: Partial<HTMLElement> | null = null, mods = {}) =>
-		({ key: k, target, ctrlKey: false, metaKey: false, altKey: false, ...mods }) as never;
-
-	it('is the V key, upper or lower case', () => {
-		expect(isViewShortcut(key('v'))).toBe(true);
-		expect(isViewShortcut(key('V'))).toBe(true);
-		expect(isViewShortcut(key('b'))).toBe(false);
-	});
-
-	it('never fires while typing (V is a variable name) or with a modifier', () => {
-		expect(isViewShortcut(key('V', { tagName: 'INPUT' }))).toBe(false);
-		expect(isViewShortcut(key('v', { tagName: 'TEXTAREA' }))).toBe(false);
-		expect(isViewShortcut(key('v', { tagName: 'SELECT' }))).toBe(false);
-		expect(isViewShortcut(key('v', { tagName: 'DIV', isContentEditable: true }))).toBe(false);
-		expect(isViewShortcut(key('v', null, { ctrlKey: true }))).toBe(false);
-		expect(isViewShortcut(key('v', null, { metaKey: true }))).toBe(false);
-		expect(isViewShortcut(key('v', null, { altKey: true }))).toBe(false);
-		expect(isViewShortcut(key('v', { tagName: 'BUTTON' }))).toBe(true);
 	});
 });

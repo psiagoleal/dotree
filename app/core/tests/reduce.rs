@@ -375,6 +375,23 @@ fn a_new_action_clears_the_redo_branch() {
     assert!(!r.redo());
 }
 
+/// The interface enables its undo and redo buttons from these (CMP-03).
+#[test]
+fn can_undo_and_can_redo_follow_the_history() {
+    let mut r = r1();
+    assert!(!r.can_undo() && !r.can_redo());
+    form(&mut r, 1, &["a0_b1", "a1_b0", "c0_d1"]);
+    assert!(r.can_undo() && !r.can_redo());
+    r.undo();
+    assert!(!r.can_undo() && r.can_redo());
+    r.redo();
+    assert!(r.can_undo() && !r.can_redo());
+    // A refused action is not history.
+    assert!(r.conclude_level().is_ok());
+    assert!(r.conclude_level().is_err());
+    assert!(r.can_undo() && !r.can_redo());
+}
+
 #[test]
 fn origins_point_to_the_right_cells() {
     let mut r = r1();

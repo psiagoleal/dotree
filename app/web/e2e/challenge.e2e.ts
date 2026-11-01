@@ -6,7 +6,7 @@ test.use({ locale: 'pt-BR' });
 async function loadR1(page: Page) {
 	await page.goto('./');
 	await page.getByRole('button', { name: 'Soma de produtos' }).click();
-	await expect(page.getByTestId('dot-matrix').locator('.dot')).toHaveCount(20);
+	await expect(page.getByTestId('level-current').locator('.dot')).toHaveCount(20);
 }
 
 async function answer(page: Page, value: string) {
@@ -15,7 +15,7 @@ async function answer(page: Page, value: string) {
 }
 
 const column = (page: Page, j: number) =>
-	page.getByTestId('dot-matrix').getByRole('group', { name: new RegExp(`2\\^${j},`) });
+	page.getByTestId('level-current').getByRole('group', { name: new RegExp(`2\\^${j},`) });
 
 test('W stays hidden until the challenge is answered; then the matrix shows all W columns (EXP-09, EXP-10, GER-01)', async ({
 	page
@@ -77,13 +77,13 @@ test('V toggles dots and indexed variables, outside text fields, and is remember
 	page
 }) => {
 	await loadR1(page);
-	const dot = page.getByRole('img', { name: 'a1_b0' });
+	const dot = page.getByRole('button', { name: 'a1_b0', exact: true });
 	await expect(dot).toHaveText('');
 
-	await page.locator('main h2').click(); // focus outside any text field
+	await page.locator('#matrix-title').click(); // focus outside any text field
 	await page.keyboard.press('v');
 	await expect(dot).toHaveText('a1b0');
-	await expect(page.getByRole('img', { name: 'e0' }).first()).toHaveText('e0');
+	await expect(page.getByRole('button', { name: 'e0', exact: true }).first()).toHaveText('e0');
 	await expect(page.getByRole('button', { name: 'Variáveis indexadas' })).toHaveAttribute(
 		'aria-pressed',
 		'true'
@@ -95,8 +95,8 @@ test('V toggles dots and indexed variables, outside text fields, and is remember
 
 	await page.reload();
 	await loadR1(page);
-	await expect(page.getByRole('img', { name: 'a1_b0' })).toHaveText('a1b0');
+	await expect(page.getByRole('button', { name: 'a1_b0', exact: true })).toHaveText('a1b0');
 
 	await page.getByRole('button', { name: 'Pontos' }).click();
-	await expect(page.getByRole('img', { name: 'a1_b0' })).toHaveText('');
+	await expect(page.getByRole('button', { name: 'a1_b0', exact: true })).toHaveText('');
 });
