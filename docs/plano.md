@@ -127,9 +127,9 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 ### MT-7: Verificar o circuito
 - **Objetivo:** simulação célula a célula, amostra xorshift64\*, contraexemplo, progresso e
   cancelamento pela API.
-- **Arquivos no escopo:** `app/core/src/verify/**`
-- **Critério de aceite:** `cargo test -p dotree-core verify` (VER-01 a VER-03, VER-06 com
-  proptest).
+- **Arquivos no escopo:** `app/core/src/netlist/**`, `app/core/src/verify/**`
+- **Critério de aceite:** `cargo test -p dotree-core --test verify` (VER-01 a VER-03, VER-07,
+  VER-06 com proptest sobre reduções aleatórias).
 - **Fora de escopo:** interface de progresso (MT-14).
 - **Depende de:** MT-6
 
@@ -137,7 +137,8 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Objetivo:** algoritmo de Dadda a partir do nível 0 e do estado atual, catálogo de
   dicas, limite inferior.
 - **Arquivos no escopo:** `app/core/src/help/**`
-- **Critério de aceite:** `cargo test -p dotree-core help` (AJU-04 a AJU-06, AJU-08).
+- **Critério de aceite:** `cargo test -p dotree-core help` (AJU-04 a AJU-06, AJU-08) e a
+  solução Dadda incluída no teste de propriedade de VER-06.
 - **Fora de escopo:** confirmação e duas etapas (interface, MT-13).
 - **Depende de:** MT-6
 
