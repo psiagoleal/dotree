@@ -43,6 +43,7 @@ ou métrica fica em segundo plano.
 |---|---|
 | Ponto | quadrado de 14 px (como nas figuras de aula), cor do papel acima |
 | Ponto selecionado | contorno de 2 px na cor de destaque, deslocado 2 px |
+| Ponto da próxima jogada | contorno tracejado de 2 px na cor de destaque, deslocado 3 px (AJU-04); selecionar o ponto troca pelo contorno da seleção |
 | Ponto em foco pelo teclado | o anel de foco padrão (`:focus-visible`) |
 | Visão indexada | o sinal em fonte monoespaçada com índices subscritos ($a_1 b_0$), na mesma posição do ponto |
 | FA | retângulo de borda contínua (1,5 px) em volta dos 3 pontos consumidos |
@@ -79,6 +80,11 @@ ou métrica fica em segundo plano.
   críticas ganham a borda de 3 px e o nome acessível "…, no caminho crítico".
 - **Vai-um descartado** (CMP-09): "k=0" pequeno dentro da caixa da célula e uma nota abaixo
   dos painéis, com "Por quê?".
+- **Ajuda** (MT-13): seção "Ajuda" abaixo das ações: "Regras" (`<details>`, sempre
+  aberto a pedido, sem diálogo), "Dica" e "Próxima jogada" (só com o circuito incompleto;
+  a resposta some na ação seguinte), "Limite inferior" e "Solução automática" (o botão da
+  etapa 2 aparece só depois da etapa 1). A solução nível a nível fica num quadro tracejado,
+  à parte do circuito do aluno. O resumo do circuito completo lista as ajudas usadas.
 - **Visão** (VIS-01, VIS-03): botões "Pontos" e "Variáveis indexadas" ao lado do título da
   matriz, com a tecla V como atalho; a escolha fica no `localStorage` do navegador.
 - **Revelação em duas etapas** (GER-03): resultado primeiro; o caminho fica atrás de um

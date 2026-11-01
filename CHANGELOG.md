@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Interface: ajuda sob demanda. Regras sempre abertas; dica (em ciclo, sem citar pontos) e
+  próxima jogada (pontos destacados, a célula só se forma com outro clique), ambas
+  apagadas na ação seguinte; limite inferior e solução de Dadda em duas etapas (resultado,
+  depois o caminho), a solução num painel à parte sem mexer no circuito do aluno. Cada
+  pedido pergunta antes, com o foco em "vou tentar mais um pouco"; o resumo do circuito
+  completo lista as ajudas usadas. O núcleo ganhou o contador `HelpLog`, e a `Session`, os
+  métodos `hint`, `nextMove`, `lowerBound`, `solution` e `helpLog` (MT-13).
 - Interface: compressão até o circuito completo. "Fechar com CPA" fica desabilitado com a
   condição que falta; o painel do CPA e o do resultado, com os bits $R_j$ em roxo e a coluna
   vazia como 0; destaque do caminho crítico a pedido; voltar a um nível anterior, com

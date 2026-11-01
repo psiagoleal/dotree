@@ -6,6 +6,7 @@
 use std::collections::BTreeMap;
 
 use dotree_core::expr::{self, Analysis, Expected, ExprError, SyntaxErrorKind, Warning};
+use dotree_core::help::{self, HelpLog, HelpStep, Hint, NextMove};
 use dotree_core::matrix::{DotMatrix, MatrixError};
 use dotree_core::reduce::{
     CellKind, CpaBlock, Origin, PendingCell, Point, PointId, Reduction, Rejection,
@@ -255,9 +256,22 @@ pub struct Session {
     reduction: Reduction,
     /// Term of each input dot, for its colour (COR-01).
     dot_terms: Vec<usize>,
+    /// The level-0 matrix: the automatic solution and the lower bound start from it.
+    matrix: DotMatrix,
+    /// Helps revealed so far (AJU-07); outside the undo history.
+    log: HelpLog,
 }
 
 impl Session {
+    fn with(reduction: Reduction, matrix: DotMatrix) -> Session {
+        Session {
+            reduction,
+            dot_terms: matrix.dots.iter().map(|d| d.term).collect(),
+            matrix,
+            log: HelpLog::default(),
+        }
+    }
+
     fn point(&self, p: &Point) -> Value {
         let (origin, term) = match p.origin {
             Origin::Input { dot } => ("input", Some(self.dot_terms[dot])),
@@ -282,10 +296,7 @@ impl Session {
     /// Opens a session on the level-0 matrix, or returns the error JSON of `buildMatrix`.
     pub fn open(src: &str, widths_json: &str) -> Result<Session, String> {
         let (_, m) = analyze_and_build(src, widths_json).map_err(|e| e.to_string())?;
-        Ok(Session {
-            reduction: Reduction::new(&m),
-            dot_terms: m.dots.iter().map(|d| d.term).collect(),
-        })
+        Ok(Session::with(Reduction::new(&m), m))
     }
 
     pub fn snapshot(&self) -> String {
@@ -358,6 +369,78 @@ impl Session {
     #[wasm_bindgen(js_name = goToLevel)]
     pub fn go_to_level(&mut self, level: usize) -> String {
         outcome(self.reduction.go_to_level(level).map(|()| Value::Null))
+    }
+
+    // ------------------------------------------------------------ help (spec 03, MT-13)
+    // Each call is a reveal: the interface calls only after the user confirmed (AJU-02).
+
+    /// The next hint that applies now, cycling through them on each request; `null` when
+    /// none applies (complete circuit), which is not counted.
+    pub fn hint(&mut self) -> String {
+        let list = help::hints(&self.reduction);
+        if list.is_empty() {
+            return json!({"hint": null}).to_string();
+        }
+        let shown = list[self.log.hints as usize % list.len()];
+        self.log.record(HelpStep::Hint);
+        let hint = match shown {
+            Hint::MinLevelsLeft { height, levels } => {
+                json!({"code": "minLevelsLeft", "height": height, "levels": levels})
+            }
+            Hint::TallestColumn { column, height } => {
+                json!({"code": "tallestColumn", "column": column, "height": height})
+            }
+            Hint::IdlePoints => json!({"code": "idlePoints"}),
+            Hint::CpaReady => json!({"code": "cpaReady"}),
+        };
+        json!({ "hint": hint }).to_string()
+    }
+
+    /// What Dadda's method would do now (AJU-04). Forms nothing.
+    #[wasm_bindgen(js_name = nextMove)]
+    pub fn next_move(&mut self) -> String {
+        let out = match help::next_move(&self.reduction) {
+            NextMove::FormCell { kind, points } => {
+                json!({"move": "formCell", "kind": kind_code(kind), "points": points})
+            }
+            NextMove::ConcludeLevel => json!({"move": "concludeLevel"}),
+            NextMove::CloseWithCpa => json!({"move": "closeWithCpa"}),
+            NextMove::Complete => return json!({"move": "complete"}).to_string(),
+        };
+        self.log.record(HelpStep::NextMove);
+        out.to_string()
+    }
+
+    /// The lower bound and the numbers behind it (AJU-06); `path` counts step 2.
+    #[wasm_bindgen(js_name = lowerBound)]
+    pub fn lower_bound(&mut self, path: bool) -> String {
+        self.log.record(if path {
+            HelpStep::LowerBoundPath
+        } else {
+            HelpStep::LowerBound
+        });
+        let b = help::lower_bound(&self.matrix);
+        json!({"dots": b.dots, "outputWidth": b.output_width, "value": b.value}).to_string()
+    }
+
+    /// Dadda's solution from level 0 as a separate session (AJU-03, AJU-05); `path` counts
+    /// step 2. The student's circuit is untouched.
+    pub fn solution(&mut self, path: bool) -> Session {
+        self.log.record(if path {
+            HelpStep::SolutionPath
+        } else {
+            HelpStep::Solution
+        });
+        Session::with(help::dadda_solution(&self.matrix), self.matrix.clone())
+    }
+
+    #[wasm_bindgen(js_name = helpLog)]
+    pub fn help_log(&self) -> String {
+        let l = &self.log;
+        json!({"hints": l.hints, "nextMoves": l.next_moves, "lowerBound": l.lower_bound,
+               "lowerBoundPath": l.lower_bound_path, "solution": l.solution,
+               "solutionPath": l.solution_path})
+        .to_string()
     }
 
     pub fn undo(&mut self) -> bool {

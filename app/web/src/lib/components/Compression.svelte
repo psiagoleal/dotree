@@ -11,9 +11,13 @@
 	import { cpaBlockMessage, rejectionMessage } from '#lib/errors.ts';
 	import { keyAction } from '#lib/keys.ts';
 	import { formatHalves, visibleTop } from '#lib/levels.ts';
+	import { helpLogItems } from '#lib/help.ts';
 	import type { ViewMode } from '#lib/view.ts';
+	import Coach from './Coach.svelte';
 	import ConfirmDialog from './ConfirmDialog.svelte';
 	import LevelPanel from './LevelPanel.svelte';
+	import Rules from './Rules.svelte';
+	import SolutionHelp from './SolutionHelp.svelte';
 
 	let {
 		session,
@@ -40,6 +44,11 @@
 	let status = $state('');
 
 	let showCritical = $state(false);
+	// Points of the next move, highlighted until the next action (AJU-04).
+	let suggested = $state<number[]>([]);
+	// Read again after each revealed help; the summary shows it (AJU-07).
+	let helps = $state.raw(untrack(() => session.helpLog()));
+	const helpItems = $derived(helpLogItems(helps));
 	let explained = $state(false);
 	let backTarget = $state(0);
 	let backDialog: ConfirmDialog;
@@ -63,6 +72,7 @@
 	function refresh(message: string) {
 		snap = session.snapshot();
 		selected = [];
+		suggested = [];
 		refusal = null;
 		status = message;
 	}
@@ -74,6 +84,12 @@
 
 	function form() {
 		const r = session.formCell(selected);
+		if (r.ok) refresh(m.formed_cell({ kind: KIND[r.kind ?? 'fa'] }));
+		else refusal = rejectionMessage(r.rejection);
+	}
+
+	function formSuggested(ids: number[]) {
+		const r = session.formCell(ids);
 		if (r.ok) refresh(m.formed_cell({ kind: KIND[r.kind ?? 'fa'] }));
 		else refusal = rejectionMessage(r.rejection);
 	}
@@ -194,6 +210,7 @@
 		{selected}
 		ontoggle={toggle}
 		result={snap.result}
+		{suggested}
 	/>
 
 	{#if dropped.length > 0}
@@ -215,6 +232,11 @@
 	{#if snap.result}
 		<p class="complete" data-testid="complete">
 			{m.complete({ width: snap.result.length, top: snap.result.length - 1 })}
+		</p>
+		<p class="help-log" data-testid="help-log">
+			{helpItems.length === 0
+				? m.help_log_none()
+				: `${m.help_log_title()}: ${helpItems.join(' · ')}`}
 		</p>
 	{/if}
 
@@ -251,6 +273,24 @@
 	{/if}
 	<p class="visually-hidden" role="status">{status}</p>
 	<p class="hint">{m.keyboard_hint()}</p>
+
+	<section class="help" aria-labelledby={`${id}-help`}>
+		<h3 id={`${id}-help`}>{m.help_title()}</h3>
+		<Rules />
+		{#if !complete}
+			<!-- Re-created on every change, so an answer about an older state never stays. -->
+			{#key snap}
+				<Coach
+					{session}
+					points={snap.current.points}
+					onsuggest={(ids) => (suggested = ids)}
+					onform={formSuggested}
+					onhelp={() => (helps = session.helpLog())}
+				/>
+			{/key}
+		{/if}
+		<SolutionHelp {session} {view} onhelp={() => (helps = session.helpLog())} />
+	</section>
 
 	<ConfirmDialog
 		bind:this={backDialog}
@@ -338,6 +378,21 @@
 		margin: 0;
 		color: var(--color-muted);
 		font-size: 0.9rem;
+	}
+	.help {
+		display: grid;
+		gap: var(--space-2);
+		margin-top: var(--space-3);
+		padding-top: var(--space-3);
+		border-top: 1px solid var(--color-border);
+	}
+	.help h3 {
+		margin: 0;
+		font-size: 1rem;
+	}
+	.help-log {
+		margin: 0;
+		color: var(--color-muted);
 	}
 	.complete {
 		margin: 0;

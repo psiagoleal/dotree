@@ -9,7 +9,7 @@
 
 - **Data:** 2026-11-01
 - **Branch:** `main`
-- **Commit:** `109697f` (MT-12a, #26). O MT-12b ainda não foi commitado.
+- **Commit:** `b46fcff` (MT-12b, #27). O MT-13 ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -75,7 +75,14 @@
       6 $T_{FA}$, críticas 1, 2, 4, 6, 8, 9, 12–17). 145 testes Rust, 78 de
       unidade/componente, 19 e2e; 3 mutações pegas (volta sem confirmação, explicação sem
       confirmação, caminho crítico sem pedido).
-- [ ] Próximo: MT-13 (ajuda sob demanda em duas etapas).
+- [x] MT-12b mesclado (#27).
+- [x] MT-13: ajuda sob demanda (`Rules`, `Coach`, `SolutionHelp`, `help.ts`); `HelpLog` no
+      núcleo; `hint`/`nextMove`/`lowerBound`/`solution`/`helpLog` na `Session` (cada chamada
+      é uma revelação e é contada; a dica cicla pelo próprio contador). e2e
+      `ajuda-nao-aparece-sem-pedido` e uma prova por linha de GER-03. A solução de Dadda de
+      R1 tem atraso 7 $T_{FA}$, contra 6 da árvore de R2: Dadda minimiza células, não
+      atraso. 152 testes Rust, 94 de unidade/componente, 22 e2e; 5 mutações pegas.
+- [ ] Próximo: MT-14 (diagrama, tabela, verificação e VHDL na interface).
 
 ## Observações para a próxima sessão
 
@@ -99,6 +106,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-01 | `b46fcff` | CPA e resultado (#27); ajuda sob demanda na interface | MT-12b, MT-13 |
 | 2026-11-01 | `109697f` | compressão até o CPA (#26); CPA, resultado e caminho crítico na interface | MT-12a, MT-12b |
 | 2026-11-01 | `8b15e7d` | visão indexada e desafio de W (#25); compressão na interface até o CPA | MT-11b, MT-12a |
 | 2026-11-01 | `dca3ca6` | matriz colorida na interface; depois, visão indexada e desafio de W | MT-11a, MT-11b |
