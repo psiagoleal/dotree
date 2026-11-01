@@ -45,7 +45,10 @@
 - [x] MT-7: `netlist` + `verify`; R2 com 16 384 casos corretos; proptest de 64 reduções
       aleatórias; 6 mutações pegas (uma só depois de reforçar o teste com um simulador
       escalar independente). Pior caso exaustivo (2^24 vetores, 245 células): 1,6 s nativo.
-- [ ] Próximo: MT-8 (Dadda e ajuda) ou MT-9 (diagrama); MT-10 (VHDL) depende de MT-7 e MT-9.
+- [x] MT-9: `diagram`; a tabela de R2 sai idêntica à da spec 05 (o teste lê a spec); o
+      caminho crítico calculado pela netlist concorda com o da redução em R2 e em 64 casos
+      aleatórios; 6 mutações pegas. A netlist ganhou nível, CPA, `W` e versão parcial.
+- [ ] Próximo: MT-10 (VHDL + GHDL no CI) ou MT-8 (Dadda e ajuda).
 
 ## Observações para a próxima sessão
 
@@ -54,6 +57,8 @@
   `AGENTS.md` proíbe o agente de rodar `git worktree`.
 - SvelteKit 3 não tem `$lib`: use `#lib/...` com extensão.
 - A porta 4173 costuma estar ocupada nesta máquina; o e2e usa 4180 (`E2E_PORT`).
+- Testes de mutação deixam `app/core/tests/*.proptest-regressions` com casos que só falham no
+  código mutado: apagar antes de commitar (aconteceu no MT-7 e no MT-9).
 - O exercício que originou o projeto não pode vir para cá (material de terceiros e
   solução de lista avaliada).
 

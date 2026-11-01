@@ -146,8 +146,8 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Objetivo:** posições (linha, coluna, ordem), ligações rotuladas, tabela de ligações,
   conjunto de células críticas.
 - **Arquivos no escopo:** `app/core/src/diagram/**`
-- **Critério de aceite:** `cargo test -p dotree-core diagram` com a tabela de referência de R2
-  (DIA-01, DIA-03, DIA-04, DIA-05).
+- **Critério de aceite:** `cargo test -p dotree-core --test diagram` com a tabela de
+  referência de R2 lida da própria spec 05 (DIA-01, DIA-03, DIA-04, DIA-05, DIA-07).
 - **Fora de escopo:** SVG (MT-14).
 - **Depende de:** MT-6
 

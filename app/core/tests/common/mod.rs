@@ -70,3 +70,49 @@ pub fn replay_r2_tree(r: &mut Reduction) {
     form(r, 4, &["a2_b2", "k7"]);
     r.conclude_level().unwrap();
 }
+
+/// Small deterministic generator for the random reduction.
+pub struct Lcg(pub u64);
+impl Lcg {
+    pub fn next(&mut self, n: usize) -> usize {
+        self.0 = self
+            .0
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
+        ((self.0 >> 33) as usize) % n
+    }
+}
+
+/// Reduces at random until the circuit is complete. Every FA and HA lowers
+/// sum(height x (W - column)), so this always ends.
+pub fn reduce_at_random(r: &mut Reduction, g: &mut Lcg) {
+    while !r.is_complete() {
+        if r.cpa_status().is_ok() && g.next(2) == 0 {
+            r.close_with_cpa().unwrap();
+            continue;
+        }
+        let mut formed = false;
+        for column in 0..r.heights().len() as u32 {
+            loop {
+                let used: Vec<usize> = r.pending().iter().flat_map(|c| c.inputs.clone()).collect();
+                let free: Vec<usize> = r
+                    .points()
+                    .iter()
+                    .filter(|p| p.column == column && !used.contains(&p.id))
+                    .map(|p| p.id)
+                    .collect();
+                if free.len() < 2 || (formed && g.next(3) == 0) {
+                    break;
+                }
+                let n = if free.len() >= 3 && g.next(3) != 0 {
+                    3
+                } else {
+                    2
+                };
+                r.form_cell(&free[..n]).unwrap();
+                formed = true;
+            }
+        }
+        r.conclude_level().unwrap();
+    }
+}

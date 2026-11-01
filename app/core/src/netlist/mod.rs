@@ -27,6 +27,10 @@ pub enum Wire {
 pub struct NetCell {
     pub number: usize,
     pub kind: CellKind,
+    /// Index of the level whose points the cell consumed.
+    pub level: usize,
+    /// True for cells of the final ripple-carry adder.
+    pub cpa: bool,
     pub column: u32,
     /// Inputs in canonical order (x, y, z).
     pub inputs: Vec<Wire>,
@@ -45,8 +49,13 @@ pub struct Netlist {
     /// Cells in number order: `cells[n - 1]` is cell `n`. Every input comes from a lower
     /// number or from an input signal, so this is also a valid evaluation order.
     pub cells: Vec<NetCell>,
-    /// Wire behind each result bit `R_0 .. R_{W-1}`; `None` is the constant 0.
+    /// Wire behind each result bit `R_0 .. R_{W-1}`; `None` is the constant 0. Empty while
+    /// the circuit is incomplete.
     pub result: Vec<Option<Wire>>,
+    /// Output width `W`.
+    pub output_width: u32,
+    /// Every column ends with at most one point (CMP-12).
+    pub complete: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -61,7 +70,16 @@ impl Netlist {
         matrix: &DotMatrix,
         reduction: &Reduction,
     ) -> Result<Netlist, NetlistError> {
-        let result_points = reduction.result().ok_or(NetlistError::NotComplete)?;
+        if !reduction.is_complete() {
+            return Err(NetlistError::NotComplete);
+        }
+        Ok(Netlist::partial(matrix, reduction))
+    }
+
+    /// The concluded part of a reduction, complete or not. Pending cells are left out; the
+    /// result is empty until the circuit is complete (DIA-07).
+    pub fn partial(matrix: &DotMatrix, reduction: &Reduction) -> Netlist {
+        let result_points = reduction.result().unwrap_or_default();
         let wire_of = |id: usize| -> Wire {
             let p = reduction
                 .point(id)
@@ -75,17 +93,19 @@ impl Netlist {
         let mut cells: Vec<NetCell> = reduction
             .levels()
             .iter()
-            .flat_map(|l| &l.cells)
-            .map(|c| NetCell {
+            .flat_map(|l| l.cells.iter().map(move |c| (c, l.cpa)))
+            .map(|(c, cpa)| NetCell {
                 number: c.number,
                 kind: c.kind,
+                level: c.level,
+                cpa,
                 column: c.column,
                 inputs: c.inputs.iter().map(|&id| wire_of(id)).collect(),
                 has_carry: c.carry.is_some(),
             })
             .collect();
         cells.sort_by_key(|c| c.number);
-        Ok(Netlist {
+        Netlist {
             variables: matrix.widths.iter().map(|(&v, &w)| (v, w)).collect(),
             terms: matrix.terms.clone(),
             signals: matrix.signals.clone(),
@@ -94,7 +114,9 @@ impl Netlist {
                 .into_iter()
                 .map(|id| id.map(wire_of))
                 .collect(),
-        })
+            output_width: matrix.output_width,
+            complete: reduction.is_complete(),
+        }
     }
 
     /// Identifier of a wire: `a1_b0`, `e0`, `s3`, `k3`.
