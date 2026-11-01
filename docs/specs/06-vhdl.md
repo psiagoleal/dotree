@@ -26,9 +26,8 @@ válido.
   torna `full_adder` e `half_adder` diretamente visíveis, como a ligação padrão de
   componentes do VHDL-93 exige). Os arquivos DEVEM ser ASCII puro: o português dos
   comentários vai sem acento.
-  *Prova:* em CI (job `vhdl`), o GHDL 6 em `--std=93` analisa, elabora e simula R2, R3, R4
-  (com uma redução gulosa até o MT-8 trazer a Dadda) e um caso de 21 bits; teste do núcleo
-  exige ASCII e o `use work.all`.
+  *Prova:* em CI (job `vhdl`), o GHDL 6 em `--std=93` analisa, elabora e simula R2, R3, a
+  solução Dadda de R4 e um caso de 21 bits; teste do núcleo exige ASCII e o `use work.all`.
 - **VHD-02** — O topo DEVE usar os mesmos identificadores de sinal e de instância do
   diagrama e da tabela de ligações; um bit de resultado constante é atribuído com
   `R(j) <= '0'`. A saída se chama `R`; uma variável de entrada chamada $R$ vira a porta

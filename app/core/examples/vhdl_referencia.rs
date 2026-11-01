@@ -12,6 +12,7 @@ use std::fs;
 use std::path::Path;
 
 use dotree_core::expr::analyze;
+use dotree_core::help::dadda_solution;
 use dotree_core::matrix::DotMatrix;
 use dotree_core::netlist::{Netlist, Wire};
 use dotree_core::reduce::Reduction;
@@ -86,44 +87,9 @@ fn r2() -> (DotMatrix, Netlist) {
     (m, n)
 }
 
-/// A simple deterministic reduction: as many FAs as possible per level, an HA when a level
-/// would otherwise be empty, then the CPA as soon as it is allowed.
-fn greedy(m: &DotMatrix) -> Netlist {
-    let mut r = Reduction::new(m);
-    while !r.is_complete() {
-        if r.cpa_status().is_ok() {
-            r.close_with_cpa().expect("CPA");
-            continue;
-        }
-        for column in 0..m.output_width {
-            let ids: Vec<usize> = r
-                .points()
-                .iter()
-                .filter(|p| p.column == column)
-                .map(|p| p.id)
-                .collect();
-            for chunk in ids.chunks_exact(3) {
-                r.form_cell(chunk).expect("FA");
-            }
-        }
-        if r.pending().is_empty() {
-            let column = r
-                .heights()
-                .iter()
-                .position(|&h| h >= 2)
-                .expect("a column to add") as u32;
-            let ids: Vec<usize> = r
-                .points()
-                .iter()
-                .filter(|p| p.column == column)
-                .map(|p| p.id)
-                .take(2)
-                .collect();
-            r.form_cell(&ids).expect("HA");
-        }
-        r.conclude_level().expect("level");
-    }
-    Netlist::from_reduction(m, &r).expect("complete")
+/// Dadda's solution (spec 03, AJU-05) as a netlist.
+fn dadda(m: &DotMatrix) -> Netlist {
+    Netlist::from_reduction(m, &dadda_solution(m)).expect("Dadda's solution is complete")
 }
 
 fn write(
@@ -171,18 +137,11 @@ fn main() {
     );
 
     let m3 = matrix("A", &[('A', 4)]);
-    write(dir, "r3", &m3, &greedy(&m3), Language::En, "ok", &mut list);
+    write(dir, "r3", &m3, &dadda(&m3), Language::En, "ok", &mut list);
 
+    // R4 with Dadda's solution (spec 06, VHD-01).
     let m4 = matrix("A*B", &[('A', 4), ('B', 4)]);
-    write(
-        dir,
-        "r4",
-        &m4,
-        &greedy(&m4),
-        Language::PtBr,
-        "ok",
-        &mut list,
-    );
+    write(dir, "r4", &m4, &dadda(&m4), Language::PtBr, "ok", &mut list);
 
     // 21 input bits: the testbench uses the 4096-vector sample.
     let ms = matrix("A + 2048B", &[('A', 11), ('B', 10)]);
@@ -190,7 +149,7 @@ fn main() {
         dir,
         "amostra",
         &ms,
-        &greedy(&ms),
+        &dadda(&ms),
         Language::En,
         "ok",
         &mut list,

@@ -137,8 +137,8 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Objetivo:** algoritmo de Dadda a partir do nível 0 e do estado atual, catálogo de
   dicas, limite inferior.
 - **Arquivos no escopo:** `app/core/src/help/**`
-- **Critério de aceite:** `cargo test -p dotree-core help` (AJU-04 a AJU-06, AJU-08) e a
-  solução Dadda incluída no teste de propriedade de VER-06.
+- **Critério de aceite:** `cargo test -p dotree-core --test help` (AJU-03 a AJU-06, AJU-08 e
+  a parte Dadda de VER-06); o R4 do job `vhdl` passa a usar a solução Dadda.
 - **Fora de escopo:** confirmação e duas etapas (interface, MT-13).
 - **Depende de:** MT-6
 

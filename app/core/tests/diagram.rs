@@ -207,7 +207,13 @@ fn dia05_r2_critical_cells_agree_with_the_reduction() {
 }
 
 proptest! {
-    #![proptest_config(ProptestConfig::with_cases(64))]
+    // No regressions file: mutation runs used to leave cases that only fail on mutated code.
+    // A real failure is printed, already shrunk, in the test output.
+    #![proptest_config(ProptestConfig {
+        cases: 64,
+        failure_persistence: None,
+        ..ProptestConfig::default()
+    })]
 
     /// Two independent computations of the critical cells (reduction state vs. netlist
     /// timing) must always agree.
