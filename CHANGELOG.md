@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Interface: diagrama de blocos em SVG (uma linha por nível, maior peso à esquerda, bloco
+  de portas AND que se expande em portas, ligações rotuladas com o sinal, vai-um do CPA na
+  horizontal, bits $R_j$ ao fim, células críticas destacadas pelo mesmo botão dos painéis)
+  e tabela de ligações, ambos até o último nível concluído; exportações em SVG e Markdown
+  só com o circuito completo (o Markdown sai igual à tabela de referência da spec 05). A
+  `Session` ganhou `diagram`, `wiringTable` e `wiringTableMarkdown` (MT-14a).
 - Interface: ajuda sob demanda. Regras sempre abertas; dica (em ciclo, sem citar pontos) e
   próxima jogada (pontos destacados, a célula só se forma com outro clique), ambas
   apagadas na ação seguinte; limite inferior e solução de Dadda em duas etapas (resultado,

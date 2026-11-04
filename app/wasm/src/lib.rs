@@ -5,9 +5,11 @@
 
 use std::collections::BTreeMap;
 
+use dotree_core::diagram::{self, Endpoint, Layout, TableHeaders};
 use dotree_core::expr::{self, Analysis, Expected, ExprError, SyntaxErrorKind, Warning};
 use dotree_core::help::{self, HelpLog, HelpStep, Hint, NextMove};
 use dotree_core::matrix::{DotMatrix, MatrixError};
+use dotree_core::netlist::Netlist;
 use dotree_core::reduce::{
     CellKind, CpaBlock, Origin, PendingCell, Point, PointId, Reduction, Rejection,
 };
@@ -432,6 +434,99 @@ impl Session {
             HelpStep::Solution
         });
         Session::with(help::dadda_solution(&self.matrix), self.matrix.clone())
+    }
+
+    // ------------------------------------------------------------ diagram (spec 05, MT-14a)
+
+    /// Block diagram of the concluded levels (DIA-01 to DIA-03, DIA-05, DIA-07). Endpoints
+    /// are `"inputs"`, a cell number or `"R<j>"`; `ands` lists the AND gates (DIA-02).
+    pub fn diagram(&self) -> String {
+        let netlist = Netlist::partial(&self.matrix, &self.reduction);
+        let l = Layout::new(&netlist);
+        let end = |e: Endpoint| match e {
+            Endpoint::Inputs => json!("inputs"),
+            Endpoint::Cell(n) => json!(n),
+            Endpoint::Output(j) => json!(format!("R{j}")),
+        };
+        let blocks: Vec<Value> = l
+            .blocks
+            .iter()
+            .map(|b| {
+                json!({"cell": b.cell, "kind": kind_code(b.kind), "row": b.row,
+                       "column": b.column, "slot": b.slot})
+            })
+            .collect();
+        let edges: Vec<Value> = l
+            .edges
+            .iter()
+            .map(|e| json!({"from": end(e.from), "to": end(e.to), "label": e.label}))
+            .collect();
+        let ands: Vec<Value> = netlist
+            .signals
+            .iter()
+            .filter(|s| s.is_and())
+            .map(|s| {
+                let factors: Vec<String> = s
+                    .factors
+                    .iter()
+                    .map(|f| format!("{}{}", f.var.to_ascii_lowercase(), f.bit))
+                    .collect();
+                json!({"ident": s.ident(), "factors": factors})
+            })
+            .collect();
+        json!({
+            "complete": l.complete,
+            "outputWidth": l.output_width,
+            "rows": l.rows,
+            "andGates": l.and_gates,
+            "blocks": blocks,
+            "edges": edges,
+            "outputs": l.outputs,
+            "critical": l.critical,
+            "ands": ands,
+        })
+        .to_string()
+    }
+
+    /// Wiring table rows of the concluded levels (DIA-04).
+    #[wasm_bindgen(js_name = wiringTable)]
+    pub fn wiring_table(&self) -> String {
+        let netlist = Netlist::partial(&self.matrix, &self.reduction);
+        let rows: Vec<Value> = diagram::wiring_table(&netlist)
+            .into_iter()
+            .map(|r| {
+                json!({"cell": r.cell, "level": r.level, "column": r.column,
+                       "inputs": r.inputs, "sum": r.sum, "sumResult": r.sum_result,
+                       "carry": r.carry, "carryResult": r.carry_result})
+            })
+            .collect();
+        Value::from(rows).to_string()
+    }
+
+    /// The wiring table as Markdown (DIA-06), with headers in the interface's language:
+    /// `{"cell", "level", "column", "sum", "carry"}`.
+    #[wasm_bindgen(js_name = wiringTableMarkdown)]
+    pub fn wiring_table_markdown(&self, headers_json: &str) -> String {
+        let h: Value = serde_json::from_str(headers_json).unwrap_or_default();
+        let get = |k: &str| h[k].as_str().unwrap_or(k).to_owned();
+        let (cell, level, column, sum, carry) = (
+            get("cell"),
+            get("level"),
+            get("column"),
+            get("sum"),
+            get("carry"),
+        );
+        let netlist = Netlist::partial(&self.matrix, &self.reduction);
+        diagram::wiring_table_markdown(
+            &diagram::wiring_table(&netlist),
+            TableHeaders {
+                cell: &cell,
+                level: &level,
+                column: &column,
+                sum: &sum,
+                carry: &carry,
+            },
+        )
     }
 
     #[wasm_bindgen(js_name = helpLog)]

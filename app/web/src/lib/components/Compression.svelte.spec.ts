@@ -6,6 +6,7 @@ import { render } from 'vitest-browser-svelte';
 import Compression from './Compression.svelte';
 import { loadCore, type CompressionSession, type Core } from '#lib/core.ts';
 import { EXAMPLES } from '#lib/expression.ts';
+import { formOn, r2Levels } from '#lib/testing/r2.ts';
 
 let core: Core;
 const r1 = EXAMPLES.find((e) => e.id === 'r1')!;
@@ -22,41 +23,7 @@ async function open(view: 'dots' | 'indexed' = 'dots') {
 // R1: W = 7, v_max = 79 (spec 00); hidden unless a test reveals it.
 const R1_WIDTH = { outputWidth: 7, vMax: '79', widthRevealed: false };
 
-/** Forms a cell straight on the session, by signal, before the component reads it. */
-function formOn(s: CompressionSession, column: number, signals: string[]) {
-	const points = s.snapshot().current.points;
-	const ids = signals.map((sig) => points.find((p) => p.column === column && p.signal === sig)!.id);
-	expect(s.formCell(ids).ok).toBe(true);
-}
-
-/** Levels 0 to 2 of the R2 tree (spec 00): level 3 is ready for the CPA. */
-function r2BeforeTheCpa(): CompressionSession {
-	const s = core.openSession(r1.expression, r1.widths);
-	const levels: [number, string[]][][] = [
-		[
-			[1, ['a0_b1', 'a1_b0', 'c0_d1']],
-			[1, ['c1_d0', 'e1', 'e0']],
-			[2, ['a0_b2', 'a1_b1']]
-		],
-		[
-			[1, ['f0', 's1', 's2']],
-			[2, ['a2_b0', 'c1_d1', 'e1']],
-			[2, ['s3', 'k1', 'k2']],
-			[3, ['a1_b2', 'a2_b1', 'k3']]
-		],
-		[
-			[0, ['a0_b0', 'c0_d0', 'e0']],
-			[2, ['s5', 'k4', 's6']],
-			[3, ['k5', 's7', 'k6']],
-			[4, ['a2_b2', 'k7']]
-		]
-	];
-	for (const cells of levels) {
-		for (const [column, signals] of cells) formOn(s, column, signals);
-		expect(s.concludeLevel().ok).toBe(true);
-	}
-	return s;
-}
+const r2BeforeTheCpa = () => r2Levels(core, 3);
 
 /** The point with this signal in column `column` of the current level. */
 const point = (signal: string, column: number) =>

@@ -13,6 +13,7 @@
 	import { formatHalves, visibleTop } from '#lib/levels.ts';
 	import { helpLogItems } from '#lib/help.ts';
 	import type { ViewMode } from '#lib/view.ts';
+	import CircuitView from './CircuitView.svelte';
 	import Coach from './Coach.svelte';
 	import ConfirmDialog from './ConfirmDialog.svelte';
 	import LevelPanel from './LevelPanel.svelte';
@@ -291,6 +292,8 @@
 		{/if}
 		<SolutionHelp {session} {view} onhelp={() => (helps = session.helpLog())} />
 	</section>
+
+	<CircuitView {session} {snap} {top} critical={showCritical} />
 
 	<ConfirmDialog
 		bind:this={backDialog}

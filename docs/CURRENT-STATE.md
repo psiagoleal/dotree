@@ -9,7 +9,7 @@
 
 - **Data:** 2026-11-01
 - **Branch:** `main`
-- **Commit:** `b46fcff` (MT-12b, #27). O MT-13 ainda não foi commitado.
+- **Commit:** `2a53fcd` (MT-13, #28). O MT-14a ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -82,7 +82,15 @@
       `ajuda-nao-aparece-sem-pedido` e uma prova por linha de GER-03. A solução de Dadda de
       R1 tem atraso 7 $T_{FA}$, contra 6 da árvore de R2: Dadda minimiza células, não
       atraso. 152 testes Rust, 94 de unidade/componente, 22 e2e; 5 mutações pegas.
-- [ ] Próximo: MT-14 (diagrama, tabela, verificação e VHDL na interface).
+- [x] MT-13 mesclado (#28).
+- [x] MT-14 dividido em 14a e 14b. MT-14a: `diagram`/`wiringTable`/`wiringTableMarkdown`
+      na `Session`; `diagram.ts` (geometria e SVG únicos para a tela e o arquivo, cores por
+      variável CSS com reserva fixa); `CircuitView` com diagrama, tabela e exportações. O e2e
+      compara o Markdown baixado com a tabela da spec 05, caractere a caractere, e valida o
+      SVG com `DOMParser`. 156 testes Rust, 106 de unidade/componente, 24 e2e; 5 mutações
+      pegas. Fixture do R2 compartilhada: `src/lib/testing/r2.ts` (componentes),
+      `e2e/r2.ts` (e2e), `app/wasm/tests/common` (ponte).
+- [ ] Próximo: MT-14b (verificação e VHDL na interface).
 
 ## Observações para a próxima sessão
 
@@ -93,6 +101,8 @@
   da ferramenta (exit 144). Guarde o PID do servidor e use `kill`.
 - O rótulo de coluna diz "1 pontos" (sem plural); corrigir no MT-16 com variantes do
   Paraglide.
+- O gateway OpenAI-compatível do ambiente não respondeu desta máquina em 2026-11-03
+  (conexão expira); a revisão independente do MT-14a ficou sem ele.
 - SvelteKit 3 não tem `$lib`: use `#lib/...` com extensão.
 - A porta 4173 costuma estar ocupada nesta máquina; o e2e usa 4180 (`E2E_PORT`).
 - Os testes de propriedade não gravam `*.proptest-regressions` (`failure_persistence: None`):
@@ -106,6 +116,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-03 | `2a53fcd` | ajuda sob demanda (#28); diagrama, tabela e exportações | MT-13, MT-14a |
 | 2026-11-01 | `b46fcff` | CPA e resultado (#27); ajuda sob demanda na interface | MT-12b, MT-13 |
 | 2026-11-01 | `109697f` | compressão até o CPA (#26); CPA, resultado e caminho crítico na interface | MT-12a, MT-12b |
 | 2026-11-01 | `8b15e7d` | visão indexada e desafio de W (#25); compressão na interface até o CPA | MT-11b, MT-12a |

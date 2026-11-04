@@ -2,20 +2,9 @@
 // MT-12a and MT-12b: the tree of R2 (spec 00) built through the interface, the CPA, the
 // result and the questions asked before discarding work (CMP-04, CMP-09, EXP-04).
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { current, formByMouse, point, r2ByMouse } from './r2';
 
 test.use({ locale: 'pt-BR' });
-
-const current = (page: Page) => page.getByTestId('level-current');
-
-const point = (page: Page, column: number, signal: string) =>
-	current(page)
-		.getByRole('group', { name: new RegExp(`2\\^${column},`) })
-		.getByRole('button', { name: signal, exact: true });
-
-async function formByMouse(page: Page, column: number, signals: string[]) {
-	for (const s of signals) await point(page, column, s).click();
-	await page.getByRole('button', { name: 'Formar célula' }).click();
-}
 
 /** Keyboard only: focus each point, Space selects it, F forms the cell (GER-07). */
 async function formByKeyboard(page: Page, column: number, signals: string[]) {
@@ -56,26 +45,6 @@ async function formByTab(page: Page, column: number, signals: string[]) {
 async function press(page: Page, name: string) {
 	await tabTo(page, page.getByRole('button', { name, exact: true }));
 	await page.keyboard.press('Enter');
-}
-
-/** Levels 0 to 2 of the R2 tree by mouse, leaving level 3 ready for the CPA. */
-async function r2ByMouse(page: Page) {
-	await page.getByRole('button', { name: 'Soma de produtos' }).click();
-	const conclude = page.getByRole('button', { name: 'Concluir nível' });
-	await formByMouse(page, 1, ['a0_b1', 'a1_b0', 'c0_d1']);
-	await formByMouse(page, 1, ['c1_d0', 'e1', 'e0']);
-	await formByMouse(page, 2, ['a0_b2', 'a1_b1']);
-	await conclude.click();
-	await formByMouse(page, 1, ['f0', 's1', 's2']);
-	await formByMouse(page, 2, ['a2_b0', 'c1_d1', 'e1']);
-	await formByMouse(page, 2, ['s3', 'k1', 'k2']);
-	await formByMouse(page, 3, ['a1_b2', 'a2_b1', 'k3']);
-	await conclude.click();
-	await formByMouse(page, 0, ['a0_b0', 'c0_d0', 'e0']);
-	await formByMouse(page, 2, ['s5', 'k4', 's6']);
-	await formByMouse(page, 3, ['k5', 's7', 'k6']);
-	await formByMouse(page, 4, ['a2_b2', 'k7']);
-	await conclude.click();
 }
 
 test('R2 tree through the interface: panels, numbered cells and metrics (CMP-05, CMP-13 to CMP-15)', async ({

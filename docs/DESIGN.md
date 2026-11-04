@@ -85,6 +85,14 @@ ou métrica fica em segundo plano.
   a resposta some na ação seguinte), "Limite inferior" e "Solução automática" (o botão da
   etapa 2 aparece só depois da etapa 1). A solução nível a nível fica num quadro tracejado,
   à parte do circuito do aluno. O resumo do circuito completo lista as ajudas usadas.
+- **Circuito** (MT-14a): seção "Circuito" ao fim da compressão. Diagrama em SVG com o bloco
+  "Entradas e portas AND (n)" no topo (expansível em portas, cada uma com o desenho de AND),
+  os pesos $2^j$, uma linha de blocos por nível e os bits $R_j$ em roxo embaixo. Cada
+  ligação leva o rótulo do sinal logo acima da porta de entrada (rótulos alternados em
+  altura para não se tocarem); entrada vinda do bloco AND é um toco curto ligado pelo
+  nome; o vai-um entre células da mesma linha (CPA) é horizontal. Abaixo, a tabela de
+  ligações. Exportar só com o circuito completo; antes disso, um aviso diz até que nível
+  o diagrama vai.
 - **Visão** (VIS-01, VIS-03): botões "Pontos" e "Variáveis indexadas" ao lado do título da
   matriz, com a tecla V como atalho; a escolha fica no `localStorage` do navegador.
 - **Revelação em duas etapas** (GER-03): resultado primeiro; o caminho fica atrás de um

@@ -234,6 +234,20 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Fora de escopo:** edição do diagrama.
 - **Depende de:** MT-9, MT-10, MT-12
 
+> **Divisão (2026-11-03):** o MT-14 virou dois, como o MT-12. **MT-14a**: diagrama,
+> tabela de ligações e exportações SVG e Markdown (DIA-01 a DIA-07). **MT-14b**: o resto,
+> abaixo.
+
+### MT-14b: Interface — verificação e VHDL
+- **Objetivo:** verificação num *worker*, com progresso depois de 0,5 s e cancelamento
+  (VER-01, VER-03 a VER-05); VHDL com nome escolhido, cópia de cada arquivo e `.zip`
+  (VHD-05, VHD-07, VHD-08).
+- **Arquivos no escopo:** `app/web/src/**`, `app/wasm/src/**`, `app/web/messages/*`
+- **Critério de aceite:** e2e (VER-04, VER-05, VHD-05, VHD-07); R2 → "16 384 casos,
+  exaustivo, 0 erros" na interface.
+- **Fora de escopo:** salvar o estado (MT-15).
+- **Depende de:** MT-14a
+
 ### MT-15: Salvar, abrir e retomar
 - **Objetivo:** autosave local, exportar e importar JSON, estado corrompido.
 - **Arquivos no escopo:** `app/core/src/state/**`, `app/web/src/**`
