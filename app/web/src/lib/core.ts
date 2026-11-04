@@ -177,7 +177,57 @@ export interface HelpLog {
 	solutionPath: number;
 }
 
-/** A compression in progress, held by the core (MT-12a, MT-12b, MT-13). */
+// ---------------------------------------------------------------- diagram (MT-14a)
+
+/** The input and AND block, a cell number, or result bit `R<j>`. */
+export type DiagramEnd = 'inputs' | number | `R${number}`;
+
+export interface DiagramBlock {
+	cell: number;
+	kind: CellKind;
+	/** 0 is the input block; cells over level n sit in row n + 1. */
+	row: number;
+	column: number;
+	/** Position among the blocks of the same row and column. */
+	slot: number;
+}
+
+/** The block diagram of the concluded levels (spec 05). */
+export interface Diagram {
+	complete: boolean;
+	outputWidth: number;
+	rows: number;
+	andGates: number;
+	blocks: DiagramBlock[];
+	edges: { from: DiagramEnd; to: DiagramEnd; label: string }[];
+	/** Wire behind each R_j once complete; null is a constant 0. */
+	outputs: (string | null)[];
+	critical: number[];
+	ands: { ident: string; factors: string[] }[];
+}
+
+/** One row of the wiring table (DIA-04). */
+export interface WiringRow {
+	cell: string;
+	/** Null for the CPA. */
+	level: number | null;
+	column: number;
+	inputs: (string | null)[];
+	sum: string;
+	sumResult: number | null;
+	carry: string | null;
+	carryResult: number | null;
+}
+
+export interface TableHeaders {
+	cell: string;
+	level: string;
+	column: string;
+	sum: string;
+	carry: string;
+}
+
+/** A compression in progress, held by the core (MT-12a, MT-12b, MT-13, MT-14a). */
 export interface CompressionSession {
 	snapshot(): Snapshot;
 	formCell(ids: number[]): ActionResult;
@@ -193,6 +243,9 @@ export interface CompressionSession {
 	/** Dadda's solution from level 0, as a separate session; free it after use. */
 	solution(path: boolean): CompressionSession;
 	helpLog(): HelpLog;
+	diagram(): Diagram;
+	wiringTable(): WiringRow[];
+	wiringTableMarkdown(headers: TableHeaders): string;
 	/** Releases the WASM memory; the session is unusable afterwards. */
 	free(): void;
 }
@@ -218,6 +271,9 @@ function wrap(s: Session): CompressionSession {
 		lowerBound: (path) => JSON.parse(s.lowerBound(path)),
 		solution: (path) => wrap(s.solution(path)),
 		helpLog: () => JSON.parse(s.helpLog()),
+		diagram: () => JSON.parse(s.diagram()),
+		wiringTable: () => JSON.parse(s.wiringTable()),
+		wiringTableMarkdown: (headers) => s.wiringTableMarkdown(JSON.stringify(headers)),
 		free: () => s.free()
 	};
 }
