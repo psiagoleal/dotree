@@ -227,7 +227,36 @@ export interface TableHeaders {
 	carry: string;
 }
 
-/** A compression in progress, held by the core (MT-12a, MT-12b, MT-13, MT-14a). */
+// ------------------------------------------------- verification and VHDL (MT-14b)
+
+/** First failing vector (VER-03). Values are decimal strings. */
+export interface Counterexample {
+	inputs: { var: string; value: string }[];
+	expected: string;
+	obtained: string;
+	/** Result bits where the circuit disagrees with the expression. */
+	differing: number[];
+}
+
+export interface VerificationProgress {
+	checked: number;
+	total: number;
+	coverage: 'exhaustive' | 'sample';
+	done: boolean;
+	counterexample: Counterexample | null;
+}
+
+export interface VhdlFile {
+	name: string;
+	contents: string;
+}
+
+export type VhdlLanguage = 'pt-br' | 'en';
+
+export type VhdlResult =
+	{ ok: true; files: VhdlFile[] } | { ok: false; error: 'notComplete' | 'invalidName' };
+
+/** A compression in progress, held by the core (MT-12a, MT-12b, MT-13, MT-14). */
 export interface CompressionSession {
 	snapshot(): Snapshot;
 	formCell(ids: number[]): ActionResult;
@@ -246,6 +275,9 @@ export interface CompressionSession {
 	diagram(): Diagram;
 	wiringTable(): WiringRow[];
 	wiringTableMarkdown(headers: TableHeaders): string;
+	/** The complete circuit for the verification worker, or null while incomplete. */
+	netlist(): string | null;
+	vhdl(name: string, language: VhdlLanguage): VhdlResult;
 	/** Releases the WASM memory; the session is unusable afterwards. */
 	free(): void;
 }
@@ -274,6 +306,8 @@ function wrap(s: Session): CompressionSession {
 		diagram: () => JSON.parse(s.diagram()),
 		wiringTable: () => JSON.parse(s.wiringTable()),
 		wiringTableMarkdown: (headers) => s.wiringTableMarkdown(JSON.stringify(headers)),
+		netlist: () => s.netlist() ?? null,
+		vhdl: (name, language) => JSON.parse(s.vhdl(name, language)),
 		free: () => s.free()
 	};
 }

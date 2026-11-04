@@ -93,6 +93,13 @@ ou métrica fica em segundo plano.
   nome; o vai-um entre células da mesma linha (CPA) é horizontal. Abaixo, a tabela de
   ligações. Exportar só com o circuito completo; antes disso, um aviso diz até que nível
   o diagrama vai.
+- **Verificação e VHDL** (MT-14b): duas seções depois de "Circuito". "Verificar circuito"
+  fica desabilitado, com o motivo embaixo, até o circuito ficar completo; a barra de
+  progresso (na cor de destaque) e "Cancelar" só aparecem se a verificação passar de 0,5 s.
+  O resultado é uma linha ("16.384 casos, exaustivo, 0 erros."); um erro mostra o
+  contraexemplo numa lista de termos, com os valores em decimal e em binário. No VHDL, o
+  nome da entidade é um campo em fonte monoespaçada (borda de perigo e explicação quando
+  inválido); cada arquivo tem "Copiar <arquivo>" e o código num `<details>` fechado.
 - **Visão** (VIS-01, VIS-03): botões "Pontos" e "Variáveis indexadas" ao lado do título da
   matriz, com a tecla V como atalho; a escolha fica no `localStorage` do navegador.
 - **Revelação em duas etapas** (GER-03): resultado primeiro; o caminho fica atrás de um

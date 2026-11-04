@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Interface: verificação do circuito completo num *worker* (o R2 dá "16.384 casos,
+  exaustivo, 0 erros"), com barra de progresso depois de 0,5 s, cancelamento sem resultado
+  parcial e, se algum caso falhar, o primeiro contraexemplo (entradas, esperado, obtido em
+  decimal e binário, bits que diferem). Painel VHDL com nome da entidade validado pelo
+  núcleo, cópia de cada arquivo e `.zip` com todos; verificação e VHDL desabilitados, com o
+  motivo, enquanto o circuito está incompleto. A `Session` ganhou `netlist` e `vhdl`; a
+  classe `Verification` roda no *worker* (MT-14b).
 - Interface: diagrama de blocos em SVG (uma linha por nível, maior peso à esquerda, bloco
   de portas AND que se expande em portas, ligações rotuladas com o sinal, vai-um do CPA na
   horizontal, bits $R_j$ ao fim, células críticas destacadas pelo mesmo botão dos painéis)
