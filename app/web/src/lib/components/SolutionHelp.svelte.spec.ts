@@ -69,4 +69,27 @@ describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06)', () => {
 		expect(JSON.stringify(session.snapshot())).toBe(before);
 		expect(session.helpLog()).toMatchObject({ solution: 1, solutionPath: 1 });
 	});
+
+	it('a reopened exercise shows the helps already revealed, without counting them (SAL-02)', async () => {
+		const first = core.openSession(r1.expression, r1.widths);
+		first.lowerBound(false);
+		first.lowerBound(true);
+		first.solution(false).free();
+		const reopened = core.restoreSession(first.exercise());
+		first.free();
+		if (!reopened.ok) throw new Error(reopened.error.code);
+		const session = reopened.session;
+		const log = session.helpLog();
+		const onhelp = vi.fn();
+		await render(SolutionHelp, { session, view: 'dots', onhelp });
+
+		await expect.element(page.getByTestId('lower-bound-path')).toHaveTextContent('20 − 7 = 13');
+		await expect.element(page.getByTestId('solution-summary')).toBeVisible();
+		await expect.element(page.getByTestId('solution')).not.toBeInTheDocument();
+		await expect
+			.element(page.getByRole('button', { name: 'Ver a solução nível a nível' }))
+			.toBeVisible();
+		expect(session.helpLog()).toEqual(log);
+		expect(onhelp).not.toHaveBeenCalled();
+	});
 });

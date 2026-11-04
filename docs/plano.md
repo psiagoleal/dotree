@@ -259,6 +259,34 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Fora de escopo:** link compartilhável (D-6).
 - **Depende de:** MT-12
 
+> **Divisão (2026-11-04):** o MT-15 virou dois, como o MT-12 e o MT-14. **MT-15a**: o
+> formato do arquivo no núcleo, exportar e abrir (SAL-02, SAL-03). **MT-15b**: salvamento
+> automático no navegador, retomada, armazenamento indisponível e estado salvo corrompido
+> (SAL-01, SAL-04, SAL-05).
+
+### MT-15a: Exportar e abrir o exercício
+- **Objetivo:** módulo `state` do núcleo (arquivo JSON com versão de esquema, reaberto
+  refazendo cada célula pelas regras); exportar e abrir na interface, com as revelações já
+  feitas de volta na tela sem contar de novo.
+- **Arquivos no escopo:** `app/core/src/state/**`, `app/wasm/src/**`, `app/web/src/**`,
+  `app/web/messages/*`
+- **Critério de aceite:** `cargo test -p dotree-core --test state` e e2e (SAL-02, SAL-03).
+- **Fora de escopo:** salvamento automático (MT-15b).
+- **Depende de:** MT-12, MT-13
+- **Feito (2026-11-04):** o núcleo passou a depender de `serde` e `serde_json` (Rust puro,
+  já no lockfile pela ponte; a ADR 0001 só proíbe dependência de navegador). As entradas de
+  cada célula vão como posições na ordem canônica dos pontos do nível, porque voltar de
+  nível gera ids novos. O limite inferior e a solução revelados saem do registro de ajudas.
+
+### MT-15b: Salvamento automático e retomada
+- **Objetivo:** salvar no armazenamento local a cada mudança, oferecer a retomada, avisar
+  uma vez se o armazenamento falhar e oferecer baixar um estado salvo corrompido antes de
+  descartá-lo.
+- **Arquivos no escopo:** `app/web/src/**`, `app/web/messages/*`
+- **Critério de aceite:** e2e (SAL-01, SAL-04, SAL-05).
+- **Fora de escopo:** link compartilhável (D-6).
+- **Depende de:** MT-15a
+
 ### MT-16: Acessibilidade, desempenho e tela pequena
 - **Objetivo:** axe sem violações graves, R2 só por teclado, 100 ms no p95, modo leitura
   abaixo de 768 px, sem rede após carregar, sem requisições externas.

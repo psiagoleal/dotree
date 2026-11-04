@@ -59,15 +59,17 @@ describe('WidthChallenge (EXP-09, EXP-10, GER-01, GER-03)', () => {
 		await expect.element(result()).toHaveTextContent('Acertou! A saída tem W = 7 bits.');
 		await expect.element(path()).not.toBeInTheDocument();
 		await expect.element(page.getByLabelText('Bits da saída')).not.toBeInTheDocument();
-		expect(onreveal).toHaveBeenCalledOnce();
+		expect(onreveal).toHaveBeenCalledExactlyOnceWith(7);
 	});
 
 	it('a wrong answer says so and still reveals W (EXP-10)', async () => {
-		await render(WidthChallenge, { matrix: r1, onreveal: () => {} });
+		const onreveal = vi.fn();
+		await render(WidthChallenge, { matrix: r1, onreveal });
 		await answer('6');
 		await expect
 			.element(result())
 			.toHaveTextContent('Não foi dessa vez: você respondeu 6. A saída tem W = 7 bits.');
+		expect(onreveal).toHaveBeenCalledExactlyOnceWith(6);
 	});
 
 	it('refuses an answer that is not a whole number of bits, revealing nothing', async () => {
@@ -94,16 +96,18 @@ describe('WidthChallenge (EXP-09, EXP-10, GER-01, GER-03)', () => {
 		await confirm().click();
 		await expect.element(result()).toHaveTextContent('A saída tem W = 7 bits.');
 		await expect.element(path()).not.toBeInTheDocument();
-		expect(onreveal).toHaveBeenCalledOnce();
+		expect(onreveal).toHaveBeenCalledExactlyOnceWith(null);
 	});
 
 	it('the working is step 2, with its own request and confirmation (GER-03)', async () => {
-		await render(WidthChallenge, { matrix: r1, onreveal: () => {} });
+		const onpath = vi.fn();
+		await render(WidthChallenge, { matrix: r1, onreveal: () => {}, onpath });
 		await answer('7');
 		await page.getByRole('button', { name: 'Mostrar a conta' }).click();
 		await expect.element(keepTrying()).toHaveFocus();
 		await keepTrying().click();
 		await expect.element(path()).not.toBeInTheDocument();
+		expect(onpath).not.toHaveBeenCalled();
 
 		await page.getByRole('button', { name: 'Mostrar a conta' }).click();
 		await confirm().click();
@@ -115,8 +119,31 @@ describe('WidthChallenge (EXP-09, EXP-10, GER-01, GER-03)', () => {
 		expect(p).toContain('49 + 9 + 9 + 3 + 1');
 		expect(p).toContain('⌈log2 72⌉ = 7');
 		expect(p).toContain('64 ≤ 71 < 128');
+		expect(onpath).toHaveBeenCalledOnce();
 		await expect
 			.element(page.getByRole('button', { name: 'Mostrar a conta' }))
 			.not.toBeInTheDocument();
+	});
+
+	it('a reopened exercise shows what was already revealed, without asking (SAL-02)', async () => {
+		const onreveal = vi.fn();
+		await render(WidthChallenge, { matrix: r1, initial: { answer: 6, path: true }, onreveal });
+		await expect
+			.element(result())
+			.toHaveTextContent('Não foi dessa vez: você respondeu 6. A saída tem W = 7 bits.');
+		await expect.element(path()).toBeVisible();
+		await expect.element(page.getByLabelText('Bits da saída')).not.toBeInTheDocument();
+		expect(onreveal).not.toHaveBeenCalled();
+	});
+
+	it('a reopened give-up keeps step 2 behind its own request', async () => {
+		await render(WidthChallenge, {
+			matrix: r1,
+			initial: { answer: null, path: false },
+			onreveal: () => {}
+		});
+		await expect.element(result()).toHaveTextContent('A saída tem W = 7 bits.');
+		await expect.element(path()).not.toBeInTheDocument();
+		await expect.element(page.getByRole('button', { name: 'Mostrar a conta' })).toBeVisible();
 	});
 });

@@ -9,12 +9,13 @@
 
 ## Em aberto
 
-- [ ] [MT-15](plano.md#mt-15-salvar-abrir-e-retomar) — Salvar, abrir e retomar.
+- [ ] [MT-15b](plano.md#mt-15b-salvamento-automático-e-retomada) — Salvamento automático, retomada, armazenamento indisponível e estado corrompido.
 - [ ] [MT-16](plano.md#mt-16-acessibilidade-desempenho-e-tela-pequena) — Acessibilidade, desempenho e tela pequena.
 - [ ] [MT-17](plano.md#mt-17-publicar-a-v010) — Publicar a v0.1.0.
 
 ## Concluídos
 
+- [x] [MT-15a](plano.md#mt-15a-exportar-e-abrir-o-exercício) — Exportar e abrir o exercício como JSON (núcleo `state`, recusas explicadas, revelações de volta).
 - [x] [MT-14b](plano.md#mt-14b-interface--verificação-e-vhdl) — Interface: verificação num *worker* com progresso e cancelamento, VHDL com cópia e `.zip`.
 - [x] [MT-14a](plano.md#mt-14-interface--diagrama-tabela-verificação-e-vhdl) — Interface: diagrama de blocos em SVG, tabela de ligações e exportações SVG e Markdown.
 - [x] [MT-13](plano.md#mt-13-interface--ajuda-sob-demanda-em-duas-etapas) — Interface: ajuda sob demanda em duas etapas (regras, dica, próxima jogada, limite inferior, solução Dadda, registro no resumo).

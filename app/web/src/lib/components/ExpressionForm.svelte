@@ -30,6 +30,12 @@
 		onbuild(expression, widthsInUse());
 	}
 
+	/** Shows the expression and widths of a reopened exercise, without building. */
+	export function load(src: string, w: Record<string, number>) {
+		expression = src;
+		widths = { ...w };
+	}
+
 	function useExample(ex: Example) {
 		expression = ex.expression;
 		widths = { ...ex.widths };

@@ -9,7 +9,7 @@
 
 | Componente | Onde | Responsabilidade | Depende de |
 |---|---|---|---|
-| `dotree-core` | `app/core` | Domínio puro. Expõe `version()` e os módulos `expr`, `matrix`, `reduce`, `help`, `netlist`, `verify`, `diagram` e `vhdl`. | — |
+| `dotree-core` | `app/core` | Domínio puro. Expõe `version()` e os módulos `expr`, `matrix`, `reduce`, `help`, `netlist`, `verify`, `diagram`, `vhdl` e `state`. | `serde`, `serde_json` |
 | `dotree_core::expr` | `app/core/src/expr/` | Linguagem da expressão: lexer e analisador recursivo (`parser.rs`) que expande enquanto lê; `analyze()` valida larguras e limite de bits. Erros como códigos (IDI-05). | — |
 | `dotree_core::matrix` | `app/core/src/matrix/` | Matriz de pontos do nível 0: cópias por bit do coeficiente, sinais compartilhados, ANDs, $v_{max}$, $W$, ordem canônica. | `expr` |
 | `dotree_core::reduce` | `app/core/src/reduce/` | Compressão nível a nível: células FA/HA, prontidão em meios $T_{FA}$, numeração, recusas, CPA *ripple*, resultado, métricas, caminho crítico; histórico de desfazer/refazer por cópia de estado com registro de todos os pontos por id. | `matrix` |
@@ -17,11 +17,12 @@
 | `dotree_core::netlist` | `app/core/src/netlist/` | Circuito completo como fios (`Wire`) e células em ordem de número; identificadores comuns a diagrama, tabela e VHDL; empacotamento das entradas. | `matrix`, `reduce` |
 | `dotree_core::diagram` | `app/core/src/diagram/` | Leiaute em grade do diagrama de blocos, ligações rotuladas, células críticas recalculadas da netlist, tabela de ligações e Markdown (cabeçalhos vindos da interface). | `netlist` |
 | `dotree_core::vhdl` | `app/core/src/vhdl/` | Gera VHDL-93 ASCII: `full_adder`, `half_adder`, topo estrutural e testbench (exaustivo ou amostra); comentários e mensagens em pt-BR/en; validação do nome da entidade. Exemplo `vhdl_referencia` + `ghdl_casos.sh` alimentam o job de CI. | `netlist`, `matrix`, `verify` |
+| `dotree_core::state` | `app/core/src/state/` | Arquivo do exercício (spec 08): `Exercise::capture` → JSON com `format` e `schema`; `parse` confere marca e esquema antes dos campos; `restore` refaz a matriz e cada célula pelas regras de `reduce` (entradas por posição na ordem canônica do nível). Recusas como `StateError`. | `expr`, `matrix`, `reduce`, `help` |
 | `dotree_core::verify` | `app/core/src/verify/` | Simulação bit-paralela (64 vetores por `u64`), exaustiva até 24 bits ou por amostra xorshift64\*, em blocos (progresso e cancelamento), contraexemplo. | `netlist` |
-| `dotree-wasm` | `app/wasm` | Ponte `wasm-bindgen`: `coreVersion()`, `buildMatrix(src, widthsJson)` e a classe `Session` (estado da compressão no núcleo: `snapshot`, `formCell`, `concludeLevel`, `closeWithCpa`, `goToLevel`, `undo`, `redo`; ajuda que conta cada revelação: `hint`, `nextMove`, `lowerBound`, `solution` (outra `Session`, com a solução de Dadda), `helpLog`; diagrama e tabela dos níveis concluídos: `diagram`, `wiringTable`, `wiringTableMarkdown`; circuito completo: `netlist` (JSON de `netcodec.rs`, conferido ao voltar) e `vhdl`; e a classe `Verification`, que verifica em blocos dentro do *worker*; o snapshot traz o motivo do bloqueio do CPA, o resultado e as células críticas), tudo em JSON com códigos (contratos em `app/wasm/tests/bridge.rs`, `session.rs`, `diagram.rs` e `verification.rs`). | `dotree-core`, `wasm-bindgen`, `serde_json` |
+| `dotree-wasm` | `app/wasm` | Ponte `wasm-bindgen`: `coreVersion()`, `buildMatrix(src, widthsJson)` e a classe `Session` (estado da compressão no núcleo: `snapshot`, `formCell`, `concludeLevel`, `closeWithCpa`, `goToLevel`, `undo`, `redo`; ajuda que conta cada revelação: `hint`, `nextMove`, `lowerBound`, `solution` (outra `Session`, com a solução de Dadda), `helpLog`; diagrama e tabela dos níveis concluídos: `diagram`, `wiringTable`, `wiringTableMarkdown`; circuito completo: `netlist` (JSON de `netcodec.rs`, conferido ao voltar) e `vhdl`; arquivo do exercício: `exercise`, `restore` (recusa com código), `expression`, `widths`, `revealWidth`, `revealWidthPath`, `revealed`, `shownLowerBound` e `shownSolution` (o já revelado, sem contar de novo); e a classe `Verification`, que verifica em blocos dentro do *worker*; o snapshot traz o motivo do bloqueio do CPA, o resultado e as células críticas), tudo em JSON com códigos (contratos em `app/wasm/tests/bridge.rs`, `session.rs`, `diagram.rs`, `verification.rs` e `exercise.rs`). | `dotree-core`, `wasm-bindgen`, `serde_json` |
 | Pacote WASM gerado | `app/web/src/lib/wasm/` (fora do git) | Saída do `wasm-pack` (`dotree.js`, `dotree_bg.wasm`). | `dotree-wasm` |
 | `#lib/core.ts` | `app/web/src/lib/core.ts` | Carrega o WASM e tipa o JSON da ponte (`Matrix`, `CoreError`, `Snapshot`, `Rejection`); `openSession` embrulha a `Session`. | pacote WASM |
-| `#lib/errors.ts` | `app/web/src/lib/errors.ts` | Traduz códigos de erro, aviso, recusa e bloqueio do CPA do núcleo (IDI-05). | Paraglide, `core.ts` (tipos) |
+| `#lib/errors.ts` | `app/web/src/lib/errors.ts` | Traduz códigos de erro, aviso, recusa, bloqueio do CPA e recusa de arquivo do núcleo (IDI-05). | Paraglide, `core.ts` (tipos) |
 | `#lib/expression.ts` | `app/web/src/lib/expression.ts` | Variáveis do texto (um campo de largura cada) e exemplos embutidos. | — |
 | `#lib/signal.ts` | `app/web/src/lib/signal.ts` | Separa o identificador do sinal em letra e índice para a visão indexada. | — |
 | `#lib/view.ts` | `app/web/src/lib/view.ts` | Visão pontos/indexada: preferência guardada. | — |
@@ -36,7 +37,7 @@
 | `#lib/width.ts` | `app/web/src/lib/width.ts` | Arruma a conta da etapa 2 do desafio de $W$ com os valores do núcleo. | `core.ts` (tipos) |
 | `#lib/locale.ts` | `app/web/src/lib/locale.ts` | Idioma da primeira visita (IDI-03). | — |
 | Catálogos i18n | `app/web/messages/`, gerados em `src/lib/paraglide/` | Textos pt-br e en (Paraglide). | — |
-| Rotas | `app/web/src/routes/` | Layout (idioma, tokens CSS) e página inicial: formulário → `buildMatrix` + `openSession` (confirmando antes de descartar uma compressão, EXP-04) → legenda, desafio de $W$ e compressão, ou erro; estado da visão e atalho V. | `#lib/core.ts`, `#lib/errors.ts`, `#lib/locale.ts`, Paraglide, componentes |
+| Rotas | `app/web/src/routes/` | Layout (idioma, tokens CSS) e página inicial: formulário → `buildMatrix` + `openSession` (confirmando antes de descartar uma compressão, EXP-04), ou exportar e abrir o exercício como JSON (`restoreSession`, recusa explicada sem mexer no exercício aberto) → legenda, desafio de $W$ e compressão, ou erro; estado da visão e atalho V. | `#lib/core.ts`, `#lib/errors.ts`, `#lib/locale.ts`, Paraglide, componentes |
 | Componentes | `app/web/src/lib/components/` | `LanguageSwitch`, `ExpressionForm`, `TermLegend`, `ViewToggle`, `WidthChallenge`, `ConfirmDialog` (reutilizado por toda ajuda), `LevelPanel` (um nível, só leitura, selecionável ou resultado), `Rules`, `Coach` (dica e próxima jogada), `SolutionHelp` (limite inferior e solução em duas etapas), `CircuitView` (diagrama, tabela de ligações, exportações), `VerifyView` (verificação, progresso, cancelamento, contraexemplo), `VhdlView` (nome, cópia, `.zip`), `Compression` (painéis, ações, CPA, resultado, caminho crítico, volta de nível, métricas, teclado). | Paraglide, `expression.ts`, `signal.ts`, `view.ts`, `keys.ts`, `levels.ts`, `width.ts`, `errors.ts`, `core.ts`, `diagram.ts`, `download.ts`, `verification.ts`, `zip.ts` |
 
 ## Dependências
@@ -68,8 +69,8 @@ flowchart LR
 
 ## Fronteiras que a arquitetura protege
 
-- O núcleo não conhece navegador nem WASM (ADR 0001): `app/core/Cargo.toml` não tem
-  dependência.
+- O núcleo não conhece navegador nem WASM (ADR 0001): `app/core/Cargo.toml` só depende de
+  `serde` e `serde_json` (Rust puro), para o arquivo do exercício.
 - A interface não tem regra de domínio: só chama `#lib/core.ts` (ou, na verificação, o
   mesmo pacote WASM dentro do *worker*).
 - Entrega: a mesma build estática vai para o GitHub Pages (`/dotree/`) e para a imagem

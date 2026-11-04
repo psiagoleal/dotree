@@ -10,12 +10,15 @@
 	import ViewToggle from '#lib/components/ViewToggle.svelte';
 	import WidthChallenge from '#lib/components/WidthChallenge.svelte';
 	import { loadCore, type BuildResult, type CompressionSession, type Core } from '#lib/core.ts';
-	import { errorMessage, warningMessage } from '#lib/errors.ts';
+	import { download } from '#lib/download.ts';
+	import { errorMessage, fileErrorMessage, warningMessage } from '#lib/errors.ts';
 	import { keyAction } from '#lib/keys.ts';
 	import { browserStorage, readView, writeView, type ViewMode } from '#lib/view.ts';
 
 	const ISSUES_URL = 'https://github.com/psiagoleal/dotree/issues/new';
 	const SPEC_URL = 'https://github.com/psiagoleal/dotree/blob/main/docs/specs/README.md';
+	/** An exercise file is a few kilobytes; anything far larger is refused unread. */
+	const MAX_FILE_BYTES = 1_000_000;
 
 	type Status =
 		{ kind: 'loading' } | { kind: 'ready'; core: Core } | { kind: 'error'; reason: string };
@@ -30,14 +33,45 @@
 	let widthRevealed = $state(false);
 	// Mounted only once the core is ready, hence state.
 	let discardDialog = $state<ConfirmDialog>();
+	let form = $state<ExpressionForm>();
+	let fileInput = $state<HTMLInputElement>();
+	// Outcome of the last "open exercise" (SAL-03): a refusal leaves the exercise as it was.
+	let fileStatus = $state<{ ok: boolean; text: string } | null>(null);
 
 	async function build(core: Core, expression: string, widths: Record<string, number>) {
 		// EXP-04: a compression with any action in it is discarded only after confirmation.
 		if (session?.snapshot().canUndo && !(await discardDialog?.ask())) return;
+		fileStatus = null;
 		result = core.buildMatrix(expression, widths);
 		widthRevealed = false;
 		session?.free();
 		session = result.ok ? core.openSession(expression, widths) : null;
+	}
+
+	function exportExercise() {
+		if (session) download(m.file_name(), session.exercise(), 'application/json');
+	}
+
+	async function openFile(core: Core, file: File) {
+		fileStatus = null;
+		const refuse = (text: string) =>
+			(fileStatus = { ok: false, text: m.file_import_failed({ file: file.name, reason: text }) });
+		if (file.size > MAX_FILE_BYTES) return refuse(fileErrorMessage({ code: 'tooLarge' }));
+		const opened = core.restoreSession(await file.text());
+		if (!opened.ok) return refuse(fileErrorMessage(opened.error));
+		const next = opened.session;
+		if (session?.snapshot().canUndo && !(await discardDialog?.ask())) {
+			next.free();
+			return;
+		}
+		const expression = next.expression();
+		const widths = next.widths();
+		form?.load(expression, widths);
+		result = core.buildMatrix(expression, widths);
+		widthRevealed = next.revealed().width !== null;
+		session?.free();
+		session = next;
+		fileStatus = { ok: true, text: m.file_imported({ file: file.name }) };
 	}
 
 	function setView(mode: ViewMode) {
@@ -75,7 +109,26 @@
 		<p role="status">{m.status_loading()}</p>
 	{:else if status.kind === 'ready'}
 		{@const core = status.core}
-		<ExpressionForm onbuild={(e, w) => build(core, e, w)} />
+		<ExpressionForm bind:this={form} onbuild={(e, w) => build(core, e, w)} />
+		<div class="file">
+			<button type="button" onclick={exportExercise} disabled={!session}>{m.file_export()}</button>
+			<button type="button" onclick={() => fileInput?.click()}>{m.file_import()}</button>
+			<input
+				bind:this={fileInput}
+				type="file"
+				accept=".json,application/json"
+				hidden
+				data-testid="file-input"
+				onchange={(e) => {
+					const file = e.currentTarget.files?.[0];
+					e.currentTarget.value = '';
+					if (file) void openFile(core, file);
+				}}
+			/>
+		</div>
+		<div role="status" data-testid="file-status" class:error-text={fileStatus && !fileStatus.ok}>
+			{#if fileStatus}<p>{fileStatus.text}</p>{/if}
+		</div>
 		<ConfirmDialog
 			bind:this={discardDialog}
 			title={m.discard_confirm_title()}
@@ -101,7 +154,15 @@
 				</p>
 				<TermLegend terms={mx.terms} />
 				{#key mx}
-					<WidthChallenge matrix={mx} onreveal={() => (widthRevealed = true)} />
+					<WidthChallenge
+						matrix={mx}
+						initial={session?.revealed().width ?? null}
+						onreveal={(answer) => {
+							session?.revealWidth(answer);
+							widthRevealed = true;
+						}}
+						onpath={() => session?.revealWidthPath()}
+					/>
 				{/key}
 				{#if session}
 					{#key session}
@@ -152,6 +213,32 @@
 	}
 	.tagline {
 		font-size: 1.15rem;
+	}
+	.file {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+		margin-top: var(--space-2);
+	}
+	.file button {
+		font: inherit;
+		padding: var(--space-1) var(--space-3);
+		border-radius: var(--radius);
+		border: 1px solid var(--color-accent);
+		background: transparent;
+		color: var(--color-accent);
+		cursor: pointer;
+	}
+	.file button:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+	[data-testid='file-status'] p {
+		margin: var(--space-2) 0 0;
+		font-size: 0.9rem;
+	}
+	.error-text {
+		color: var(--color-danger);
 	}
 	.notice,
 	.version {
