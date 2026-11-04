@@ -26,6 +26,24 @@ arquivo.
   salvo como arquivo antes de descartá-lo.
   *Prova:* teste de ponta a ponta com estado salvo adulterado.
 
+## Notas de implementação
+
+- **Formato (esquema 1, MT-15a).** Objeto JSON com `format: "dotree-exercise"`, `schema`,
+  `expression`, `widths`, `levels` (cada um com `cpa` e `cells`), `pending` (células do
+  nível atual, na ordem em que foram formadas), `reveals.width` (resposta dada, ou `null`
+  para quem desistiu, e se a conta foi aberta) e `help` (o registro de ajudas, AJU-07).
+  Cada célula guarda `kind`, `column` e `inputs`. As entradas são **posições na ordem
+  canônica dos pontos do nível**, e não ids internos, porque voltar de nível gera ids
+  novos. O nível do CPA não lista células: elas decorrem dos pontos do nível.
+- **Revelações.** O limite inferior e a solução revelados (etapa 1 ou 2) decorrem do
+  registro de ajudas, por isso não se repetem em `reveals`. Ao reabrir, a tela mostra de
+  novo tudo o que já foi revelado sem pedir confirmação nem contar outra vez. Dica e
+  próxima jogada valem só para o estado em que foram pedidas, então ficam apenas na
+  contagem.
+- **Abrir = refazer.** O núcleo refaz cada célula pelas regras da compressão, e qualquer
+  recusa vira "célula inconsistente", com nível e posição. O histórico de desfazer volta
+  como a sequência das células salvas. Arquivos acima de 1 MB são recusados sem leitura.
+
 ## Fora de escopo
 
 Compartilhamento por link (D-6); sincronização entre dispositivos; histórico de versões;

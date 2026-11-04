@@ -9,7 +9,7 @@
 
 - **Data:** 2026-11-04
 - **Branch:** `main`
-- **Commit:** `5f9ce8a` (MT-14a, #29). O MT-14b ainda não foi commitado.
+- **Commit:** `98e1f38` (MT-14b, #30). O MT-15a ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -99,7 +99,19 @@
       circuito muda) e `VhdlView`. A prova de VER-04 passou a ser $A + B$ 12 + 12 ($2^{24}$
       casos, ~1,4 s no navegador); $A \times B$ 16 × 16 cai na amostra e termina antes de
       0,5 s. 165 testes Rust, 122 de unidade/componente, 28 e2e; 7 mutações pegas.
-- [ ] Próximo: MT-15 (salvar, abrir e retomar).
+- [x] MT-14b mesclado (#30).
+- [x] MT-15a (o MT-15 virou 15a e 15b): módulo `dotree_core::state` (o núcleo agora depende
+      de `serde` e `serde_json`), com entradas das células por posição na ordem canônica do
+      nível, porque `go_to_level` não reaproveita ids. Ao abrir, o núcleo refaz cada célula
+      pelas regras. Na ponte: `exercise`, `restore`, `revealWidth`, `revealed` e
+      `shownLowerBound`/`shownSolution`, que mostram o já revelado sem contar. Na web:
+      exportar e abrir na página, `WidthChallenge` com `initial`/`onpath` e `SolutionHelp`
+      lendo o já revelado. 181 testes Rust, 128 de unidade/componente, 31 e2e; 15 mutações
+      pegas (uma só depois de reforçar o teste de trabalho após o CPA).
+- [ ] Próximo: MT-15b (salvamento automático, retomada, SAL-04, SAL-05). Plano: o
+      `exercise()` da sessão já é o que vai para o armazenamento local; salvar depois de
+      cada ação e revelação, oferecer retomar ou descartar ao abrir, e tratar o estado
+      corrompido com download do texto salvo.
 
 ## Observações para a próxima sessão
 
@@ -129,6 +141,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-04 | `98e1f38` | verificação e VHDL (#30); exportar e abrir o exercício | MT-14b, MT-15a |
 | 2026-11-04 | `5f9ce8a` | diagrama, tabela e exportações (#29); verificação e VHDL na interface | MT-14a, MT-14b |
 | 2026-11-03 | `2a53fcd` | ajuda sob demanda (#28); diagrama, tabela e exportações | MT-13, MT-14a |
 | 2026-11-01 | `b46fcff` | CPA e resultado (#27); ajuda sob demanda na interface | MT-12b, MT-13 |

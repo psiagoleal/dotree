@@ -177,6 +177,37 @@ export interface HelpLog {
 	solutionPath: number;
 }
 
+// ---------------------------------------------------------------- exercise file (MT-15a)
+
+/** The width challenge: the answer given, or null when the user gave up (EXP-10). */
+export interface WidthReveal {
+	answer: number | null;
+	path: boolean;
+}
+
+/** How far a two-step help was revealed (GER-03). */
+export type RevealStage = 'none' | 'result' | 'path';
+
+export interface Revealed {
+	width: WidthReveal | null;
+	lowerBound: RevealStage;
+	solution: RevealStage;
+}
+
+/** Why an exercise file cannot be opened (SAL-03). */
+export type ExerciseError =
+	| { code: 'malformed'; detail: string }
+	| { code: 'notExercise' }
+	| { code: 'oldSchema'; found: number }
+	| { code: 'futureSchema'; found: number }
+	| { code: 'badExpression' }
+	| { code: 'inconsistentCell'; level: number; position: number }
+	| { code: 'inconsistentLevel'; level: number }
+	| { code: 'inconsistentReveals' };
+
+export type RestoreResult =
+	{ ok: true; session: CompressionSession } | { ok: false; error: ExerciseError };
+
 // ---------------------------------------------------------------- diagram (MT-14a)
 
 /** The input and AND block, a cell number, or result bit `R<j>`. */
@@ -278,6 +309,19 @@ export interface CompressionSession {
 	/** The complete circuit for the verification worker, or null while incomplete. */
 	netlist(): string | null;
 	vhdl(name: string, language: VhdlLanguage): VhdlResult;
+	/** The exercise as a JSON file (SAL-02). */
+	exercise(): string;
+	/** What the exercise was opened with. */
+	expression(): string;
+	widths(): Record<string, number>;
+	/** The width challenge was answered, or given up with null; only the first call counts. */
+	revealWidth(answer: number | null): void;
+	/** Step 2 of the width; false before step 1. */
+	revealWidthPath(): boolean;
+	revealed(): Revealed;
+	/** Already revealed helps, again and uncounted; null before their reveal. */
+	shownLowerBound(): LowerBound | null;
+	shownSolution(): CompressionSession | null;
 	/** Releases the WASM memory; the session is unusable afterwards. */
 	free(): void;
 }
@@ -287,6 +331,8 @@ export interface Core {
 	buildMatrix(src: string, widths: Record<string, number>): BuildResult;
 	/** Opens a compression session; call it only after `buildMatrix` succeeded. */
 	openSession(src: string, widths: Record<string, number>): CompressionSession;
+	/** Opens an exercise file, or says why it cannot (SAL-03). */
+	restoreSession(file: string): RestoreResult;
 }
 
 function wrap(s: Session): CompressionSession {
@@ -308,6 +354,20 @@ function wrap(s: Session): CompressionSession {
 		wiringTableMarkdown: (headers) => s.wiringTableMarkdown(JSON.stringify(headers)),
 		netlist: () => s.netlist() ?? null,
 		vhdl: (name, language) => JSON.parse(s.vhdl(name, language)),
+		exercise: () => s.exercise(),
+		expression: () => s.expression(),
+		widths: () => JSON.parse(s.widths()),
+		revealWidth: (answer) => s.revealWidth(answer),
+		revealWidthPath: () => s.revealWidthPath(),
+		revealed: () => JSON.parse(s.revealed()),
+		shownLowerBound: () => {
+			const b = s.shownLowerBound();
+			return b === undefined ? null : JSON.parse(b);
+		},
+		shownSolution: () => {
+			const o = s.shownSolution();
+			return o === undefined ? null : wrap(o);
+		},
 		free: () => s.free()
 	};
 }
@@ -317,6 +377,13 @@ export async function loadCore(): Promise<Core> {
 	return {
 		version: coreVersion(),
 		buildMatrix: (src, widths) => JSON.parse(wasmBuildMatrix(src, JSON.stringify(widths))),
-		openSession: (src, widths) => wrap(Session.open(src, JSON.stringify(widths)))
+		openSession: (src, widths) => wrap(Session.open(src, JSON.stringify(widths))),
+		restoreSession: (file) => {
+			try {
+				return { ok: true, session: wrap(Session.restore(file)) };
+			} catch (e) {
+				return { ok: false, error: JSON.parse(String(e)) };
+			}
+		}
 	};
 }

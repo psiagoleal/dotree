@@ -1,30 +1,52 @@
 <!-- Caminho relativo: app/web/src/lib/components/WidthChallenge.svelte -->
 <!-- "How many bits does the output need?" (D-1). W stays hidden until the user answers or
      asks for it and confirms (EXP-09, EXP-10, GER-01). The working, from v_max to W, is
-     step 2, with its own request and confirmation (GER-03). -->
+     step 2, with its own request and confirmation (GER-03). A reopened exercise passes what
+     was already revealed as `initial` (SAL-02). -->
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { m } from '#lib/paraglide/messages.js';
-	import type { Matrix } from '#lib/core.ts';
+	import type { Matrix, WidthReveal } from '#lib/core.ts';
 	import { widthPath } from '#lib/width.ts';
 	import ConfirmDialog from './ConfirmDialog.svelte';
 
-	let { matrix, onreveal }: { matrix: Matrix; onreveal: () => void } = $props();
+	let {
+		matrix,
+		initial = null,
+		onreveal,
+		onpath = () => {}
+	}: {
+		matrix: Matrix;
+		/** What a reopened exercise had already revealed. */
+		initial?: WidthReveal | null;
+		/** W was revealed: by an answer, or by giving up (`null`). */
+		onreveal: (answer: number | null) => void;
+		/** Step 2 was revealed. */
+		onpath?: () => void;
+	} = $props();
 
 	type Outcome = { kind: 'right' } | { kind: 'wrong'; answer: number } | { kind: 'given-up' };
 
+	function outcomeOf(answer: number | null): Outcome {
+		if (answer === null) return { kind: 'given-up' };
+		return answer === matrix.outputWidth ? { kind: 'right' } : { kind: 'wrong', answer };
+	}
+
+	// The component is re-created for each matrix, so `initial` is read once.
+	const start = untrack(() => initial);
 	let draft = $state('');
 	let invalid = $state(false);
-	let outcome = $state<Outcome | null>(null);
-	let showPath = $state(false);
+	let outcome = $state<Outcome | null>(start && untrack(() => outcomeOf(start.answer)));
+	let showPath = $state(start?.path ?? false);
 	let resultDialog: ConfirmDialog;
 	let pathDialog: ConfirmDialog;
 
 	const path = $derived(widthPath(matrix));
 	const width = $derived(matrix.outputWidth);
 
-	function reveal(o: Outcome) {
-		outcome = o;
-		onreveal();
+	function reveal(answer: number | null) {
+		outcome = outcomeOf(answer);
+		onreveal(answer);
 	}
 
 	function submit(event: SubmitEvent) {
@@ -33,15 +55,17 @@
 		const answer = Number(text);
 		invalid = !/^\d+$/.test(text) || answer < 1;
 		if (invalid) return;
-		reveal(answer === width ? { kind: 'right' } : { kind: 'wrong', answer });
+		reveal(answer);
 	}
 
 	async function giveUp() {
-		if (await resultDialog.ask()) reveal({ kind: 'given-up' });
+		if (await resultDialog.ask()) reveal(null);
 	}
 
 	async function askPath() {
-		if (await pathDialog.ask()) showPath = true;
+		if (!(await pathDialog.ask())) return;
+		showPath = true;
+		onpath();
 	}
 </script>
 

@@ -9,6 +9,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Exportar e abrir o exercício como arquivo JSON com versão de esquema (expressão,
+  larguras, células por nível, células pendentes, resposta do desafio da largura e
+  registro de ajudas). Ao abrir, o núcleo refaz cada célula pelas regras; arquivo
+  malformado, de outro tipo, de esquema antigo ou futuro, com expressão inválida ou célula
+  inconsistente é recusado com o motivo, sem mexer no exercício aberto. O que já tinha sido
+  revelado (W, a conta de W, limite inferior, solução) volta à tela sem pedir confirmação
+  nem contar de novo. Novo módulo `state` no núcleo, que passou a depender de `serde` e
+  `serde_json` (MT-15a).
 - Interface: verificação do circuito completo num *worker* (o R2 dá "16.384 casos,
   exaustivo, 0 erros"), com barra de progresso depois de 0,5 s, cancelamento sem resultado
   parcial e, se algum caso falhar, o primeiro contraexemplo (entradas, esperado, obtido em

@@ -1,7 +1,7 @@
 // Caminho relativo: app/web/src/lib/errors.ts
 // Words the codes the core returns (IDI-05), in the current or a given language.
 import { m } from '#lib/paraglide/messages.js';
-import type { CoreError, CoreWarning, CpaBlock, Rejection } from '#lib/core.ts';
+import type { CoreError, CoreWarning, CpaBlock, ExerciseError, Rejection } from '#lib/core.ts';
 
 type Locale = 'pt-br' | 'en';
 
@@ -101,5 +101,32 @@ export function cpaBlockMessage(b: CpaBlock, locale?: Locale): string {
 			return m.cpa_block_nothing_to_add({}, o);
 		case 'pendingCells':
 			return m.cpa_block_pending_cells({}, o);
+	}
+}
+
+/** Why an exercise file was refused (SAL-03); `tooLarge` is checked before the core reads it. */
+export type FileError = ExerciseError | { code: 'tooLarge' };
+
+export function fileErrorMessage(e: FileError, locale?: Locale): string {
+	const o = locale ? { locale } : {};
+	switch (e.code) {
+		case 'tooLarge':
+			return m.file_error_too_large({}, o);
+		case 'malformed':
+			return m.file_error_malformed({ detail: e.detail }, o);
+		case 'notExercise':
+			return m.file_error_not_exercise({}, o);
+		case 'oldSchema':
+			return m.file_error_old_schema({ found: e.found }, o);
+		case 'futureSchema':
+			return m.file_error_future_schema({ found: e.found }, o);
+		case 'badExpression':
+			return m.file_error_bad_expression({}, o);
+		case 'inconsistentCell':
+			return m.file_error_inconsistent_cell({ level: e.level, position: e.position }, o);
+		case 'inconsistentLevel':
+			return m.file_error_inconsistent_level({ level: e.level }, o);
+		case 'inconsistentReveals':
+			return m.file_error_inconsistent_reveals({}, o);
 	}
 }

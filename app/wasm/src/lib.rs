@@ -13,6 +13,7 @@ use dotree_core::netlist::Netlist;
 use dotree_core::reduce::{
     CellKind, CpaBlock, Origin, PendingCell, Point, PointId, Reduction, Rejection,
 };
+use dotree_core::state::{Exercise, StateError, WidthReveal};
 use dotree_core::verify::{Coverage, Progress, Verifier};
 use dotree_core::vhdl::{self, Language, VhdlError};
 use serde::Serialize;
@@ -115,7 +116,7 @@ fn failure(error: Value) -> String {
 
 /// Parses the widths, analyses the expression and builds the level-0 matrix, or returns the
 /// error object shared by `buildMatrix` and `Session.open`.
-fn analyze_and_build(src: &str, widths_json: &str) -> Result<(Analysis, DotMatrix), Value> {
+fn parse_widths(widths_json: &str) -> Result<BTreeMap<char, u32>, Value> {
     let Ok(raw) = serde_json::from_str::<BTreeMap<String, u32>>(widths_json) else {
         return Err(json!({"code": "badWidths"}));
     };
@@ -129,6 +130,11 @@ fn analyze_and_build(src: &str, widths_json: &str) -> Result<(Analysis, DotMatri
             _ => return Err(json!({"code": "badWidths"})),
         }
     }
+    Ok(widths)
+}
+
+fn analyze_and_build(src: &str, widths_json: &str) -> Result<(Analysis, DotMatrix), Value> {
+    let widths = parse_widths(widths_json)?;
     let analysis = expr::analyze(src, &widths).map_err(|e| expr_error(&e))?;
     let m = DotMatrix::build(&analysis).map_err(|e| match e {
         MatrixError::TooManyDots { count, limit } => {
@@ -266,16 +272,43 @@ pub struct Session {
     matrix: DotMatrix,
     /// Helps revealed so far (AJU-07); outside the undo history.
     log: HelpLog,
+    /// What the exercise was opened with, for the exercise file (SAL-02).
+    expression: String,
+    widths: BTreeMap<char, u32>,
+    /// The width challenge, once answered or given up (EXP-10); outside the undo history.
+    width: Option<WidthReveal>,
 }
 
 impl Session {
-    fn with(reduction: Reduction, matrix: DotMatrix) -> Session {
+    fn with(
+        reduction: Reduction,
+        matrix: DotMatrix,
+        expression: &str,
+        widths: &BTreeMap<char, u32>,
+    ) -> Session {
         Session {
             reduction,
             dot_terms: matrix.dots.iter().map(|d| d.term).collect(),
             matrix,
             log: HelpLog::default(),
+            expression: expression.into(),
+            widths: widths.clone(),
+            width: None,
         }
+    }
+
+    fn bound_json(&self) -> String {
+        let b = help::lower_bound(&self.matrix);
+        json!({"dots": b.dots, "outputWidth": b.output_width, "value": b.value}).to_string()
+    }
+
+    fn solution_session(&self) -> Session {
+        Session::with(
+            help::dadda_solution(&self.matrix),
+            self.matrix.clone(),
+            &self.expression,
+            &self.widths,
+        )
     }
 
     fn point(&self, p: &Point) -> Value {
@@ -293,6 +326,23 @@ impl Session {
     }
 }
 
+fn state_error(e: &StateError) -> Value {
+    match e {
+        StateError::Malformed(detail) => json!({"code": "malformed", "detail": detail}),
+        StateError::NotAnExercise => json!({"code": "notExercise"}),
+        StateError::OldSchema { found } => json!({"code": "oldSchema", "found": found}),
+        StateError::FutureSchema { found } => json!({"code": "futureSchema", "found": found}),
+        StateError::BadExpression => json!({"code": "badExpression"}),
+        StateError::InconsistentCell { level, position } => {
+            json!({"code": "inconsistentCell", "level": level, "position": position})
+        }
+        StateError::InconsistentLevel { level } => {
+            json!({"code": "inconsistentLevel", "level": level})
+        }
+        StateError::InconsistentReveals => json!({"code": "inconsistentReveals"}),
+    }
+}
+
 fn pending(c: &PendingCell) -> Value {
     json!({"kind": kind_code(c.kind), "column": c.column, "inputs": c.inputs, "ready": c.ready.0})
 }
@@ -302,7 +352,79 @@ impl Session {
     /// Opens a session on the level-0 matrix, or returns the error JSON of `buildMatrix`.
     pub fn open(src: &str, widths_json: &str) -> Result<Session, String> {
         let (_, m) = analyze_and_build(src, widths_json).map_err(|e| e.to_string())?;
-        Ok(Session::with(Reduction::new(&m), m))
+        let widths = parse_widths(widths_json).expect("checked by analyze_and_build");
+        Ok(Session::with(Reduction::new(&m), m, src, &widths))
+    }
+
+    // ------------------------------------------------------------ exercise file (spec 08)
+
+    /// The exercise as a JSON file (SAL-02).
+    pub fn exercise(&self) -> String {
+        Exercise::capture(
+            &self.expression,
+            &self.widths,
+            &self.reduction,
+            self.width,
+            self.log,
+        )
+        .to_json()
+    }
+
+    /// Opens an exercise file, or returns why not as JSON `{"code": …}` (SAL-03).
+    pub fn restore(file: &str) -> Result<Session, String> {
+        let open = || {
+            let ex = Exercise::parse(file)?;
+            let (m, r) = ex.restore()?;
+            let mut s = Session::with(r, m, &ex.expression, &ex.widths);
+            s.log = ex.help;
+            s.width = ex.reveals.width;
+            Ok(s)
+        };
+        open().map_err(|e: StateError| state_error(&e).to_string())
+    }
+
+    pub fn expression(&self) -> String {
+        self.expression.clone()
+    }
+
+    /// The widths the exercise was opened with, as a JSON object.
+    pub fn widths(&self) -> String {
+        let w: BTreeMap<String, u32> = self
+            .widths
+            .iter()
+            .map(|(k, v)| (k.to_string(), *v))
+            .collect();
+        json!(w).to_string()
+    }
+
+    /// The width challenge was answered (`Some`) or given up (`None`); only the first
+    /// call counts, as the challenge closes after it (EXP-10).
+    #[wasm_bindgen(js_name = revealWidth)]
+    pub fn reveal_width(&mut self, answer: Option<u32>) {
+        self.width.get_or_insert(WidthReveal {
+            answer,
+            path: false,
+        });
+    }
+
+    /// Step 2 of the width (GER-03); false while step 1 has not happened.
+    #[wasm_bindgen(js_name = revealWidthPath)]
+    pub fn reveal_width_path(&mut self) -> bool {
+        self.width.as_mut().map(|w| w.path = true).is_some()
+    }
+
+    /// What was revealed so far, so a reopened exercise shows it again without asking.
+    pub fn revealed(&self) -> String {
+        let stage = |result: u32, path: u32| match (result, path) {
+            (0, _) => "none",
+            (_, 0) => "result",
+            _ => "path",
+        };
+        let l = &self.log;
+        json!({"width": self.width,
+               "lowerBound": stage(l.lower_bound, l.lower_bound_path),
+               "solution": stage(l.solution, l.solution_path)})
+        .to_string()
     }
 
     pub fn snapshot(&self) -> String {
@@ -425,8 +547,13 @@ impl Session {
         } else {
             HelpStep::LowerBound
         });
-        let b = help::lower_bound(&self.matrix);
-        json!({"dots": b.dots, "outputWidth": b.output_width, "value": b.value}).to_string()
+        self.bound_json()
+    }
+
+    /// The lower bound again, uncounted, once it was revealed; `None` before that (GER-01).
+    #[wasm_bindgen(js_name = shownLowerBound)]
+    pub fn shown_lower_bound(&self) -> Option<String> {
+        (self.log.lower_bound > 0).then(|| self.bound_json())
     }
 
     /// Dadda's solution from level 0 as a separate session (AJU-03, AJU-05); `path` counts
@@ -437,7 +564,13 @@ impl Session {
         } else {
             HelpStep::Solution
         });
-        Session::with(help::dadda_solution(&self.matrix), self.matrix.clone())
+        self.solution_session()
+    }
+
+    /// The solution again, uncounted, once it was revealed; `None` before that (GER-01).
+    #[wasm_bindgen(js_name = shownSolution)]
+    pub fn shown_solution(&self) -> Option<Session> {
+        (self.log.solution > 0).then(|| self.solution_session())
     }
 
     // ------------------------------------------------------------ diagram (spec 05, MT-14a)

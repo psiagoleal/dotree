@@ -2,8 +2,9 @@
 <!-- Lower bound and automatic solution (spec 03): both depend only on the initial matrix and
      come in two steps, result first and path on a second request, each confirmed (GER-03).
      The solution is a separate session from the core; the student's circuit is untouched
-     (AJU-03). -->
+     (AJU-03). A reopened exercise shows what was already revealed, uncounted (SAL-02). -->
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import type { CompressionSession, LowerBound, Snapshot } from '#lib/core.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
@@ -23,23 +24,31 @@
 	let solutionDialog: ConfirmDialog;
 	let solutionPathDialog: ConfirmDialog;
 
-	let bound = $state.raw<LowerBound | null>(null);
-	let boundPath = $state(false);
-	let solution = $state.raw<Snapshot | null>(null);
-	let solutionPath = $state(false);
+	// The parent re-creates this component for each session, so these are read once.
+	const shown = untrack(() => session.revealed());
+	let bound = $state.raw<LowerBound | null>(untrack(() => session.shownLowerBound()));
+	let boundPath = $state(shown.lowerBound === 'path');
+	let solution = $state.raw<Snapshot | null>(
+		untrack(() => {
+			const s = session.shownSolution();
+			return s && read(s);
+		})
+	);
+	let solutionPath = $state(shown.solution === 'path');
 
 	const KIND = { fa: 'FA', ha: 'HA' } as const;
 	const halves = (n: number) => formatHalves(n, getLocale());
 
 	/** Reads the solution's snapshot and frees the WASM session right away. */
-	function solve(path: boolean): Snapshot {
-		const s = session.solution(path);
+	function read(s: CompressionSession): Snapshot {
 		try {
 			return s.snapshot();
 		} finally {
 			s.free();
 		}
 	}
+
+	const solve = (path: boolean) => read(session.solution(path));
 
 	async function askBound() {
 		if (!(await boundDialog.ask())) return;

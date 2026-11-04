@@ -213,7 +213,8 @@ pub enum HelpStep {
 
 /// How many times each help step was revealed, for the summary of a complete circuit
 /// (AJU-07). It is not part of the undo history: undoing does not take a help back.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct HelpLog {
     pub hints: u32,
     pub next_moves: u32,

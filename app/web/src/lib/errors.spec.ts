@@ -2,7 +2,14 @@
 // Every error code the core can return has a message in both languages (IDI-05).
 import { describe, expect, it } from 'vitest';
 import type { CoreError, CpaBlock, Rejection } from '#lib/core.ts';
-import { cpaBlockMessage, errorMessage, rejectionMessage, warningMessage } from './errors';
+import {
+	cpaBlockMessage,
+	errorMessage,
+	fileErrorMessage,
+	rejectionMessage,
+	warningMessage,
+	type FileError
+} from './errors';
 
 const ALL: CoreError[] = [
 	...(
@@ -136,6 +143,38 @@ describe('cpaBlockMessage (CMP-10)', () => {
 	it('a refused CPA says the same as the disabled button', () => {
 		expect(rejectionMessage({ code: 'cpaUnavailable', block: BLOCKS[3] }, 'pt-br')).toBe(
 			cpaBlockMessage(BLOCKS[3], 'pt-br')
+		);
+	});
+});
+
+const FILE_ERRORS: FileError[] = [
+	{ code: 'tooLarge' },
+	{ code: 'malformed', detail: 'EOF while parsing' },
+	{ code: 'notExercise' },
+	{ code: 'oldSchema', found: 0 },
+	{ code: 'futureSchema', found: 2 },
+	{ code: 'badExpression' },
+	{ code: 'inconsistentCell', level: 1, position: 3 },
+	{ code: 'inconsistentLevel', level: 4 },
+	{ code: 'inconsistentReveals' }
+];
+
+describe('fileErrorMessage (SAL-03)', () => {
+	it.each(['pt-br', 'en'] as const)('words every refusal of a file in %s', (locale) => {
+		const texts = FILE_ERRORS.map((e) => fileErrorMessage(e, locale));
+		for (const t of texts) {
+			expect(t.length).toBeGreaterThan(5);
+			expect(t).not.toMatch(/[{}]/);
+		}
+		expect(new Set(texts).size).toBe(texts.length);
+	});
+
+	it('says where the file breaks the rules', () => {
+		expect(fileErrorMessage({ code: 'inconsistentCell', level: 1, position: 3 }, 'pt-br')).toBe(
+			'a célula 3 do nível 1 não obedece às regras da compressão.'
+		);
+		expect(fileErrorMessage({ code: 'futureSchema', found: 2 }, 'en')).toBe(
+			'the file uses schema 2, from a newer version of dotree.'
 		);
 	});
 });
