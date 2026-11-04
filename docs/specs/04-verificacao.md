@@ -48,8 +48,14 @@ mascarada para a largura total. A mesma codificação vale para o testbench VHDL
   coluna errada), que precisa ser pego.
 - **VER-04** — O sistema DEVE executar a verificação sem travar a interface, mostrar o
   progresso quando ela levar mais de 0,5 s e permitir cancelá-la.
-  *Prova:* teste de ponta a ponta com $A \times B$ de 16 × 16 bits (progresso visível;
-  cancelar devolve a interface sem resultado parcial).
+  *Prova:* teste de ponta a ponta com $A + B$ de 12 + 12 bits, fechado direto com o CPA:
+  $2^{24}$ casos exaustivos, a verificação mais longa da tabela acima (progresso visível e
+  andando; cancelar devolve a interface sem resultado parcial). $A \times B$ de 16 × 16 bits
+  passa de 24 bits e cai na amostra de $2^{20}$ vetores, que termina em cerca de 0,3 s, antes
+  de o progresso aparecer.
+  *Implementação (MT-14b):* a netlist vai em JSON para um *worker* com o próprio núcleo, que
+  verifica em blocos de $2^{16}$ vetores e manda o progresso a cada bloco; cancelar encerra
+  o *worker*.
 - **VER-05** — ENQUANTO o circuito estiver incompleto, o sistema DEVE manter a verificação
   desabilitada, explicando que ela exige circuito completo.
   *Prova:* teste de componente.

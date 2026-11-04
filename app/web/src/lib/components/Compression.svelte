@@ -19,6 +19,8 @@
 	import LevelPanel from './LevelPanel.svelte';
 	import Rules from './Rules.svelte';
 	import SolutionHelp from './SolutionHelp.svelte';
+	import VerifyView from './VerifyView.svelte';
+	import VhdlView from './VhdlView.svelte';
 
 	let {
 		session,
@@ -294,6 +296,11 @@
 	</section>
 
 	<CircuitView {session} {snap} {top} critical={showCritical} />
+	<!-- A changed circuit drops the verification result and stops a running one. -->
+	{#key snap}
+		<VerifyView {session} {snap} />
+	{/key}
+	<VhdlView {session} {snap} />
 
 	<ConfirmDialog
 		bind:this={backDialog}

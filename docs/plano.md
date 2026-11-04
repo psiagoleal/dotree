@@ -247,6 +247,10 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
   exaustivo, 0 erros" na interface.
 - **Fora de escopo:** salvar o estado (MT-15).
 - **Depende de:** MT-14a
+- **Feito (2026-11-04):** o R2 aparece como "16.384 casos, exaustivo, 0 erros." (separador
+  de milhar do idioma). A prova de VER-04 trocou $A \times B$ 16 × 16 por $A + B$ 12 + 12
+  (ver spec 04). O `.zip` é gerado sem dependência (`zip.ts`, sem compressão) e conferido
+  no e2e pelo `zipfile` do Python.
 
 ### MT-15: Salvar, abrir e retomar
 - **Objetivo:** autosave local, exportar e importar JSON, estado corrompido.

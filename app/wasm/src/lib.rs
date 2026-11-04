@@ -13,9 +13,13 @@ use dotree_core::netlist::Netlist;
 use dotree_core::reduce::{
     CellKind, CpaBlock, Origin, PendingCell, Point, PointId, Reduction, Rejection,
 };
+use dotree_core::verify::{Coverage, Progress, Verifier};
+use dotree_core::vhdl::{self, Language, VhdlError};
 use serde::Serialize;
 use serde_json::{Value, json};
 use wasm_bindgen::prelude::*;
+
+mod netcodec;
 
 /// Core version, used by the interface to prove the WASM module loaded.
 #[wasm_bindgen(js_name = coreVersion)]
@@ -529,6 +533,42 @@ impl Session {
         )
     }
 
+    // ------------------------------------------------- verification and VHDL (MT-14b)
+
+    /// The complete circuit as JSON for [`Verification`], or `undefined` while incomplete
+    /// (VER-05).
+    pub fn netlist(&self) -> Option<String> {
+        Netlist::from_reduction(&self.matrix, &self.reduction)
+            .ok()
+            .map(|n| netcodec::encode(&n).to_string())
+    }
+
+    /// The VHDL files (spec 06) in `language` (`"pt-br"` or `"en"`):
+    /// `{"ok": true, "files": [{"name", "contents"}]}`, or `{"ok": false, "error"}` with
+    /// `"notComplete"` (VHD-07) or `"invalidName"` (VHD-08).
+    pub fn vhdl(&self, name: &str, language: &str) -> String {
+        let language = if language == "en" {
+            Language::En
+        } else {
+            Language::PtBr
+        };
+        let netlist = Netlist::partial(&self.matrix, &self.reduction);
+        match vhdl::generate(&self.matrix, &netlist, name, language) {
+            Ok(files) => {
+                let files: Vec<Value> = files
+                    .into_iter()
+                    .map(|f| json!({"name": f.name, "contents": f.contents}))
+                    .collect();
+                json!({"ok": true, "files": files})
+            }
+            Err(e) => json!({"ok": false, "error": match e {
+                VhdlError::NotComplete => "notComplete",
+                VhdlError::InvalidName => "invalidName",
+            }}),
+        }
+        .to_string()
+    }
+
     #[wasm_bindgen(js_name = helpLog)]
     pub fn help_log(&self) -> String {
         let l = &self.log;
@@ -545,4 +585,53 @@ impl Session {
     pub fn redo(&mut self) -> bool {
         self.reduction.redo()
     }
+}
+
+/// A verification run (spec 04), driven in chunks by the worker so it can report progress
+/// and be cancelled (VER-04). Built from the JSON of [`Session::netlist`].
+#[wasm_bindgen]
+pub struct Verification {
+    verifier: Verifier,
+}
+
+#[wasm_bindgen]
+impl Verification {
+    #[wasm_bindgen(constructor)]
+    pub fn new(netlist_json: &str) -> Result<Verification, String> {
+        Ok(Verification {
+            verifier: Verifier::new(netcodec::decode(netlist_json)?),
+        })
+    }
+
+    /// Checks up to `max_vectors` more vectors and returns the progress JSON:
+    /// `{checked, total, coverage, done, counterexample}`.
+    pub fn run(&mut self, max_vectors: f64) -> String {
+        // `as` saturates: a huge or infinite budget runs to the end.
+        progress_json(&self.verifier.run(max_vectors.max(1.0) as u64))
+    }
+}
+
+fn progress_json(p: &Progress) -> String {
+    let counterexample = p.counterexample.as_ref().map(|ce| {
+        let inputs: Vec<Value> = ce
+            .inputs
+            .iter()
+            .map(|(v, x)| json!({"var": v.to_string(), "value": x.to_string()}))
+            .collect();
+        let diff = ce.differing_bits();
+        let differing: Vec<u32> = (0..128).filter(|b| diff >> b & 1 == 1).collect();
+        json!({"inputs": inputs, "expected": ce.expected.to_string(),
+               "obtained": ce.obtained.to_string(), "differing": differing})
+    });
+    json!({
+        "checked": p.checked,
+        "total": p.total,
+        "coverage": match p.coverage {
+            Coverage::Exhaustive => "exhaustive",
+            Coverage::Sample => "sample",
+        },
+        "done": p.done(),
+        "counterexample": counterexample,
+    })
+    .to_string()
 }

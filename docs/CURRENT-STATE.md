@@ -7,9 +7,9 @@
 
 ## Último turno
 
-- **Data:** 2026-11-01
+- **Data:** 2026-11-04
 - **Branch:** `main`
-- **Commit:** `2a53fcd` (MT-13, #28). O MT-14a ainda não foi commitado.
+- **Commit:** `5f9ce8a` (MT-14a, #29). O MT-14b ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -90,7 +90,16 @@
       SVG com `DOMParser`. 156 testes Rust, 106 de unidade/componente, 24 e2e; 5 mutações
       pegas. Fixture do R2 compartilhada: `src/lib/testing/r2.ts` (componentes),
       `e2e/r2.ts` (e2e), `app/wasm/tests/common` (ponte).
-- [ ] Próximo: MT-14b (verificação e VHDL na interface).
+- [x] MT-14a mesclado (#29).
+- [x] MT-14b: `Session.netlist` (JSON, `app/wasm/src/netcodec.rs`, com checagem de cada
+      fio) e `Session.vhdl`; classe `Verification` em blocos. Na web: `verify.worker.ts`
+      (núcleo próprio, blocos de $2^{16}$ vetores), `verification.ts` (inicia, segue e
+      cancela; cancelar = `terminate`), `zip.ts` (zip sem compressão, CRC conferido contra
+      `node:zlib`), `VerifyView` (recriado a cada snapshot, então o resultado some quando o
+      circuito muda) e `VhdlView`. A prova de VER-04 passou a ser $A + B$ 12 + 12 ($2^{24}$
+      casos, ~1,4 s no navegador); $A \times B$ 16 × 16 cai na amostra e termina antes de
+      0,5 s. 165 testes Rust, 122 de unidade/componente, 28 e2e; 7 mutações pegas.
+- [ ] Próximo: MT-15 (salvar, abrir e retomar).
 
 ## Observações para a próxima sessão
 
@@ -102,7 +111,11 @@
 - O rótulo de coluna diz "1 pontos" (sem plural); corrigir no MT-16 com variantes do
   Paraglide.
 - O gateway OpenAI-compatível do ambiente não respondeu desta máquina em 2026-11-03
-  (conexão expira); a revisão independente do MT-14a ficou sem ele.
+  (conexão expira) nem em 2026-11-04 (conexão recusada na porta configurada); as revisões
+  independentes do MT-14a e do MT-14b ficaram sem ele. Conferir endereço e porta no
+  ambiente antes de tentar de novo.
+- O e2e de VER-04 cancela por volta de 0,7 s uma verificação de ~1,4 s; se ficar instável
+  numa máquina mais rápida, é o primeiro suspeito.
 - SvelteKit 3 não tem `$lib`: use `#lib/...` com extensão.
 - A porta 4173 costuma estar ocupada nesta máquina; o e2e usa 4180 (`E2E_PORT`).
 - Os testes de propriedade não gravam `*.proptest-regressions` (`failure_persistence: None`):
@@ -116,6 +129,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-04 | `5f9ce8a` | diagrama, tabela e exportações (#29); verificação e VHDL na interface | MT-14a, MT-14b |
 | 2026-11-03 | `2a53fcd` | ajuda sob demanda (#28); diagrama, tabela e exportações | MT-13, MT-14a |
 | 2026-11-01 | `b46fcff` | CPA e resultado (#27); ajuda sob demanda na interface | MT-12b, MT-13 |
 | 2026-11-01 | `109697f` | compressão até o CPA (#26); CPA, resultado e caminho crítico na interface | MT-12a, MT-12b |

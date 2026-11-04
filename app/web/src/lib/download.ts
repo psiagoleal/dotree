@@ -1,8 +1,12 @@
 // Caminho relativo: app/web/src/lib/download.ts
-// Saves text the page generated as a file, without any server (GER-05).
+// Saves text or bytes the page generated as a file, without any server (GER-05).
 
-export function download(filename: string, text: string, type: string): void {
-	const url = URL.createObjectURL(new Blob([text], { type }));
+export function download(
+	filename: string,
+	data: string | Uint8Array<ArrayBuffer>,
+	type: string
+): void {
+	const url = URL.createObjectURL(new Blob([data], { type }));
 	const a = document.createElement('a');
 	a.href = url;
 	a.download = filename;
