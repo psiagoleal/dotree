@@ -4,13 +4,15 @@
 	import favicon from '#lib/assets/favicon.svg';
 	import { getLocale, setLocale } from '#lib/paraglide/runtime.js';
 	import { detectLocale, hasStoredLocale } from '#lib/locale.ts';
+	import { browserStorage } from '#lib/view.ts';
 	import type { LayoutProps } from './$types';
 
 	let { children }: LayoutProps = $props();
 
 	// First visit: pick the language from the browser (IDI-03). Later visits: Paraglide
 	// restores the stored choice (IDI-04).
-	if (typeof window !== 'undefined' && !hasStoredLocale(window.localStorage)) {
+	// Reading `window.localStorage` itself throws where site data is blocked (SAL-04).
+	if (typeof window !== 'undefined' && !hasStoredLocale(browserStorage())) {
 		const detected = detectLocale(navigator.languages ?? [navigator.language]);
 		if (detected !== getLocale()) setLocale(detected, { reload: false });
 	}

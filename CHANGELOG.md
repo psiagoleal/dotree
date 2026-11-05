@@ -8,7 +8,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+### Corrigido
+- Com os dados do site bloqueados no navegador, a página não montava: o layout lia
+  `window.localStorage` direto ao escolher o idioma (MT-15b).
+
 ### Adicionado
+- O exercício fica salvo neste navegador a cada ação e revelação, e a visita seguinte
+  oferece retomá-lo ou descartá-lo. Com o armazenamento bloqueado ou cheio, o app funciona
+  normalmente e avisa uma vez que o progresso não será lembrado. Um estado salvo
+  corrompido ou de esquema antigo não é aberto: a página explica o motivo e oferece baixar
+  o conteúdo antes de descartá-lo (MT-15b).
 - Exportar e abrir o exercício como arquivo JSON com versão de esquema (expressão,
   larguras, células por nível, células pendentes, resposta do desafio da largura e
   registro de ajudas). Ao abrir, o núcleo refaz cada célula pelas regras; arquivo

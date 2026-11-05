@@ -13,6 +13,7 @@
 	import { download } from '#lib/download.ts';
 	import { errorMessage, fileErrorMessage, warningMessage } from '#lib/errors.ts';
 	import { keyAction } from '#lib/keys.ts';
+	import { autosaving, clearSaved, loadSaved, saveExercise } from '#lib/persist.ts';
 	import { browserStorage, readView, writeView, type ViewMode } from '#lib/view.ts';
 
 	const ISSUES_URL = 'https://github.com/psiagoleal/dotree/issues/new';
@@ -37,15 +38,76 @@
 	let fileInput = $state<HTMLInputElement>();
 	// Outcome of the last "open exercise" (SAL-03): a refusal leaves the exercise as it was.
 	let fileStatus = $state<{ ok: boolean; text: string } | null>(null);
+	// An exercise left in local storage by an earlier visit, waiting for the user's choice
+	// (SAL-01), or one that could not be opened (SAL-05). Nothing overwrites it meanwhile.
+	type Pending =
+		| { kind: 'offer'; session: CompressionSession }
+		| { kind: 'corrupt'; text: string; reason: string };
+	let pending = $state.raw<Pending | null>(null);
+	let pendingDialog = $state<ConfirmDialog>();
+	// SAL-04: storage that fails is reported once; the app goes on without it.
+	let storageFailed = $state(false);
+
+	function save(text: string) {
+		if (!saveExercise(browserStorage(), text)) storageFailed = true;
+	}
+
+	/** Makes `next` the exercise on screen, saving it now and after every change. */
+	function adopt(next: CompressionSession | null) {
+		session?.free();
+		session = next && autosaving(next, save);
+		if (next) save(next.exercise());
+	}
+
+	/** The saved exercise is dropped only after confirmation; true when it is gone. */
+	async function settlePending(): Promise<boolean> {
+		if (!pending) return true;
+		if (!(await pendingDialog?.ask())) return false;
+		discardPending();
+		return true;
+	}
+
+	function discardPending() {
+		if (pending?.kind === 'offer') pending.session.free();
+		pending = null;
+		clearSaved(browserStorage());
+	}
+
+	function checkSaved(core: Core) {
+		const saved = loadSaved(browserStorage());
+		if (saved.kind === 'unavailable') storageFailed = true;
+		if (saved.kind !== 'found') return;
+		const opened = core.restoreSession(saved.text);
+		pending = opened.ok
+			? { kind: 'offer', session: opened.session }
+			: { kind: 'corrupt', text: saved.text, reason: fileErrorMessage(opened.error) };
+	}
+
+	function resume(core: Core) {
+		if (pending?.kind !== 'offer') return;
+		const next = pending.session;
+		pending = null;
+		show(core, next);
+	}
+
+	/** Puts a reopened exercise on screen: form, matrix, reveals and compression. */
+	function show(core: Core, next: CompressionSession) {
+		const expression = next.expression();
+		const widths = next.widths();
+		form?.load(expression, widths);
+		result = core.buildMatrix(expression, widths);
+		widthRevealed = next.revealed().width !== null;
+		adopt(next);
+	}
 
 	async function build(core: Core, expression: string, widths: Record<string, number>) {
+		if (!(await settlePending())) return;
 		// EXP-04: a compression with any action in it is discarded only after confirmation.
 		if (session?.snapshot().canUndo && !(await discardDialog?.ask())) return;
 		fileStatus = null;
 		result = core.buildMatrix(expression, widths);
 		widthRevealed = false;
-		session?.free();
-		session = result.ok ? core.openSession(expression, widths) : null;
+		adopt(result.ok ? core.openSession(expression, widths) : null);
 	}
 
 	function exportExercise() {
@@ -60,17 +122,13 @@
 		const opened = core.restoreSession(await file.text());
 		if (!opened.ok) return refuse(fileErrorMessage(opened.error));
 		const next = opened.session;
-		if (session?.snapshot().canUndo && !(await discardDialog?.ask())) {
+		const keep =
+			!(await settlePending()) || (session?.snapshot().canUndo && !(await discardDialog?.ask()));
+		if (keep) {
 			next.free();
 			return;
 		}
-		const expression = next.expression();
-		const widths = next.widths();
-		form?.load(expression, widths);
-		result = core.buildMatrix(expression, widths);
-		widthRevealed = next.revealed().width !== null;
-		session?.free();
-		session = next;
+		show(core, next);
 		fileStatus = { ok: true, text: m.file_imported({ file: file.name }) };
 	}
 
@@ -87,7 +145,10 @@
 
 	onMount(() => {
 		loadCore()
-			.then((core) => (status = { kind: 'ready', core }))
+			.then((core) => {
+				status = { kind: 'ready', core };
+				checkSaved(core);
+			})
 			.catch((err: unknown) => {
 				// GER-09: a broken WASM load gets an explanation, not a broken interface.
 				status = { kind: 'error', reason: err instanceof Error ? err.message : String(err) };
@@ -109,6 +170,40 @@
 		<p role="status">{m.status_loading()}</p>
 	{:else if status.kind === 'ready'}
 		{@const core = status.core}
+		{#if pending?.kind === 'offer'}
+			<div class="saved" role="status" data-testid="saved-offer">
+				<p>{m.saved_offer({ expression: pending.session.expression() })}</p>
+				<div class="buttons">
+					<button type="button" class="primary" onclick={() => resume(core)}
+						>{m.saved_resume()}</button
+					>
+					<button type="button" onclick={settlePending}>{m.saved_discard()}</button>
+				</div>
+			</div>
+		{:else if pending?.kind === 'corrupt'}
+			{@const text = pending.text}
+			<div class="saved corrupt" role="alert" data-testid="saved-corrupt">
+				<p>{m.saved_corrupt({ reason: pending.reason })}</p>
+				<div class="buttons">
+					<button
+						type="button"
+						onclick={() => download(m.saved_file_name(), text, 'application/json')}
+						>{m.saved_download()}</button
+					>
+					<button type="button" onclick={settlePending}>{m.saved_discard()}</button>
+				</div>
+			</div>
+		{/if}
+		{#if storageFailed}
+			<p class="note" role="status" data-testid="storage-warning">{m.storage_unavailable()}</p>
+		{/if}
+		<ConfirmDialog
+			bind:this={pendingDialog}
+			title={m.saved_confirm_title()}
+			body={m.saved_confirm_body()}
+			cancelLabel={m.saved_confirm_cancel()}
+			confirmLabel={m.saved_confirm_ok()}
+		/>
 		<ExpressionForm bind:this={form} onbuild={(e, w) => build(core, e, w)} />
 		<div class="file">
 			<button type="button" onclick={exportExercise} disabled={!session}>{m.file_export()}</button>
@@ -239,6 +334,44 @@
 	}
 	.error-text {
 		color: var(--color-danger);
+	}
+	.saved {
+		display: grid;
+		gap: var(--space-2);
+		margin-bottom: var(--space-3);
+		padding: var(--space-3);
+		border: 1px solid var(--color-accent);
+		border-radius: var(--radius);
+		background: var(--color-surface);
+	}
+	.saved.corrupt {
+		border-color: var(--color-danger);
+	}
+	.saved p {
+		margin: 0;
+	}
+	.saved .buttons {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+	.saved button {
+		font: inherit;
+		padding: var(--space-1) var(--space-3);
+		border-radius: var(--radius);
+		border: 1px solid var(--color-accent);
+		background: transparent;
+		color: var(--color-accent);
+		cursor: pointer;
+	}
+	.saved button.primary {
+		background: var(--color-accent);
+		color: var(--color-bg);
+	}
+	p.note {
+		margin: 0 0 var(--space-3);
+		color: var(--color-muted);
+		font-size: 0.9rem;
 	}
 	.notice,
 	.version {

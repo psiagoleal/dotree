@@ -36,6 +36,10 @@ flowchart LR
   MT16 --> MT17[MT-17 release v0.1.0]
 ```
 
+O que vem depois da v0.1 (pedidos do laboratório de multiplicadores: larguras de 64 bits,
+fatias, blocos hierárquicos, VHDL comportamental, placa DE2, Quartus) está avaliado em
+[`plano-pos-v0.1.md`](plano-pos-v0.1.md).
+
 Os tickets do núcleo (MT-3 a MT-10) não dependem da interface e podem andar na frente. A
 interface só começa a consumir uma API do núcleo depois que ela tem teste.
 
@@ -286,6 +290,10 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Critério de aceite:** e2e (SAL-01, SAL-04, SAL-05).
 - **Fora de escopo:** link compartilhável (D-6).
 - **Depende de:** MT-15a
+- **Feito (2026-11-05):** `persist.ts` embrulha a sessão e salva o arquivo do exercício
+  depois de cada ação e revelação. O e2e de armazenamento bloqueado achou um defeito
+  anterior: o layout lia `window.localStorage` direto, e com os dados do site bloqueados a
+  página não montava.
 
 ### MT-16: Acessibilidade, desempenho e tela pequena
 - **Objetivo:** axe sem violações graves, R2 só por teclado, 100 ms no p95, modo leitura

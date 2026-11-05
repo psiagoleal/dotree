@@ -44,6 +44,15 @@ arquivo.
   recusa vira "célula inconsistente", com nível e posição. O histórico de desfazer volta
   como a sequência das células salvas. Arquivos acima de 1 MB são recusados sem leitura.
 
+- **Salvamento automático (MT-15b).** O que vai para o armazenamento local é o mesmo
+  arquivo do exercício, sob a chave `dotree.exercise`, gravado depois de cada ação e de
+  cada revelação. Na visita seguinte, a página oferece retomar ou descartar. Enquanto a
+  escolha não é feita, nada sobrescreve o salvo: montar outra matriz ou abrir um arquivo
+  pede confirmação para descartá-lo. Descartar, tanto o exercício salvo quanto o estado
+  corrompido, também pede confirmação. O aviso de armazenamento indisponível aparece uma
+  vez, na leitura inicial ou no primeiro salvamento que falhar, e sugere exportar o
+  exercício.
+
 ## Fora de escopo
 
 Compartilhamento por link (D-6); sincronização entre dispositivos; histórico de versões;
