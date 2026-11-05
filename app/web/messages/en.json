@@ -7,7 +7,7 @@
 	"status_error_title": "The dotree core failed to load.",
 	"status_error_reason": "Reason: {reason}",
 	"status_error_report": "Open an issue on GitHub",
-	"wip_notice": "Under construction: dotree already builds the matrix, compresses it to a complete circuit, draws the block diagram, verifies the circuit, generates VHDL and offers help on demand; exporting and opening the exercise as a file already works, and autosave comes in the next version.",
+	"wip_notice": "Under construction: dotree already builds the matrix, compresses it to a complete circuit, draws the block diagram, verifies the circuit, generates VHDL and offers help on demand; the exercise is saved in this browser and can be exported and opened as a file.",
 	"spec_link": "Read the specification",
 	"language_label": "Language",
 	"language_pt_br": "Português",
@@ -226,5 +226,16 @@
 	"file_error_inconsistent_cell": "cell {position} of level {level} breaks the compression rules.",
 	"file_error_inconsistent_level": "level {level} cannot exist at that point of the exercise.",
 	"file_error_inconsistent_reveals": "the reveal log is impossible (a step 2 without its step 1).",
-	"file_imported": "{file} opened."
+	"file_imported": "{file} opened.",
+	"saved_offer": "There is an exercise saved in this browser: {expression}.",
+	"saved_resume": "Resume",
+	"saved_discard": "Discard",
+	"saved_corrupt": "The exercise saved in this browser could not be opened: {reason} Download the saved content before discarding it if you want to keep it.",
+	"saved_download": "Download the saved content",
+	"saved_file_name": "dotree-saved.json",
+	"saved_confirm_title": "Discard the saved exercise?",
+	"saved_confirm_body": "The exercise saved in this browser will be erased, and that cannot be undone.",
+	"saved_confirm_cancel": "Keep the saved exercise",
+	"saved_confirm_ok": "Discard",
+	"storage_unavailable": "This browser does not let the page store data: the exercise works normally, but progress will not be remembered when the tab closes. Use “Export exercise” to keep it."
 }

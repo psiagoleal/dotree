@@ -7,9 +7,9 @@
 
 ## Último turno
 
-- **Data:** 2026-11-04
 - **Branch:** `main`
-- **Commit:** `98e1f38` (MT-14b, #30). O MT-15a ainda não foi commitado.
+- **Data:** 2026-11-05
+- **Commit:** `e0bad41` (MT-15a, #31). O MT-15b ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -108,10 +108,16 @@
       exportar e abrir na página, `WidthChallenge` com `initial`/`onpath` e `SolutionHelp`
       lendo o já revelado. 181 testes Rust, 128 de unidade/componente, 31 e2e; 15 mutações
       pegas (uma só depois de reforçar o teste de trabalho após o CPA).
-- [ ] Próximo: MT-15b (salvamento automático, retomada, SAL-04, SAL-05). Plano: o
-      `exercise()` da sessão já é o que vai para o armazenamento local; salvar depois de
-      cada ação e revelação, oferecer retomar ou descartar ao abrir, e tratar o estado
-      corrompido com download do texto salvo.
+- [x] MT-15a mesclado (#31).
+- [x] MT-15b: `persist.ts` (`autosaving` é um `Proxy` sobre a sessão que grava depois de
+      cada chamada que muda estado ou revela), oferta de retomada, aviso único de
+      armazenamento e estado corrompido com download. Corrigido o layout, que quebrava com
+      o armazenamento bloqueado. Dois e2e antigos que recarregavam a página foram ajustados
+      (a recarga agora oferece retomar). 181 testes Rust, 132 de unidade/componente, 37
+      e2e; 6 mutações pegas.
+- [x] Pedidos do laboratório de multiplicadores avaliados em `docs/plano-pos-v0.1.md`
+      (MT-19 a MT-27, aguardam decisão do autor).
+- [ ] Próximo: MT-16 (acessibilidade, desempenho e tela pequena).
 
 ## Observações para a próxima sessão
 
@@ -122,6 +128,10 @@
   da ferramenta (exit 144). Guarde o PID do servidor e use `kill`.
 - O rótulo de coluna diz "1 pontos" (sem plural); corrigir no MT-16 com variantes do
   Paraglide.
+- A recusa do estado salvo reaproveita as mensagens de arquivo ("o arquivo usa o esquema
+  0…"); no MT-16, considerar um sujeito neutro ("o conteúdo").
+- Testes e2e que recarregam a página encontram a oferta de retomada (SAL-01): retome, ou
+  apague `dotree.exercise` antes de recarregar.
 - O gateway OpenAI-compatível do ambiente não respondeu desta máquina em 2026-11-03
   (conexão expira) nem em 2026-11-04 (conexão recusada na porta configurada); as revisões
   independentes do MT-14a e do MT-14b ficaram sem ele. Conferir endereço e porta no
@@ -141,6 +151,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-05 | `e0bad41` | exportar e abrir (#31); salvamento automático e retomada; plano pós-v0.1 | MT-15a, MT-15b |
 | 2026-11-04 | `98e1f38` | verificação e VHDL (#30); exportar e abrir o exercício | MT-14b, MT-15a |
 | 2026-11-04 | `5f9ce8a` | diagrama, tabela e exportações (#29); verificação e VHDL na interface | MT-14a, MT-14b |
 | 2026-11-03 | `2a53fcd` | ajuda sob demanda (#28); diagrama, tabela e exportações | MT-13, MT-14a |

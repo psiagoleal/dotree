@@ -77,6 +77,8 @@ test('export, reload and open give back the same exercise (SAL-02)', async ({ pa
 	expect(file.levels).toHaveLength(2);
 	expect(file.pending).toHaveLength(2);
 
+	// A clean page, without the copy autosave keeps (MT-15b).
+	await page.evaluate(() => localStorage.removeItem('dotree.exercise'));
 	await page.reload();
 	await expect(page.getByRole('button', { name: 'Exportar exercício (.json)' })).toBeDisabled();
 	await openFile(page, 'meu.json', text);

@@ -7,7 +7,7 @@
 	"status_error_title": "O núcleo do dotree não carregou.",
 	"status_error_reason": "Motivo: {reason}",
 	"status_error_report": "Abrir uma issue no GitHub",
-	"wip_notice": "Em construção: o dotree já monta a matriz, comprime até o circuito completo, desenha o diagrama de blocos, verifica o circuito, gera o VHDL e oferece ajuda sob demanda; exportar e abrir o exercício como arquivo já funciona, e o salvamento automático chega na próxima versão.",
+	"wip_notice": "Em construção: o dotree já monta a matriz, comprime até o circuito completo, desenha o diagrama de blocos, verifica o circuito, gera o VHDL e oferece ajuda sob demanda; o exercício fica salvo neste navegador e pode ser exportado e aberto como arquivo.",
 	"spec_link": "Ler a especificação",
 	"language_label": "Idioma",
 	"language_pt_br": "Português",
@@ -226,5 +226,16 @@
 	"file_error_inconsistent_cell": "a célula {position} do nível {level} não obedece às regras da compressão.",
 	"file_error_inconsistent_level": "o nível {level} não pode existir nesse ponto do exercício.",
 	"file_error_inconsistent_reveals": "o registro de revelações é impossível (uma etapa 2 sem a etapa 1).",
-	"file_imported": "{file} aberto."
+	"file_imported": "{file} aberto.",
+	"saved_offer": "Há um exercício salvo neste navegador: {expression}.",
+	"saved_resume": "Retomar",
+	"saved_discard": "Descartar",
+	"saved_corrupt": "O exercício salvo neste navegador não pôde ser aberto: {reason} Baixe o conteúdo salvo antes de descartá-lo, se quiser guardá-lo.",
+	"saved_download": "Baixar o conteúdo salvo",
+	"saved_file_name": "dotree-salvo.json",
+	"saved_confirm_title": "Descartar o exercício salvo?",
+	"saved_confirm_body": "O exercício salvo neste navegador será apagado, e isso não se desfaz.",
+	"saved_confirm_cancel": "Manter o exercício salvo",
+	"saved_confirm_ok": "Descartar",
+	"storage_unavailable": "Este navegador não deixa a página guardar dados: o exercício funciona normalmente, mas o progresso não será lembrado ao fechar a aba. Use “Exportar exercício” para guardá-lo."
 }

@@ -9,12 +9,24 @@
 
 ## Em aberto
 
-- [ ] [MT-15b](plano.md#mt-15b-salvamento-automático-e-retomada) — Salvamento automático, retomada, armazenamento indisponível e estado corrompido.
 - [ ] [MT-16](plano.md#mt-16-acessibilidade-desempenho-e-tela-pequena) — Acessibilidade, desempenho e tela pequena.
 - [ ] [MT-17](plano.md#mt-17-publicar-a-v010) — Publicar a v0.1.0.
 
+## Depois da v0.1 (propostos, aguardam decisão do autor)
+
+- [ ] [MT-19](plano-pos-v0.1.md#mt-19-vhdl-compatível-com-o-fpgaemuweb-p7) — VHDL com `end <nome>;` para o FPGAEmuWeb.
+- [ ] [MT-20](plano-pos-v0.1.md#mt-20-aplicar-a-solução-de-dadda-ao-exercício-p5) — Aplicar a solução de Dadda ao exercício.
+- [ ] [MT-21](plano-pos-v0.1.md#mt-21-vhdl-comportamental-p4) — VHDL comportamental com `numeric_std`.
+- [ ] [MT-22](plano-pos-v0.1.md#mt-22-topo-para-a-de2-até-18-bits-e-projeto-do-quartus-p6-p8) — Topo DE2 até 18 bits e projeto do Quartus.
+- [ ] [MT-23](plano-pos-v0.1.md#mt-23-painel-de-operandos-em-palavras-p6) — Painel de operandos em palavras na DE2.
+- [ ] [MT-24](plano-pos-v0.1.md#mt-24-aritmética-larga-no-núcleo-p1-parte-1) — Aritmética larga no núcleo.
+- [ ] [MT-25](plano-pos-v0.1.md#mt-25-limites-de-64-bits-e-matriz-navegável-p1-parte-2) — 64 bits por variável e matriz navegável.
+- [ ] [MT-26](plano-pos-v0.1.md#mt-26-fatias-de-variáveis-p2) — Fatias de variáveis (`A[63:32]`).
+- [ ] [MT-27](plano-pos-v0.1.md#mt-27-blocos-hierárquicos-p3) — Blocos hierárquicos (subprodutos como multiplicadores).
+
 ## Concluídos
 
+- [x] [MT-15b](plano.md#mt-15b-salvamento-automático-e-retomada) — Salvamento automático, retomada, armazenamento indisponível e estado corrompido.
 - [x] [MT-15a](plano.md#mt-15a-exportar-e-abrir-o-exercício) — Exportar e abrir o exercício como JSON (núcleo `state`, recusas explicadas, revelações de volta).
 - [x] [MT-14b](plano.md#mt-14b-interface--verificação-e-vhdl) — Interface: verificação num *worker* com progresso e cancelamento, VHDL com cópia e `.zip`.
 - [x] [MT-14a](plano.md#mt-14-interface--diagrama-tabela-verificação-e-vhdl) — Interface: diagrama de blocos em SVG, tabela de ligações e exportações SVG e Markdown.
