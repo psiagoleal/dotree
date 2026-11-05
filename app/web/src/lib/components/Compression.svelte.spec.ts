@@ -39,9 +39,10 @@ describe('Compression (CMP-01, CMP-02, CMP-05, CMP-13 to CMP-15, GER-02)', () =>
 		await point('a1_b1', 2).click();
 		await expect.element(page.getByText('Seleção: 2')).toBeVisible();
 		await rerender({ view: 'indexed' });
-		await expect.element(point('a0_b2', 2)).toHaveAttribute('aria-pressed', 'true');
-		await expect.element(point('a0_b2', 2)).toHaveTextContent('a0b2');
-		await expect.element(point('a1_b1', 2)).toHaveAttribute('aria-pressed', 'true');
+		// In the indexed view a point is named by what it shows (WCAG 2.5.3).
+		await expect.element(point('a0b2', 2)).toHaveAttribute('aria-pressed', 'true');
+		await expect.element(point('a0b2', 2)).toHaveTextContent('a0b2');
+		await expect.element(point('a1b1', 2)).toHaveAttribute('aria-pressed', 'true');
 	});
 
 	it('forming a cell boxes its points and counts it at once', async () => {

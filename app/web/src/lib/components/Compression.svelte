@@ -53,6 +53,19 @@
 	let helps = $state.raw(untrack(() => session.helpLog()));
 	const helpItems = $derived(helpLogItems(helps));
 	let explained = $state(false);
+	// GER-10: below 768 px the exercise is read-only; the same width as the CSS breakpoint.
+	const NARROW = '(max-width: 767.98px)';
+	let narrow = $state(typeof matchMedia === 'function' && matchMedia(NARROW).matches);
+	$effect(() => {
+		const query = matchMedia(NARROW);
+		const update = () => {
+			narrow = query.matches;
+			if (narrow) clear();
+		};
+		update();
+		query.addEventListener('change', update);
+		return () => query.removeEventListener('change', update);
+	});
 	let backTarget = $state(0);
 	let backDialog: ConfirmDialog;
 	let whyDialog: ConfirmDialog;
@@ -148,7 +161,7 @@
 		const action = keyAction(e);
 		if (action === null || action === 'toggleView') return;
 		if (document.querySelector('dialog[open]')) return; // a question is being asked
-		if (complete && (action === 'form' || action === 'clearSelection')) return;
+		if (narrow || (complete && (action === 'form' || action === 'clearSelection'))) return;
 		e.preventDefault();
 		({ form, clearSelection: clear, undo, redo })[action]();
 	}
@@ -189,7 +202,9 @@
 			{top}
 			{view}
 		>
-			<button type="button" class="link" onclick={() => goBack(i)}>{m.action_back()}</button>
+			{#if !narrow}
+				<button type="button" class="link" onclick={() => goBack(i)}>{m.action_back()}</button>
+			{/if}
 		</LevelPanel>
 		<div class="arrow" aria-hidden="true">↓</div>
 	{/each}
@@ -209,7 +224,7 @@
 		{top}
 		{view}
 		heights={!complete}
-		selectable={!complete}
+		selectable={!complete && !narrow}
 		{selected}
 		ontoggle={toggle}
 		result={snap.result}
@@ -243,39 +258,45 @@
 		</p>
 	{/if}
 
-	<div class="actions">
-		{#if !complete}
-			<button type="button" onclick={form} disabled={selected.length === 0}
-				>{m.action_form()}</button
-			>
-			<button type="button" class="secondary" onclick={clear} disabled={selected.length === 0}>
-				{m.action_clear()}
+	{#if narrow}
+		<p class="narrow" role="status" data-testid="read-only">{m.read_only_notice()}</p>
+	{:else}
+		<div class="actions">
+			{#if !complete}
+				<button type="button" onclick={form} disabled={selected.length === 0}
+					>{m.action_form()}</button
+				>
+				<button type="button" class="secondary" onclick={clear} disabled={selected.length === 0}>
+					{m.action_clear()}
+				</button>
+				<span class="count">{m.selection_count({ count: selected.length })}</span>
+				<button type="button" class="secondary" onclick={conclude}>{m.action_conclude()}</button>
+				<button
+					type="button"
+					class="secondary"
+					onclick={closeWithCpa}
+					disabled={snap.cpa !== null}
+					aria-describedby={snap.cpa ? `${id}-cpa` : undefined}>{m.action_cpa()}</button
+				>
+			{/if}
+			<button type="button" class="secondary" onclick={undo} disabled={!snap.canUndo}>
+				{m.action_undo()}
 			</button>
-			<span class="count">{m.selection_count({ count: selected.length })}</span>
-			<button type="button" class="secondary" onclick={conclude}>{m.action_conclude()}</button>
-			<button
-				type="button"
-				class="secondary"
-				onclick={closeWithCpa}
-				disabled={snap.cpa !== null}
-				aria-describedby={snap.cpa ? `${id}-cpa` : undefined}>{m.action_cpa()}</button
-			>
-		{/if}
-		<button type="button" class="secondary" onclick={undo} disabled={!snap.canUndo}>
-			{m.action_undo()}
-		</button>
-		<button type="button" class="secondary" onclick={redo} disabled={!snap.canRedo}>
-			{m.action_redo()}
-		</button>
-	</div>
-	{#if snap.cpa && !complete}
+			<button type="button" class="secondary" onclick={redo} disabled={!snap.canRedo}>
+				{m.action_redo()}
+			</button>
+		</div>
+	{/if}
+	{#if snap.cpa && !complete && !narrow}
 		<p id={`${id}-cpa`} class="cpa-reason">{m.action_cpa()}: {cpaBlockMessage(snap.cpa)}</p>
 	{/if}
 	{#if refusal}
 		<p class="refusal" role="alert">{refusal}</p>
 	{/if}
 	<p class="visually-hidden" role="status">{status}</p>
-	<p class="hint">{m.keyboard_hint()}</p>
+	{#if !narrow}
+		<p class="hint">{m.keyboard_hint()}</p>
+	{/if}
 
 	<section class="help" aria-labelledby={`${id}-help`}>
 		<h3 id={`${id}-help`}>{m.help_title()}</h3>
@@ -288,6 +309,7 @@
 					points={snap.current.points}
 					onsuggest={(ids) => (suggested = ids)}
 					onform={formSuggested}
+					readOnly={narrow}
 					onhelp={() => (helps = session.helpLog())}
 				/>
 			{/key}
@@ -317,6 +339,14 @@
 </section>
 
 <style>
+	.narrow {
+		margin: 0;
+		padding: var(--space-2) var(--space-3);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		background: var(--color-surface);
+		font-size: 0.9rem;
+	}
 	.compression {
 		display: grid;
 		gap: var(--space-2);

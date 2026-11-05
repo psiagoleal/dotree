@@ -260,7 +260,7 @@ impl Gen<'_> {
         format!(
             "-- full_adder - {}: s = x xor y xor z; k = {}(x, y, z)\n\
              library ieee;\nuse ieee.std_logic_1164.all;\n\n\
-             entity full_adder is\n    port (\n        x, y, z : in  std_logic;\n        s, k    : out std_logic\n    );\nend entity full_adder;\n\n\
+             entity full_adder is\n    port (\n        x, y, z : in  std_logic;\n        s, k    : out std_logic\n    );\nend full_adder;\n\n\
              architecture rtl of full_adder is\nbegin\n    s <= x xor y xor z;\n    k <= (x and y) or (x and z) or (y and z);\nend architecture rtl;\n",
             self.t("somador completo (FA)", "full adder (FA)"),
             self.t("maioria", "majority"),
@@ -271,7 +271,7 @@ impl Gen<'_> {
         format!(
             "-- half_adder - {}: s = x xor y; k = x and y\n\
              library ieee;\nuse ieee.std_logic_1164.all;\n\n\
-             entity half_adder is\n    port (\n        x, y : in  std_logic;\n        s, k : out std_logic\n    );\nend entity half_adder;\n\n\
+             entity half_adder is\n    port (\n        x, y : in  std_logic;\n        s, k : out std_logic\n    );\nend half_adder;\n\n\
              architecture rtl of half_adder is\nbegin\n    s <= x xor y;\n    k <= x and y;\nend architecture rtl;\n",
             self.t("meio-somador (HA)", "half adder (HA)"),
         )
@@ -362,7 +362,7 @@ impl Gen<'_> {
         }
         let _ = writeln!(
             o,
-            "        R : out std_logic_vector({} downto 0)\n    );\nend entity {};\n",
+            "        R : out std_logic_vector({} downto 0)\n    );\nend {};\n",
             w - 1,
             self.name
         );
@@ -508,7 +508,7 @@ impl Gen<'_> {
             )
         };
         o.push_str("library ieee;\nuse ieee.std_logic_1164.all;\nuse ieee.numeric_std.all;\n\n");
-        let _ = writeln!(o, "entity {tb} is\nend entity {tb};\n");
+        let _ = writeln!(o, "entity {tb} is\nend {tb};\n");
         let _ = writeln!(o, "architecture test of {tb} is");
         for &(v, width) in &n.variables {
             let _ = writeln!(

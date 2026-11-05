@@ -140,7 +140,9 @@
 		{:else if status.kind === 'cancelled'}
 			<p class="note">{m.verify_cancelled()}</p>
 		{:else if status.kind === 'error'}
-			<p class="error">{m.verify_error({ message: status.message })}</p>
+			<p class="error">
+				{status.message ? m.verify_error({ message: status.message }) : m.verify_error_load()}
+			</p>
 		{/if}
 	</div>
 </section>

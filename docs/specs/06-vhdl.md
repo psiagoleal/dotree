@@ -60,6 +60,11 @@ válido.
   componentes), ENTÃO o sistema DEVE recusá-lo.
   *Prova:* teste do núcleo com nomes válidos e inválidos.
 
+- **VHD-09** — Cada entidade DEVE fechar com `end <nome>;` (sem `end entity`), e cada
+  componente declarado no topo DEVE vir num arquivo `<componente>.vhd`, para que o
+  FPGAEmuWeb, que lê as portas do topo até `end <nome>;`, abra o projeto sem edição.
+  *Prova:* teste do núcleo (fechamento e um arquivo por componente); job GHDL do CI.
+
 ## Compatibilidade com ferramentas
 
 O alvo declarado é VHDL-93 sem construções de VHDL-2008, para que o código também rode no
@@ -71,6 +76,9 @@ ASE 10.1d e deu "TODOS OS 16384 CASOS CORRETOS".
 Duas lições do primeiro contato com simuladores reais, que viraram critério:
 - o GHDL recusa caracteres fora do Latin-1 até em comentário (um travessão bastou), por isso
   os arquivos são ASCII;
+- o FPGAEmuWeb, usado em aula, lê a entidade de topo procurando `end <nome>;` ou
+  `end entity;` e recusa `end entity <nome>;`; em 2026-11-05 (MT-19), a análise de portas
+  do emulador leu as 8 portas do R2 gerado e reuniu os 3 arquivos do projeto;
 - o GHDL segue à risca a regra de ligação padrão do VHDL-93 e deixava todas as células sem
   ligação; o ModelSim é permissivo e escondia o problema. O `use work.all` resolve nos dois.
 

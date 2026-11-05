@@ -77,13 +77,16 @@ test('V toggles dots and indexed variables, outside text fields, and is remember
 	page
 }) => {
 	await loadR1(page);
-	const dot = page.getByRole('button', { name: 'a1_b0', exact: true });
+	const dot = page.locator('button[data-signal="a1_b0"]');
+	await expect(dot).toHaveAccessibleName('a1_b0');
 	await expect(dot).toHaveText('');
 
 	await page.locator('#matrix-title').click(); // focus outside any text field
 	await page.keyboard.press('v');
 	await expect(dot).toHaveText('a1b0');
-	await expect(page.getByRole('button', { name: 'e0', exact: true }).first()).toHaveText('e0');
+	// WCAG 2.5.3: the name is what the point shows.
+	await expect(dot).toHaveAccessibleName('a1b0');
+	await expect(page.locator('button[data-signal="e0"]').first()).toHaveText('e0');
 	await expect(page.getByRole('button', { name: 'Variáveis indexadas' })).toHaveAttribute(
 		'aria-pressed',
 		'true'
@@ -96,7 +99,7 @@ test('V toggles dots and indexed variables, outside text fields, and is remember
 	// The next visit offers the saved R1 back (SAL-01), in the remembered view.
 	await page.reload();
 	await page.getByRole('button', { name: 'Retomar' }).click();
-	await expect(page.getByRole('button', { name: 'a1_b0', exact: true })).toHaveText('a1b0');
+	await expect(dot).toHaveText('a1b0');
 
 	await page.getByRole('button', { name: 'Pontos' }).click();
 	await expect(page.getByRole('button', { name: 'a1_b0', exact: true })).toHaveText('');

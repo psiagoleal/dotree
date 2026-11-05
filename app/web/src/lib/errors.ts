@@ -107,19 +107,21 @@ export function cpaBlockMessage(b: CpaBlock, locale?: Locale): string {
 /** Why an exercise file was refused (SAL-03); `tooLarge` is checked before the core reads it. */
 export type FileError = ExerciseError | { code: 'tooLarge' };
 
-export function fileErrorMessage(e: FileError, locale?: Locale): string {
+/** `saved` words it for the copy in local storage instead of a file (SAL-05). */
+export function fileErrorMessage(e: FileError, locale?: Locale, saved = false): string {
 	const o = locale ? { locale } : {};
+	const subject = saved ? m.saved_subject({}, o) : m.file_subject({}, o);
 	switch (e.code) {
 		case 'tooLarge':
 			return m.file_error_too_large({}, o);
 		case 'malformed':
-			return m.file_error_malformed({ detail: e.detail }, o);
+			return m.file_error_malformed({ subject, detail: e.detail }, o);
 		case 'notExercise':
-			return m.file_error_not_exercise({}, o);
+			return m.file_error_not_exercise({ subject }, o);
 		case 'oldSchema':
-			return m.file_error_old_schema({ found: e.found }, o);
+			return m.file_error_old_schema({ subject, found: e.found }, o);
 		case 'futureSchema':
-			return m.file_error_future_schema({ found: e.found }, o);
+			return m.file_error_future_schema({ subject, found: e.found }, o);
 		case 'badExpression':
 			return m.file_error_bad_expression({}, o);
 		case 'inconsistentCell':

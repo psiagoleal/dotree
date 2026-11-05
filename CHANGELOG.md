@@ -8,7 +8,22 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+### Alterado
+- O VHDL fecha cada entidade com `end <nome>;` (antes `end entity <nome>;`), forma que o
+  FPGAEmuWeb exige para ler as portas do topo; cada componente continua num arquivo
+  próprio (VHD-09, MT-19).
+- A verificação usa um único *worker*, carregado junto com a página; cancelar envia uma
+  mensagem em vez de encerrar o *worker* (MT-16).
+- Abaixo de 768 px o exercício fica em modo leitura, com aviso: matriz, ajuda, diagrama,
+  verificação e VHDL continuam disponíveis, mas não se formam células (GER-10, MT-16).
+
 ### Corrigido
+- Sem rede depois de carregar a página, a verificação falhava, porque o *worker* e o WASM
+  só eram buscados ao rodar; a mensagem de erro também saía vazia (GER-05, MT-16).
+- Acessibilidade: na visão indexada, o nome do ponto agora é o texto visível (`a1b0`); o
+  diagrama e a tabela de ligações, roláveis, recebem foco pelo teclado (GER-07, MT-16).
+- Plurais: "1 ponto", "1 porta AND", "1 nível" (antes "1 pontos" etc.); a recusa do estado
+  salvo diz "o conteúdo salvo" em vez de "o arquivo" (MT-16).
 - Com os dados do site bloqueados no navegador, a página não montava: o layout lia
   `window.localStorage` direto ao escolher o idioma (MT-15b).
 

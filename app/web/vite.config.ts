@@ -41,7 +41,9 @@ export default defineConfig({
 					browser: {
 						enabled: true,
 						provider: playwright(),
-						instances: [{ browser: 'chromium', headless: true }]
+						instances: [{ browser: 'chromium', headless: true }],
+						// A desktop width: below 768 px the exercise is read-only (GER-10).
+						viewport: { width: 1280, height: 800 }
 					},
 					include: ['src/**/*.svelte.{test,spec}.{js,ts}']
 				}
