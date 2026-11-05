@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-05
-- **Commit:** `e0bad41` (MT-15a, #31). O MT-15b ainda não foi commitado.
+- **Commit:** `76654f4` (MT-15b, #32). O MT-16 + MT-19 ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -117,7 +117,19 @@
       e2e; 6 mutações pegas.
 - [x] Pedidos do laboratório de multiplicadores avaliados em `docs/plano-pos-v0.1.md`
       (MT-19 a MT-27, aguardam decisão do autor).
-- [ ] Próximo: MT-16 (acessibilidade, desempenho e tela pequena).
+- [x] MT-15b mesclado (#32). Decisões do autor sobre os pedidos do laboratório registradas
+      em `docs/plano-pos-v0.1.md` (ordem aprovada; MT-19 antecipado; placa pelas portas
+      padrão do FPGAEmuWeb).
+- [x] MT-19: `end <nome>;` nas entidades (VHD-09). Conferido com o GHDL local (imagem do
+      CI) e com a análise de portas do próprio FPGAEmuWeb, extraída do código público e
+      rodada fora do repositório.
+- [x] MT-16: `e2e/quality.e2e.ts` (axe nos dois temas, sem rede, p95, origem) e
+      `e2e/narrow.e2e.ts`. *Worker* de verificação único e aguardado no carregamento
+      (`Verifier`); nome acessível dos pontos na visão indexada; regiões roláveis
+      focáveis; plurais com variantes do Paraglide (`campo=1` / `campo=*`); o Vitest em
+      navegador roda com janela de 1280 px (abaixo de 768 px o exercício é só leitura).
+      183 testes Rust, 136 de unidade/componente, 44 e2e; 5 mutações pegas.
+- [ ] Próximo: MT-17 (publicar a v0.1.0).
 
 ## Observações para a próxima sessão
 
@@ -126,10 +138,12 @@
   `AGENTS.md` proíbe o agente de rodar `git worktree`.
 - Não use `pkill -f` com um padrão que apareça na própria linha de comando: mata o shell
   da ferramenta (exit 144). Guarde o PID do servidor e use `kill`.
-- O rótulo de coluna diz "1 pontos" (sem plural); corrigir no MT-16 com variantes do
-  Paraglide.
-- A recusa do estado salvo reaproveita as mensagens de arquivo ("o arquivo usa o esquema
-  0…"); no MT-16, considerar um sujeito neutro ("o conteúdo").
+- Abaixo de 768 px o exercício é só leitura (GER-10): testes de componente precisam de
+  janela larga (o `vite.config.ts` fixa 1280 px) e e2e com `setViewportSize` estreito
+  não acham os botões de ação.
+- O e2e de GER-05 dependia de uma corrida (rede cortada antes de o *worker* carregar);
+  resolvido esperando o `ready` do *worker* no carregamento. Se voltar a falhar, é o
+  primeiro suspeito.
 - Testes e2e que recarregam a página encontram a oferta de retomada (SAL-01): retome, ou
   apague `dotree.exercise` antes de recarregar.
 - O gateway OpenAI-compatível do ambiente não respondeu desta máquina em 2026-11-03
@@ -151,6 +165,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-05 | `76654f4` | salvamento automático (#32); acessibilidade, rede, desempenho, tela pequena; VHDL para o FPGAEmuWeb | MT-15b, MT-16, MT-19 |
 | 2026-11-05 | `e0bad41` | exportar e abrir (#31); salvamento automático e retomada; plano pós-v0.1 | MT-15a, MT-15b |
 | 2026-11-04 | `98e1f38` | verificação e VHDL (#30); exportar e abrir o exercício | MT-14b, MT-15a |
 | 2026-11-04 | `5f9ce8a` | diagrama, tabela e exportações (#29); verificação e VHDL na interface | MT-14a, MT-14b |

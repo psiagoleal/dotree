@@ -13,7 +13,8 @@
 		points,
 		onsuggest,
 		onform,
-		onhelp
+		onhelp,
+		readOnly = false
 	}: {
 		session: CompressionSession;
 		/** Points of the current level, to name the suggested cell. */
@@ -24,6 +25,8 @@
 		onform: (ids: number[]) => void;
 		/** A help was revealed (AJU-07). */
 		onhelp: () => void;
+		/** Narrow screen (GER-10): the suggestion is shown but not formed from here. */
+		readOnly?: boolean;
 	} = $props();
 
 	let hintDialog: ConfirmDialog;
@@ -57,7 +60,7 @@
 	{#if move}
 		<p data-testid="next-move">
 			{moveMessage(move, points)}
-			{#if move.move === 'formCell'}
+			{#if move.move === 'formCell' && !readOnly}
 				{@const ids = move.points}
 				<button type="button" class="link" onclick={() => onform(ids)}>{m.move_form_this()}</button>
 			{/if}

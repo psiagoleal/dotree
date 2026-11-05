@@ -4,6 +4,8 @@
      colour (COR-01, COR-02), each cell as a box around the points it consumes (CMP-05).
      Columns run from `top` down to 2^0, so W stays hidden until revealed (EXP-09). In the
      indexed view each point becomes its signal, a₁b₀, in the same place and colour (VIS-01).
+     A selectable point is named by what it shows (WCAG 2.5.3): its signal in the dots view,
+     the visible a1b0 in the indexed view.
      In the current level the points are toggle buttons for selection (GER-07). The result
      panel (`result`) draws the bits R_j in the result colour, an empty column as a constant 0
      (CMP-12, COR-02). Critical cells get a thicker accent border (CMP-15); a cell whose carry
@@ -88,7 +90,7 @@
 			class:suggested={suggested.includes(p.id)}
 			style:--c={color(p)}
 			aria-pressed={selected.includes(p.id)}
-			aria-label={p.signal}
+			aria-label={view === 'indexed' ? undefined : p.signal}
 			title={p.signal}
 			data-signal={p.signal}
 			onclick={() => ontoggle(p.id)}

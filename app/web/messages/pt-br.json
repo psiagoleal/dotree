@@ -21,8 +21,28 @@
 	"example_r3": "Uma variável",
 	"example_r4": "Multiplicador 4×4",
 	"matrix_title": "Matriz de pontos",
-	"matrix_summary": "{dots} pontos · {ands} portas AND",
-	"matrix_column_label": "Coluna de peso 2^{column}, {height} pontos",
+	"matrix_summary": [
+		{
+			"declarations": ["input dots", "input ands"],
+			"selectors": ["dots", "ands"],
+			"match": {
+				"dots=1, ands=1": "{dots} ponto · {ands} porta AND",
+				"dots=1, ands=*": "{dots} ponto · {ands} portas AND",
+				"dots=*, ands=1": "{dots} pontos · {ands} porta AND",
+				"dots=*, ands=*": "{dots} pontos · {ands} portas AND"
+			}
+		}
+	],
+	"matrix_column_label": [
+		{
+			"declarations": ["input column", "input height"],
+			"selectors": ["height"],
+			"match": {
+				"height=1": "Coluna de peso 2^{column}, {height} ponto",
+				"height=*": "Coluna de peso 2^{column}, {height} pontos"
+			}
+		}
+	],
 	"legend_title": "Termos",
 	"warning_unused_width": "A largura de {var} foi ignorada: a expressão não usa {var}.",
 	"error_syntax_empty": "A expressão está vazia.",
@@ -151,7 +171,16 @@
 	"confirm_solution_body": "Primeiro, só as métricas finais; os níveis ficam para um segundo pedido. O seu circuito não muda.",
 	"confirm_solution_path_title": "Ver a solução nível a nível?",
 	"confirm_solution_path_body": "Antes, compare as métricas da solução com as do seu circuito.",
-	"hint_min_levels_left": "Com altura máxima {height}, faltam no mínimo {levels} níveis até o CPA.",
+	"hint_min_levels_left": [
+		{
+			"declarations": ["input height", "input levels"],
+			"selectors": ["levels"],
+			"match": {
+				"levels=1": "Com altura máxima {height}, falta no mínimo {levels} nível até o CPA.",
+				"levels=*": "Com altura máxima {height}, faltam no mínimo {levels} níveis até o CPA."
+			}
+		}
+	],
 	"hint_tallest_column": "A coluna 2^{column} é a mais alta ({height} pontos); o CPA aceita no máximo 3 na primeira coluna e 2 nas demais.",
 	"hint_idle_points": "Há pontos prontos em t = 0 que ainda não entraram em nenhuma célula, numa coluna com 3 ou mais pontos.",
 	"hint_cpa_ready": "Este nível já pode ser fechado com o CPA.",
@@ -162,8 +191,26 @@
 	"move_complete": "O circuito está completo.",
 	"lower_bound_result": "Limite inferior: {value}. Nenhum circuito para esta matriz usa menos que {value} FA somados aos vai-uns descartados.",
 	"lower_bound_path": "Pontos da matriz inicial menos W: {dots} − {width} = {value}. Cada FA elimina 1 ponto (entram 3, saem 2), cada vai-um descartado elimina 1, e o HA não elimina nenhum (entram 2, saem 2). O circuito completo tem no máximo W pontos, então FA + vai-uns descartados ≥ {dots} − {width}. É um limite inferior, não necessariamente o ótimo.",
-	"solution_summary_cpa": "Solução de Dadda: {levels} níveis e o CPA; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA.",
-	"solution_summary": "Solução de Dadda: {levels} níveis; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA.",
+	"solution_summary_cpa": [
+		{
+			"declarations": ["input levels", "input fa", "input ha", "input area", "input delay"],
+			"selectors": ["levels"],
+			"match": {
+				"levels=1": "Solução de Dadda: {levels} nível e o CPA; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA.",
+				"levels=*": "Solução de Dadda: {levels} níveis e o CPA; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA."
+			}
+		}
+	],
+	"solution_summary": [
+		{
+			"declarations": ["input levels", "input fa", "input ha", "input area", "input delay"],
+			"selectors": ["levels"],
+			"match": {
+				"levels=1": "Solução de Dadda: {levels} nível; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA.",
+				"levels=*": "Solução de Dadda: {levels} níveis; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA."
+			}
+		}
+	],
 	"solution_title": "Solução de Dadda, nível a nível",
 	"solution_level": "Solução, nível {level}",
 	"solution_cpa": "Solução, nível {level}: CPA",
@@ -218,11 +265,11 @@
 	"file_name": "dotree-exercicio.json",
 	"file_import_failed": "Não foi possível abrir {file}: {reason} O exercício aberto não mudou.",
 	"file_error_too_large": "o arquivo passa de 1 MB, grande demais para um exercício.",
-	"file_error_malformed": "o arquivo não é um JSON de exercício válido ({detail}).",
-	"file_error_not_exercise": "o arquivo é JSON, mas não é um exercício do dotree.",
-	"file_error_old_schema": "o arquivo usa o esquema {found}, antigo demais para esta versão.",
-	"file_error_future_schema": "o arquivo usa o esquema {found}, de uma versão mais nova do dotree.",
-	"file_error_bad_expression": "a expressão ou as larguras do arquivo não formam uma matriz válida.",
+	"file_error_malformed": "{subject} não é um JSON de exercício válido ({detail}).",
+	"file_error_not_exercise": "{subject} é JSON, mas não é um exercício do dotree.",
+	"file_error_old_schema": "{subject} usa o esquema {found}, antigo demais para esta versão.",
+	"file_error_future_schema": "{subject} usa o esquema {found}, de uma versão mais nova do dotree.",
+	"file_error_bad_expression": "a expressão ou as larguras não formam uma matriz válida.",
 	"file_error_inconsistent_cell": "a célula {position} do nível {level} não obedece às regras da compressão.",
 	"file_error_inconsistent_level": "o nível {level} não pode existir nesse ponto do exercício.",
 	"file_error_inconsistent_reveals": "o registro de revelações é impossível (uma etapa 2 sem a etapa 1).",
@@ -237,5 +284,9 @@
 	"saved_confirm_body": "O exercício salvo neste navegador será apagado, e isso não se desfaz.",
 	"saved_confirm_cancel": "Manter o exercício salvo",
 	"saved_confirm_ok": "Descartar",
-	"storage_unavailable": "Este navegador não deixa a página guardar dados: o exercício funciona normalmente, mas o progresso não será lembrado ao fechar a aba. Use “Exportar exercício” para guardá-lo."
+	"storage_unavailable": "Este navegador não deixa a página guardar dados: o exercício funciona normalmente, mas o progresso não será lembrado ao fechar a aba. Use “Exportar exercício” para guardá-lo.",
+	"verify_error_load": "A verificação não pôde rodar: o módulo de verificação não carregou. Recarregue a página com a rede disponível.",
+	"read_only_notice": "Tela estreita: abaixo de 768 px o exercício fica em modo leitura. Matriz, diagrama, verificação e VHDL continuam disponíveis; para formar células, use uma janela mais larga.",
+	"file_subject": "o arquivo",
+	"saved_subject": "o conteúdo salvo"
 }

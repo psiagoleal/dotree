@@ -348,3 +348,45 @@ fn entity_name_validation() {
     assert!(fs.iter().any(|f| f.name == "meu_somador.vhd"));
     assert!(fs.iter().any(|f| f.name == "tb_meu_somador.vhd"));
 }
+
+// ---------------------------------------------------------------- VHD-09 (MT-19)
+
+#[test]
+fn vhd09_entities_close_with_their_bare_name() {
+    // The FPGAEmuWeb reads the top entity up to `end <name>;` (or `end entity;`) only.
+    let (m, n) = r2();
+    for lang in [Language::PtBr, Language::En] {
+        for f in files(&m, &n, lang) {
+            let code = code_only(&f.contents);
+            assert!(!code.contains("end entity"), "{}", f.name);
+            let entity = code
+                .lines()
+                .find_map(|l| l.strip_prefix("entity ")?.strip_suffix(" is"))
+                .unwrap_or_else(|| panic!("no entity in {}", f.name));
+            assert_eq!(format!("{entity}.vhd"), f.name);
+            assert!(
+                code.lines().any(|l| l == format!("end {entity};")),
+                "{}",
+                f.name
+            );
+        }
+    }
+}
+
+#[test]
+fn vhd09_every_component_of_the_top_has_its_own_file() {
+    let (m, n) = r2();
+    let fs = files(&m, &n, Language::PtBr);
+    let names: BTreeSet<&str> = fs.iter().map(|f| f.name.as_str()).collect();
+    let components: Vec<String> = code_only(top(&fs))
+        .lines()
+        .filter_map(|l| {
+            let c = l.trim().strip_prefix("component ")?.strip_suffix(" is")?;
+            Some(format!("{c}.vhd"))
+        })
+        .collect();
+    assert_eq!(components, ["full_adder.vhd", "half_adder.vhd"]);
+    for c in &components {
+        assert!(names.contains(c.as_str()), "{c}");
+    }
+}

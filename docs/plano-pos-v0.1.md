@@ -8,6 +8,27 @@
 > depois que a spec correspondente for atualizada e aprovada (`spec-como-contrato`).
 > Avaliação feita em 2026-11-05 sobre o código do commit `e0bad41`.
 
+## Decisões do autor (2026-11-05)
+
+- Ordem proposta aprovada. Todos os pedidos entram no plano, inclusive os grandes.
+- **MT-19** entra junto com o MT-16, antes da v0.1.0.
+- **MT-20** (aplicar a solução): implementar. A adequação didática é reavaliada depois do
+  uso; a spec 03 passa a permitir a substituição do circuito pela solução, contada como
+  ajuda.
+- **MT-22** (placa): seguir as portas que o FPGAEmuWeb já mapeia por padrão, em vez de uma
+  tabela de pinos própria. Conferido no código público do emulador (lido para entender o
+  comportamento; o repositório não declara licença, então nada dele é copiado):
+  - a entidade de topo é lida até `end entity;` ou `end <nome>;`;
+  - cada `component X is` do topo puxa o arquivo `X.vhd`;
+  - portas com estes nomes ligam-se sozinhas à placa emulada: `CLOCK_50`, `CLK_500Hz`,
+    `CLK_1Hz`, `CLK_10Hz`, `KEY` (4 bits), `SW` (18), `LEDR` (18), `HEX0` a `HEX7` (7 cada,
+    ativos em 0);
+  - os pinos reais da DE2 para o `.qsf` vêm do manual da placa, conferidos contra os
+    arquivos de mapeamento do professor (que ficam fora do repositório).
+- **MT-27** (blocos hierárquicos): escrever a ADR antes do código.
+- A sessão "CA", que acompanha a disciplina, pode ser consultada sobre o uso no
+  laboratório.
+
 ## Os pedidos, avaliados
 
 | # | Pedido | Situação hoje | Esforço | Specs afetadas |
@@ -59,8 +80,9 @@ flowchart LR
 - **Arquivos no escopo:** `app/core/src/vhdl/**`, `docs/specs/06-vhdl.md`
 - **Critério de aceite:** testes do núcleo sem `end entity` nem `end architecture`; job
   GHDL do CI verde; o autor confere um `.zip` no FPGAEmuWeb.
-- **Decisão pendente:** quais formas o emulador recusa além de `end entity` (o autor testa
-  um arquivo antes).
+- **Decidido:** o emulador só lê o fechamento da entidade (`end entity;` ou `end <nome>;`);
+  basta `end <nome>;` nas entidades. **Feito (2026-11-05)**, junto com o MT-16: GHDL com
+  os mesmos vereditos do CI, e a análise de portas do emulador leu as 8 portas do R2.
 
 ### MT-20: Aplicar a solução de Dadda ao exercício (P5)
 - **Objetivo:** botão "usar esta solução" depois da etapa 2 da solução, com confirmação;
@@ -69,8 +91,8 @@ flowchart LR
 - **Arquivos no escopo:** `app/wasm/src/**`, `app/web/src/**`, `docs/specs/03-ajuda-sob-demanda.md`
 - **Critério de aceite:** e2e (R1 → solução aplicada → verificação "0 erros" e VHDL
   disponível; desfazer devolve o circuito do aluno).
-- **Decisão pendente:** como conciliar com "correção automática fora de escopo" (spec 03).
-  Proposta: aplicar não corrige, substitui, e conta como revelação do caminho.
+- **Decidido:** implementar; aplicar não corrige, substitui, e conta como revelação do
+  caminho. A spec 03 é ajustada no ticket.
 
 ### MT-21: VHDL comportamental (P4)
 - **Objetivo:** gerar `<nome>_comportamental.vhd` com a mesma interface, usando `unsigned`,
@@ -87,7 +109,8 @@ flowchart LR
   nova spec de placa
 - **Critério de aceite:** testes do núcleo; tabela de pinos conferida contra o manual da
   DE2, com referência à fonte e sem copiar o documento; GHDL compila o topo.
-- **Decisão pendente:** abrir uma spec nova (`10-placa.md`) ou ampliar a spec 06.
+- **Decidido:** portas com os nomes padrão do FPGAEmuWeb (`SW`, `KEY`, `LEDR`, `HEX0`–`HEX7`),
+  que ele liga sem mapeamento manual. **Pendente:** spec nova (`10-placa.md`) ou ampliar a 06.
 
 ### MT-23: Painel de operandos em palavras (P6)
 - **Objetivo:** acima de 18 bits de entrada, uma máquina de estados que carrega cada

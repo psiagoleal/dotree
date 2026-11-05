@@ -18,7 +18,9 @@ test('example R1 builds the dot diagram of spec 00 (EXP-01, EXP-12)', async ({ p
 		[0, 5]
 	] as const) {
 		await expect(
-			matrix.getByRole('group', { name: `Coluna de peso 2^${col}, ${h} pontos` })
+			matrix.getByRole('group', {
+				name: `Coluna de peso 2^${col}, ${h} ${h === 1 ? 'ponto' : 'pontos'}`
+			})
 		).toBeVisible();
 	}
 	await expect(matrix.getByRole('group', { name: /2\^5/ })).toHaveCount(0);

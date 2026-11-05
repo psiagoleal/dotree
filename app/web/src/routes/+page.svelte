@@ -14,6 +14,7 @@
 	import { errorMessage, fileErrorMessage, warningMessage } from '#lib/errors.ts';
 	import { keyAction } from '#lib/keys.ts';
 	import { autosaving, clearSaved, loadSaved, saveExercise } from '#lib/persist.ts';
+	import { prewarmVerification } from '#lib/verification.ts';
 	import { browserStorage, readView, writeView, type ViewMode } from '#lib/view.ts';
 
 	const ISSUES_URL = 'https://github.com/psiagoleal/dotree/issues/new';
@@ -80,7 +81,11 @@
 		const opened = core.restoreSession(saved.text);
 		pending = opened.ok
 			? { kind: 'offer', session: opened.session }
-			: { kind: 'corrupt', text: saved.text, reason: fileErrorMessage(opened.error) };
+			: {
+					kind: 'corrupt',
+					text: saved.text,
+					reason: fileErrorMessage(opened.error, undefined, true)
+				};
 	}
 
 	function resume(core: Core) {
@@ -144,8 +149,9 @@
 	}
 
 	onMount(() => {
-		loadCore()
-			.then((core) => {
+		// Loading counts the verification worker too: after it, nothing is fetched (GER-05).
+		Promise.all([loadCore(), prewarmVerification()])
+			.then(([core]) => {
 				status = { kind: 'ready', core };
 				checkSaved(core);
 			})

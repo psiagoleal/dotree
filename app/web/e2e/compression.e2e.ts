@@ -97,7 +97,9 @@ test('R2 tree through the interface: panels, numbered cells and metrics (CMP-05,
 	] as const) {
 		await expect(
 			current(page).getByRole('group', { name: new RegExp(`2\\^${column},`) })
-		).toHaveAccessibleName(`Coluna de peso 2^${column}, ${height} pontos`);
+		).toHaveAccessibleName(
+			`Coluna de peso 2^${column}, ${height} ${height === 1 ? 'ponto' : 'pontos'}`
+		);
 	}
 	await expect(current(page).getByRole('group', { name: /2\^6,/ })).toHaveCount(0);
 

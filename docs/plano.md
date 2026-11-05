@@ -302,6 +302,16 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 - **Critério de aceite:** e2e (GER-05 a GER-08, GER-10).
 - **Fora de escopo:** compressão por toque.
 - **Depende de:** MT-13, MT-14, MT-15
+- **Feito (2026-11-05), junto com o MT-19:** `e2e/quality.e2e.ts` (GER-05 a GER-08) e
+  `e2e/narrow.e2e.ts` (GER-10); o GER-09 já tinha teste. GER-06 mediu p95 de ~14 ms em 50
+  operações na matriz 16 × 16. Os testes acharam três defeitos:
+  - a verificação buscava o *worker* e o WASM só ao rodar, e falhava sem rede; agora o
+    *worker* é um só, criado e aguardado no carregamento, com cancelamento por mensagem;
+  - na visão indexada, o nome acessível do ponto (`a1_b0`) não continha o texto visível
+    (`a1b0`), o que viola o WCAG 2.5.3;
+  - o diagrama e a tabela roláveis não recebiam foco pelo teclado.
+  Também entraram os plurais ("1 ponto", "1 nível") e o sujeito "o conteúdo salvo" nas
+  recusas do estado salvo.
 
 ### MT-17: Publicar a v0.1.0
 - **Objetivo:** CHANGELOG da versão, conferência manual do VHDL no ModelSim, *tag* `v0.1.0`.

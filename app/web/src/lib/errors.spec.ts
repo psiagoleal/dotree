@@ -176,5 +176,9 @@ describe('fileErrorMessage (SAL-03)', () => {
 		expect(fileErrorMessage({ code: 'futureSchema', found: 2 }, 'en')).toBe(
 			'the file uses schema 2, from a newer version of dotree.'
 		);
+		// SAL-05: the copy in local storage is not a file.
+		expect(fileErrorMessage({ code: 'oldSchema', found: 0 }, 'pt-br', true)).toBe(
+			'o conteúdo salvo usa o esquema 0, antigo demais para esta versão.'
+		);
 	});
 });

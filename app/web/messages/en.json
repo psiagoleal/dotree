@@ -21,8 +21,28 @@
 	"example_r3": "Single variable",
 	"example_r4": "4×4 multiplier",
 	"matrix_title": "Dot matrix",
-	"matrix_summary": "{dots} dots · {ands} AND gates",
-	"matrix_column_label": "Column of weight 2^{column}, {height} dots",
+	"matrix_summary": [
+		{
+			"declarations": ["input dots", "input ands"],
+			"selectors": ["dots", "ands"],
+			"match": {
+				"dots=1, ands=1": "{dots} dot · {ands} AND gate",
+				"dots=1, ands=*": "{dots} dot · {ands} AND gates",
+				"dots=*, ands=1": "{dots} dots · {ands} AND gate",
+				"dots=*, ands=*": "{dots} dots · {ands} AND gates"
+			}
+		}
+	],
+	"matrix_column_label": [
+		{
+			"declarations": ["input column", "input height"],
+			"selectors": ["height"],
+			"match": {
+				"height=1": "Column of weight 2^{column}, {height} dot",
+				"height=*": "Column of weight 2^{column}, {height} dots"
+			}
+		}
+	],
 	"legend_title": "Terms",
 	"warning_unused_width": "The width of {var} was ignored: the expression does not use {var}.",
 	"error_syntax_empty": "The expression is empty.",
@@ -151,7 +171,16 @@
 	"confirm_solution_body": "First only the final metrics; the levels come with a second request. Your circuit does not change.",
 	"confirm_solution_path_title": "See the solution level by level?",
 	"confirm_solution_path_body": "First compare the solution's metrics with your circuit's.",
-	"hint_min_levels_left": "With maximum height {height}, at least {levels} levels are left before the CPA.",
+	"hint_min_levels_left": [
+		{
+			"declarations": ["input height", "input levels"],
+			"selectors": ["levels"],
+			"match": {
+				"levels=1": "With maximum height {height}, at least {levels} level is left before the CPA.",
+				"levels=*": "With maximum height {height}, at least {levels} levels are left before the CPA."
+			}
+		}
+	],
 	"hint_tallest_column": "Column 2^{column} is the tallest ({height} points); the CPA takes at most 3 in the first column and 2 in the others.",
 	"hint_idle_points": "Some points ready at t = 0 are in no cell yet, in a column with 3 or more points.",
 	"hint_cpa_ready": "This level can already be closed with the CPA.",
@@ -162,8 +191,26 @@
 	"move_complete": "The circuit is complete.",
 	"lower_bound_result": "Lower bound: {value}. No circuit for this matrix uses fewer than {value} FA plus dropped carries.",
 	"lower_bound_path": "Points of the initial matrix minus W: {dots} − {width} = {value}. Each FA removes 1 point (3 in, 2 out), each dropped carry removes 1, and the HA removes none (2 in, 2 out). The complete circuit has at most W points, so FA + dropped carries ≥ {dots} − {width}. It is a lower bound, not necessarily the optimum.",
-	"solution_summary_cpa": "Dadda's solution: {levels} levels and the CPA; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA.",
-	"solution_summary": "Dadda's solution: {levels} levels; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA.",
+	"solution_summary_cpa": [
+		{
+			"declarations": ["input levels", "input fa", "input ha", "input area", "input delay"],
+			"selectors": ["levels"],
+			"match": {
+				"levels=1": "Dadda's solution: {levels} level and the CPA; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA.",
+				"levels=*": "Dadda's solution: {levels} levels and the CPA; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA."
+			}
+		}
+	],
+	"solution_summary": [
+		{
+			"declarations": ["input levels", "input fa", "input ha", "input area", "input delay"],
+			"selectors": ["levels"],
+			"match": {
+				"levels=1": "Dadda's solution: {levels} level; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA.",
+				"levels=*": "Dadda's solution: {levels} levels; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA."
+			}
+		}
+	],
 	"solution_title": "Dadda's solution, level by level",
 	"solution_level": "Solution, level {level}",
 	"solution_cpa": "Solution, level {level}: CPA",
@@ -218,11 +265,11 @@
 	"file_name": "dotree-exercise.json",
 	"file_import_failed": "Could not open {file}: {reason} The open exercise did not change.",
 	"file_error_too_large": "the file is over 1 MB, too large for an exercise.",
-	"file_error_malformed": "the file is not valid exercise JSON ({detail}).",
-	"file_error_not_exercise": "the file is JSON, but not a dotree exercise.",
-	"file_error_old_schema": "the file uses schema {found}, too old for this version.",
-	"file_error_future_schema": "the file uses schema {found}, from a newer version of dotree.",
-	"file_error_bad_expression": "the expression or the widths in the file do not build a valid matrix.",
+	"file_error_malformed": "{subject} is not valid exercise JSON ({detail}).",
+	"file_error_not_exercise": "{subject} is JSON, but not a dotree exercise.",
+	"file_error_old_schema": "{subject} uses schema {found}, too old for this version.",
+	"file_error_future_schema": "{subject} uses schema {found}, from a newer version of dotree.",
+	"file_error_bad_expression": "the expression or the widths do not build a valid matrix.",
 	"file_error_inconsistent_cell": "cell {position} of level {level} breaks the compression rules.",
 	"file_error_inconsistent_level": "level {level} cannot exist at that point of the exercise.",
 	"file_error_inconsistent_reveals": "the reveal log is impossible (a step 2 without its step 1).",
@@ -237,5 +284,9 @@
 	"saved_confirm_body": "The exercise saved in this browser will be erased, and that cannot be undone.",
 	"saved_confirm_cancel": "Keep the saved exercise",
 	"saved_confirm_ok": "Discard",
-	"storage_unavailable": "This browser does not let the page store data: the exercise works normally, but progress will not be remembered when the tab closes. Use “Export exercise” to keep it."
+	"storage_unavailable": "This browser does not let the page store data: the exercise works normally, but progress will not be remembered when the tab closes. Use “Export exercise” to keep it.",
+	"verify_error_load": "The verification could not run: the verification module did not load. Reload the page with the network available.",
+	"read_only_notice": "Narrow screen: below 768 px the exercise is read-only. Matrix, diagram, verification and VHDL stay available; to form cells, use a wider window.",
+	"file_subject": "the file",
+	"saved_subject": "the saved content"
 }

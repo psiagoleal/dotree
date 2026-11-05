@@ -105,13 +105,22 @@
 			</p>
 		{/if}
 
-		<div class="drawing" data-testid="diagram">
+		<!-- Scrolls sideways on narrow screens, so it takes focus for the arrow keys (GER-07). -->
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+		<div
+			class="drawing"
+			data-testid="diagram"
+			role="region"
+			aria-label={m.diagram_title()}
+			tabindex="0"
+		>
 			<!-- Generated from the core's layout; every text in it is escaped by diagram.ts. -->
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 			{@html svg}
 		</div>
 
-		<div class="table-wrap">
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+		<div class="table-wrap" role="region" aria-label={m.table_title()} tabindex="0">
 			<table data-testid="wiring-table">
 				<caption>{m.table_title()}</caption>
 				<thead>
