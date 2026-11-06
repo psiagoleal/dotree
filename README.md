@@ -7,35 +7,43 @@
 > didática para treinar a intuição em árvores de redução (Wallace, Dadda).
 
 [![CI](https://github.com/psiagoleal/dotree/actions/workflows/ci.yml/badge.svg)](https://github.com/psiagoleal/dotree/actions/workflows/ci.yml)
-![version](https://img.shields.io/badge/version-0.0.0-blue)
+![version](https://img.shields.io/badge/version-0.1.0-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
 
-**No ar:** <https://psiagoleal.github.io/dotree/> (versão de esqueleto: carrega o núcleo em
-WebAssembly e troca de idioma; as funcionalidades chegam ticket a ticket).
+**No ar:** <https://psiagoleal.github.io/dotree/> — versão 0.1.0.
 
 *Interface em português e inglês.*
 
 ## Estado
 
-Esqueleto pronto: núcleo Rust compilado para WebAssembly, interface SvelteKit estática,
-testes de unidade, de componente e de ponta a ponta, imagem Docker e CI/CD com publicação
-no GitHub Pages. O contrato da v0.1 está em [`docs/specs/`](docs/specs/README.md); o plano,
-em [`docs/TICKETS.md`](docs/TICKETS.md).
+v0.1.0: o exercício completo, da expressão ao VHDL. O contrato da versão está em
+[`docs/specs/`](docs/specs/README.md); o que vem depois, em
+[`docs/plano-pos-v0.1.md`](docs/plano-pos-v0.1.md) e no painel
+[`docs/TICKETS.md`](docs/TICKETS.md). As mudanças de cada versão estão no
+[`CHANGELOG.md`](CHANGELOG.md).
 
-## O que o dotree vai fazer (v0.1)
+## O que o dotree faz (v0.1)
 
 1. **Expressão → pontos.** Você digita algo como `A*B + C*D + 3(E+F) + G` e as larguras de
    cada variável; o app mostra a matriz de pontos, uma cor por termo, e alterna a qualquer
-   momento para as variáveis indexadas ($a_1 b_0$).
+   momento para as variáveis indexadas ($a_1 b_0$, tecla V).
 2. **Você comprime.** Escolhe três pontos de uma coluna para um FA, dois para um HA, nível a
-   nível, e fecha com um CPA. Altura das colunas, área ($A_{FA}$) e atraso ($T_{FA}$)
-   aparecem na hora.
+   nível, pelo mouse ou pelo teclado, e fecha com um CPA. Altura das colunas, área
+   ($A_{FA}$), atraso ($T_{FA}$) e caminho crítico aparecem na hora; dá para desfazer e
+   voltar a um nível.
 3. **Ajuda só quando você pede.** Dica, próxima jogada, limite inferior e solução automática
    (Dadda) existem, mas o app pergunta antes de mostrar e revela em duas etapas: primeiro o
-   resultado, depois o caminho.
-4. **Prova.** Verificação exaustiva do circuito (ex.: 16 384 casos).
-5. **Saídas.** Diagrama de blocos (SVG), tabela de ligações e VHDL-93 estrutural com
-   testbench.
+   resultado, depois o caminho. O que foi revelado fica registrado no resumo.
+4. **Prova.** Verificação do circuito num *worker*, com progresso e cancelamento: exaustiva
+   até 24 bits de entrada (ex.: 16 384 casos), por amostra acima, com contraexemplo se
+   houver erro.
+5. **Saídas.** Diagrama de blocos (SVG), tabela de ligações (Markdown) e VHDL-93 estrutural
+   com testbench, em arquivos soltos ou num `.zip`, que o ModelSim, o GHDL e o FPGAEmuWeb
+   leem.
+6. **Seu trabalho fica.** O exercício é salvo no navegador a cada ação e pode ser exportado
+   e reaberto como arquivo JSON.
+
+Abaixo de 768 px de largura o exercício fica em modo leitura.
 
 Tudo roda no navegador: nenhum dado sai do seu computador.
 
@@ -44,7 +52,7 @@ Tudo roda no navegador: nenhum dado sai do seu computador.
 - Rust estável com o alvo `wasm32-unknown-unknown` (o `rust-toolchain.toml` pede) e
   [`wasm-pack`](https://github.com/wasm-bindgen/wasm-pack)
 - Node.js 24+ e pnpm 11
-- Docker (opcional: imagem e, no futuro, testes do VHDL com GHDL)
+- Docker (opcional: a imagem do site e os testes do VHDL com GHDL)
 
 ## Instalação e uso
 
@@ -69,6 +77,12 @@ Com Docker:
 ```bash
 docker build -t dotree .
 docker run --rm -p 8080:8080 dotree    # http://localhost:8080
+```
+
+Ou a imagem publicada de cada versão:
+
+```bash
+docker run --rm -p 8080:8080 ghcr.io/psiagoleal/dotree:0.1.0
 ```
 
 ## Estrutura de diretórios
