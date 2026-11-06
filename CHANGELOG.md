@@ -119,6 +119,8 @@ verificação exaustiva no navegador e VHDL-93 com testbench, em português e in
 - O VHDL fecha cada entidade com `end <nome>;` (antes `end entity <nome>;`), forma que o
   FPGAEmuWeb exige para ler as portas do topo; cada componente continua num arquivo
   próprio (VHD-09, MT-19).
+- Conferido à mão para esta versão: o R2 gerado compila sem avisos no ModelSim ASE 10.1d e
+  dá "TODOS OS 16384 CASOS CORRETOS"; o R2 estragado de propósito falha (MT-17).
 - A verificação usa um único *worker*, carregado junto com a página; cancelar envia uma
   mensagem em vez de encerrar o *worker* (MT-16).
 - Abaixo de 768 px o exercício fica em modo leitura, com aviso: matriz, ajuda, diagrama,

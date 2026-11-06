@@ -71,7 +71,8 @@ O alvo declarado é VHDL-93 sem construções de VHDL-2008, para que o código t
 ModelSim ASE 10.1d e no Quartus usados em aula. A garantia **automática** é o GHDL em
 `--std=93` no CI. A compatibilidade com o ModelSim é conferida à mão antes de cada versão e
 registrada no CHANGELOG; em 2026-11-01 (MT-10), o R2 gerado compilou sem avisos no ModelSim
-ASE 10.1d e deu "TODOS OS 16384 CASOS CORRETOS".
+ASE 10.1d e deu "TODOS OS 16384 CASOS CORRETOS". Em 2026-11-06, para a v0.1.0 (já com
+`end <nome>;`), o mesmo resultado, e o R2 estragado de propósito acusou erro já no vetor 30.
 
 Duas lições do primeiro contato com simuladores reais, que viraram critério:
 - o GHDL recusa caracteres fora do Latin-1 até em comentário (um travessão bastou), por isso

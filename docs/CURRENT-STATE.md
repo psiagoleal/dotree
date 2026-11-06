@@ -134,9 +134,10 @@
       CHANGELOG fechado em `[0.1.0] - 2026-11-05` (seções repetidas reunidas, resumo da
       versão); `app/core/tests/release.rs` (ENT-05) exige que as quatro versões batam; o
       e2e de ENT-03 confere o número exato da versão na página. 187 testes Rust, 136 de
-      unidade/componente, 44 e2e; 2 mutações pegas. **Falta, com o autor:** conferir o R2
-      no ModelSim (as entidades mudaram para `end <nome>;`), registrar o resultado no
-      CHANGELOG, mesclar, criar a *tag* `v0.1.0` e conferir a release e a imagem no GHCR.
+      unidade/componente, 44 e2e; 2 mutações pegas. ModelSim ASE 10.1d conferido em
+      2026-11-06 (`~/altera/13.0/modelsim_ase/bin`; R2 com 16 384 casos corretos, o
+      estragado acusa erro) e registrado no CHANGELOG. **Falta, com o autor:** mesclar,
+      criar a *tag* `v0.1.0` e conferir a release e a imagem no GHCR.
 - [ ] Depois: MT-20 (aplicar a solução de Dadda).
 
 ## Observações para a próxima sessão
