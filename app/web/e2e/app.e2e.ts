@@ -1,10 +1,18 @@
 // Caminho relativo: app/web/e2e/app.e2e.ts
+import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 
-test('loads under the Pages base path and runs the WASM core (ENT-03)', async ({ page }) => {
+/** The release version (ENT-05): the site shows the version its core was built with. */
+const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+
+test('loads under the Pages base path and runs the WASM core of this release (ENT-03, ENT-05)', async ({
+	page
+}) => {
 	await page.goto('./');
 	await expect(page.getByRole('heading', { level: 1, name: 'dotree' })).toBeVisible();
-	await expect(page.getByTestId('core-status')).toContainText(/\d+\.\d+\.\d+/);
+	await expect(page.getByTestId('core-status')).toContainText(
+		new RegExp(`(^|\\s)${version.replaceAll('.', '\\.')}\\b`)
+	);
 });
 
 test('first visit follows the browser language (IDI-03)', async ({ browser }) => {

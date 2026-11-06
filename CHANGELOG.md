@@ -8,24 +8,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
-### Alterado
-- O VHDL fecha cada entidade com `end <nome>;` (antes `end entity <nome>;`), forma que o
-  FPGAEmuWeb exige para ler as portas do topo; cada componente continua num arquivo
-  próprio (VHD-09, MT-19).
-- A verificação usa um único *worker*, carregado junto com a página; cancelar envia uma
-  mensagem em vez de encerrar o *worker* (MT-16).
-- Abaixo de 768 px o exercício fica em modo leitura, com aviso: matriz, ajuda, diagrama,
-  verificação e VHDL continuam disponíveis, mas não se formam células (GER-10, MT-16).
+## [0.1.0] - 2026-11-05
 
-### Corrigido
-- Sem rede depois de carregar a página, a verificação falhava, porque o *worker* e o WASM
-  só eram buscados ao rodar; a mensagem de erro também saía vazia (GER-05, MT-16).
-- Acessibilidade: na visão indexada, o nome do ponto agora é o texto visível (`a1b0`); o
-  diagrama e a tabela de ligações, roláveis, recebem foco pelo teclado (GER-07, MT-16).
-- Plurais: "1 ponto", "1 porta AND", "1 nível" (antes "1 pontos" etc.); a recusa do estado
-  salvo diz "o conteúdo salvo" em vez de "o arquivo" (MT-16).
-- Com os dados do site bloqueados no navegador, a página não montava: o layout lia
-  `window.localStorage` direto ao escolher o idioma (MT-15b).
+Primeira versão de uso: da expressão à matriz de pontos, compressão feita pelo aluno com
+FA, HA e CPA, ajuda sob demanda em duas etapas, diagrama de blocos, tabela de ligações,
+verificação exaustiva no navegador e VHDL-93 com testbench, em português e inglês.
 
 ### Adicionado
 - O exercício fica salvo neste navegador a cada ação e revelação, e a visita seguinte
@@ -129,10 +116,25 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   mapa de arquitetura em `docs/architecture.md`.
 
 ### Alterado
+- O VHDL fecha cada entidade com `end <nome>;` (antes `end entity <nome>;`), forma que o
+  FPGAEmuWeb exige para ler as portas do topo; cada componente continua num arquivo
+  próprio (VHD-09, MT-19).
+- A verificação usa um único *worker*, carregado junto com a página; cancelar envia uma
+  mensagem em vez de encerrar o *worker* (MT-16).
+- Abaixo de 768 px o exercício fica em modo leitura, com aviso: matriz, ajuda, diagrama,
+  verificação e VHDL continuam disponíveis, mas não se formam células (GER-10, MT-16).
 - Casos de referência trocados por exemplos próprios do projeto.
 - Wallace e exportação CSV saem da v0.1.
 
 ### Corrigido
+- Sem rede depois de carregar a página, a verificação falhava, porque o *worker* e o WASM
+  só eram buscados ao rodar; a mensagem de erro também saía vazia (GER-05, MT-16).
+- Acessibilidade: na visão indexada, o nome do ponto agora é o texto visível (`a1b0`); o
+  diagrama e a tabela de ligações, roláveis, recebem foco pelo teclado (GER-07, MT-16).
+- Plurais: "1 ponto", "1 porta AND", "1 nível" (antes "1 pontos" etc.); a recusa do estado
+  salvo diz "o conteúdo salvo" em vez de "o arquivo" (MT-16).
+- Com os dados do site bloqueados no navegador, a página não montava: o layout lia
+  `window.localStorage` direto ao escolher o idioma (MT-15b).
 - Núcleo: voltar ao nível que o CPA fechou reabria as células do CPA como pendentes, com
   entradas de vai-um que não são pontos do nível; agora só remove o CPA (MT-12b).
 

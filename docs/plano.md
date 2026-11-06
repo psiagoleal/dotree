@@ -320,3 +320,6 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
   versão.
 - **Fora de escopo:** Wallace, CSV, link compartilhável (v0.2).
 - **Depende de:** MT-16
+- **Em andamento (2026-11-05):** versões em 0.1.0 e conferidas por
+  `app/core/tests/release.rs`; o e2e de ENT-03 confere a versão exata na página; CHANGELOG
+  fechado. Faltam a conferência no ModelSim, a *tag* e a conferência da release e do GHCR.
