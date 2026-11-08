@@ -209,6 +209,8 @@ pub enum HelpStep {
     Solution,
     /// Step 2: the solution level by level.
     SolutionPath,
+    /// The solution replaced the student's circuit (AJU-09).
+    SolutionApplied,
 }
 
 /// How many times each help step was revealed, for the summary of a complete circuit
@@ -222,6 +224,9 @@ pub struct HelpLog {
     pub lower_bound_path: u32,
     pub solution: u32,
     pub solution_path: u32,
+    /// Absent in files from v0.1, so it defaults to 0 and the schema stays 1 (spec 08).
+    #[serde(default)]
+    pub solution_applied: u32,
 }
 
 impl HelpLog {
@@ -233,6 +238,7 @@ impl HelpLog {
             HelpStep::LowerBoundPath => &mut self.lower_bound_path,
             HelpStep::Solution => &mut self.solution,
             HelpStep::SolutionPath => &mut self.solution_path,
+            HelpStep::SolutionApplied => &mut self.solution_applied,
         };
         *n += 1;
     }

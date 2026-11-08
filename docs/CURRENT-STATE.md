@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-05
-- **Commit:** `9f07dd2` (MT-16 + MT-19, #33). O MT-17 ainda não foi commitado.
+- **Commit:** `ce19784` (v0.1.0, #36; *tag* `v0.1.0`). O plano da disciplina e o MT-20 ainda não foram commitados.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -130,15 +130,20 @@
       navegador roda com janela de 1280 px (abaixo de 768 px o exercício é só leitura).
       183 testes Rust, 136 de unidade/componente, 44 e2e; 5 mutações pegas.
 - [x] MT-16 + MT-19 mesclados (#33).
-- [ ] MT-17 em andamento: versão 0.1.0 no `Cargo.toml`, no `package.json` e no README;
-      CHANGELOG fechado em `[0.1.0] - 2026-11-05` (seções repetidas reunidas, resumo da
-      versão); `app/core/tests/release.rs` (ENT-05) exige que as quatro versões batam; o
-      e2e de ENT-03 confere o número exato da versão na página. 187 testes Rust, 136 de
-      unidade/componente, 44 e2e; 2 mutações pegas. ModelSim ASE 10.1d conferido em
-      2026-11-06 (`~/altera/13.0/modelsim_ase/bin`; R2 com 16 384 casos corretos, o
-      estragado acusa erro) e registrado no CHANGELOG. **Falta, com o autor:** mesclar,
-      criar a *tag* `v0.1.0` e conferir a release e a imagem no GHCR.
-- [ ] Depois: MT-20 (aplicar a solução de Dadda).
+- [x] MT-17: v0.1.0 publicada (#36). Versões conferidas por `app/core/tests/release.rs`;
+      ModelSim ASE 10.1d conferido pelo agente (`~/altera/13.0/modelsim_ase/bin`); workflow
+      Release verde, release com a seção do CHANGELOG, imagem `0.1.0` lida sem login no GHCR.
+- [x] Plano da disciplina (caps. 4 a 12) combinado com a sessão CA e aprovado pelo autor:
+      P9 a P20 e MT-28 a MT-38 em `docs/plano-pos-v0.1.md`; até o projeto final (03/12):
+      MT-20, 21, 22, 28, 29, 30, 38 e, se der tempo, 31.
+- [x] P21/MT-39 (2026-11-08): multiplicação por constantes como o gerador do SPIRAL,
+      reimplementada a partir do artigo do Hcub (o código deles é GPL; o dotree segue MIT);
+      depois do MT-33 e do MT-37, sem mexer na fila até o projeto final.
+- [x] MT-20: AJU-09 ("Usar esta solução"). `Reduction::adopt`, `Session.applySolution`,
+      `HelpLog.solution_applied` (opcional no arquivo). 197 testes Rust, 139 de
+      unidade/componente, 45 e2e; 3 mutações pegas (botão no modo leitura, aplicar sem a
+      etapa 2, aplicar sem passo de desfazer).
+- [ ] Próximo: MT-21 (VHDL comportamental).
 
 ## Observações para a próxima sessão
 
@@ -174,6 +179,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-06 | `ce19784` | v0.1.0 publicada (#36); plano da disciplina; usar a solução | MT-17, MT-20 |
 | 2026-11-05 | `9f07dd2` | qualidade e FPGAEmuWeb (#33); preparação da v0.1.0 | MT-16, MT-19, MT-17 |
 | 2026-11-05 | `76654f4` | salvamento automático (#32); acessibilidade, rede, desempenho, tela pequena; VHDL para o FPGAEmuWeb | MT-15b, MT-16, MT-19 |
 | 2026-11-05 | `e0bad41` | exportar e abrir (#31); salvamento automático e retomada; plano pós-v0.1 | MT-15a, MT-15b |

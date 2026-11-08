@@ -33,7 +33,7 @@ fn nothing_is_counted_before_a_request() {
     assert_eq!(
         parse(r1().help_log()),
         json!({"hints": 0, "nextMoves": 0, "lowerBound": 0, "lowerBoundPath": 0,
-               "solution": 0, "solutionPath": 0})
+               "solution": 0, "solutionPath": 0, "solutionApplied": 0})
     );
 }
 
@@ -114,4 +114,51 @@ fn no_hint_once_complete_and_nothing_counted() {
     assert_eq!(parse(s.hint()), json!({"hint": null}));
     assert_eq!(parse(s.next_move()), json!({"move": "complete"}));
     assert_eq!(parse(s.help_log())["hints"], 0);
+}
+
+// ----------------------------------------------------- AJU-09: using the solution (MT-20)
+
+#[test]
+fn applying_needs_the_path_first() {
+    let mut s = r1();
+    let before = s.snapshot();
+    assert!(!s.apply_solution(), "nothing revealed yet");
+    s.solution(false);
+    assert!(!s.apply_solution(), "only the result was revealed");
+    assert_eq!(s.snapshot(), before);
+    assert_eq!(parse(s.help_log())["solutionApplied"], 0);
+}
+
+#[test]
+fn applying_replaces_the_circuit_in_one_undo_step_and_is_counted() {
+    let mut s = r1();
+    let ids = json!([id_of(&s, 2, "a0_b2"), id_of(&s, 2, "a1_b1")]).to_string();
+    s.form_cell(&ids);
+    let before = s.snapshot();
+    let solution = s.solution(true).snapshot();
+
+    assert!(s.apply_solution());
+    let after = parse(s.snapshot());
+    let expected = parse(solution);
+    assert_eq!(after["levels"], expected["levels"]);
+    assert_eq!(after["metrics"], expected["metrics"]);
+    assert_eq!(after["result"], expected["result"]);
+    assert!(s.netlist().is_some(), "the applied circuit is complete");
+    assert_eq!(parse(s.help_log())["solutionApplied"], 1);
+
+    assert!(s.undo());
+    let mut back = parse(s.snapshot());
+    assert_eq!(back["canRedo"], true, "redo applies the solution again");
+    back["canRedo"] = false.into();
+    assert_eq!(back, parse(before), "undo gives the student's circuit back");
+    assert_eq!(
+        parse(s.help_log())["solutionApplied"],
+        1,
+        "undo does not take a help back"
+    );
+
+    // Applying again over the solution itself changes nothing and is not counted.
+    assert!(s.redo());
+    assert!(!s.apply_solution());
+    assert_eq!(parse(s.help_log())["solutionApplied"], 1);
 }

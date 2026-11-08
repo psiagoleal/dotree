@@ -80,8 +80,9 @@ describe('autosaving', () => {
 		s.solution(true);
 		s.revealWidth(7);
 		s.revealWidthPath();
-		expect(save).toHaveBeenCalledTimes(12);
-		expect(save).toHaveBeenLastCalledWith('state 12');
+		s.applySolution();
+		expect(save).toHaveBeenCalledTimes(13);
+		expect(save).toHaveBeenLastCalledWith('state 13');
 	});
 
 	it('does not save on reads', () => {

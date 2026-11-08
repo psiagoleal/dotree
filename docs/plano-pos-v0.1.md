@@ -1,12 +1,15 @@
 <!-- Caminho relativo: docs/plano-pos-v0.1.md -->
 
-# Plano depois da v0.1 — pedidos do laboratório de multiplicadores
+# Plano depois da v0.1 — laboratório de multiplicadores e conteúdo da disciplina
 
 > **Plano, não spec.** Registra pedidos levantados ao usar o dotree num laboratório de
 > multiplicadores grandes (64 × 64 numa placa DE2), com a avaliação de cada um e uma ordem
 > proposta. Nada aqui muda o escopo da v0.1 sem decisão do autor; cada ticket só começa
 > depois que a spec correspondente for atualizada e aprovada (`spec-como-contrato`).
-> Avaliação feita em 2026-11-05 sobre o código do commit `e0bad41`.
+> Avaliação feita em 2026-11-05 sobre o código do commit `e0bad41`. Os pedidos P9 a P20,
+> sobre os capítulos 4 a 12 do livro-texto da disciplina, foram avaliados em 2026-11-06
+> sobre o commit `9f07dd2`, com a sessão "CA" (ver
+> [Conteúdo da disciplina](#conteúdo-da-disciplina-capítulos-4-a-12)).
 
 ## Decisões do autor (2026-11-05)
 
@@ -28,6 +31,29 @@
 - **MT-27** (blocos hierárquicos): escrever a ADR antes do código.
 - A sessão "CA", que acompanha a disciplina, pode ser consultada sobre o uso no
   laboratório.
+
+## Decisões do autor (2026-11-06)
+
+- O professor da disciplina indicou o dotree como projeto final (nota cheia de 17/11 a
+  03/12/2026) e quer usá-lo nas aulas de 2027/1. O plano de ensino pede "unidades
+  aritméticas e avaliação do custo em ASIC e/ou FPGA".
+- **Até o projeto final (v0.2):** MT-20, MT-21, MT-22, MT-28, MT-29, MT-30 e MT-38 (versão
+  mínima); MT-31 se der tempo. Entregável: *tag* `v0.2.0`, relatório da síntese no Quartus
+  (estrutural × comportamental; fica no repositório da disciplina, não aqui) e
+  demonstração no FPGAEmuWeb.
+- **Constante aditiva:** entra como ponto fixo em 1, comprimido como qualquer outro; o app
+  não simplifica a célula que o recebe (fica como melhoria futura).
+- **Depois do projeto final:** ordem por dependências, com o módulo $2^n-1$ (P16) adiantado
+  para o início de 2027/1, porque o semestre começa por RNS. Marcos: $2^n-1$ no início do
+  semestre; célula composta (P13) por volta da 6.ª semana; números com sinal e Booth (P14,
+  P15) antes dos capítulos 9 e 10.
+- **Modelo de custo** (o mesmo dos problemas do curso): FA = 1 $A_{FA}$ e 1 $T_{FA}$; HA =
+  0,5 e 0,5; MUX $2^a{:}1$ = $a/2$ $A_{FA}$ e $a/2$ $T_{FA}$; portas AND contadas à parte. O
+  dotree já usa o de FA e HA.
+- **Multiplicação por constantes (2026-11-08):** as funções do gerador do SPIRAL (P21) entram
+  reimplementadas em Rust **a partir dos artigos**, sem portar nem ler o código deles, que é
+  GPL; o dotree continua MIT. O gerador online serve só como referência para os testes.
+- **Comparação de soluções (P20):** aprovada.
 
 ## Os pedidos, avaliados
 
@@ -93,6 +119,10 @@ flowchart LR
   disponível; desfazer devolve o circuito do aluno).
 - **Decidido:** implementar; aplicar não corrige, substitui, e conta como revelação do
   caminho. A spec 03 é ajustada no ticket.
+- **Feito (2026-11-06):** AJU-09 na spec 03 e nota na spec 08. `Reduction::adopt` guarda o
+  estado final da solução como um passo do histórico (desfazer devolve o circuito do aluno;
+  recusa outra matriz e o circuito já igual); `Session.applySolution` exige a etapa 2 e
+  conta `solutionApplied`; botão "Usar esta solução" com confirmação, fora do modo leitura.
 
 ### MT-21: VHDL comportamental (P4)
 - **Objetivo:** gerar `<nome>_comportamental.vhd` com a mesma interface, usando `unsigned`,
@@ -141,3 +171,142 @@ flowchart LR
 - **Decisão pendente:** modelo do bloco e se o aluno comprime cada bloco ou só a soma
   final. Precisa de ADR.
 - **Depende de:** MT-25, MT-26
+
+## Conteúdo da disciplina (capítulos 4 a 12)
+
+Referência: B. Parhami, *Computer Arithmetic*, 2.ª ed., caps. 4 a 12. Os problemas e
+laboratórios da disciplina são material de terceiros: citados pelo número, nunca copiados.
+
+### O que a v0.1 já cobre
+
+- **8.3, quase todo:** um contador generalizado é uma matriz de bits independentes
+  ({2,2,3; …} = `A+B+C+2D+2E+4F+4G`, larguras 1). Falta parar num perfil de saída (P12).
+- **8.1 sem a constante** (F1 com 48 pontos, F2 com 56), **9.4 em parte** (978943·A até
+  14 bits de A) e o **AMM** $A \times B + C \times D + 2(E+F) + G$.
+
+### Os pedidos
+
+| # | Pedido (capítulo) | Situação hoje | Esforço | Specs |
+|---|---|---|---|---|
+| P9 | Constante aditiva: `+36`, `+8`, `+1164` (8.1, lab do cap. 8, cap. 5) | O parser já a representa como monômio sem variáveis e a recusa de propósito (`ConstantTerm`, EXP-13); um sinal sem fatores já vale 1 | **Pequeno-médio** | 00, 01, 05, 06 |
+| P10 | Solução de Wallace ao lado da de Dadda (8.3) | Só Dadda (`help::dadda_solution`) | **Pequeno-médio** | 03 |
+| P11 | Tabela de alturas nível a nível (8.2) | As alturas aparecem por painel, não numa tabela | **Pequeno** | 02 |
+| P12 | Entrada por alturas com perfil-alvo de saída: `{2,2,3; 1,1,1,1}`, `{3,3,3; 1,2,2,1}` (8.3) | A redução sempre para em 2 linhas + CPA. Na notação do professor, depois do ";" vêm as alturas de saída por coluna | **Pequeno** | 01, 02 |
+| P13 | Célula composta: contador 7:3, (5,5;4), compressor 4:2, AMM 2×2 (8.4, 12.1, 12.2) e multiplicador hierárquico (P3) | A célula é só `CellKind::{Fa, Ha}`, com duas saídas; um 7:3 tem 3 saídas em 3 colunas | **Grande** | 00, 02, 05, 06, 08 |
+| P14 | Ponto invertido: Baugh-Wooley e recodificação com dígito −1 (9.4, 9.5) | Sem sinal e sem NOT | **Médio-grande** | 00, 01, 04, 06 |
+| P15 | Booth radix-2 e radix-4, com mux e múltiplos (9.4, cap. 10) | Sem sinal selecionado por mux | **Grande** | 00, 01, 02, 06 |
+| P16 | Matriz módulo $2^n-1$ e depois $2^n+1$ (8.5, cap. 4, labs de RNS) | Sem volta de colunas. A árvore com volta não fecha laço; o CPA modular segue o padrão de dois somadores e um MUX 2:1, sem laço. $2^n+1$ pede P14 | **Médio** ($2^n-1$) a **grande** | 01, 02, 04, 06 |
+| P17 | Escolha do CPA final: CLA, prefixo, *carry-select* (caps. 6 e 7) | Só *ripple* | **Médio-grande** | 00, 02, 05, 06 |
+| P18 | Variável derivada: múltiplos pré-computados ($7A$) e constante grande (9.4, 9.5) | Literal até $2^{32}$ (EXP-14), 256 pontos | **Grande** | 01, 02 |
+| P19 | Animação de *shift-add*, à esquerda e à direita (9.1) | Fora do modelo combinacional | **Médio** | nova |
+| P20 | Comparação visual de soluções do mesmo problema | Métricas de uma solução por vez | **Pequeno-médio** (mínima) | 02, 03 |
+| P21 | Bloco multiplicador por constantes (MCM), como o gerador do SPIRAL: Hcub com limite de profundidade (9.4, 9.5) | Constante só expandida em pontos; sem subtração nem múltiplo pré-computado | **Médio** | 01, 02, 06, nova |
+
+### Dependências
+
+- P12 fecha o 8.3 inteiro **sem** célula composta; P13 só é preciso para **usar** esses
+  blocos como células (8.4).
+- P13 serve ao P3 (MT-27), ao P15 e ao P17.
+- P14 precisa de P9 (a correção de sinal é constante); P15 precisa de P14 e de P13.
+- P16 com $2^n+1$ precisa de P14 (volta invertida).
+- P18 precisa de P1 (MT-24) e de P3 (MT-27).
+- P20 fica completo com P10 (Wallace).
+- P21 precisa de P14 (o Hcub subtrai) e de P18 (os múltiplos viram variáveis derivadas).
+
+```mermaid
+flowchart LR
+  v01[v0.1.0] --> MT28[MT-28 constante]
+  v01 --> MT30[MT-30 tabela de alturas]
+  v01 --> MT31[MT-31 perfil-alvo]
+  MT20[MT-20 aplicar solução] --> MT29[MT-29 Wallace]
+  MT29 --> MT38[MT-38 comparação]
+  MT28 --> MT33[MT-33 ponto invertido]
+  v01 --> MT35[MT-35 módulo 2^n-1 e 2^n+1]
+  MT33 --> MT35
+  v01 --> MT32[MT-32 célula composta]
+  MT32 --> MT27[MT-27 blocos hierárquicos]
+  MT32 --> MT34[MT-34 Booth]
+  MT33 --> MT34
+  MT32 --> MT36[MT-36 escolha do CPA]
+  MT27 --> MT37[MT-37 variável derivada]
+  MT33 --> MT39[MT-39 multiplicação por constantes]
+  MT37 --> MT39
+```
+
+## Tickets propostos (P9 a P21)
+
+### MT-28: Constante aditiva (P9)
+- **Objetivo:** aceitar termos constantes (`+36`, `3(A+1)`), combinados num só; seus bits em 1
+  viram pontos fixos com cor própria, que o aluno comprime como os outros; VHDL com `'1'`.
+- **Arquivos no escopo:** `app/core/src/{expr,matrix,netlist,vhdl,diagram}/**`,
+  `app/web/src/**`, specs 00, 01, 05 e 06
+- **Critério de aceite:** testes do núcleo; e2e com o lab do cap. 8 (44 pontos e a
+  constante, $W$ = 13); GHDL verde com a constante.
+
+### MT-29: Solução de Wallace (P10)
+- **Objetivo:** `help::wallace_solution` (em cada nível, o máximo de FA e depois HA), com o
+  mesmo fluxo de revelação e aplicação do MT-20.
+- **Critério de aceite:** testes do núcleo com R1 e R2 conferidos à mão; e2e de aplicar.
+- **Depende de:** MT-20
+
+### MT-30: Tabela de alturas nível a nível (P11)
+- **Objetivo:** tabela com a altura de cada coluna em cada nível, exportável em Markdown.
+- **Critério de aceite:** teste com as alturas do R2 (spec 05).
+
+### MT-31: Entrada por alturas com perfil-alvo de saída (P12)
+- **Objetivo:** aceitar `{2,2,3; 1,1,1,1}` (alturas de entrada e de saída, do bit mais
+  significativo ao menos), parar quando o perfil de saída for atingido e mostrar área e
+  atraso do bloco; o nome do bloco conhecido aparece só como revelação opcional.
+- **Critério de aceite:** a solução ótima reproduz as áreas e atrasos dos 11 itens do
+  gabarito do problema 8.3, citados pela fonte, sem copiar o documento.
+
+### MT-32: Célula composta (P13)
+- **Objetivo:** modelo de célula com entradas e saídas em várias colunas, custo e atraso
+  vindos da rede interna; contadores, compressor 4:2 e AMM 2×2 como os primeiros tipos.
+- **Decisão pendente:** ADR 0004 (modelo de célula composta), que vale também para o MT-27.
+
+### MT-33: Ponto invertido e números com sinal (P14)
+- **Objetivo:** pontos negados e a constante de correção; Baugh-Wooley e recodificação com
+  dígito −1 para constantes.
+- **Depende de:** MT-28
+
+### MT-34: Booth radix-2 e radix-4 (P15)
+- **Depende de:** MT-32, MT-33
+
+### MT-35: Matriz módulo $2^n-1$ e $2^n+1$ (P16)
+- **Objetivo:** pesos com volta direta ($2^n-1$) e invertida ($2^n+1$); CPA modular com dois
+  somadores e MUX 2:1. Começa por $2^n-1$, para o início de 2027/1.
+- **Depende de:** MT-33 (só a parte $2^n+1$)
+
+### MT-36: Escolha do CPA final (P17)
+- **Objetivo:** *ripple*, *carry-select* e prefixo, com o modelo de custo do MUX.
+- **Depende de:** MT-32
+
+### MT-37: Variável derivada e constante grande (P18)
+- **Depende de:** MT-24, MT-27
+
+### MT-38: Comparação de soluções (P20)
+- **Objetivo:** guardar soluções do mesmo problema (aluno, Dadda, Wallace, versões salvas)
+  e compará-las lado a lado: área, atraso, FA, HA, AND, níveis, largura do CPA, caminhos
+  críticos, área × atraso e área × atraso²; gráfico área × atraso com a fronteira das
+  soluções não dominadas. Depois: perfis de alturas sobrepostos e números da síntese no
+  Quartus.
+- **Critério de aceite:** e2e com R1 (aluno × Dadda × Wallace) e os números conferidos
+  contra as métricas de cada solução.
+- **Depende de:** MT-29
+
+### MT-39: Multiplicação por constantes, MCM (P21)
+- **Objetivo:** dado $Y = c_1 A$ (ou várias constantes sobre a mesma variável), calcular o
+  grafo de somadores do Hcub, com limite de profundidade opcional, e usar os múltiplos
+  como variáveis derivadas; o aluno compara, no MT-38, a constante expandida em pontos (CSD)
+  com os múltiplos pré-computados mais a árvore.
+- **Fonte:** Y. Voronenko e M. Püschel, "Multiplierless multiple constant multiplication",
+  *ACM Transactions on Algorithms*, 2007. Implementação a partir do artigo, sem consultar o
+  código GPL do SPIRAL; RAG-n fica de fora (precisa da tabela pré-calculada deles) e o BHM
+  fica para depois.
+- **Critério de aceite:** número de somadores e profundidade iguais aos do gerador online
+  num conjunto de casos anotados (só os números, com data e opções usadas); grafo e VHDL
+  conferidos pelo GHDL.
+- **Depende de:** MT-33, MT-37
+
+A animação de *shift-add* (P19) fica sem ticket até haver espaço depois da v0.4.

@@ -264,6 +264,7 @@ fn aju07_the_log_counts_each_step_of_each_help() {
             lower_bound_path: 1,
             solution: 1,
             solution_path: 0,
+            solution_applied: 0,
         }
     );
     assert!(!log.is_empty());
@@ -337,4 +338,79 @@ proptest! {
         let dropped = r.levels().iter().flat_map(|l| &l.cells).filter(|c| c.carry.is_none()).count();
         prop_assert!(r.metrics().fa + dropped >= lower_bound(&m).value);
     }
+}
+
+// ------------------------------------------------------- AJU-09: using the solution (MT-20)
+
+#[test]
+fn aju09_adopting_the_solution_is_one_undo_step() {
+    let m = r1_matrix();
+    let solution = dadda_solution(&m);
+    let mut r = Reduction::new(&m);
+    form(&mut r, 1, &["a0_b1", "a1_b0"]);
+    let before = (
+        r.levels().to_vec(),
+        r.points().to_vec(),
+        r.pending().to_vec(),
+    );
+
+    assert!(r.adopt(&solution));
+    assert_eq!(r.levels(), solution.levels());
+    assert_eq!(r.points(), solution.points());
+    assert_eq!(r.metrics(), solution.metrics());
+    assert_eq!(r.result(), solution.result());
+    assert!(
+        Netlist::from_reduction(&m, &r).is_ok(),
+        "the circuit is complete"
+    );
+
+    assert!(r.undo());
+    assert_eq!(
+        (
+            r.levels().to_vec(),
+            r.points().to_vec(),
+            r.pending().to_vec()
+        ),
+        before,
+        "one undo gives the student's circuit back"
+    );
+    assert!(r.redo());
+    assert_eq!(r.result(), solution.result());
+}
+
+#[test]
+fn aju09_adopting_drops_what_could_be_redone() {
+    let m = r1_matrix();
+    let mut r = Reduction::new(&m);
+    form(&mut r, 1, &["a0_b1", "a1_b0"]);
+    r.undo();
+    assert!(r.can_redo());
+    assert!(r.adopt(&dadda_solution(&m)));
+    assert!(!r.can_redo());
+}
+
+#[test]
+fn aju09_adopting_the_same_circuit_changes_nothing() {
+    let m = r1_matrix();
+    let solution = dadda_solution(&m);
+    let mut r = solution.clone();
+    let undoable = r.can_undo();
+    assert!(!r.adopt(&solution));
+    assert_eq!(r.can_undo(), undoable);
+    assert_eq!(r.result(), solution.result());
+}
+
+#[test]
+fn aju09_a_solution_of_another_matrix_is_refused() {
+    let mut r = Reduction::new(&r1_matrix());
+    assert!(!r.adopt(&dadda_solution(&r4_matrix())));
+    assert!(!r.can_undo());
+}
+
+#[test]
+fn aju09_applying_is_recorded_in_the_help_log() {
+    let mut log = HelpLog::default();
+    log.record(HelpStep::SolutionApplied);
+    assert_eq!(log.solution_applied, 1);
+    assert!(!log.is_empty());
 }

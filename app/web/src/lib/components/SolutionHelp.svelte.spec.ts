@@ -14,11 +14,28 @@ beforeAll(async () => {
 	core = await loadCore();
 });
 
-async function open() {
+async function open(readOnly = false) {
 	const session = core.openSession(r1.expression, r1.widths);
 	const onhelp = vi.fn();
-	const { container } = await render(SolutionHelp, { session, view: 'dots', onhelp });
-	return { session, onhelp, container };
+	const onapply = vi.fn();
+	const { container } = await render(SolutionHelp, {
+		session,
+		view: 'dots',
+		onhelp,
+		onapply,
+		readOnly
+	});
+	return { session, onhelp, onapply, container };
+}
+
+const useIt = () => page.getByRole('button', { name: 'Usar esta solução' });
+const replace = () => page.getByRole('dialog').getByRole('button', { name: 'Substituir' });
+
+async function revealPath() {
+	await page.getByRole('button', { name: 'Solução automática' }).click();
+	await show().click();
+	await page.getByRole('button', { name: 'Ver a solução nível a nível' }).click();
+	await show().click();
 }
 
 const show = () => page.getByRole('dialog').getByRole('button', { name: 'Mostrar' });
@@ -81,7 +98,7 @@ describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06)', () => {
 		const session = reopened.session;
 		const log = session.helpLog();
 		const onhelp = vi.fn();
-		await render(SolutionHelp, { session, view: 'dots', onhelp });
+		await render(SolutionHelp, { session, view: 'dots', onhelp, onapply: vi.fn() });
 
 		await expect.element(page.getByTestId('lower-bound-path')).toHaveTextContent('20 − 7 = 13');
 		await expect.element(page.getByTestId('solution-summary')).toBeVisible();
@@ -91,5 +108,36 @@ describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06)', () => {
 			.toBeVisible();
 		expect(session.helpLog()).toEqual(log);
 		expect(onhelp).not.toHaveBeenCalled();
+	});
+
+	it('using the solution: offered only after the levels, asked first, then replaces the circuit (AJU-09)', async () => {
+		const { session, onapply } = await open();
+		await expect.element(useIt()).not.toBeInTheDocument();
+		await page.getByRole('button', { name: 'Solução automática' }).click();
+		await show().click();
+		await expect.element(useIt()).not.toBeInTheDocument();
+		await page.getByRole('button', { name: 'Ver a solução nível a nível' }).click();
+		await show().click();
+
+		await useIt().click();
+		await expect.element(keepTrying()).toHaveFocus();
+		await keepTrying().click();
+		expect(onapply).not.toHaveBeenCalled();
+		expect(session.snapshot().result).toBeNull();
+
+		await useIt().click();
+		await replace().click();
+		expect(onapply).toHaveBeenCalledTimes(1);
+		const snap = session.snapshot();
+		expect(snap.metrics).toMatchObject({ fa: 13, ha: 8 });
+		expect(snap.result).not.toBeNull();
+		expect(session.helpLog()).toMatchObject({ solutionApplied: 1 });
+	});
+
+	it('read-only mode does not offer to use the solution (GER-10)', async () => {
+		await open(true);
+		await revealPath();
+		await expect.element(page.getByTestId('solution')).toBeVisible();
+		await expect.element(useIt()).not.toBeInTheDocument();
 	});
 });

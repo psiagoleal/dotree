@@ -114,3 +114,43 @@ test('solution in two steps, without touching the circuit (GER-03, AJU-03, AJU-0
 	await expect(current(page).getByRole('group', { name: 'HA pendente' })).toBeVisible();
 	await expect(page.getByRole('heading', { name: 'Nível 0 (atual)' })).toBeVisible();
 });
+
+test('using the solution replaces the circuit in one undo step and is logged (AJU-09)', async ({
+	page
+}) => {
+	await page.goto('./');
+	await page.getByRole('button', { name: 'Soma de produtos' }).click();
+	await point(page, 2, 'a0_b2').click();
+	await point(page, 2, 'a1_b1').click();
+	await page.getByRole('button', { name: 'Formar célula' }).click();
+	await expect(current(page).locator('.cell')).toHaveCount(1);
+
+	const useIt = page.getByRole('button', { name: 'Usar esta solução' });
+	await page.getByRole('button', { name: 'Solução automática', exact: true }).click();
+	await show(page).click();
+	await expect(useIt).toHaveCount(0);
+	await page.getByRole('button', { name: 'Ver a solução nível a nível' }).click();
+	await show(page).click();
+
+	await useIt.click();
+	await expect(keepTrying(page)).toBeFocused();
+	await page.keyboard.press('Escape');
+	await expect(page.getByTestId('complete')).toHaveCount(0);
+
+	await useIt.click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Substituir' }).click();
+	await expect(page.getByTestId('complete')).toBeVisible();
+	await expect(page.getByTestId('metrics')).toContainText(/FA\s*13/);
+	await expect(page.getByTestId('help-log')).toContainText('solução aplicada: 1 vez');
+	await page.getByRole('button', { name: 'Verificar circuito' }).click();
+	await expect(page.getByTestId('verify-result')).toHaveText('16.384 casos, exaustivo, 0 erros.');
+	await expect(page.getByRole('button', { name: 'Baixar todos (.zip)' })).toBeEnabled();
+
+	// One undo gives the student's circuit back: level 0 with the one cell formed.
+	await page.getByRole('button', { name: 'Desfazer' }).click();
+	await expect(page.getByTestId('complete')).toHaveCount(0);
+	await expect(current(page).locator('.cell')).toHaveCount(1);
+	await expect(page.getByRole('heading', { name: /^Nível 0/ })).toBeVisible();
+	await page.getByRole('button', { name: 'Refazer' }).click();
+	await expect(page.getByTestId('complete')).toBeVisible();
+});

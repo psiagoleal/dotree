@@ -112,6 +112,7 @@
 	"formed_cell": "{kind} formed.",
 	"level_concluded": "Level {level} concluded.",
 	"undone": "Undone.",
+	"solution_applied": "Solution applied. Undo brings your circuit back.",
 	"redone": "Redone.",
 	"metrics_title": "Circuit so far",
 	"metric_area": "Area",
@@ -159,6 +160,7 @@
 	"help_lower_bound_path": "See how the bound is reached",
 	"help_solution": "Automatic solution",
 	"help_solution_path": "See the solution level by level",
+	"help_use_solution": "Use this solution",
 	"confirm_hint_title": "See a hint?",
 	"confirm_hint_body": "The hint talks about the current level, without saying which points to pick.",
 	"confirm_next_move_title": "See the next move?",
@@ -171,6 +173,9 @@
 	"confirm_solution_body": "First only the final metrics; the levels come with a second request. Your circuit does not change.",
 	"confirm_solution_path_title": "See the solution level by level?",
 	"confirm_solution_path_body": "First compare the solution's metrics with your circuit's.",
+	"confirm_use_solution_title": "Replace your circuit with the solution?",
+	"confirm_use_solution_body": "The circuit you built gives way to Dadda's whole solution. Undo (Ctrl+Z) brings your circuit back.",
+	"confirm_use_solution_ok": "Replace",
 	"hint_min_levels_left": [
 		{
 			"declarations": ["input height", "input levels"],
@@ -221,6 +226,16 @@
 	"help_log_next_moves": "next moves: {count}",
 	"help_log_lower_bound": "lower bound: {result} (reasoning: {path})",
 	"help_log_solution": "automatic solution: {result} (level by level: {path})",
+	"help_log_solution_applied": [
+		{
+			"declarations": ["input count"],
+			"selectors": ["count"],
+			"match": {
+				"count=1": "solution applied: {count} time",
+				"count=*": "solution applied: {count} times"
+			}
+		}
+	],
 	"circuit_title": "Circuit",
 	"diagram_title": "Block diagram",
 	"diagram_inputs": "Inputs and AND gates ({count})",

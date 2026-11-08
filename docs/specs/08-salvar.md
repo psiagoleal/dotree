@@ -43,6 +43,10 @@ arquivo.
 - **Abrir = refazer.** O núcleo refaz cada célula pelas regras da compressão, e qualquer
   recusa vira "célula inconsistente", com nível e posição. O histórico de desfazer volta
   como a sequência das células salvas. Arquivos acima de 1 MB são recusados sem leitura.
+- **Solução aplicada (AJU-09, MT-20).** `help.solutionApplied` conta as aplicações; é
+  opcional (arquivos sem ele valem 0), então o esquema continua 1. Aplicar sem a etapa 2
+  da solução registrada é revelação inconsistente. Depois de reabrir, o circuito salvo é o
+  da solução, e o desfazer percorre as células dela, não o circuito anterior à aplicação.
 
 - **Salvamento automático (MT-15b).** O que vai para o armazenamento local é o mesmo
   arquivo do exercício, sob a chave `dotree.exercise`, gravado depois de cada ação e de

@@ -49,6 +49,7 @@ const CHANGES = new Set<string>([
 	'nextMove',
 	'lowerBound',
 	'solution',
+	'applySolution',
 	'revealWidth',
 	'revealWidthPath'
 ]);

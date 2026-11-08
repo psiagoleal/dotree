@@ -53,5 +53,7 @@ export function helpLogItems(log: HelpLog, locale?: Locale): string[] {
 		items.push(m.help_log_lower_bound({ result: log.lowerBound, path: log.lowerBoundPath }, o));
 	if (log.solution + log.solutionPath > 0)
 		items.push(m.help_log_solution({ result: log.solution, path: log.solutionPath }, o));
+	if (log.solutionApplied > 0)
+		items.push(m.help_log_solution_applied({ count: log.solutionApplied }, o));
 	return items;
 }
