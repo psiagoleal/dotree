@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-09
-- **Commit:** `15a1b9b` (MT-22, #39). O MT-28 ainda não foi commitado.
+- **Commit:** `48cb595` (MT-28, #40). O override do `minimatch` ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -155,6 +155,8 @@
       No CI, o e2e de VER-04 falhou de novo: com $A + B$, a verificação terminava antes
       de o teste ver a barra. Agora usa $AB$ 12 × 12 com a solução de Dadda e um
       MutationObserver desde o clique; uma mutação que esconde a barra é pega.
+- [x] Segurança: `minimatch` forçado para 11.0.1 por override (GHSA-g3hv-75wg-m249, alerta
+      Dependabot 3). Remover quando o ESLint e o typescript-eslint aceitarem a 11.
 - [ ] Próximo: MT-29 (solução de Wallace).
 
 ## Observações para a próxima sessão
@@ -198,6 +200,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-09 | `48cb595` | constante aditiva (#40); override do `minimatch` | MT-28 |
 | 2026-11-09 | `15a1b9b` | placa DE2 e Quartus (#39); constante aditiva | MT-22, MT-28 |
 | 2026-11-09 | `afa4bbd` | VHDL comportamental (#38); placa DE2 e projeto do Quartus | MT-21, MT-22 |
 | 2026-11-09 | `86233eb` | usar a solução e plano da disciplina (#37); VHDL comportamental | MT-20, MT-21 |
