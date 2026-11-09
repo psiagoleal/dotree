@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-09
-- **Commit:** `2e099f7` (MT-29, #43). O MT-30 ainda não foi commitado.
+- **Commit:** `c7fe552` (MT-30, #44). O MT-29b ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -164,7 +164,9 @@
       conferido à mão contra a spec 02. No CI, o proptest do Wallace (MT-29) achou um
       circuito completo sem CPA (`A*B + 5C*D + C`, 1 bit); o defeito era do auxiliar de
       teste, que exigia o nível de CPA. Corrigido nos dois métodos, com o caso fixado.
-- [ ] Próximo: MT-38 (comparação de soluções, versão mínima). Antes, decidir o Dadda (achado do MT-29).
+- [x] MT-29b: Dadda mantido clássico (decisão do usuário); spec 03 documenta a diferença
+      para a fig. 8.14 do Parhami; teste de regressão nos sete operandos.
+- [ ] Próximo: MT-38 (comparação de soluções, versão mínima), com nota sobre o Dadda clássico.
 
 ## Observações para a próxima sessão
 
@@ -207,6 +209,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-09 | `c7fe552` | tabela de alturas (#44); Dadda clássico documentado | MT-29b |
 | 2026-11-09 | `2e099f7` | solução de Wallace (#43); tabela de alturas | MT-30 |
 | 2026-11-09 | `b22bbc0` | override do `minimatch` (#41); solução de Wallace | MT-29 |
 | 2026-11-09 | `48cb595` | constante aditiva (#40); override do `minimatch` | MT-28 |

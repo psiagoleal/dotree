@@ -272,6 +272,11 @@ flowchart LR
   5 FA + 1 HA, 10 + 1, 5 + 2, 6 + 1 (33 FA e 6 HA no total, contra 33 e 3): o livro usa FA
   também onde falta reduzir só 1, e AJU-05 manda usar HA. Mudar AJU-05 altera R1, R4 e a
   próxima jogada; fica para decisão (proposta: ticket próprio depois do projeto final).
+  **Decidido (MT-29b, 2026-11-09):** manter o Dadda clássico. A figura não segue regra
+  coluna a coluna (no 3.º nível põe FA em colunas já no alvo); a variante "FA sempre que
+  passa do alvo" iguala os totais da figura (33 FA, 3 HA), mas não os níveis 2 e 3, e em R1
+  dá 15,5 $A_{FA}$ e 7 $T_{FA}$, ainda atrás do Wallace (14,5 e 6). Spec 03 documenta a
+  diferença; teste de regressão do Dadda clássico nos sete operandos.
 
 ### MT-30: Tabela de alturas nível a nível (P11)
 - **Objetivo:** tabela com a altura de cada coluna em cada nível, exportável em Markdown.

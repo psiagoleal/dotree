@@ -543,6 +543,25 @@ fn aju10_a_tree_level_can_complete_the_circuit_without_cpa() {
 }
 
 #[test]
+fn aju05_classic_dadda_on_seven_operands() {
+    // The classic rule (an HA when only 1 is left to reduce), not the variant drawn in the
+    // course reference (Parhami, fig. 8.14: 6, 11, 7 and 4 FA + 1 HA, 33 FA and 3 HA in
+    // all). The figure also puts FA in columns already at their target, which no
+    // column-by-column rule reproduces; spec 03 keeps the classic method (MT-29b).
+    let m = seven_operands();
+    let r = dadda_solution(&m);
+    assert_eq!(
+        cells_per_level(&r),
+        [(5, 1), (10, 1), (5, 2), (6, 1), (7, 1)]
+    );
+    let mt = r.metrics();
+    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (33, 6, 72));
+    assert_eq!(mt.delay, Time(20)); // 10 T_FA
+    assert_respects_targets(&r, m.output_width);
+    assert!(verifies(&m, &r));
+}
+
+#[test]
 fn aju10_solution_by_method() {
     let m = r1_matrix();
     assert_eq!(
