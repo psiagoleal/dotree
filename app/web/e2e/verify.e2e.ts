@@ -57,6 +57,7 @@ test('R2: copy each VHDL file and download them all as a .zip (VHD-05)', async (
 		'full_adder.vhd',
 		'half_adder.vhd',
 		'dotree_circuito.vhd',
+		'dotree_circuito_comportamental.vhd',
 		'tb_dotree_circuito.vhd'
 	];
 	const contents: Record<string, string> = {};
@@ -67,6 +68,13 @@ test('R2: copy each VHDL file and download them all as a .zip (VHD-05)', async (
 		expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(contents[name]);
 	}
 	expect(contents['dotree_circuito.vhd']).toContain('entity dotree_circuito is');
+	// VHD-10: the behavioral twin, and the testbench that checks both.
+	expect(contents['dotree_circuito_comportamental.vhd']).toContain(
+		'entity dotree_circuito_comportamental is'
+	);
+	expect(contents['tb_dotree_circuito.vhd']).toContain(
+		'entity work.dotree_circuito_comportamental'
+	);
 
 	const downloading = page.waitForEvent('download');
 	await page.getByRole('button', { name: 'Baixar todos (.zip)' }).click();

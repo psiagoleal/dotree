@@ -130,6 +130,11 @@ flowchart LR
 - **Arquivos no escopo:** `app/core/src/vhdl/**`, `app/web/src/**`, `docs/specs/06-vhdl.md`
 - **Critério de aceite:** testes do núcleo; job GHDL roda o testbench contra as duas
   arquiteturas (R2: 16 384 casos corretos em ambas).
+- **Feito (2026-11-09):** VHD-10 na spec 06. Entidade própria `<nome>_comportamental` (as
+  mesmas portas, um arquivo por entidade, como pede o VHD-09), para o Quartus escolher o
+  topo; o testbench instancia as duas e relata cada uma. Coeficiente acima de $2^{31}-1$
+  vai como cadeia de bits. GHDL e ModelSim: R2 correto nas duas; o comportamental
+  estragado de propósito falha só nele.
 
 ### MT-22: Topo para a DE2 até 18 bits e projeto do Quartus (P6, P8)
 - **Objetivo:** com até 18 bits de entrada, gerar um topo que liga as entradas às chaves

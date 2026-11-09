@@ -1,11 +1,13 @@
 <!-- Caminho relativo: docs/specs/06-vhdl.md -->
 
-# 06 — VHDL estrutural de modelo
+# 06 — VHDL de modelo: estrutural e comportamental
 
 ## Resultado
 
 Um ponto de partida em VHDL para o circuito montado: simples, legível, com um testbench que
-prova o circuito. Não é ferramenta de síntese; é um modelo que o estudante adapta.
+prova o circuito. Não é ferramenta de síntese; é um modelo que o estudante adapta. Ao lado
+do topo estrutural vem uma versão comportamental com as mesmas portas, para comparar no
+sintetizador (Quartus) o circuito montado à mão com o que a ferramenta escolhe.
 
 ## Arquivos gerados
 
@@ -14,7 +16,8 @@ prova o circuito. Não é ferramenta de síntese; é um modelo que o estudante a
 | `full_adder.vhd` | Entidade `full_adder` (x, y, z → s, k) |
 | `half_adder.vhd` | Entidade `half_adder` (x, y → s, k), só quando o circuito tem HA |
 | `<nome>.vhd` | Topo estrutural: portas AND, uma instância por célula, com os identificadores de `05-diagrama.md` |
-| `tb_<nome>.vhd` | Testbench que percorre os vetores de `04-verificacao.md` e compara com a expressão |
+| `<nome>_comportamental.vhd` | Entidade `<nome>_comportamental`: as mesmas portas do topo e a expressão em `numeric_std`, sem células |
+| `tb_<nome>.vhd` | Testbench que percorre os vetores de `04-verificacao.md` e compara as duas versões com a expressão |
 
 `<nome>` é escolhido pelo usuário (padrão `dotree_circuito`) e precisa ser identificador VHDL
 válido.
@@ -40,11 +43,14 @@ válido.
 - **VHD-04** — O testbench DEVE calcular o valor esperado com aritmética `unsigned` de
   `numeric_std`, redimensionada para $W$ bits, e percorrer os vetores de `04-verificacao.md`
   (todas as combinações até 20 bits; acima disso, os 4096 vetores da amostra, embutidos como
-  constante). Ao terminar, DEVE emitir `report` com o total de casos corretos ou, havendo
-  erro, os 10 primeiros vetores errados e o total de errados, com `severity failure`.
-  *Prova:* em CI, o GHDL simula o testbench de R2 e a saída contém "16384 CASOS CORRETOS";
-  com o circuito corrompido de VER-03 (FA16 recebendo `k14`), a simulação acusa
-  "CASOS ERRADOS" e falha.
+  constante). DEVE conferir o topo estrutural e o comportamental (VHD-10) contra o mesmo
+  valor esperado e, ao terminar, emitir para cada um um `report` com o total de casos
+  corretos ou, havendo erro, os 10 primeiros vetores errados e o total de errados; com
+  qualquer erro, a simulação DEVE terminar em `severity failure`.
+  *Prova:* em CI, o GHDL simula o testbench de R2 e a saída contém as duas linhas
+  "ESTRUTURAL: TODOS OS 16384 CASOS CORRETOS" e "COMPORTAMENTAL: …"; com o circuito
+  corrompido de VER-03 (FA16 recebendo `k14`) e com o comportamental corrompido (a primeira
+  soma trocada por subtração), a simulação acusa "CASOS ERRADOS" na versão errada e falha.
 - **VHD-05** — O sistema DEVE permitir copiar cada arquivo e baixar todos num `.zip`.
   *Prova:* teste de ponta a ponta.
 - **VHD-06** — Os comentários e as mensagens do testbench DEVEM seguir o idioma escolhido
@@ -65,6 +71,15 @@ válido.
   FPGAEmuWeb, que lê as portas do topo até `end <nome>;`, abra o projeto sem edição.
   *Prova:* teste do núcleo (fechamento e um arquivo por componente); job GHDL do CI.
 
+- **VHD-10** — O sistema DEVE gerar `<nome>_comportamental.vhd`, com a entidade
+  `<nome>_comportamental`, as mesmas portas do topo e uma arquitetura que calcula a
+  expressão com `unsigned`, `*`, `+` e `resize` de `numeric_std`, cada produto e a soma
+  reduzidos a $W$ bits, sem instanciar células. Um coeficiente que não cabe em `integer` do
+  VHDL-93 ($> 2^{31}-1$) DEVE ir como cadeia de bits.
+  *Prova:* teste do núcleo (portas idênticas às do topo, a expressão de R2, coeficiente de
+  $3 \cdot 10^9$ e a variável `R_IN`); em CI, o GHDL simula R2, R3, R4, a amostra de 21
+  bits e o coeficiente grande nas duas versões.
+
 ## Compatibilidade com ferramentas
 
 O alvo declarado é VHDL-93 sem construções de VHDL-2008, para que o código também rode no
@@ -73,6 +88,13 @@ ModelSim ASE 10.1d e no Quartus usados em aula. A garantia **automática** é o 
 registrada no CHANGELOG; em 2026-11-01 (MT-10), o R2 gerado compilou sem avisos no ModelSim
 ASE 10.1d e deu "TODOS OS 16384 CASOS CORRETOS". Em 2026-11-06, para a v0.1.0 (já com
 `end <nome>;`), o mesmo resultado, e o R2 estragado de propósito acusou erro já no vetor 30.
+Em 2026-11-09 (MT-21), com a versão comportamental, o ModelSim compilou R2, o coeficiente
+grande e o comportamental estragado sem avisos; os dois primeiros deram todos os casos
+corretos nas duas versões, e o terceiro acusou 9216 casos errados só na comportamental.
+
+No Quartus, os `*` da versão comportamental podem ser mapeados nos multiplicadores
+embutidos da FPGA. Para comparar só elementos lógicos com a versão estrutural, é preciso
+pedir multiplicadores em lógica na síntese.
 
 Duas lições do primeiro contato com simuladores reais, que viraram critério:
 - o GHDL recusa caracteres fora do Latin-1 até em comentário (um travessão bastou), por isso
@@ -85,5 +107,4 @@ Duas lições do primeiro contato com simuladores reais, que viraram critério:
 
 ## Fora de escopo
 
-Verilog; arquivo de projeto do Quartus; atribuição de pinos de placa; VHDL comportamental
-ou otimizado.
+Verilog; arquivo de projeto do Quartus; atribuição de pinos de placa; VHDL otimizado.

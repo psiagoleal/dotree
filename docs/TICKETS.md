@@ -13,7 +13,6 @@ Nenhum: a v0.1.0 foi publicada.
 
 ## Até o projeto final da disciplina — v0.2 (aprovado em 2026-11-06)
 
-- [ ] [MT-21](plano-pos-v0.1.md#mt-21-vhdl-comportamental-p4) — VHDL comportamental com `numeric_std`.
 - [ ] [MT-22](plano-pos-v0.1.md#mt-22-topo-para-a-de2-até-18-bits-e-projeto-do-quartus-p6-p8) — Topo DE2 até 18 bits e projeto do Quartus.
 - [ ] [MT-28](plano-pos-v0.1.md#mt-28-constante-aditiva-p9) — Constante aditiva (`+36`) como pontos fixos.
 - [ ] [MT-29](plano-pos-v0.1.md#mt-29-solução-de-wallace-p10) — Solução de Wallace ao lado da de Dadda.
@@ -38,6 +37,7 @@ Nenhum: a v0.1.0 foi publicada.
 
 ## Concluídos
 
+- [x] [MT-21](plano-pos-v0.1.md#mt-21-vhdl-comportamental-p4) — VHDL comportamental com `numeric_std`, conferido pelo mesmo testbench.
 - [x] [MT-20](plano-pos-v0.1.md#mt-20-aplicar-a-solução-de-dadda-ao-exercício-p5) — "Usar esta solução": troca o circuito pela de Dadda num passo de desfazer, contada como ajuda.
 - [x] [MT-17](plano.md#mt-17-publicar-a-v010) — v0.1.0 publicada: release, imagem pública no GHCR e site no ar.
 - [x] [MT-19](plano-pos-v0.1.md#mt-19-vhdl-compatível-com-o-fpgaemuweb-p7) — VHDL com `end <nome>;` e um arquivo por componente, lido pelo FPGAEmuWeb (antecipado para a v0.1).

@@ -16,7 +16,7 @@ use dotree_core::help::dadda_solution;
 use dotree_core::matrix::DotMatrix;
 use dotree_core::netlist::{Netlist, Wire};
 use dotree_core::reduce::Reduction;
-use dotree_core::vhdl::{DEFAULT_NAME, Language, generate};
+use dotree_core::vhdl::{BEHAVIORAL_SUFFIX, DEFAULT_NAME, Language, VhdlFile, generate};
 
 fn matrix(src: &str, widths: &[(char, u32)]) -> DotMatrix {
     let w: BTreeMap<char, u32> = widths.iter().copied().collect();
@@ -101,11 +101,15 @@ fn write(
     expect: &str,
     list: &mut String,
 ) {
+    let files = generate(m, n, DEFAULT_NAME, lang).expect("generate");
+    write_files(dir, case, &files, expect, list);
+}
+
+fn write_files(dir: &Path, case: &str, files: &[VhdlFile], expect: &str, list: &mut String) {
     let sub = dir.join(case);
     fs::create_dir_all(&sub).expect("create dir");
-    let files = generate(m, n, DEFAULT_NAME, lang).expect("generate");
     let order: Vec<&str> = files.iter().map(|f| f.name.as_str()).collect();
-    for f in &files {
+    for f in files {
         fs::write(sub.join(&f.name), &f.contents).expect("write file");
     }
     // Analysis order: components, top, testbench (the order `generate` returns).
@@ -136,6 +140,20 @@ fn main() {
         &mut list,
     );
 
+    // VHD-10: the behavioral twin of R2 with its first `+` turned into `-`; the testbench
+    // must catch it while the structural top stays correct.
+    let mut files = generate(&m, &n, DEFAULT_NAME, Language::PtBr).expect("generate");
+    let beh = format!("{DEFAULT_NAME}{BEHAVIORAL_SUFFIX}.vhd");
+    let f = files
+        .iter_mut()
+        .find(|f| f.name == beh)
+        .expect("behavioral file");
+    assert!(f.contents.contains("\n            + "), "a sum to break");
+    f.contents = f
+        .contents
+        .replacen("\n            + ", "\n            - ", 1);
+    write_files(dir, "r2_comp_quebrado", &files, "falha", &mut list);
+
     let m3 = matrix("A", &[('A', 4)]);
     write(dir, "r3", &m3, &dadda(&m3), Language::En, "ok", &mut list);
 
@@ -150,6 +168,18 @@ fn main() {
         "amostra",
         &ms,
         &dadda(&ms),
+        Language::En,
+        "ok",
+        &mut list,
+    );
+
+    // A coefficient beyond a VHDL-93 integer: the behavioral twin writes it as a bit string.
+    let mc = matrix("3000000000A", &[('A', 2)]);
+    write(
+        dir,
+        "coef_grande",
+        &mc,
+        &dadda(&mc),
         Language::En,
         "ok",
         &mut list,

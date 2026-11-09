@@ -8,8 +8,8 @@
 ## Último turno
 
 - **Branch:** `main`
-- **Data:** 2026-11-05
-- **Commit:** `ce19784` (v0.1.0, #36; *tag* `v0.1.0`). O plano da disciplina e o MT-20 ainda não foram commitados.
+- **Data:** 2026-11-09
+- **Commit:** `86233eb` (MT-20 e plano da disciplina, #37). O MT-21 ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -143,7 +143,10 @@
       `HelpLog.solution_applied` (opcional no arquivo). 197 testes Rust, 139 de
       unidade/componente, 45 e2e; 3 mutações pegas (botão no modo leitura, aplicar sem a
       etapa 2, aplicar sem passo de desfazer).
-- [ ] Próximo: MT-21 (VHDL comportamental).
+- [x] MT-21: VHD-10. `<nome>_comportamental.vhd` com as portas do topo e a expressão em
+      `numeric_std`; testbench confere as duas versões. GHDL (7 casos, 2 estragados de
+      propósito) e ModelSim ASE 10.1d conferidos pelo agente.
+- [ ] Próximo: MT-22 (topo para a DE2 até 18 bits e projeto do Quartus).
 
 ## Observações para a próxima sessão
 
@@ -179,6 +182,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-09 | `86233eb` | usar a solução e plano da disciplina (#37); VHDL comportamental | MT-20, MT-21 |
 | 2026-11-06 | `ce19784` | v0.1.0 publicada (#36); plano da disciplina; usar a solução | MT-17, MT-20 |
 | 2026-11-05 | `9f07dd2` | qualidade e FPGAEmuWeb (#33); preparação da v0.1.0 | MT-16, MT-19, MT-17 |
 | 2026-11-05 | `76654f4` | salvamento automático (#32); acessibilidade, rede, desempenho, tela pequena; VHDL para o FPGAEmuWeb | MT-15b, MT-16, MT-19 |
