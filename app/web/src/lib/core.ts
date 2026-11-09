@@ -1,7 +1,12 @@
 // Caminho relativo: app/web/src/lib/core.ts
 // Loads the dotree-core WebAssembly module and types what it returns. The interface never
 // reimplements domain rules (ADR 0001); it only calls into this module.
-import init, { buildMatrix as wasmBuildMatrix, coreVersion, Session } from '#lib/wasm/dotree.js';
+import init, {
+	buildMatrix as wasmBuildMatrix,
+	coreVersion,
+	Session,
+	SolutionMethod
+} from '#lib/wasm/dotree.js';
 
 export interface Term {
 	/** Decimal string: coefficients can exceed a JS number. */
@@ -177,7 +182,22 @@ export interface HelpLog {
 	solutionPath: number;
 	/** Times the solution replaced the circuit (AJU-09). */
 	solutionApplied: number;
+	/** The same three counts for Wallace's solution (AJU-10). */
+	wallace: number;
+	wallacePath: number;
+	wallaceApplied: number;
 }
+
+/** The method of an automatic solution (AJU-05, AJU-10). */
+export type Method = 'dadda' | 'wallace';
+
+/** The proper name of each method, the same in every language. */
+export const METHOD_NAME: Record<Method, string> = { dadda: 'Dadda', wallace: 'Wallace' };
+
+const WASM_METHOD: Record<Method, SolutionMethod> = {
+	dadda: SolutionMethod.Dadda,
+	wallace: SolutionMethod.Wallace
+};
 
 // ---------------------------------------------------------------- exercise file (MT-15a)
 
@@ -194,6 +214,7 @@ export interface Revealed {
 	width: WidthReveal | null;
 	lowerBound: RevealStage;
 	solution: RevealStage;
+	wallace: RevealStage;
 }
 
 /** Why an exercise file cannot be opened (SAL-03). */
@@ -309,11 +330,12 @@ export interface CompressionSession {
 	hint(): Hint | null;
 	nextMove(): NextMove;
 	lowerBound(path: boolean): LowerBound;
-	/** Dadda's solution from level 0, as a separate session; free it after use. */
-	solution(path: boolean): CompressionSession;
-	/** Replaces the circuit with the solution as one undo step (AJU-09); false before step 2
-	 *  of the solution, or when the circuit already is the solution. Counted when true. */
-	applySolution(): boolean;
+	/** The solution of `method` from level 0, as a separate session; free it after use. */
+	solution(path: boolean, method: Method): CompressionSession;
+	/** Replaces the circuit with the solution of `method` as one undo step (AJU-09, AJU-10);
+	 *  false before step 2 of that solution, or when the circuit already is it. Counted
+	 *  when true. */
+	applySolution(method: Method): boolean;
 	helpLog(): HelpLog;
 	diagram(): Diagram;
 	wiringTable(): WiringRow[];
@@ -333,7 +355,7 @@ export interface CompressionSession {
 	revealed(): Revealed;
 	/** Already revealed helps, again and uncounted; null before their reveal. */
 	shownLowerBound(): LowerBound | null;
-	shownSolution(): CompressionSession | null;
+	shownSolution(method: Method): CompressionSession | null;
 	/** Releases the WASM memory; the session is unusable afterwards. */
 	free(): void;
 }
@@ -359,8 +381,8 @@ function wrap(s: Session): CompressionSession {
 		hint: () => JSON.parse(s.hint()).hint,
 		nextMove: () => JSON.parse(s.nextMove()),
 		lowerBound: (path) => JSON.parse(s.lowerBound(path)),
-		solution: (path) => wrap(s.solution(path)),
-		applySolution: () => s.applySolution(),
+		solution: (path, method) => wrap(s.solution(path, WASM_METHOD[method])),
+		applySolution: (method) => s.applySolution(WASM_METHOD[method]),
 		helpLog: () => JSON.parse(s.helpLog()),
 		diagram: () => JSON.parse(s.diagram()),
 		wiringTable: () => JSON.parse(s.wiringTable()),
@@ -377,8 +399,8 @@ function wrap(s: Session): CompressionSession {
 			const b = s.shownLowerBound();
 			return b === undefined ? null : JSON.parse(b);
 		},
-		shownSolution: () => {
-			const o = s.shownSolution();
+		shownSolution: (method) => {
+			const o = s.shownSolution(WASM_METHOD[method]);
 			return o === undefined ? null : wrap(o);
 		},
 		free: () => s.free()

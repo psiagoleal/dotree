@@ -5,7 +5,7 @@
 mod common;
 
 use common::{R1, r1, r2_levels, snap};
-use dotree_wasm::Session;
+use dotree_wasm::{Session, SolutionMethod};
 use serde_json::{Value, json};
 
 fn r2() -> Session {
@@ -47,7 +47,7 @@ fn reveals_start_hidden_and_are_kept() {
     let mut s = r1();
     assert_eq!(
         json(&s.revealed()),
-        json!({"width": null, "lowerBound": "none", "solution": "none"})
+        json!({"width": null, "lowerBound": "none", "solution": "none", "wallace": "none"})
     );
     // Step 2 of the width needs step 1 first (GER-03).
     assert!(!s.reveal_width_path());
@@ -56,11 +56,11 @@ fn reveals_start_hidden_and_are_kept() {
     assert!(s.reveal_width_path());
     s.lower_bound(false);
     s.lower_bound(true);
-    let _ = s.solution(false);
+    let _ = s.solution(false, SolutionMethod::Dadda);
     assert_eq!(
         json(&s.revealed()),
         json!({"width": {"answer": null, "path": true}, "lowerBound": "path",
-               "solution": "result"})
+               "solution": "result", "wallace": "none"})
     );
 }
 
@@ -68,12 +68,27 @@ fn reveals_start_hidden_and_are_kept() {
 fn shown_helps_do_not_count_again() {
     let mut s = r1();
     assert_eq!(s.shown_lower_bound(), None);
-    assert!(s.shown_solution().is_none());
+    assert!(s.shown_solution(SolutionMethod::Dadda).is_none());
+    assert!(s.shown_solution(SolutionMethod::Wallace).is_none());
     let bound = s.lower_bound(false);
-    let solution = snap(&s.solution(false));
+    let solution = snap(&s.solution(false, SolutionMethod::Dadda));
+    assert!(
+        s.shown_solution(SolutionMethod::Wallace).is_none(),
+        "seeing Dadda shows nothing of Wallace"
+    );
+    let wallace = snap(&s.solution(false, SolutionMethod::Wallace));
     let log = s.help_log();
     assert_eq!(s.shown_lower_bound(), Some(bound));
-    assert_eq!(snap(&s.shown_solution().unwrap()), solution);
+    assert_eq!(
+        snap(&s.shown_solution(SolutionMethod::Dadda).unwrap()),
+        solution
+    );
+    assert_eq!(
+        snap(&s.shown_solution(SolutionMethod::Wallace).unwrap()),
+        wallace
+    );
+    assert_ne!(wallace, solution);
+    assert_eq!(json(&s.revealed())["wallace"], "result");
     assert_eq!(s.help_log(), log);
 }
 

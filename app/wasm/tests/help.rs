@@ -3,7 +3,10 @@
 //! Each call is a reveal: the interface calls only after the user confirmed (AJU-02), and
 //! the session counts it (AJU-07).
 
-use dotree_wasm::Session;
+use dotree_wasm::{Session, SolutionMethod};
+
+const DADDA: SolutionMethod = SolutionMethod::Dadda;
+const WALLACE: SolutionMethod = SolutionMethod::Wallace;
 use serde_json::{Value, json};
 
 const R1: &str = "A*B + C*D + 3(E+F) + G";
@@ -33,7 +36,8 @@ fn nothing_is_counted_before_a_request() {
     assert_eq!(
         parse(r1().help_log()),
         json!({"hints": 0, "nextMoves": 0, "lowerBound": 0, "lowerBoundPath": 0,
-               "solution": 0, "solutionPath": 0, "solutionApplied": 0})
+               "solution": 0, "solutionPath": 0, "solutionApplied": 0,
+               "wallace": 0, "wallacePath": 0, "wallaceApplied": 0})
     );
 }
 
@@ -88,7 +92,7 @@ fn the_solution_is_a_separate_session_from_level_0() {
     s.form_cell(&ids);
     let before = s.snapshot();
 
-    let solution = s.solution(false);
+    let solution = s.solution(false, DADDA);
     let v = parse(solution.snapshot());
     assert_eq!(v["metrics"]["fa"], 13);
     assert_eq!(v["metrics"]["ha"], 8);
@@ -100,7 +104,7 @@ fn the_solution_is_a_separate_session_from_level_0() {
 
     // AJU-03: the student's circuit is untouched.
     assert_eq!(s.snapshot(), before);
-    s.solution(true);
+    s.solution(true, DADDA);
     let log = parse(s.help_log());
     assert_eq!(
         (log["solution"].clone(), log["solutionPath"].clone()),
@@ -122,9 +126,9 @@ fn no_hint_once_complete_and_nothing_counted() {
 fn applying_needs_the_path_first() {
     let mut s = r1();
     let before = s.snapshot();
-    assert!(!s.apply_solution(), "nothing revealed yet");
-    s.solution(false);
-    assert!(!s.apply_solution(), "only the result was revealed");
+    assert!(!s.apply_solution(DADDA), "nothing revealed yet");
+    s.solution(false, DADDA);
+    assert!(!s.apply_solution(DADDA), "only the result was revealed");
     assert_eq!(s.snapshot(), before);
     assert_eq!(parse(s.help_log())["solutionApplied"], 0);
 }
@@ -135,9 +139,9 @@ fn applying_replaces_the_circuit_in_one_undo_step_and_is_counted() {
     let ids = json!([id_of(&s, 2, "a0_b2"), id_of(&s, 2, "a1_b1")]).to_string();
     s.form_cell(&ids);
     let before = s.snapshot();
-    let solution = s.solution(true).snapshot();
+    let solution = s.solution(true, DADDA).snapshot();
 
-    assert!(s.apply_solution());
+    assert!(s.apply_solution(DADDA));
     let after = parse(s.snapshot());
     let expected = parse(solution);
     assert_eq!(after["levels"], expected["levels"]);
@@ -159,6 +163,62 @@ fn applying_replaces_the_circuit_in_one_undo_step_and_is_counted() {
 
     // Applying again over the solution itself changes nothing and is not counted.
     assert!(s.redo());
-    assert!(!s.apply_solution());
+    assert!(!s.apply_solution(DADDA));
     assert_eq!(parse(s.help_log())["solutionApplied"], 1);
+}
+
+// ------------------------------------------------- AJU-10: Wallace's solution (MT-29)
+
+#[test]
+fn wallace_is_a_separate_session_counted_apart() {
+    let mut s = r1();
+    let before = s.snapshot();
+    let v = parse(s.solution(false, WALLACE).snapshot());
+    // The hand computation of spec 03: 13 FA, 3 HA, 4 levels and the CPA.
+    assert_eq!(
+        (v["metrics"]["fa"].clone(), v["metrics"]["ha"].clone()),
+        (json!(13), json!(3))
+    );
+    assert_eq!(v["levels"].as_array().unwrap().len(), 5);
+    assert_eq!(s.snapshot(), before, "the student's circuit is untouched");
+    s.solution(true, WALLACE);
+    let log = parse(s.help_log());
+    assert_eq!(
+        (log["wallace"].clone(), log["wallacePath"].clone()),
+        (json!(1), json!(1))
+    );
+    assert_eq!(
+        (log["solution"].clone(), log["solutionPath"].clone()),
+        (json!(0), json!(0))
+    );
+}
+
+#[test]
+fn each_method_is_applied_only_after_its_own_path() {
+    let mut s = r1();
+    s.solution(true, DADDA);
+    assert!(
+        !s.apply_solution(WALLACE),
+        "Dadda's path does not unlock Wallace"
+    );
+    s.solution(false, WALLACE);
+    assert!(!s.apply_solution(WALLACE), "only Wallace's result");
+    let wallace = parse(s.solution(true, WALLACE).snapshot());
+
+    assert!(s.apply_solution(WALLACE));
+    assert_eq!(parse(s.snapshot())["levels"], wallace["levels"]);
+    let log = parse(s.help_log());
+    assert_eq!(
+        (
+            log["wallaceApplied"].clone(),
+            log["solutionApplied"].clone()
+        ),
+        (json!(1), json!(0))
+    );
+
+    // Dadda over Wallace is another circuit: one more undo step, counted for Dadda.
+    assert!(s.apply_solution(DADDA));
+    assert_eq!(parse(s.help_log())["solutionApplied"], 1);
+    assert!(s.undo());
+    assert_eq!(parse(s.snapshot())["levels"], wallace["levels"]);
 }

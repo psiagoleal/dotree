@@ -45,7 +45,7 @@ são a spec em forma executável: cada critério tem uma prova associada.
 | D-4 | Alvo ≥ 768 px; abaixo disso, só leitura | GER-10 |
 | D-5 | Confirmação a cada pedido de ajuda | AJU-02 |
 | D-6 | Compartilhar por link fica fora da v0.1 | 08 |
-| — | Wallace e exportação CSV ficam para a v0.2 | 00, 03, 05 |
+| — | Wallace e exportação CSV ficam para a v0.2 (Wallace feito: AJU-10, MT-29) | 00, 03, 05 |
 | — | Cores por termo no estilo das aulas; alternância pontos ↔ variáveis indexadas | COR, VIS |
 | — | Revelação em duas etapas: resultado, depois caminho | GER-03 |
 | — | Exemplos próprios do projeto (nenhum enunciado de terceiros) | 00 |

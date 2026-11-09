@@ -82,9 +82,10 @@ ou métrica fica em segundo plano.
   dos painéis, com "Por quê?".
 - **Ajuda** (MT-13): seção "Ajuda" abaixo das ações: "Regras" (`<details>`, sempre
   aberto a pedido, sem diálogo), "Dica" e "Próxima jogada" (só com o circuito incompleto;
-  a resposta some na ação seguinte), "Limite inferior" e "Solução automática" (o botão da
-  etapa 2 aparece só depois da etapa 1). A solução nível a nível fica num quadro tracejado,
-  à parte do circuito do aluno. O resumo do circuito completo lista as ajudas usadas.
+  a resposta some na ação seguinte), "Limite inferior", "Solução de Dadda" e "Solução de
+  Wallace" (o botão da etapa 2 aparece só depois da etapa 1, por método). Cada solução nível
+  a nível fica num quadro tracejado próprio, à parte do circuito do aluno, com a regra do
+  método numa frase acima dos níveis. O resumo do circuito completo lista as ajudas usadas.
 - **Circuito** (MT-14a): seção "Circuito" ao fim da compressão. Diagrama em SVG com o bloco
   "Entradas e portas AND (n)" no topo (expansível em portas, cada uma com o desenho de AND),
   os pesos $2^j$, uma linha de blocos por nível e os bits $R_j$ em roxo embaixo. Cada

@@ -24,11 +24,11 @@ test('a constant becomes fixed dots, compresses like the others and verifies (EX
 
 	// Dadda's solution, applied (AJU-09), compresses the fixed dots too.
 	const show = page.getByRole('dialog').getByRole('button', { name: 'Mostrar', exact: true });
-	await page.getByRole('button', { name: 'Solução automática', exact: true }).click();
+	await page.getByRole('button', { name: 'Solução de Dadda', exact: true }).click();
 	await show.click();
-	await page.getByRole('button', { name: 'Ver a solução nível a nível' }).click();
+	await page.getByRole('button', { name: 'Ver a solução de Dadda nível a nível' }).click();
 	await show.click();
-	await page.getByRole('button', { name: 'Usar esta solução' }).click();
+	await page.getByRole('button', { name: 'Usar a solução de Dadda' }).click();
 	await page.getByRole('dialog').getByRole('button', { name: 'Substituir' }).click();
 	await expect(page.getByTestId('complete')).toBeVisible();
 

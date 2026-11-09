@@ -1,8 +1,9 @@
 // Caminho relativo: app/core/src/help/mod.rs
-//! On-demand help (spec 03; MT-8): Dadda's method, the next move, hints and the lower bound.
+//! On-demand help (spec 03; MT-8): Dadda's method, the next move, hints and the lower bound;
+//! Wallace's method as a second solution (AJU-10, MT-29).
 //!
-//! The automatic solution is literally "follow the next move until done", so the suggestion
-//! the student gets and the solution in the side panel can never disagree. Everything here
+//! Dadda's solution is literally "follow the next move until done", so the suggestion the
+//! student gets and the solution in the side panel can never disagree. Everything here
 //! returns codes and numbers; the interface words them (IDI-05) and asks before showing
 //! anything (AJU-02).
 
@@ -39,39 +40,14 @@ pub fn next_move(reduction: &Reduction) -> NextMove {
     if r.is_complete() {
         return NextMove::Complete;
     }
-    let heights = r.heights();
-    let width = heights.len();
-    let tallest = heights.iter().copied().max().unwrap_or(0);
+    let tallest = r.heights().iter().copied().max().unwrap_or(0);
     let Some(target) = dadda_target(tallest) else {
-        // Every column has at most 2 points: what remains is the CPA.
-        return if r.pending().is_empty() {
-            NextMove::CloseWithCpa
-        } else {
-            NextMove::ConcludeLevel
-        };
+        return closing_move(r);
     };
-
-    // Height each column will have in the next level, given the cells already formed over
-    // this one: free points + sums of cells in the column + carries from the column below.
-    let used: Vec<PointId> = r
-        .pending()
-        .iter()
-        .flat_map(|c| c.inputs.iter().copied())
-        .collect();
-    let mut sums = vec![0u32; width];
-    let mut carries_in = vec![0u32; width + 1];
-    for c in r.pending() {
-        sums[c.column as usize] += 1;
-        carries_in[c.column as usize + 1] += 1;
-    }
-    for column in 0..width {
-        let free: Vec<PointId> = r
-            .points()
-            .iter()
-            .filter(|p| p.column as usize == column && !used.contains(&p.id))
-            .map(|p| p.id)
-            .collect();
-        let next_height = free.len() as u32 + sums[column] + carries_in[column];
+    let level = LevelView::new(r);
+    for column in 0..level.free.len() {
+        let free = &level.free[column];
+        let next_height = level.next_height(column);
         if next_height <= target {
             continue;
         }
@@ -79,19 +55,107 @@ pub fn next_move(reduction: &Reduction) -> NextMove {
         // column over its target gets the next cell, on its earliest points (canonical order).
         let excess = next_height - target;
         if excess >= 2 && free.len() >= 3 {
-            return NextMove::FormCell {
-                kind: CellKind::Fa,
-                points: free[..3].to_vec(),
-            };
+            return form(CellKind::Fa, &free[..3]);
         }
         if free.len() >= 2 {
-            return NextMove::FormCell {
-                kind: CellKind::Ha,
-                points: free[..2].to_vec(),
-            };
+            return form(CellKind::Ha, &free[..2]);
         }
         // Not enough free points left here (the student's own cells used them): move on.
     }
+    level_done(r)
+}
+
+/// Wallace's target for a level whose tallest column has `height` points: the rows left
+/// after grouping them in threes, `2 floor(h/3) + h mod 3`; `None` when `height <= 2`.
+pub fn wallace_target(height: u32) -> Option<u32> {
+    (height > 2).then(|| 2 * (height / 3) + height % 3)
+}
+
+/// The next cell of Wallace's method (AJU-10): in each column, from the lowest, as many FA
+/// as the free points allow, at the earliest opportunity; then an HA only if the column
+/// would still be over the level's target, counting the carries that come in. The rule of
+/// the course reference (Parhami, fig. 8.10), not the HA on every leftover pair.
+fn wallace_move(r: &Reduction) -> NextMove {
+    if r.is_complete() {
+        return NextMove::Complete;
+    }
+    let tallest = r.heights().iter().copied().max().unwrap_or(0);
+    let Some(target) = wallace_target(tallest) else {
+        return closing_move(r);
+    };
+    let level = LevelView::new(r);
+    for column in 0..level.free.len() {
+        let free = &level.free[column];
+        if free.len() >= 3 {
+            return form(CellKind::Fa, &free[..3]);
+        }
+        if level.next_height(column) > target && free.len() >= 2 {
+            return form(CellKind::Ha, &free[..2]);
+        }
+    }
+    level_done(r)
+}
+
+/// The current level as the methods see it: the points still free in each column, and the
+/// sums and carries of the cells already formed over it.
+struct LevelView {
+    free: Vec<Vec<PointId>>,
+    sums: Vec<u32>,
+    carries_in: Vec<u32>,
+}
+
+impl LevelView {
+    fn new(r: &Reduction) -> LevelView {
+        let width = r.heights().len();
+        let used: Vec<PointId> = r
+            .pending()
+            .iter()
+            .flat_map(|c| c.inputs.iter().copied())
+            .collect();
+        let mut sums = vec![0u32; width];
+        let mut carries_in = vec![0u32; width + 1];
+        for c in r.pending() {
+            sums[c.column as usize] += 1;
+            carries_in[c.column as usize + 1] += 1;
+        }
+        let mut free = vec![Vec::new(); width];
+        for p in r.points() {
+            if !used.contains(&p.id) {
+                free[p.column as usize].push(p.id);
+            }
+        }
+        LevelView {
+            free,
+            sums,
+            carries_in,
+        }
+    }
+
+    /// Height the column will have in the next level: free points + sums of cells in the
+    /// column + carries from the column below.
+    fn next_height(&self, column: usize) -> u32 {
+        self.free[column].len() as u32 + self.sums[column] + self.carries_in[column]
+    }
+}
+
+fn form(kind: CellKind, points: &[PointId]) -> NextMove {
+    NextMove::FormCell {
+        kind,
+        points: points.to_vec(),
+    }
+}
+
+/// Every column has at most 2 points: what remains is the CPA.
+fn closing_move(r: &Reduction) -> NextMove {
+    if r.pending().is_empty() {
+        NextMove::CloseWithCpa
+    } else {
+        NextMove::ConcludeLevel
+    }
+}
+
+/// No column needs another cell in this level.
+fn level_done(r: &Reduction) -> NextMove {
     if r.pending().is_empty() {
         // Unreachable from a level whose tallest column exceeds the target (that column has
         // free points), kept as a safe answer.
@@ -105,22 +169,47 @@ pub fn next_move(reduction: &Reduction) -> NextMove {
     }
 }
 
+/// The method of an automatic solution (AJU-05, AJU-10).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Method {
+    Dadda,
+    Wallace,
+}
+
+/// The solution of `method` from the initial matrix, as a complete reduction.
+pub fn solution(matrix: &DotMatrix, method: Method) -> Reduction {
+    match method {
+        Method::Dadda => dadda_solution(matrix),
+        Method::Wallace => wallace_solution(matrix),
+    }
+}
+
+/// Wallace's solution from the initial matrix, as a complete reduction (AJU-10).
+pub fn wallace_solution(matrix: &DotMatrix) -> Reduction {
+    follow(matrix, wallace_move)
+}
+
 /// Dadda's solution from the initial matrix, as a complete reduction (AJU-05).
 pub fn dadda_solution(matrix: &DotMatrix) -> Reduction {
+    follow(matrix, next_move)
+}
+
+/// Follows `step` from the initial matrix until the circuit is complete.
+fn follow(matrix: &DotMatrix, step: fn(&Reduction) -> NextMove) -> Reduction {
     let mut r = Reduction::new(matrix);
     // Each step forms a cell or closes a level, and every FA/HA lowers
     // sum(height x (W - column)); this bound only guards against a bug turning into a hang.
     let limit = 4 * matrix.dots.len() * (matrix.output_width as usize + 1) + 16;
     for _ in 0..limit {
-        let ok = match next_move(&r) {
+        let ok = match step(&r) {
             NextMove::FormCell { points, .. } => r.form_cell(&points).is_ok(),
             NextMove::ConcludeLevel => r.conclude_level().is_ok(),
             NextMove::CloseWithCpa => r.close_with_cpa().is_ok(),
             NextMove::Complete => return r,
         };
-        assert!(ok, "Dadda's next move must always be valid");
+        assert!(ok, "a method's next move must always be valid");
     }
-    panic!("Dadda's method did not finish");
+    panic!("the method did not finish");
 }
 
 /// Lower bound on FA + dropped carries (AJU-06), with the numbers behind it for step 2.
@@ -211,6 +300,10 @@ pub enum HelpStep {
     SolutionPath,
     /// The solution replaced the student's circuit (AJU-09).
     SolutionApplied,
+    /// The same three steps for Wallace's solution (AJU-10).
+    Wallace,
+    WallacePath,
+    WallaceApplied,
 }
 
 /// How many times each help step was revealed, for the summary of a complete circuit
@@ -227,6 +320,13 @@ pub struct HelpLog {
     /// Absent in files from v0.1, so it defaults to 0 and the schema stays 1 (spec 08).
     #[serde(default)]
     pub solution_applied: u32,
+    /// Wallace's solution (AJU-10). Absent in files before v0.2: 0, schema still 1.
+    #[serde(default)]
+    pub wallace: u32,
+    #[serde(default)]
+    pub wallace_path: u32,
+    #[serde(default)]
+    pub wallace_applied: u32,
 }
 
 impl HelpLog {
@@ -239,6 +339,9 @@ impl HelpLog {
             HelpStep::Solution => &mut self.solution,
             HelpStep::SolutionPath => &mut self.solution_path,
             HelpStep::SolutionApplied => &mut self.solution_applied,
+            HelpStep::Wallace => &mut self.wallace,
+            HelpStep::WallacePath => &mut self.wallace_path,
+            HelpStep::WallaceApplied => &mut self.wallace_applied,
         };
         *n += 1;
     }

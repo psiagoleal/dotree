@@ -66,7 +66,10 @@ describe('helpLogItems (AJU-07)', () => {
 		lowerBoundPath: 0,
 		solution: 0,
 		solutionPath: 0,
-		solutionApplied: 0
+		solutionApplied: 0,
+		wallace: 0,
+		wallacePath: 0,
+		wallaceApplied: 0
 	};
 
 	it('is empty when no help was used', () => {
@@ -80,16 +83,26 @@ describe('helpLogItems (AJU-07)', () => {
 		]);
 		expect(helpLogItems({ ...none, nextMoves: 3, solution: 1 }, 'pt-br')).toEqual([
 			'próximas jogadas: 3',
-			'solução automática: 1 (nível a nível: 0)'
+			'solução de Dadda: 1 (nível a nível: 0)'
 		]);
 	});
 
 	it('says how many times the solution replaced the circuit (AJU-09)', () => {
 		expect(
 			helpLogItems({ ...none, solution: 1, solutionPath: 1, solutionApplied: 1 }, 'pt-br')
-		).toEqual(['solução automática: 1 (nível a nível: 1)', 'solução aplicada: 1 vez']);
+		).toEqual(['solução de Dadda: 1 (nível a nível: 1)', 'solução de Dadda aplicada: 1 vez']);
 		expect(
 			helpLogItems({ ...none, solution: 1, solutionPath: 1, solutionApplied: 2 }, 'en')
-		).toEqual(['automatic solution: 1 (level by level: 1)', 'solution applied: 2 times']);
+		).toEqual(["Dadda's solution: 1 (level by level: 1)", "Dadda's solution applied: 2 times"]);
+	});
+
+	it("counts Wallace's solution apart, after Dadda's (AJU-10)", () => {
+		expect(
+			helpLogItems({ ...none, solution: 1, wallace: 1, wallacePath: 1, wallaceApplied: 1 }, 'pt-br')
+		).toEqual([
+			'solução de Dadda: 1 (nível a nível: 0)',
+			'solução de Wallace: 1 (nível a nível: 1)',
+			'solução de Wallace aplicada: 1 vez'
+		]);
 	});
 });

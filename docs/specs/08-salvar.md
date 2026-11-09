@@ -47,6 +47,10 @@ arquivo.
   opcional (arquivos sem ele valem 0), então o esquema continua 1. Aplicar sem a etapa 2
   da solução registrada é revelação inconsistente. Depois de reabrir, o circuito salvo é o
   da solução, e o desfazer percorre as células dela, não o circuito anterior à aplicação.
+- **Solução de Wallace (AJU-10, MT-29).** `help.wallace`, `help.wallacePath` e
+  `help.wallaceApplied` contam as etapas e as aplicações da solução de Wallace, à parte das
+  de Dadda. São opcionais (valem 0 em arquivos da v0.1), então o esquema continua 1. Etapa
+  2 sem a 1, ou aplicação sem a etapa 2 de Wallace, é revelação inconsistente.
 
 - **Salvamento automático (MT-15b).** O que vai para o armazenamento local é o mesmo
   arquivo do exercício, sob a chave `dotree.exercise`, gravado depois de cada ação e de

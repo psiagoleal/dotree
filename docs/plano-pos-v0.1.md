@@ -264,6 +264,14 @@ flowchart LR
   mesmo fluxo de revelação e aplicação do MT-20.
 - **Critério de aceite:** testes do núcleo com R1 e R2 conferidos à mão; e2e de aplicar.
 - **Depende de:** MT-20
+- **Feito (2026-11-09):** AJU-10. A regra é a da fig. 8.10 do Parhami (referência do
+  curso): alvo $2\lfloor h/3 \rfloor + (h \bmod 3)$, todos os FA que cabem e HA só se a
+  coluna ainda passaria do alvo; reproduz a figura nível a nível (12, 6, 6, 4 + 1 HA).
+  R1: 13 FA, 3 HA, 14,5 $A_{FA}$, 6 $T_{FA}$ (Dadda: 17 e 7). **Achado:** a fig. 8.14
+  (Dadda, mesmos sete operandos) dá 6, 11, 7 e 4 FA + 1 HA, mas o Dadda do dotree dá
+  5 FA + 1 HA, 10 + 1, 5 + 2, 6 + 1 (33 FA e 6 HA no total, contra 33 e 3): o livro usa FA
+  também onde falta reduzir só 1, e AJU-05 manda usar HA. Mudar AJU-05 altera R1, R4 e a
+  próxima jogada; fica para decisão (proposta: ticket próprio depois do projeto final).
 
 ### MT-30: Tabela de alturas nível a nível (P11)
 - **Objetivo:** tabela com a altura de cada coluna em cada nível, exportável em Markdown.

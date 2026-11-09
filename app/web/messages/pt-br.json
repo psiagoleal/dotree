@@ -112,7 +112,7 @@
 	"formed_cell": "{kind} formado.",
 	"level_concluded": "Nível {level} concluído.",
 	"undone": "Desfeito.",
-	"solution_applied": "Solução aplicada. Desfazer traz o seu circuito de volta.",
+	"solution_applied": "Solução de {method} aplicada. Desfazer traz o seu circuito de volta.",
 	"redone": "Refeito.",
 	"metrics_title": "Circuito até agora",
 	"metric_area": "Área",
@@ -158,9 +158,9 @@
 	"help_next_move": "Próxima jogada",
 	"help_lower_bound": "Limite inferior",
 	"help_lower_bound_path": "Ver a conta do limite",
-	"help_solution": "Solução automática",
-	"help_solution_path": "Ver a solução nível a nível",
-	"help_use_solution": "Usar esta solução",
+	"help_solution": "Solução de {method}",
+	"help_solution_path": "Ver a solução de {method} nível a nível",
+	"help_use_solution": "Usar a solução de {method}",
 	"confirm_hint_title": "Ver uma dica?",
 	"confirm_hint_body": "A dica fala do nível atual, sem dizer quais pontos escolher.",
 	"confirm_next_move_title": "Ver a próxima jogada?",
@@ -169,12 +169,12 @@
 	"confirm_lower_bound_body": "Primeiro, só o número; a conta fica para um segundo pedido.",
 	"confirm_lower_bound_path_title": "Ver a conta do limite inferior?",
 	"confirm_lower_bound_path_body": "Antes, tente: quantos pontos cada FA elimina? E cada HA?",
-	"confirm_solution_title": "Ver a solução automática?",
+	"confirm_solution_title": "Ver a solução de {method}?",
 	"confirm_solution_body": "Primeiro, só as métricas finais; os níveis ficam para um segundo pedido. O seu circuito não muda.",
-	"confirm_solution_path_title": "Ver a solução nível a nível?",
+	"confirm_solution_path_title": "Ver a solução de {method} nível a nível?",
 	"confirm_solution_path_body": "Antes, compare as métricas da solução com as do seu circuito.",
-	"confirm_use_solution_title": "Trocar o seu circuito pela solução?",
-	"confirm_use_solution_body": "O circuito que você montou dá lugar à solução de Dadda inteira. Desfazer (Ctrl+Z) traz o seu circuito de volta.",
+	"confirm_use_solution_title": "Trocar o seu circuito pela solução de {method}?",
+	"confirm_use_solution_body": "O circuito que você montou dá lugar à solução de {method} inteira. Desfazer (Ctrl+Z) traz o seu circuito de volta.",
 	"confirm_use_solution_ok": "Substituir",
 	"hint_min_levels_left": [
 		{
@@ -198,41 +198,57 @@
 	"lower_bound_path": "Pontos da matriz inicial menos W: {dots} − {width} = {value}. Cada FA elimina 1 ponto (entram 3, saem 2), cada vai-um descartado elimina 1, e o HA não elimina nenhum (entram 2, saem 2). O circuito completo tem no máximo W pontos, então FA + vai-uns descartados ≥ {dots} − {width}. É um limite inferior, não necessariamente o ótimo.",
 	"solution_summary_cpa": [
 		{
-			"declarations": ["input levels", "input fa", "input ha", "input area", "input delay"],
+			"declarations": [
+				"input method",
+				"input levels",
+				"input fa",
+				"input ha",
+				"input area",
+				"input delay"
+			],
 			"selectors": ["levels"],
 			"match": {
-				"levels=1": "Solução de Dadda: {levels} nível e o CPA; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA.",
-				"levels=*": "Solução de Dadda: {levels} níveis e o CPA; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA."
+				"levels=1": "Solução de {method}: {levels} nível e o CPA; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA.",
+				"levels=*": "Solução de {method}: {levels} níveis e o CPA; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA."
 			}
 		}
 	],
 	"solution_summary": [
 		{
-			"declarations": ["input levels", "input fa", "input ha", "input area", "input delay"],
+			"declarations": [
+				"input method",
+				"input levels",
+				"input fa",
+				"input ha",
+				"input area",
+				"input delay"
+			],
 			"selectors": ["levels"],
 			"match": {
-				"levels=1": "Solução de Dadda: {levels} nível; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA.",
-				"levels=*": "Solução de Dadda: {levels} níveis; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA."
+				"levels=1": "Solução de {method}: {levels} nível; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA.",
+				"levels=*": "Solução de {method}: {levels} níveis; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA."
 			}
 		}
 	],
-	"solution_title": "Solução de Dadda, nível a nível",
-	"solution_level": "Solução, nível {level}",
-	"solution_cpa": "Solução, nível {level}: CPA",
-	"solution_result": "Solução, resultado",
+	"solution_title": "Solução de {method}, nível a nível",
+	"solution_level": "Solução de {method}, nível {level}",
+	"solution_cpa": "Solução de {method}, nível {level}: CPA",
+	"solution_result": "Solução de {method}, resultado",
+	"solution_rule_dadda": "Dadda adia a redução: em cada nível, cada coluna só desce até a altura-alvo, o maior número da sequência 2, 3, 4, 6, 9, 13… abaixo da altura máxima, com FA, e HA quando falta reduzir só 1.",
+	"solution_rule_wallace": "Wallace reduz o quanto antes: em cada nível, cada coluna usa todos os FA que os seus pontos permitem, e um HA só quando ainda passaria da altura-alvo, 2⌊h/3⌋ + (h mod 3) para a altura máxima h.",
 	"help_log_title": "Ajudas usadas",
 	"help_log_none": "Ajudas usadas: nenhuma.",
 	"help_log_hints": "dicas: {count}",
 	"help_log_next_moves": "próximas jogadas: {count}",
 	"help_log_lower_bound": "limite inferior: {result} (conta: {path})",
-	"help_log_solution": "solução automática: {result} (nível a nível: {path})",
+	"help_log_solution": "solução de {method}: {result} (nível a nível: {path})",
 	"help_log_solution_applied": [
 		{
-			"declarations": ["input count"],
+			"declarations": ["input method", "input count"],
 			"selectors": ["count"],
 			"match": {
-				"count=1": "solução aplicada: {count} vez",
-				"count=*": "solução aplicada: {count} vezes"
+				"count=1": "solução de {method} aplicada: {count} vez",
+				"count=*": "solução de {method} aplicada: {count} vezes"
 			}
 		}
 	],

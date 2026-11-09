@@ -7,9 +7,10 @@ use std::collections::BTreeMap;
 
 use common::{form, pick, r1, replay_r2_tree};
 use dotree_core::expr::analyze;
+use dotree_core::expr::{Analysis, parse};
 use dotree_core::help::{
-    HelpLog, HelpStep, Hint, LowerBound, NextMove, dadda_solution, dadda_target, hints,
-    lower_bound, next_move,
+    HelpLog, HelpStep, Hint, LowerBound, Method, NextMove, dadda_solution, dadda_target, hints,
+    lower_bound, next_move, solution, wallace_solution, wallace_target,
 };
 use dotree_core::matrix::DotMatrix;
 use dotree_core::netlist::Netlist;
@@ -265,6 +266,7 @@ fn aju07_the_log_counts_each_step_of_each_help() {
             solution: 1,
             solution_path: 0,
             solution_applied: 0,
+            ..HelpLog::default()
         }
     );
     assert!(!log.is_empty());
@@ -413,4 +415,167 @@ fn aju09_applying_is_recorded_in_the_help_log() {
     log.record(HelpStep::SolutionApplied);
     assert_eq!(log.solution_applied, 1);
     assert!(!log.is_empty());
+}
+
+// ------------------------------------------------------- AJU-10: Wallace's solution (MT-29)
+
+/// Seven 6-bit operands, the example of the course reference (Parhami, *Computer
+/// Arithmetic*, fig. 8.10). 42 input bits is over the interface's limit, so the
+/// analysis is assembled here; the matrix is built as usual.
+fn seven_operands() -> DotMatrix {
+    let widths: BTreeMap<char, u32> = ('A'..='G').map(|v| (v, 6)).collect();
+    let analysis = Analysis {
+        polynomial: parse("A + B + C + D + E + F + G").unwrap(),
+        widths,
+        warnings: Vec::new(),
+    };
+    DotMatrix::build(&analysis).unwrap()
+}
+
+/// Every tree level brings the tallest column down to Wallace's target (AJU-10).
+fn assert_respects_wallace_targets(r: &Reduction, width: u32) {
+    let tree: Vec<_> = r.levels().iter().filter(|l| !l.cpa).collect();
+    for (k, level) in tree.iter().enumerate() {
+        let h = max_height(&level.points, width);
+        let target = wallace_target(h).expect("a tree level starts above height 2");
+        let next = match tree.get(k + 1) {
+            Some(l) => &l.points,
+            None => &r.levels().iter().find(|l| l.cpa).expect("CPA level").points,
+        };
+        assert!(
+            max_height(next, width) <= target,
+            "level {k}: {h} -> target {target}"
+        );
+    }
+}
+
+#[test]
+fn wallace_targets() {
+    // 2 floor(h/3) + h mod 3: the rows left after grouping them in threes.
+    let cases = [
+        (1, None),
+        (2, None),
+        (3, Some(2)),
+        (4, Some(3)),
+        (5, Some(4)),
+        (6, Some(4)),
+        (7, Some(5)),
+        (9, Some(6)),
+        (13, Some(9)),
+        (19, Some(13)),
+    ];
+    for (h, expected) in cases {
+        assert_eq!(wallace_target(h), expected, "h = {h}");
+    }
+}
+
+#[test]
+fn aju10_r4_wallace_matches_the_hand_computation() {
+    let m = r4_matrix();
+    let r = wallace_solution(&m);
+    assert!(r.is_complete());
+    // Heights 1 2 3 4 3 2 1, target 3: an FA in each of 2^2, 2^3, 2^4. Heights
+    // 1 2 1 3 2 3 1, target 2: FA in 2^3, HA in 2^4 (2 points and a carry), FA in 2^5.
+    // CPA over 1 2 1 1 2 2 2: HA, HA, HA, FA, FA, FA.
+    assert_eq!(cells_per_level(&r), [(3, 0), (2, 1), (3, 3)]);
+    let mt = r.metrics();
+    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (8, 4, 20));
+    assert_eq!(mt.delay, Time(11)); // 5.5 T_FA, as Dadda's
+    assert_respects_wallace_targets(&r, m.output_width);
+    assert!(verifies(&m, &r));
+}
+
+#[test]
+fn aju10_r1_wallace_matches_the_hand_computation() {
+    let m = r1_matrix();
+    let r = wallace_solution(&m);
+    // 5 7 5 2 1 -> 3 4 5 3 1 -> 1 3 4 2 2 -> 1 1 3 3 2 -> 1 1 1 2 2 1, then the CPA.
+    assert_eq!(
+        cells_per_level(&r),
+        [(4, 0), (4, 0), (2, 0), (2, 1), (1, 2)]
+    );
+    let mt = r.metrics();
+    // 13 FA and 3 HA, 14.5 A_FA, like the other solution of spec 00, but 6 T_FA instead of
+    // 6.5; Dadda's solution has 17 A_FA and 7 T_FA.
+    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (13, 3, 29));
+    assert_eq!(mt.delay, Time(12));
+    assert!(mt.fa >= lower_bound(&m).value);
+    assert_respects_wallace_targets(&r, m.output_width);
+    assert!(verifies(&m, &r));
+}
+
+#[test]
+fn aju10_seven_operands_as_in_the_course_reference() {
+    let m = seven_operands();
+    // Fig. 8.10: 12 FA, 6 FA, 6 FA, 4 FA + 1 HA, then a 7-bit adder (2^1 to 2^7).
+    let r = wallace_solution(&m);
+    assert_eq!(
+        cells_per_level(&r),
+        [(12, 0), (6, 0), (6, 0), (4, 1), (5, 2)]
+    );
+    assert_respects_wallace_targets(&r, m.output_width);
+    assert!(verifies(&m, &r));
+}
+
+#[test]
+fn aju10_solution_by_method() {
+    let m = r1_matrix();
+    assert_eq!(
+        solution(&m, Method::Dadda).levels(),
+        dadda_solution(&m).levels()
+    );
+    assert_eq!(
+        solution(&m, Method::Wallace).levels(),
+        wallace_solution(&m).levels()
+    );
+}
+
+#[test]
+fn aju10_the_log_counts_wallace_apart() {
+    let mut log = HelpLog::default();
+    for step in [
+        HelpStep::Wallace,
+        HelpStep::WallacePath,
+        HelpStep::WallacePath,
+        HelpStep::WallaceApplied,
+    ] {
+        log.record(step);
+    }
+    assert_eq!(
+        (log.wallace, log.wallace_path, log.wallace_applied),
+        (1, 2, 1)
+    );
+    assert_eq!(
+        (log.solution, log.solution_path, log.solution_applied),
+        (0, 0, 0)
+    );
+}
+
+proptest! {
+    #![proptest_config(ProptestConfig {
+        cases: 64,
+        failure_persistence: None,
+        ..ProptestConfig::default()
+    })]
+
+    /// VER-06: Wallace's solution of random expressions verifies, respects every target and
+    /// never beats the lower bound.
+    #[test]
+    fn ver06_wallace_solutions_verify(
+        a in 1u32..=4, b in 1u32..=4, c in 1u32..=3, d in 1u32..=3, coef in 1u64..=7,
+        k in 0u64..=9,
+    ) {
+        // k = 0 is no constant: "+ 0" is not a term.
+        let constant = if k == 0 { String::new() } else { format!(" + {k}") };
+        let m = matrix(
+            &format!("A*B + {coef}C*D + C{constant}"),
+            &[('A', a), ('B', b), ('C', c), ('D', d)],
+        );
+        let r = wallace_solution(&m);
+        prop_assert!(r.is_complete());
+        assert_respects_wallace_targets(&r, m.output_width);
+        prop_assert!(verifies(&m, &r));
+        let dropped = r.levels().iter().flat_map(|l| &l.cells).filter(|c| c.carry.is_none()).count();
+        prop_assert!(r.metrics().fa + dropped >= lower_bound(&m).value);
+    }
 }

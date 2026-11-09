@@ -211,6 +211,8 @@ impl Exercise {
             || (h.lower_bound_path > 0 && h.lower_bound == 0)
             || (h.solution_path > 0 && h.solution == 0)
             || (h.solution_applied > 0 && h.solution_path == 0)
+            || (h.wallace_path > 0 && h.wallace == 0)
+            || (h.wallace_applied > 0 && h.wallace_path == 0)
         {
             return Err(StateError::InconsistentReveals);
         }

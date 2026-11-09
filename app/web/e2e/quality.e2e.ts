@@ -127,8 +127,10 @@ for (const scheme of ['light', 'dark'] as const) {
 		await page.getByRole('dialog').getByRole('button', { name: 'Descartar' }).click();
 
 		await r2Everything(page);
-		await page.getByRole('button', { name: 'Solução automática' }).click();
-		await page.getByRole('dialog').getByRole('button', { name: 'Mostrar', exact: true }).click();
+		for (const method of ['Dadda', 'Wallace']) {
+			await page.getByRole('button', { name: `Solução de ${method}`, exact: true }).click();
+			await page.getByRole('dialog').getByRole('button', { name: 'Mostrar', exact: true }).click();
+		}
 		await audit(page, 'complete circuit');
 	});
 }
