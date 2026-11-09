@@ -8,6 +8,7 @@ use std::collections::BTreeMap;
 use dotree_core::board::{self, BoardLimit};
 use dotree_core::diagram::{self, Endpoint, Layout, TableHeaders};
 use dotree_core::expr::{self, Analysis, Expected, ExprError, SyntaxErrorKind, Warning};
+use dotree_core::heights::{self, HeightHeaders, RowKind};
 use dotree_core::help::{self, HelpLog, HelpStep, Hint, Method, NextMove};
 use dotree_core::matrix::{DotMatrix, MatrixError};
 use dotree_core::netlist::Netlist;
@@ -695,6 +696,43 @@ impl Session {
             })
             .collect();
         Value::from(rows).to_string()
+    }
+
+    /// Height of each column at each level, with the cells formed over it (CMP-16):
+    /// concluded levels, then the current level or the result.
+    #[wasm_bindgen(js_name = heightTable)]
+    pub fn height_table(&self) -> String {
+        let rows: Vec<Value> = heights::height_table(&self.reduction)
+            .into_iter()
+            .map(|r| {
+                let kind = match r.kind {
+                    RowKind::Level => "level",
+                    RowKind::Cpa => "cpa",
+                    RowKind::Current => "current",
+                    RowKind::Result => "result",
+                };
+                json!({"level": r.level, "kind": kind, "heights": r.heights,
+                       "fa": r.fa, "ha": r.ha})
+            })
+            .collect();
+        Value::from(rows).to_string()
+    }
+
+    /// The height table as Markdown (CMP-16), with words in the interface's language:
+    /// `{"level", "current", "result"}`.
+    #[wasm_bindgen(js_name = heightTableMarkdown)]
+    pub fn height_table_markdown(&self, headers_json: &str) -> String {
+        let h: Value = serde_json::from_str(headers_json).unwrap_or_default();
+        let get = |k: &str| h[k].as_str().unwrap_or(k).to_owned();
+        let (level, current, result) = (get("level"), get("current"), get("result"));
+        heights::height_table_markdown(
+            &heights::height_table(&self.reduction),
+            HeightHeaders {
+                level: &level,
+                current: &current,
+                result: &result,
+            },
+        )
     }
 
     /// The wiring table as Markdown (DIA-06), with headers in the interface's language:

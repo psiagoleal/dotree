@@ -66,9 +66,15 @@ fn assert_respects_targets(r: &Reduction, width: u32) {
     for (k, level) in tree.iter().enumerate() {
         let h = max_height(&level.points, width);
         let target = dadda_target(h).expect("a tree level starts above height 2");
+        // After the last tree level comes the CPA, or nothing when that level already
+        // completed the circuit.
         let next = match tree.get(k + 1) {
             Some(l) => &l.points,
-            None => &r.levels().iter().find(|l| l.cpa).expect("CPA level").points,
+            None => r
+                .levels()
+                .iter()
+                .find(|l| l.cpa)
+                .map_or(r.points(), |l| &l.points),
         };
         assert!(
             max_height(next, width) <= target,
@@ -438,9 +444,15 @@ fn assert_respects_wallace_targets(r: &Reduction, width: u32) {
     for (k, level) in tree.iter().enumerate() {
         let h = max_height(&level.points, width);
         let target = wallace_target(h).expect("a tree level starts above height 2");
+        // After the last tree level comes the CPA, or nothing when that level already
+        // completed the circuit.
         let next = match tree.get(k + 1) {
             Some(l) => &l.points,
-            None => &r.levels().iter().find(|l| l.cpa).expect("CPA level").points,
+            None => r
+                .levels()
+                .iter()
+                .find(|l| l.cpa)
+                .map_or(r.points(), |l| &l.points),
         };
         assert!(
             max_height(next, width) <= target,
@@ -513,6 +525,19 @@ fn aju10_seven_operands_as_in_the_course_reference() {
         cells_per_level(&r),
         [(12, 0), (6, 0), (6, 0), (4, 1), (5, 2)]
     );
+    assert_respects_wallace_targets(&r, m.output_width);
+    assert!(verifies(&m, &r));
+}
+
+#[test]
+fn aju10_a_tree_level_can_complete_the_circuit_without_cpa() {
+    // Found by the property test in CI: 1-bit A*B + 5C*D + C has 3 points in 2^0 and one
+    // in 2^2; Wallace's FA leaves one point per column, so no CPA follows.
+    let m = matrix("A*B + 5C*D + C", &[('A', 1), ('B', 1), ('C', 1), ('D', 1)]);
+    let r = wallace_solution(&m);
+    assert!(r.is_complete());
+    assert_eq!(cells_per_level(&r), [(1, 0)]);
+    assert!(r.levels().iter().all(|l| !l.cpa));
     assert_respects_wallace_targets(&r, m.output_width);
     assert!(verifies(&m, &r));
 }

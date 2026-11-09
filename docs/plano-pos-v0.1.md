@@ -276,6 +276,11 @@ flowchart LR
 ### MT-30: Tabela de alturas nível a nível (P11)
 - **Objetivo:** tabela com a altura de cada coluna em cada nível, exportável em Markdown.
 - **Critério de aceite:** teste com as alturas do R2 (spec 05).
+- **Feito (2026-11-09):** CMP-16 na spec 02 (não na 05: a tabela é da compressão), com a
+  tabela de R2 calculada à mão e conferida pelo teste do núcleo e pelo arquivo baixado no
+  teste de ponta a ponta. Forma tabular da fig. 8.11 do Parhami: linhas por nível, coluna
+  mais alta à esquerda, FA e HA por nível. Só o circuito do aluno; as soluções de Dadda e
+  Wallace ganham a tabela na comparação (MT-38).
 
 ### MT-31: Entrada por alturas com perfil-alvo de saída (P12)
 - **Objetivo:** aceitar `{2,2,3; 1,1,1,1}` (alturas de entrada e de saída, do bit mais

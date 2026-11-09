@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-09
-- **Commit:** `b22bbc0` (override do `minimatch`, #41). O MT-29 ainda não foi commitado.
+- **Commit:** `2e099f7` (MT-29, #43). O MT-30 ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -160,7 +160,11 @@
 - [x] MT-29: AJU-10, solução de Wallace (regra da fig. 8.10 do Parhami, reproduzida nível
       a nível). Achado: o Dadda do dotree gasta 3 HA a mais que a fig. 8.14 do livro no
       mesmo exemplo (AJU-05 manda HA onde o livro usa FA): decidir com o usuário.
-- [ ] Próximo: MT-30 (tabela de alturas nível a nível).
+- [x] MT-30: CMP-16, tabela de alturas nível a nível com exportação em Markdown; R2
+      conferido à mão contra a spec 02. No CI, o proptest do Wallace (MT-29) achou um
+      circuito completo sem CPA (`A*B + 5C*D + C`, 1 bit); o defeito era do auxiliar de
+      teste, que exigia o nível de CPA. Corrigido nos dois métodos, com o caso fixado.
+- [ ] Próximo: MT-38 (comparação de soluções, versão mínima). Antes, decidir o Dadda (achado do MT-29).
 
 ## Observações para a próxima sessão
 
@@ -203,6 +207,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-09 | `2e099f7` | solução de Wallace (#43); tabela de alturas | MT-30 |
 | 2026-11-09 | `b22bbc0` | override do `minimatch` (#41); solução de Wallace | MT-29 |
 | 2026-11-09 | `48cb595` | constante aditiva (#40); override do `minimatch` | MT-28 |
 | 2026-11-09 | `15a1b9b` | placa DE2 e Quartus (#39); constante aditiva | MT-22, MT-28 |
