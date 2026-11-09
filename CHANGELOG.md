@@ -35,6 +35,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - O testbench gerado instancia também a versão comportamental: as mensagens finais passam
   a ser "ESTRUTURAL: …" e "COMPORTAMENTAL: …", e a simulação falha se qualquer uma errar.
 
+### Segurança
+- `minimatch` forçado para 11.0.1 (override do pnpm) por causa de GHSA-g3hv-75wg-m249
+  (CVE-2026-118764, moderada, negação de serviço por padrão de glob). Só o lint usa o
+  pacote, com os padrões da nossa configuração, e nada dele vai para o site. O override
+  sai quando o ESLint e o typescript-eslint aceitarem a 11.
+
 ## [0.1.0] - 2026-11-05
 
 Primeira versão de uso: da expressão à matriz de pontos, compressão feita pelo aluno com
