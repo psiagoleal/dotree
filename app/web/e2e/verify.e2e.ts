@@ -73,7 +73,12 @@ test('R2: copy each VHDL file and download them all as a .zip (VHD-05)', async (
 		'half_adder.vhd',
 		'dotree_circuito.vhd',
 		'dotree_circuito_comportamental.vhd',
-		'tb_dotree_circuito.vhd'
+		'tb_dotree_circuito.vhd',
+		// spec 10: R2 fits the DE2 board
+		'dotree_circuito_de2.vhd',
+		'tb_dotree_circuito_de2.vhd',
+		'dotree_circuito.qpf',
+		'dotree_circuito.qsf'
 	];
 	const contents: Record<string, string> = {};
 	for (const name of names) {
@@ -89,6 +94,9 @@ test('R2: copy each VHDL file and download them all as a .zip (VHD-05)', async (
 	);
 	expect(contents['tb_dotree_circuito.vhd']).toContain(
 		'entity work.dotree_circuito_comportamental'
+	);
+	expect(contents['dotree_circuito.qsf']).toContain(
+		'set_global_assignment -name DEVICE EP2C35F672C6'
 	);
 
 	const downloading = page.waitForEvent('download');

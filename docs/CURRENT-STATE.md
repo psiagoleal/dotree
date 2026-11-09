@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-09
-- **Commit:** `86233eb` (MT-20 e plano da disciplina, #37). O MT-21 ainda não foi commitado.
+- **Commit:** `afa4bbd` (MT-21, #38). O MT-22 ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -146,7 +146,10 @@
 - [x] MT-21: VHD-10. `<nome>_comportamental.vhd` com as portas do topo e a expressão em
       `numeric_std`; testbench confere as duas versões. GHDL (7 casos, 2 estragados de
       propósito) e ModelSim ASE 10.1d conferidos pelo agente.
-- [ ] Próximo: MT-22 (topo para a DE2 até 18 bits e projeto do Quartus).
+- [x] MT-22: spec 10 (placa DE2). Topo `<nome>_de2`, testbench da placa, `.qpf`/`.qsf` com
+      os 92 pinos; Quartus II 13.0 compilou o R2 (53 LE estrutural, 56 comportamental);
+      GHDL e ModelSim conferidos. Falta conferir no FPGAEmuWeb e numa DE2 real.
+- [ ] Próximo: MT-28 (constante aditiva).
 
 ## Observações para a próxima sessão
 
@@ -174,6 +177,9 @@
   teste agora diz, na falha, o texto de `verify-result` e os erros da página, e o CI guarda
   `test-results` com captura de tela: se voltar, a causa vem no artefato.
 - SvelteKit 3 não tem `$lib`: use `#lib/...` com extensão.
+- O Quartus II 13.0 está em `~/altera/13.0/quartus/bin` e compila o projeto gerado:
+  `quartus_sh --flow compile <nome>` na pasta dos arquivos. O arquivo de pinos da DE2 da
+  disciplina serve para `DE2_PINS_FILE=<caminho> cargo test -p dotree-core --test board`.
 - A porta 4173 costuma estar ocupada nesta máquina; o e2e usa 4180 (`E2E_PORT`).
 - Os testes de propriedade não gravam `*.proptest-regressions` (`failure_persistence: None`):
   as mutações deixavam ali casos que só falham no código mutado (MT-7, MT-9, MT-8).
@@ -186,6 +192,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-09 | `afa4bbd` | VHDL comportamental (#38); placa DE2 e projeto do Quartus | MT-21, MT-22 |
 | 2026-11-09 | `86233eb` | usar a solução e plano da disciplina (#37); VHDL comportamental | MT-20, MT-21 |
 | 2026-11-06 | `ce19784` | v0.1.0 publicada (#36); plano da disciplina; usar a solução | MT-17, MT-20 |
 | 2026-11-05 | `9f07dd2` | qualidade e FPGAEmuWeb (#33); preparação da v0.1.0 | MT-16, MT-19, MT-17 |

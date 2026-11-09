@@ -12,11 +12,24 @@
 use std::collections::BTreeSet;
 use std::fmt::Write as _;
 
+use crate::board::{self, DE2_PINS, DISPLAYS, LEDS, MAX_INPUT_BITS, SEGMENTS};
 use crate::expr::Polynomial;
 use crate::matrix::DotMatrix;
 use crate::netlist::{Netlist, Wire};
 use crate::reduce::{CellKind, Time};
 use crate::verify::sample_vectors;
+
+/// `to_bin` of the testbenches: a vector as a string of 0s and 1s for the reports.
+const TO_BIN: &str = "    function to_bin(v : std_logic_vector) return string is\n\
+             \x20       variable s : string(1 to v'length);\n\
+             \x20       variable j : integer := 1;\n\
+             \x20   begin\n\
+             \x20       for i in v'range loop\n\
+             \x20           if v(i) = '1' then s(j) := '1'; else s(j) := '0'; end if;\n\
+             \x20           j := j + 1;\n\
+             \x20       end loop;\n\
+             \x20       return s;\n\
+             \x20   end function to_bin;\n";
 
 /// Language of comments and testbench messages (VHD-06).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -34,6 +47,8 @@ pub const DEFAULT_NAME: &str = "dotree_circuito";
 /// Suffix of the behavioral entity (VHD-10); the same in both languages, like every
 /// identifier (VHD-06).
 pub const BEHAVIORAL_SUFFIX: &str = "_comportamental";
+/// Suffix of the DE2 board top (PLA-01).
+pub const BOARD_SUFFIX: &str = "_de2";
 /// Largest coefficient written as a VHDL-93 `integer` literal; above, a bit string.
 const MAX_INTEGER: u64 = (1 << 31) - 1;
 
@@ -103,6 +118,30 @@ pub fn generate(
         name: format!("tb_{name}.vhd"),
         contents: g.testbench(),
     });
+    if board::fits(netlist).is_ok() {
+        let sources: Vec<String> = files
+            .iter()
+            .map(|f| f.name.clone())
+            .filter(|f| !f.starts_with("tb_"))
+            .chain(std::iter::once(format!("{name}{BOARD_SUFFIX}.vhd")))
+            .collect();
+        files.push(VhdlFile {
+            name: format!("{name}{BOARD_SUFFIX}.vhd"),
+            contents: g.board_top(),
+        });
+        files.push(VhdlFile {
+            name: format!("tb_{name}{BOARD_SUFFIX}.vhd"),
+            contents: g.board_testbench(),
+        });
+        files.push(VhdlFile {
+            name: format!("{name}.qpf"),
+            contents: g.qpf(),
+        });
+        files.push(VhdlFile {
+            name: format!("{name}.qsf"),
+            contents: g.qsf(&sources),
+        });
+    }
     Ok(files)
 }
 
@@ -219,10 +258,27 @@ fn is_valid_name(name: &str, n: &Netlist) -> bool {
         return false;
     }
     let lower = name.to_ascii_lowercase();
-    let mut taken: BTreeSet<String> = ["r", "full_adder", "half_adder"]
-        .iter()
-        .map(|s| s.to_string())
-        .collect();
+    // The board top (PLA-07) uses `dut`, `seg7` and the board ports in every design.
+    let mut taken: BTreeSet<String> = [
+        "r",
+        "full_adder",
+        "half_adder",
+        "dut",
+        "seg7",
+        "sw",
+        "ledr",
+        "hex0",
+        "hex1",
+        "hex2",
+        "hex3",
+        "hex4",
+        "hex5",
+        "hex6",
+        "hex7",
+    ]
+    .iter()
+    .map(|s| s.to_string())
+    .collect();
     taken.extend(
         n.variables
             .iter()
@@ -557,6 +613,420 @@ impl Gen<'_> {
         o
     }
 
+    /// Testbench lines that compute `expected`, R mod 2^W, from the input signals.
+    fn expected_lines(&self) -> String {
+        let w = self.n.output_width as usize;
+        let n = self.n;
+        let mut o = String::from("            expected := (others => '0');\n");
+        let mask: u128 = if w >= 128 {
+            u128::MAX
+        } else {
+            (1u128 << w) - 1
+        };
+        for t in &n.terms {
+            let coef = u128::from(t.coefficient) & mask;
+            let _ = writeln!(o, "            term := \"{coef:0w$b}\";");
+            for v in &t.vars {
+                let _ = writeln!(
+                    o,
+                    "            term := resize(term * resize(unsigned({}), {w}), {w});",
+                    port_name(*v)
+                );
+            }
+            o.push_str("            expected := expected + term;\n");
+        }
+        o
+    }
+
+    /// Which switches drive each variable, in the packing order of the testbench vectors
+    /// (PLA-02): `(variable, "SW(hi downto lo)")`.
+    fn switches(&self) -> Vec<(char, String)> {
+        let offsets = self.n.offsets();
+        self.n
+            .variables
+            .iter()
+            .map(|&(v, w)| {
+                let lo = offsets[&v];
+                (v, format!("SW({} downto {lo})", lo + w - 1))
+            })
+            .collect()
+    }
+
+    /// Displays that show R: one hexadecimal digit per 4 bits (PLA-04).
+    fn digits(&self) -> u32 {
+        self.n.output_width.div_ceil(4)
+    }
+
+    /// The DE2 top (PLA-02 to PLA-04): switches into the structural top, R onto the red LEDs
+    /// and, in hexadecimal, onto the seven-segment displays.
+    fn board_top(&self) -> String {
+        let n = self.n;
+        let w = n.output_width;
+        let entity = format!("{}{BOARD_SUFFIX}", self.name);
+        let mut o = String::new();
+        let _ = writeln!(
+            o,
+            "-- {entity} - {} (https://psiagoleal.github.io/dotree/)",
+            self.t(
+                "topo para a placa DE2 gerado pelo dotree",
+                "DE2 board top generated by dotree"
+            )
+        );
+        let _ = writeln!(
+            o,
+            "-- {}: R = {}",
+            self.t("Expressao", "Expression"),
+            self.expression()
+        );
+        let used = n.input_bits();
+        let sw: Vec<String> = self
+            .switches()
+            .iter()
+            .map(|(v, s)| format!("{v} = {s}"))
+            .collect();
+        let _ = writeln!(
+            o,
+            "-- {}: {}{}",
+            self.t("Chaves", "Switches"),
+            sw.join(", "),
+            if used < MAX_INPUT_BITS {
+                format!(
+                    "; SW({} downto {used}) {}",
+                    MAX_INPUT_BITS - 1,
+                    self.t("sem uso", "unused")
+                )
+            } else {
+                String::new()
+            }
+        );
+        let shown = w.min(LEDS);
+        let displays: Vec<String> = (0..self.digits())
+            .rev()
+            .map(|d| format!("HEX{d}"))
+            .collect();
+        let _ = writeln!(
+            o,
+            "-- {}: R ({w} bits) {} LEDR({} downto 0) {} {}",
+            self.t("Resultado", "Result"),
+            self.t("em", "on"),
+            shown - 1,
+            self.t("e em hexadecimal em", "and in hexadecimal on"),
+            displays.join(" ")
+        );
+        let _ = writeln!(
+            o,
+            "-- {}: {}.qpf (Cyclone II EP2C35F672C6)",
+            self.t("Projeto do Quartus", "Quartus project"),
+            self.name
+        );
+        let _ = writeln!(
+            o,
+            "-- {} {}{BEHAVIORAL_SUFFIX} {}",
+            self.t(
+                "Para sintetizar a versao comportamental, troque o nome do componente e da instancia por",
+                "To synthesize the behavioral version, rename the component and the instance to"
+            ),
+            self.name,
+            self.t("(mesmas portas).", "(same ports).")
+        );
+        o.push_str("\nlibrary ieee;\nuse ieee.std_logic_1164.all;\nuse work.all;\n\n");
+        let _ = writeln!(o, "entity {entity} is\n    port (");
+        let _ = writeln!(
+            o,
+            "        SW   : in  std_logic_vector({} downto 0);",
+            MAX_INPUT_BITS - 1
+        );
+        let _ = writeln!(
+            o,
+            "        LEDR : out std_logic_vector({} downto 0);",
+            LEDS - 1
+        );
+        for h in 0..DISPLAYS {
+            let end = if h + 1 == DISPLAYS { "" } else { ";" };
+            let _ = writeln!(o, "        HEX{h} : out std_logic_vector(6 downto 0){end}");
+        }
+        let _ = writeln!(o, "    );\nend {entity};\n");
+
+        let _ = writeln!(o, "architecture placa of {entity} is");
+        let ports: Vec<String> = n
+            .variables
+            .iter()
+            .map(|&(v, width)| {
+                format!(
+                    "{} : in std_logic_vector({} downto 0)",
+                    port_name(v),
+                    width - 1
+                )
+            })
+            .chain(std::iter::once(format!(
+                "R : out std_logic_vector({} downto 0)",
+                w - 1
+            )))
+            .collect();
+        let _ = writeln!(
+            o,
+            "    component {0} is\n        port ({1});\n    end component {0};\n",
+            self.name,
+            ports.join("; ")
+        );
+        let _ = writeln!(
+            o,
+            "    -- {}",
+            self.t(
+                "segmentos de um digito hexadecimal: bit i = segmento a+i, ativo em nivel baixo",
+                "segments of a hexadecimal digit: bit i = segment a+i, active low"
+            )
+        );
+        o.push_str("    subtype nibble is std_logic_vector(3 downto 0);\n");
+        o.push_str("    function seg7(d : nibble) return std_logic_vector is\n    begin\n        case d is\n");
+        for (d, segs) in SEGMENTS.iter().enumerate() {
+            let _ = writeln!(o, "            when \"{d:04b}\" => return \"{segs:07b}\";");
+        }
+        o.push_str("            when others => return \"1111111\";\n        end case;\n    end function seg7;\n\n");
+        let _ = writeln!(o, "    signal R : std_logic_vector({} downto 0);", w - 1);
+        o.push_str("begin\n");
+        let map: Vec<String> = self
+            .switches()
+            .iter()
+            .map(|(v, s)| format!("{} => {s}", port_name(*v)))
+            .chain(std::iter::once("R => R".to_string()))
+            .collect();
+        let _ = writeln!(
+            o,
+            "    dut : {} port map ({});\n",
+            self.name,
+            map.join(", ")
+        );
+        if w == LEDS {
+            o.push_str("    LEDR <= R;\n");
+        } else if w > LEDS {
+            let _ = writeln!(o, "    LEDR <= R({} downto 0);", LEDS - 1);
+        } else {
+            let _ = writeln!(o, "    LEDR({} downto 0) <= R;", w - 1);
+            let _ = writeln!(o, "    LEDR({} downto {w}) <= (others => '0');", LEDS - 1);
+        }
+        o.push('\n');
+        for d in 0..DISPLAYS {
+            let lo = 4 * d;
+            if d < self.digits() {
+                let hi = (lo + 3).min(w - 1);
+                let pad = lo + 3 - hi;
+                let bits = format!("R({hi} downto {lo})");
+                let arg = if pad == 0 {
+                    bits
+                } else {
+                    format!("\"{}\" & {bits}", "0".repeat(pad as usize))
+                };
+                let _ = writeln!(o, "    HEX{d} <= seg7({arg});");
+            } else {
+                let _ = writeln!(o, "    HEX{d} <= (others => '1');");
+            }
+        }
+        o.push_str("end architecture placa;\n");
+        o
+    }
+
+    /// The board testbench (PLA-06): every combination of the used switches, checking the
+    /// LEDs and every display against the expression.
+    fn board_testbench(&self) -> String {
+        let n = self.n;
+        let w = n.output_width as usize;
+        let bits = n.input_bits();
+        let total: u64 = 1 << bits;
+        let entity = format!("{}{BOARD_SUFFIX}", self.name);
+        let tb = format!("tb_{entity}");
+        let mut o = String::new();
+        let _ = writeln!(
+            o,
+            "-- {tb} - {} (https://psiagoleal.github.io/dotree/)",
+            self.t(
+                "testbench da placa DE2 gerado pelo dotree",
+                "DE2 board testbench generated by dotree"
+            )
+        );
+        let _ = writeln!(
+            o,
+            "-- {}: R = {} {} LEDR {} HEX0-HEX7, {} {total} {}",
+            self.t("Confere", "Checks"),
+            self.expression(),
+            self.t("em", "on"),
+            self.t("e", "and"),
+            self.t("para todas as", "for all"),
+            self.t("combinacoes das chaves", "switch combinations")
+        );
+        o.push_str("library ieee;\nuse ieee.std_logic_1164.all;\nuse ieee.numeric_std.all;\n\n");
+        let _ = writeln!(o, "entity {tb} is\nend {tb};\n");
+        let _ = writeln!(o, "architecture test of {tb} is");
+        let _ = writeln!(
+            o,
+            "    signal SW   : std_logic_vector({} downto 0) := (others => '0');",
+            MAX_INPUT_BITS - 1
+        );
+        let _ = writeln!(
+            o,
+            "    signal LEDR : std_logic_vector({} downto 0);",
+            LEDS - 1
+        );
+        let hex: Vec<String> = (0..DISPLAYS).map(|h| format!("HEX{h}")).collect();
+        let _ = writeln!(
+            o,
+            "    signal {} : std_logic_vector(6 downto 0);",
+            hex.join(", ")
+        );
+        for &(v, width) in &n.variables {
+            let _ = writeln!(
+                o,
+                "    signal {} : std_logic_vector({} downto 0);",
+                port_name(v),
+                width - 1
+            );
+        }
+        o.push_str("    type segments_t is array (0 to 15) of std_logic_vector(6 downto 0);\n");
+        let segs: Vec<String> = SEGMENTS.iter().map(|s| format!("\"{s:07b}\"")).collect();
+        let _ = writeln!(
+            o,
+            "    constant SEGS : segments_t := ({});",
+            segs.join(", ")
+        );
+        o.push_str("    constant OFF : std_logic_vector(6 downto 0) := \"1111111\";\n");
+        o.push_str(TO_BIN);
+        o.push_str("begin\n");
+        let map: Vec<String> = std::iter::once("SW => SW".to_string())
+            .chain(std::iter::once("LEDR => LEDR".to_string()))
+            .chain(hex.iter().map(|h| format!("{h} => {h}")))
+            .collect();
+        let _ = writeln!(
+            o,
+            "    dut : entity work.{entity} port map ({});\n",
+            map.join(", ")
+        );
+        o.push_str("    stimulus : process\n");
+        let _ = writeln!(
+            o,
+            "        variable v        : std_logic_vector({} downto 0);",
+            bits - 1
+        );
+        let _ = writeln!(
+            o,
+            "        variable expected : unsigned({} downto 0);",
+            w - 1
+        );
+        let _ = writeln!(
+            o,
+            "        variable term     : unsigned({} downto 0);",
+            w - 1
+        );
+        o.push_str("        variable wide     : unsigned(31 downto 0);\n");
+        o.push_str("        variable ok       : boolean;\n");
+        o.push_str("        variable errors   : natural := 0;\n    begin\n");
+        let _ = writeln!(o, "        for n in 0 to {} loop", total - 1);
+        let _ = writeln!(
+            o,
+            "            v := std_logic_vector(to_unsigned(n, {bits}));"
+        );
+        let _ = writeln!(o, "            SW({} downto 0) <= v;", bits - 1);
+        let offsets = n.offsets();
+        for &(v, width) in &n.variables {
+            let lo = offsets[&v];
+            let _ = writeln!(
+                o,
+                "            {} <= v({} downto {lo});",
+                port_name(v),
+                lo + width - 1
+            );
+        }
+        o.push_str("            wait for 10 ns;\n");
+        o.push_str(&self.expected_lines());
+        o.push_str("            wide := resize(expected, 32);\n");
+        let _ = writeln!(
+            o,
+            "            ok := LEDR = std_logic_vector(resize(expected, {LEDS}));"
+        );
+        for d in 0..DISPLAYS {
+            if d < self.digits() {
+                let _ = writeln!(
+                    o,
+                    "            ok := ok and HEX{d} = SEGS(to_integer(wide({} downto {})));",
+                    4 * d + 3,
+                    4 * d
+                );
+            } else {
+                let _ = writeln!(o, "            ok := ok and HEX{d} = OFF;");
+            }
+        }
+        let label = self.t("PLACA", "BOARD");
+        o.push_str("            if not ok then\n                errors := errors + 1;\n                if errors <= 10 then\n");
+        let _ = writeln!(
+            o,
+            "                    report \"{label}: {}\" & integer'image(n) & \": LEDR = \" & to_bin(LEDR) & \", {} \" & to_bin(std_logic_vector(expected)) & \", HEX0 = \" & to_bin(HEX0) severity error;",
+            self.t("ERRO no vetor ", "ERROR at vector "),
+            self.t("esperado R =", "expected R ="),
+        );
+        o.push_str("                end if;\n            end if;\n        end loop;\n");
+        let _ = writeln!(
+            o,
+            "        if errors = 0 then\n            report \"{label}: {} {total} {}\" severity note;\n        else\n            report \"{label}: \" & integer'image(errors) & \" {}\" severity failure;\n        end if;",
+            self.t("TODOS OS", "ALL"),
+            self.t("CASOS CORRETOS", "CASES CORRECT"),
+            self.t("CASOS ERRADOS", "CASES WRONG"),
+        );
+        o.push_str("        wait;\n    end process stimulus;\nend architecture test;\n");
+        o
+    }
+
+    /// The Quartus II project file: its revision is the `.qsf` of the same name.
+    fn qpf(&self) -> String {
+        format!(
+            "# {}.qpf - {} (https://psiagoleal.github.io/dotree/)\n\
+             QUARTUS_VERSION = \"13.0\"\n\
+             PROJECT_REVISION = \"{}\"\n",
+            self.name,
+            self.t(
+                "projeto do Quartus II gerado pelo dotree",
+                "Quartus II project generated by dotree"
+            ),
+            self.name
+        )
+    }
+
+    /// The Quartus II settings (PLA-05): device, top, VHDL sources and the DE2 pins.
+    fn qsf(&self, sources: &[String]) -> String {
+        let mut o = String::new();
+        let _ = writeln!(
+            o,
+            "# {}.qsf - {} (https://psiagoleal.github.io/dotree/)",
+            self.name,
+            self.t(
+                "configuracao do Quartus II para a placa DE2 gerada pelo dotree",
+                "Quartus II settings for the DE2 board generated by dotree"
+            )
+        );
+        let _ = writeln!(
+            o,
+            "# {}",
+            self.t(
+                "Pinos: DE2 User Manual (Terasic), tabelas das chaves, LEDs e displays.",
+                "Pins: DE2 User Manual (Terasic), tables of the switches, LEDs and displays."
+            )
+        );
+        o.push_str("set_global_assignment -name FAMILY \"Cyclone II\"\n");
+        o.push_str("set_global_assignment -name DEVICE EP2C35F672C6\n");
+        let _ = writeln!(
+            o,
+            "set_global_assignment -name TOP_LEVEL_ENTITY {}{BOARD_SUFFIX}",
+            self.name
+        );
+        o.push_str("set_global_assignment -name VHDL_INPUT_VERSION VHDL_1993\n");
+        o.push_str("set_global_assignment -name RESERVE_ALL_UNUSED_PINS \"AS INPUT TRI-STATED\"\n");
+        for f in sources {
+            let _ = writeln!(o, "set_global_assignment -name VHDL_FILE {f}");
+        }
+        for (port, pin) in DE2_PINS {
+            let _ = writeln!(o, "set_location_assignment {pin} -to {port}");
+        }
+        o
+    }
+
     fn testbench(&self) -> String {
         let n = self.n;
         let w = n.output_width as usize;
@@ -634,18 +1104,7 @@ impl Gen<'_> {
             }
             o.push_str("    );\n");
         }
-        o.push_str(
-            "    function to_bin(v : std_logic_vector) return string is\n\
-             \x20       variable s : string(1 to v'length);\n\
-             \x20       variable j : integer := 1;\n\
-             \x20   begin\n\
-             \x20       for i in v'range loop\n\
-             \x20           if v(i) = '1' then s(j) := '1'; else s(j) := '0'; end if;\n\
-             \x20           j := j + 1;\n\
-             \x20       end loop;\n\
-             \x20       return s;\n\
-             \x20   end function to_bin;\n",
-        );
+        o.push_str(TO_BIN);
         o.push_str("begin\n");
         let ports = |r: &str| -> String {
             n.variables
@@ -703,24 +1162,8 @@ impl Gen<'_> {
                 lo + width - 1
             );
         }
-        o.push_str("            wait for 10 ns;\n            expected := (others => '0');\n");
-        let mask: u128 = if w >= 128 {
-            u128::MAX
-        } else {
-            (1u128 << w) - 1
-        };
-        for t in &n.terms {
-            let coef = u128::from(t.coefficient) & mask;
-            let _ = writeln!(o, "            term := \"{coef:0w$b}\";");
-            for v in &t.vars {
-                let _ = writeln!(
-                    o,
-                    "            term := resize(term * resize(unsigned({}), {w}), {w});",
-                    port_name(*v)
-                );
-            }
-            o.push_str("            expected := expected + term;\n");
-        }
+        o.push_str("            wait for 10 ns;\n");
+        o.push_str(&self.expected_lines());
         let structural = self.t("ESTRUTURAL", "STRUCTURAL");
         let beh = self.t("COMPORTAMENTAL", "BEHAVIORAL");
         for (out, count, label) in [("R", "errors", structural), ("R_COMP", "errors_comp", beh)] {

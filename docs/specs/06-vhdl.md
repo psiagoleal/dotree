@@ -107,4 +107,5 @@ Duas lições do primeiro contato com simuladores reais, que viraram critério:
 
 ## Fora de escopo
 
-Verilog; arquivo de projeto do Quartus; atribuição de pinos de placa; VHDL otimizado.
+Verilog; VHDL otimizado. O topo para a placa DE2 e o projeto do Quartus estão em
+[`10-placa.md`](10-placa.md), que também reserva alguns nomes (PLA-07).

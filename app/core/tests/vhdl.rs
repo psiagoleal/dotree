@@ -62,9 +62,11 @@ fn top(fs: &[VhdlFile]) -> &str {
     file(fs, "dotree_circuito.vhd")
 }
 
-/// Removes `--` comments and string literals, to compare code across languages.
+/// Removes `--` comments (`#` lines of Quartus files) and string literals, to compare code
+/// across languages.
 fn code_only(text: &str) -> String {
     text.lines()
+        .filter(|l| !l.starts_with('#'))
         .map(|l| {
             let mut out = String::new();
             let mut in_str = false;
@@ -105,7 +107,12 @@ fn vhd01_r2_files() {
             "half_adder.vhd",
             "dotree_circuito.vhd",
             "dotree_circuito_comportamental.vhd",
-            "tb_dotree_circuito.vhd"
+            "tb_dotree_circuito.vhd",
+            // spec 10: the circuit fits the DE2 board
+            "dotree_circuito_de2.vhd",
+            "tb_dotree_circuito_de2.vhd",
+            "dotree_circuito.qpf",
+            "dotree_circuito.qsf"
         ]
     );
 }
@@ -126,7 +133,12 @@ fn vhd01_no_half_adder_file_without_has() {
             "full_adder.vhd",
             "dotree_circuito.vhd",
             "dotree_circuito_comportamental.vhd",
-            "tb_dotree_circuito.vhd"
+            "tb_dotree_circuito.vhd",
+            // spec 10: the circuit fits the DE2 board
+            "dotree_circuito_de2.vhd",
+            "tb_dotree_circuito_de2.vhd",
+            "dotree_circuito.qpf",
+            "dotree_circuito.qsf"
         ]
     );
 }
@@ -362,7 +374,10 @@ fn vhd09_entities_close_with_their_bare_name() {
     // The FPGAEmuWeb reads the top entity up to `end <name>;` (or `end entity;`) only.
     let (m, n) = r2();
     for lang in [Language::PtBr, Language::En] {
-        for f in files(&m, &n, lang) {
+        for f in files(&m, &n, lang)
+            .iter()
+            .filter(|f| f.name.ends_with(".vhd"))
+        {
             let code = code_only(&f.contents);
             assert!(!code.contains("end entity"), "{}", f.name);
             let entity = code

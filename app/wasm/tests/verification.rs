@@ -5,8 +5,8 @@
 mod common;
 
 use common::{r1, r2, r2_levels};
-use dotree_wasm::Verification;
-use serde_json::Value;
+use dotree_wasm::{Session, Verification};
+use serde_json::{Value, json};
 
 fn run(v: &mut Verification, max: f64) -> Value {
     serde_json::from_str(&v.run(max)).unwrap()
@@ -107,9 +107,14 @@ fn vhd05_r2_files_in_both_languages() {
             "half_adder.vhd",
             "dotree_circuito.vhd",
             "dotree_circuito_comportamental.vhd",
-            "tb_dotree_circuito.vhd"
+            "tb_dotree_circuito.vhd",
+            "dotree_circuito_de2.vhd",
+            "tb_dotree_circuito_de2.vhd",
+            "dotree_circuito.qpf",
+            "dotree_circuito.qsf"
         ]
     );
+    assert_eq!(pt["board"], json!({"fits": true}));
     let tb = |v: &Value| v["files"][4]["contents"].as_str().unwrap().to_owned();
     assert!(tb(&pt).contains("CASOS CORRETOS"));
     let en = vhdl("meu_somador", "en");
@@ -141,4 +146,32 @@ fn vhd08_invalid_names_are_refused() {
         assert_eq!(out["ok"], false, "{bad}");
         assert_eq!(out["error"], "invalidName", "{bad}");
     }
+}
+
+// ----------------------------------------------------------- spec 10: DE2 board (MT-22)
+
+#[test]
+fn pla01_a_circuit_beyond_the_board_says_why() {
+    // One dot per column: complete from the start.
+    let wide = Session::open("A + 1024B", r#"{"A":10,"B":9}"#).unwrap();
+    let v: Value = serde_json::from_str(&wide.vhdl("dotree_circuito", "pt-br")).unwrap();
+    assert_eq!(v["ok"], true);
+    assert_eq!(
+        v["board"],
+        json!({"fits": false, "reason": "tooManyInputs", "bits": 19, "max": 18})
+    );
+    assert!(
+        v["files"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|f| f["name"] != "dotree_circuito.qsf")
+    );
+
+    let long = Session::open("2147483648A", r#"{"A":2}"#).unwrap();
+    let v: Value = serde_json::from_str(&long.vhdl("dotree_circuito", "en")).unwrap();
+    assert_eq!(
+        v["board"],
+        json!({"fits": false, "reason": "tooWide", "width": 33, "max": 32})
+    );
 }
