@@ -9,7 +9,7 @@ set -uo pipefail
 
 DIR="${1:?uso: ghdl_casos.sh <dir gerado por vhdl_referencia>}"
 falhas=0
-while read -r caso tb esperado; do
+while read -r caso tb esperado relatos; do
   [[ -z "$caso" ]] && continue
   (
     cd "$DIR/$caso" || exit 2
@@ -24,8 +24,8 @@ while read -r caso tb esperado; do
   log="$DIR/$caso/sim.log"
   final="$(grep -E 'CORRETOS|CORRECT|ERRADOS|WRONG' "$log" 2>/dev/null | sed 's/.*(report \(note\|error\|failure\)): //' | paste -sd'|' | sed 's/|/ | /g')"
   case "$esperado" in
-    # Both architectures, structural and behavioral (VHD-10), must report all correct.
-    ok)    if [[ $rc -eq 0 ]] && [[ "$(grep -cE 'CASOS CORRETOS|CASES CORRECT' "$log")" -eq 2 ]]; then v=ok; else v=FALHOU; fi ;;
+    # Every report must say all correct: structural and behavioral (VHD-10), or the board.
+    ok)    if [[ $rc -eq 0 ]] && [[ "$(grep -cE 'CASOS CORRETOS|CASES CORRECT' "$log")" -eq "$relatos" ]]; then v=ok; else v=FALHOU; fi ;;
     falha) if [[ $rc -ne 0 ]] && grep -qE 'CASOS ERRADOS|CASES WRONG' "$log"; then v=ok; else v=FALHOU; fi ;;
     *)     v=FALHOU ;;
   esac

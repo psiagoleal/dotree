@@ -35,8 +35,15 @@ describe('VhdlView (VHD-05, VHD-07, VHD-08)', () => {
 			'half_adder.vhd',
 			'dotree_circuito.vhd',
 			'dotree_circuito_comportamental.vhd',
-			'tb_dotree_circuito.vhd'
+			'tb_dotree_circuito.vhd',
+			'dotree_circuito_de2.vhd',
+			'tb_dotree_circuito_de2.vhd',
+			'dotree_circuito.qpf',
+			'dotree_circuito.qsf'
 		]);
+		await expect
+			.element(page.getByText(/^Inclui o topo para a placa DE2 \(dotree_circuito_de2\.vhd\)/))
+			.toBeVisible();
 		await nameInput().fill('meu_somador');
 		await expect
 			.element(page.getByRole('button', { name: 'Copiar meu_somador.vhd' }))
@@ -68,5 +75,19 @@ describe('VhdlView (VHD-05, VHD-07, VHD-08)', () => {
 		);
 		await expect.element(page.getByRole('status')).toHaveTextContent('full_adder.vhd copiado.');
 		vi.restoreAllMocks();
+	});
+
+	it('says why a circuit beyond the board gets no DE2 files (PLA-01)', async () => {
+		// One dot per column: complete from the start, 19 input bits.
+		const s = core.openSession('A + 1024B', { A: 10, B: 9 });
+		const { container } = await render(VhdlView, { session: s, snap: s.snapshot() });
+		await expect
+			.element(
+				page.getByText(
+					'Sem topo para a placa DE2: ela tem 18 chaves, e este circuito tem 19 bits de entrada.'
+				)
+			)
+			.toBeVisible();
+		expect(fileNames(container)).not.toContain('dotree_circuito.qsf');
 	});
 });

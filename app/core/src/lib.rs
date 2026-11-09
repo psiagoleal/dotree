@@ -5,6 +5,7 @@
 //! their tickets (docs/plano.md): `expr` (MT-3), `matrix` (MT-4), `reduce` (MT-5, MT-6),
 //! `netlist` and `verify` (MT-7), `help` (MT-8), `diagram` (MT-9), `vhdl` (MT-10), `state` (MT-15a).
 
+pub mod board;
 pub mod diagram;
 pub mod expr;
 pub mod help;

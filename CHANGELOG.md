@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Placa DE2: com até 18 bits de entrada, o VHDL traz um topo `<nome>_de2` que lê as
+  variáveis das chaves `SW` e mostra o resultado nos LEDs `LEDR` e, em hexadecimal, nos
+  displays `HEX0` a `HEX7`; um testbench próprio; e o projeto do Quartus II (`.qpf` e
+  `.qsf`) com a EP2C35F672C6 e os 92 pinos da placa. O painel diz se esses arquivos vieram
+  ou por que não. Compilado no Quartus II 13.0 e simulado no GHDL e no ModelSim (spec 10,
+  MT-22).
 - "Usar esta solução": depois de ver a solução de Dadda nível a nível, o aluno pode trocar
   o próprio circuito por ela, com confirmação. A troca é um só passo de desfazer, conta no
   registro de ajudas do resumo e vai para o arquivo do exercício (`help.solutionApplied`,
@@ -19,6 +25,8 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   resultado de cada uma; o CI e o ModelSim ASE 10.1d simulam as duas (VHD-10, MT-21).
 
 ### Alterado
+- Os nomes `dut`, `seg7`, `SW`, `LEDR` e `HEX0` a `HEX7` não servem mais como nome da
+  entidade, porque o topo da placa os usa (PLA-07).
 - O testbench gerado instancia também a versão comportamental: as mensagens finais passam
   a ser "ESTRUTURAL: …" e "COMPORTAMENTAL: …", e a simulação falha se qualquer uma errar.
 

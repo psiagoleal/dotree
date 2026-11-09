@@ -145,7 +145,12 @@ flowchart LR
 - **Critério de aceite:** testes do núcleo; tabela de pinos conferida contra o manual da
   DE2, com referência à fonte e sem copiar o documento; GHDL compila o topo.
 - **Decidido:** portas com os nomes padrão do FPGAEmuWeb (`SW`, `KEY`, `LEDR`, `HEX0`–`HEX7`),
-  que ele liga sem mapeamento manual. **Pendente:** spec nova (`10-placa.md`) ou ampliar a 06.
+  que ele liga sem mapeamento manual. Spec nova, `10-placa.md`.
+- **Feito (2026-11-09):** spec 10 (PLA-01 a PLA-07). Módulo `board` (limites, pinos,
+  segmentos); topo `<nome>_de2`, `tb_<nome>_de2`, `.qpf` e `.qsf` quando há até 18 bits de
+  entrada e $W \le 32$. Pinos conferidos contra duas cópias do arquivo de pinos da DE2;
+  Quartus II 13.0 compilou o projeto do R2 com os pinos certos; GHDL e ModelSim conferiram o
+  testbench da placa e pegaram o topo estragado de propósito.
 
 ### MT-23: Painel de operandos em palavras (P6)
 - **Objetivo:** acima de 18 bits de entrada, uma máquina de estados que carrega cada

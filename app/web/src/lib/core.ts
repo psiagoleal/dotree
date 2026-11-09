@@ -286,8 +286,15 @@ export interface VhdlFile {
 
 export type VhdlLanguage = 'pt-br' | 'en';
 
+/** Whether the DE2 board files are included (spec 10, PLA-01). */
+export type BoardFit =
+	| { fits: true }
+	| { fits: false; reason: 'tooManyInputs'; bits: number; max: number }
+	| { fits: false; reason: 'tooWide'; width: number; max: number };
+
 export type VhdlResult =
-	{ ok: true; files: VhdlFile[] } | { ok: false; error: 'notComplete' | 'invalidName' };
+	| { ok: true; files: VhdlFile[]; board: BoardFit }
+	| { ok: false; error: 'notComplete' | 'invalidName' };
 
 /** A compression in progress, held by the core (MT-12a, MT-12b, MT-13, MT-14). */
 export interface CompressionSession {

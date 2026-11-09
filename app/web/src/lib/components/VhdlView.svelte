@@ -1,8 +1,8 @@
 <!-- Caminho relativo: app/web/src/lib/components/VhdlView.svelte -->
-<!-- Structural VHDL of the complete circuit (spec 06): entity name checked by the core
-     (VHD-08), copy of each file and a .zip with all of them (VHD-05); disabled, with the
-     reason, while the circuit is incomplete (VHD-07). Comments follow the interface
-     language (VHD-06). -->
+<!-- VHDL of the complete circuit (spec 06): entity name checked by the core (VHD-08), copy
+     of each file and a .zip with all of them (VHD-05); disabled, with the reason, while the
+     circuit is incomplete (VHD-07). Comments follow the interface language (VHD-06). Says
+     whether the DE2 board top and Quartus project are included, or why not (spec 10). -->
 <script lang="ts">
 	import type { CompressionSession, Snapshot, VhdlFile } from '#lib/core.ts';
 	import { m } from '#lib/paraglide/messages.js';
@@ -23,6 +23,14 @@
 	const incomplete = $derived(!result.ok && result.error === 'notComplete');
 	const invalid = $derived(!result.ok && result.error === 'invalidName');
 	const files = $derived(result.ok ? result.files : []);
+	const boardNote = $derived.by(() => {
+		if (!result.ok) return '';
+		const b = result.board;
+		if (b.fits) return m.vhdl_board_ok({ file: `${name}_de2.vhd` });
+		return b.reason === 'tooManyInputs'
+			? m.vhdl_board_too_many_inputs({ max: b.max, bits: b.bits })
+			: m.vhdl_board_too_wide({ max: b.max, width: b.width });
+	});
 
 	function copy(f: VhdlFile) {
 		navigator.clipboard.writeText(f.contents).then(
@@ -60,6 +68,8 @@
 		</div>
 		{#if invalid}
 			<p id={`${id}-invalid`} class="error">{m.vhdl_name_invalid()}</p>
+		{:else}
+			<p class="note">{boardNote}</p>
 		{/if}
 		<ul class="files">
 			{#each files as f (f.name)}

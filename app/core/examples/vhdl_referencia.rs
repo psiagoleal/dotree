@@ -4,8 +4,10 @@
 //!   cargo run -p dotree-core --example vhdl_referencia -- <dir>
 //!
 //! Each case goes to its own subdirectory, and `<dir>/casos.txt` lists, one per line:
-//! `<subdir> <testbench entity> <expect>`, where `<expect>` is `ok` (the testbench must
-//! report all cases correct) or `falha` (it must fail: a deliberately broken circuit).
+//! `<subdir> <testbench entity> <expect> <reports>`, where `<expect>` is `ok` (the
+//! testbench must report all cases correct) or `falha` (it must fail: a deliberately
+//! broken circuit), and `<reports>` is how many "all correct" lines an `ok` run prints (2
+//! for the circuit testbench, structural and behavioral; 1 for the board testbench).
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -16,7 +18,9 @@ use dotree_core::help::dadda_solution;
 use dotree_core::matrix::DotMatrix;
 use dotree_core::netlist::{Netlist, Wire};
 use dotree_core::reduce::Reduction;
-use dotree_core::vhdl::{BEHAVIORAL_SUFFIX, DEFAULT_NAME, Language, VhdlFile, generate};
+use dotree_core::vhdl::{
+    BEHAVIORAL_SUFFIX, BOARD_SUFFIX, DEFAULT_NAME, Language, VhdlFile, generate,
+};
 
 fn matrix(src: &str, widths: &[(char, u32)]) -> DotMatrix {
     let w: BTreeMap<char, u32> = widths.iter().copied().collect();
@@ -102,19 +106,32 @@ fn write(
     list: &mut String,
 ) {
     let files = generate(m, n, DEFAULT_NAME, lang).expect("generate");
-    write_files(dir, case, &files, expect, list);
+    let tb = format!("tb_{DEFAULT_NAME}");
+    write_files(dir, case, &files, (&tb, expect, 2), list);
 }
 
-fn write_files(dir: &Path, case: &str, files: &[VhdlFile], expect: &str, list: &mut String) {
+/// Writes `files` to `<dir>/<case>` and lists the case with `(testbench, expect, reports)`.
+fn write_files(
+    dir: &Path,
+    case: &str,
+    files: &[VhdlFile],
+    (tb, expect, reports): (&str, &str, u32),
+    list: &mut String,
+) {
     let sub = dir.join(case);
     fs::create_dir_all(&sub).expect("create dir");
-    let order: Vec<&str> = files.iter().map(|f| f.name.as_str()).collect();
+    // Only VHDL is analyzed; the Quartus files go along for the record.
+    let order: Vec<&str> = files
+        .iter()
+        .map(|f| f.name.as_str())
+        .filter(|f| f.ends_with(".vhd"))
+        .collect();
     for f in files {
         fs::write(sub.join(&f.name), &f.contents).expect("write file");
     }
     // Analysis order: components, top, testbench (the order `generate` returns).
     fs::write(sub.join("ordem.txt"), order.join(" ") + "\n").expect("write order");
-    list.push_str(&format!("{case} tb_{DEFAULT_NAME} {expect}\n"));
+    list.push_str(&format!("{case} {tb} {expect} {reports}\n"));
 }
 
 fn main() {
@@ -152,7 +169,14 @@ fn main() {
     f.contents = f
         .contents
         .replacen("\n            + ", "\n            - ", 1);
-    write_files(dir, "r2_comp_quebrado", &files, "falha", &mut list);
+    let tb = format!("tb_{DEFAULT_NAME}");
+    write_files(
+        dir,
+        "r2_comp_quebrado",
+        &files,
+        (&tb, "falha", 2),
+        &mut list,
+    );
 
     let m3 = matrix("A", &[('A', 4)]);
     write(dir, "r3", &m3, &dadda(&m3), Language::En, "ok", &mut list);
@@ -184,6 +208,36 @@ fn main() {
         "ok",
         &mut list,
     );
+
+    // Spec 10 (PLA-06): the DE2 top of R2 under its own testbench.
+    let files = generate(&m, &n, DEFAULT_NAME, Language::PtBr).expect("generate");
+    let tb = format!("tb_{DEFAULT_NAME}{BOARD_SUFFIX}");
+    write_files(dir, "r2_placa", &files, (&tb, "ok", 1), &mut list);
+
+    // PLA-06: the board top with digit 1 drawn as a 7; the board testbench must catch it.
+    let mut broken = files.clone();
+    let top = format!("{DEFAULT_NAME}{BOARD_SUFFIX}.vhd");
+    let f = broken
+        .iter_mut()
+        .find(|f| f.name == top)
+        .expect("board top");
+    let one = "when \"0001\" => return \"1111001\";";
+    assert!(f.contents.contains(one), "digit 1 to break");
+    f.contents = f
+        .contents
+        .replace(one, "when \"0001\" => return \"1111000\";");
+    write_files(
+        dir,
+        "r2_placa_quebrada",
+        &broken,
+        (&tb, "falha", 1),
+        &mut list,
+    );
+
+    // W = 21 on the board: LEDR gets the 18 low bits, HEX5 a single bit (PLA-03, PLA-04).
+    let mw = matrix("1048576A + B", &[('A', 1), ('B', 9)]);
+    let files = generate(&mw, &dadda(&mw), DEFAULT_NAME, Language::En).expect("generate");
+    write_files(dir, "placa_larga", &files, (&tb, "ok", 1), &mut list);
 
     fs::write(dir.join("casos.txt"), list).expect("write list");
 }

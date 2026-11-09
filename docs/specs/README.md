@@ -29,10 +29,11 @@ são a spec em forma executável: cada critério tem uma prova associada.
 | [`03-ajuda-sob-demanda.md`](03-ajuda-sob-demanda.md) | Dicas, próxima jogada, limite inferior e solução Dadda — só quando pedidas | `AJU` |
 | [`04-verificacao.md`](04-verificacao.md) | Simulação, amostragem e contraexemplo | `VER` |
 | [`05-diagrama.md`](05-diagrama.md) | Diagrama de blocos, nomes e tabela de ligações | `DIA` |
-| [`06-vhdl.md`](06-vhdl.md) | VHDL-93 estrutural e testbench | `VHD` |
+| [`06-vhdl.md`](06-vhdl.md) | VHDL-93 estrutural, comportamental e testbench | `VHD` |
 | [`07-idiomas.md`](07-idiomas.md) | pt-BR e inglês | `IDI` |
 | [`08-salvar.md`](08-salvar.md) | Salvar, abrir e retomar | `SAL` |
 | [`09-entrega.md`](09-entrega.md) | CI, GitHub Pages, imagem Docker, *release* | `ENT` |
+| [`10-placa.md`](10-placa.md) | Topo para a placa DE2, testbench da placa e projeto do Quartus | `PLA` |
 
 ## Decisões confirmadas pelo autor
 

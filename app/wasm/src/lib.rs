@@ -5,6 +5,7 @@
 
 use std::collections::BTreeMap;
 
+use dotree_core::board::{self, BoardLimit};
 use dotree_core::diagram::{self, Endpoint, Layout, TableHeaders};
 use dotree_core::expr::{self, Analysis, Expected, ExprError, SyntaxErrorKind, Warning};
 use dotree_core::help::{self, HelpLog, HelpStep, Hint, NextMove};
@@ -692,8 +693,11 @@ impl Session {
     }
 
     /// The VHDL files (spec 06) in `language` (`"pt-br"` or `"en"`):
-    /// `{"ok": true, "files": [{"name", "contents"}]}`, or `{"ok": false, "error"}` with
-    /// `"notComplete"` (VHD-07) or `"invalidName"` (VHD-08).
+    /// `{"ok": true, "files": [{"name", "contents"}], "board"}`, or `{"ok": false, "error"}`
+    /// with `"notComplete"` (VHD-07) or `"invalidName"` (VHD-08). `board` says whether the
+    /// DE2 files are among them (spec 10): `{"fits": true}`, or `{"fits": false, "reason":
+    /// "tooManyInputs", "bits", "max"}` / `{"fits": false, "reason": "tooWide", "width",
+    /// "max"}` (PLA-01).
     pub fn vhdl(&self, name: &str, language: &str) -> String {
         let language = if language == "en" {
             Language::En
@@ -707,7 +711,14 @@ impl Session {
                     .into_iter()
                     .map(|f| json!({"name": f.name, "contents": f.contents}))
                     .collect();
-                json!({"ok": true, "files": files})
+                let board = match board::fits(&netlist) {
+                    Ok(()) => json!({"fits": true}),
+                    Err(BoardLimit::TooManyInputs(bits)) => json!({"fits": false,
+                        "reason": "tooManyInputs", "bits": bits, "max": board::MAX_INPUT_BITS}),
+                    Err(BoardLimit::TooWide(width)) => json!({"fits": false,
+                        "reason": "tooWide", "width": width, "max": board::MAX_OUTPUT_WIDTH}),
+                };
+                json!({"ok": true, "files": files, "board": board})
             }
             Err(e) => json!({"ok": false, "error": match e {
                 VhdlError::NotComplete => "notComplete",
