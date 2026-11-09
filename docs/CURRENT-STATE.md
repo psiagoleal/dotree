@@ -161,7 +161,9 @@
       a nível). Achado: o Dadda do dotree gasta 3 HA a mais que a fig. 8.14 do livro no
       mesmo exemplo (AJU-05 manda HA onde o livro usa FA): decidir com o usuário.
 - [x] MT-30: CMP-16, tabela de alturas nível a nível com exportação em Markdown; R2
-      conferido à mão contra a spec 02.
+      conferido à mão contra a spec 02. No CI, o proptest do Wallace (MT-29) achou um
+      circuito completo sem CPA (`A*B + 5C*D + C`, 1 bit); o defeito era do auxiliar de
+      teste, que exigia o nível de CPA. Corrigido nos dois métodos, com o caso fixado.
 - [ ] Próximo: MT-38 (comparação de soluções, versão mínima). Antes, decidir o Dadda (achado do MT-29).
 
 ## Observações para a próxima sessão
