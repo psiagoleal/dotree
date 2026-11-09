@@ -81,10 +81,20 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   CMP-11.
   A solução é, por construção, seguir a Próxima jogada (AJU-04) desde o nível 0 até o
   fim: sugestão e solução nunca discordam.
+  **É o método clássico de Dadda** (HA quando falta reduzir só 1). A fig. 8.14 da
+  referência do curso (Parhami), com sete operandos de 6 bits, desenha uma variante: usa FA
+  também onde falta reduzir 1 e, no terceiro nível, até em colunas que já estão no alvo,
+  escolha que nenhuma regra coluna a coluna reproduz. O total de FA é o mesmo (33), mas a
+  figura usa 3 HA e o método clássico, 6 (34,5 contra 36 $A_{FA}$; 9,5 contra
+  10 $T_{FA}$). A variante "FA sempre que a coluna passa do alvo" iguala os totais da
+  figura, mas não os níveis 2 e 3; foi avaliada no MT-29b e não adotada: o app fica com o
+  algoritmo publicado, que é o que a próxima jogada ensina.
   *Prova:* teste do núcleo: para R1 e R4, a solução está correta (VER-01), cada nível
   respeita a altura-alvo, e o número de FA mais vai-uns descartados é pelo menos o limite
   inferior (AJU-06). Contagens calculadas à mão antes do código: R4 → 8 FA, 4 HA,
-  10 $A_{FA}$, 5,5 $T_{FA}$; R1 → 13 FA, 8 HA, 17 $A_{FA}$ (4 níveis e o CPA).
+  10 $A_{FA}$, 5,5 $T_{FA}$; R1 → 13 FA, 8 HA, 17 $A_{FA}$ (4 níveis e o CPA). Sete
+  operandos de 6 bits → 5 FA + 1 HA; 10 FA + 1 HA; 5 FA + 2 HA; 6 FA + 1 HA; CPA com
+  7 FA + 1 HA (teste de regressão do MT-29b).
 - **AJU-06** — O sistema DEVE calcular o limite inferior como (pontos da matriz inicial) −
   $W$ e explicá-lo na etapa 2: cada FA elimina 1 ponto, cada vai-um descartado elimina 1, e
   HA não elimina nenhum; como o circuito completo tem no máximo $W$ pontos, FA + vai-uns
