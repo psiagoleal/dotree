@@ -573,6 +573,21 @@ impl Session {
         (self.log.solution > 0).then(|| self.solution_session())
     }
 
+    /// Replaces the student's circuit with Dadda's solution as one undo step (AJU-09).
+    /// False, with nothing changed or counted, before step 2 of the solution was revealed
+    /// or when the circuit already is the solution.
+    #[wasm_bindgen(js_name = applySolution)]
+    pub fn apply_solution(&mut self) -> bool {
+        if self.log.solution_path == 0 {
+            return false;
+        }
+        let applied = self.reduction.adopt(&help::dadda_solution(&self.matrix));
+        if applied {
+            self.log.record(HelpStep::SolutionApplied);
+        }
+        applied
+    }
+
     // ------------------------------------------------------------ diagram (spec 05, MT-14a)
 
     /// Block diagram of the concluded levels (DIA-01 to DIA-03, DIA-05, DIA-07). Endpoints
@@ -707,7 +722,7 @@ impl Session {
         let l = &self.log;
         json!({"hints": l.hints, "nextMoves": l.next_moves, "lowerBound": l.lower_bound,
                "lowerBoundPath": l.lower_bound_path, "solution": l.solution,
-               "solutionPath": l.solution_path})
+               "solutionPath": l.solution_path, "solutionApplied": l.solution_applied})
         .to_string()
     }
 

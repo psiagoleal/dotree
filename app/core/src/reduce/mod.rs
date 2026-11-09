@@ -621,6 +621,25 @@ impl Reduction {
         out
     }
 
+    /// Takes over the current circuit of `other`, built from the same matrix, as one new
+    /// step of the history: undo gives this circuit back (AJU-09). False, and nothing
+    /// changes, when `other` starts from another matrix or already has this circuit.
+    pub fn adopt(&mut self, other: &Reduction) -> bool {
+        let same_matrix = self.output_width == other.output_width
+            && self.and_gates == other.and_gates
+            && self.input_signals == other.input_signals
+            && self.history[0] == other.history[0];
+        let theirs = other.state();
+        let same_circuit = self.state().levels == theirs.levels
+            && self.state().points == theirs.points
+            && self.state().pending == theirs.pending;
+        if !same_matrix || same_circuit {
+            return false;
+        }
+        self.commit(theirs.clone());
+        true
+    }
+
     pub fn can_undo(&self) -> bool {
         self.cursor > 0
     }

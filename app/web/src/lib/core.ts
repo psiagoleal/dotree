@@ -175,6 +175,8 @@ export interface HelpLog {
 	lowerBoundPath: number;
 	solution: number;
 	solutionPath: number;
+	/** Times the solution replaced the circuit (AJU-09). */
+	solutionApplied: number;
 }
 
 // ---------------------------------------------------------------- exercise file (MT-15a)
@@ -302,6 +304,9 @@ export interface CompressionSession {
 	lowerBound(path: boolean): LowerBound;
 	/** Dadda's solution from level 0, as a separate session; free it after use. */
 	solution(path: boolean): CompressionSession;
+	/** Replaces the circuit with the solution as one undo step (AJU-09); false before step 2
+	 *  of the solution, or when the circuit already is the solution. Counted when true. */
+	applySolution(): boolean;
 	helpLog(): HelpLog;
 	diagram(): Diagram;
 	wiringTable(): WiringRow[];
@@ -348,6 +353,7 @@ function wrap(s: Session): CompressionSession {
 		nextMove: () => JSON.parse(s.nextMove()),
 		lowerBound: (path) => JSON.parse(s.lowerBound(path)),
 		solution: (path) => wrap(s.solution(path)),
+		applySolution: () => s.applySolution(),
 		helpLog: () => JSON.parse(s.helpLog()),
 		diagram: () => JSON.parse(s.diagram()),
 		wiringTable: () => JSON.parse(s.wiringTable()),

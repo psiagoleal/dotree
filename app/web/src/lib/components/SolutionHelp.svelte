@@ -2,7 +2,8 @@
 <!-- Lower bound and automatic solution (spec 03): both depend only on the initial matrix and
      come in two steps, result first and path on a second request, each confirmed (GER-03).
      The solution is a separate session from the core; the student's circuit is untouched
-     (AJU-03). A reopened exercise shows what was already revealed, uncounted (SAL-02). -->
+     (AJU-03) until the student, having seen the levels, asks to use it (AJU-09). A reopened
+     exercise shows what was already revealed, uncounted (SAL-02). -->
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { CompressionSession, LowerBound, Snapshot } from '#lib/core.ts';
@@ -16,13 +17,24 @@
 	let {
 		session,
 		view,
-		onhelp
-	}: { session: CompressionSession; view: ViewMode; onhelp: () => void } = $props();
+		onhelp,
+		onapply,
+		readOnly = false
+	}: {
+		session: CompressionSession;
+		view: ViewMode;
+		onhelp: () => void;
+		/** The circuit was replaced by the solution (AJU-09). */
+		onapply: () => void;
+		/** Below 768 px (GER-10): the circuit cannot be changed from here either. */
+		readOnly?: boolean;
+	} = $props();
 
 	let boundDialog: ConfirmDialog;
 	let boundPathDialog: ConfirmDialog;
 	let solutionDialog: ConfirmDialog;
 	let solutionPathDialog: ConfirmDialog;
+	let applyDialog: ConfirmDialog;
 
 	// The parent re-creates this component for each session, so these are read once.
 	const shown = untrack(() => session.revealed());
@@ -76,6 +88,11 @@
 		onhelp();
 	}
 
+	async function apply() {
+		if (!(await applyDialog.ask())) return;
+		if (session.applySolution()) onapply();
+	}
+
 	function summary(s: Snapshot): string {
 		const cpa = s.levels.some((l) => l.cpa);
 		const args = {
@@ -102,6 +119,9 @@
 			<button type="button" class="secondary" onclick={askSolutionPath}>
 				{m.help_solution_path()}
 			</button>
+		{/if}
+		{#if solutionPath && !readOnly}
+			<button type="button" class="secondary" onclick={apply}>{m.help_use_solution()}</button>
 		{/if}
 	</div>
 
@@ -166,6 +186,12 @@
 	bind:this={solutionPathDialog}
 	title={m.confirm_solution_path_title()}
 	body={m.confirm_solution_path_body()}
+/>
+<ConfirmDialog
+	bind:this={applyDialog}
+	title={m.confirm_use_solution_title()}
+	body={m.confirm_use_solution_body()}
+	confirmLabel={m.confirm_use_solution_ok()}
 />
 
 <style>

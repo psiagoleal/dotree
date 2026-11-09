@@ -9,21 +9,37 @@
 
 ## Em aberto
 
-- [ ] [MT-17](plano.md#mt-17-publicar-a-v010) — Publicar a v0.1.0.
+Nenhum: a v0.1.0 foi publicada.
 
-## Depois da v0.1 (ordem aprovada pelo autor em 2026-11-05)
+## Até o projeto final da disciplina — v0.2 (aprovado em 2026-11-06)
 
-- [ ] [MT-20](plano-pos-v0.1.md#mt-20-aplicar-a-solução-de-dadda-ao-exercício-p5) — Aplicar a solução de Dadda ao exercício.
 - [ ] [MT-21](plano-pos-v0.1.md#mt-21-vhdl-comportamental-p4) — VHDL comportamental com `numeric_std`.
 - [ ] [MT-22](plano-pos-v0.1.md#mt-22-topo-para-a-de2-até-18-bits-e-projeto-do-quartus-p6-p8) — Topo DE2 até 18 bits e projeto do Quartus.
+- [ ] [MT-28](plano-pos-v0.1.md#mt-28-constante-aditiva-p9) — Constante aditiva (`+36`) como pontos fixos.
+- [ ] [MT-29](plano-pos-v0.1.md#mt-29-solução-de-wallace-p10) — Solução de Wallace ao lado da de Dadda.
+- [ ] [MT-30](plano-pos-v0.1.md#mt-30-tabela-de-alturas-nível-a-nível-p11) — Tabela de alturas nível a nível.
+- [ ] [MT-38](plano-pos-v0.1.md#mt-38-comparação-de-soluções-p20) — Comparação de soluções (versão mínima).
+- [ ] [MT-31](plano-pos-v0.1.md#mt-31-entrada-por-alturas-com-perfil-alvo-de-saída-p12) — Entrada por alturas com perfil-alvo de saída (se der tempo).
+
+## Depois do projeto final (ordem por dependências)
+
+- [ ] [MT-35](plano-pos-v0.1.md#mt-35-matriz-módulo-2n-1-e-2n1-p16) — Matriz módulo $2^n-1$ (início de 2027/1) e $2^n+1$.
+- [ ] [MT-32](plano-pos-v0.1.md#mt-32-célula-composta-p13) — Célula composta (ADR 0004): contadores, 4:2, AMM 2×2.
+- [ ] [MT-33](plano-pos-v0.1.md#mt-33-ponto-invertido-e-números-com-sinal-p14) — Ponto invertido: Baugh-Wooley e dígito −1.
+- [ ] [MT-34](plano-pos-v0.1.md#mt-34-booth-radix-2-e-radix-4-p15) — Booth radix-2 e radix-4.
+- [ ] [MT-36](plano-pos-v0.1.md#mt-36-escolha-do-cpa-final-p17) — Escolha do CPA final.
 - [ ] [MT-23](plano-pos-v0.1.md#mt-23-painel-de-operandos-em-palavras-p6) — Painel de operandos em palavras na DE2.
 - [ ] [MT-24](plano-pos-v0.1.md#mt-24-aritmética-larga-no-núcleo-p1-parte-1) — Aritmética larga no núcleo.
 - [ ] [MT-25](plano-pos-v0.1.md#mt-25-limites-de-64-bits-e-matriz-navegável-p1-parte-2) — 64 bits por variável e matriz navegável.
 - [ ] [MT-26](plano-pos-v0.1.md#mt-26-fatias-de-variáveis-p2) — Fatias de variáveis (`A[63:32]`).
 - [ ] [MT-27](plano-pos-v0.1.md#mt-27-blocos-hierárquicos-p3) — Blocos hierárquicos (subprodutos como multiplicadores).
+- [ ] [MT-37](plano-pos-v0.1.md#mt-37-variável-derivada-e-constante-grande-p18) — Variável derivada e constante grande.
+- [ ] [MT-39](plano-pos-v0.1.md#mt-39-multiplicação-por-constantes-mcm-p21) — Multiplicação por constantes (Hcub, reimplementado a partir do artigo).
 
 ## Concluídos
 
+- [x] [MT-20](plano-pos-v0.1.md#mt-20-aplicar-a-solução-de-dadda-ao-exercício-p5) — "Usar esta solução": troca o circuito pela de Dadda num passo de desfazer, contada como ajuda.
+- [x] [MT-17](plano.md#mt-17-publicar-a-v010) — v0.1.0 publicada: release, imagem pública no GHCR e site no ar.
 - [x] [MT-19](plano-pos-v0.1.md#mt-19-vhdl-compatível-com-o-fpgaemuweb-p7) — VHDL com `end <nome>;` e um arquivo por componente, lido pelo FPGAEmuWeb (antecipado para a v0.1).
 - [x] [MT-16](plano.md#mt-16-acessibilidade-desempenho-e-tela-pequena) — Acessibilidade (axe sem violação grave), sem rede após carregar, 100 ms no p95, só a própria origem, modo leitura abaixo de 768 px.
 - [x] [MT-15b](plano.md#mt-15b-salvamento-automático-e-retomada) — Salvamento automático, retomada, armazenamento indisponível e estado corrompido.

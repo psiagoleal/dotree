@@ -59,7 +59,8 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   renderizado; pede, confere que o foco está em "vou tentar mais um pouco", cancela e
   confere de novo; por fim confirma e confere que aparece.
 - **AJU-03** — O sistema DEVE mostrar a Solução automática num painel separado, calculada a
-  partir da matriz inicial (nível 0), sem alterar o circuito do usuário.
+  partir da matriz inicial (nível 0), sem alterar o circuito do usuário enquanto ele não
+  pedir para usá-la (AJU-09).
   *Prova:* teste de ponta a ponta (o estado do usuário é o mesmo antes e depois).
 - **AJU-04** — QUANDO o usuário aceitar a Próxima jogada, o sistema DEVE destacar os pontos
   da primeira célula que o método de Dadda formaria **a partir do estado atual do usuário**,
@@ -96,7 +97,22 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   níveis); testes do núcleo para R1 no nível 0, R2 com o CPA disponível e circuito
   completo.
 
+- **AJU-09** — QUANDO o usuário já tiver visto a solução nível a nível (etapa 2 de AJU-03)
+  e pedir "Usar esta solução", o sistema DEVE perguntar antes e, confirmado, substituir o
+  circuito do usuário pela solução de Dadda inteira **num só passo de desfazer**: Desfazer
+  devolve o circuito anterior, e Refazer aplica de novo. Cada aplicação conta no registro
+  de ajudas (AJU-07) e vai para o arquivo do exercício (SAL-02). Antes da etapa 2 não há
+  botão, e o núcleo recusa o pedido; se o circuito já for igual à solução, nada muda nem é
+  contado; no modo leitura (GER-10) o botão não aparece. Aplicar **substitui**, não corrige:
+  nada do circuito do usuário é aproveitado.
+  *Prova:* teste do núcleo (um passo de desfazer, refazer, recusa com outra matriz, circuito
+  já igual); teste da ponte (recusa antes da etapa 2, contagem); teste do núcleo do arquivo
+  (campo novo opcional; aplicação sem etapa 2 é revelação inconsistente); teste de ponta a
+  ponta: R1 → etapa 2 → usar → "0 erros" na verificação e VHDL disponível; desfazer devolve
+  o circuito do usuário; o resumo registra a aplicação.
+
 ## Fora de escopo
 
-Solução de Wallace (v0.2); busca da solução de menor atraso ou menor área; correção
-automática do circuito do usuário; ajuda por IA; "não perguntar de novo" (D-5).
+Solução de Wallace (v0.2, MT-29); busca da solução de menor atraso ou menor área; correção
+automática do circuito do usuário (AJU-09 substitui o circuito inteiro, não o corrige);
+ajuda por IA; "não perguntar de novo" (D-5).

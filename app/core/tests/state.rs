@@ -297,3 +297,38 @@ fn sal03_impossible_reveals_are_refused() {
     v["help"]["solutionPath"] = 2.into();
     assert_eq!(open(&v), Err(StateError::InconsistentReveals));
 }
+
+// ------------------------------------------------------- AJU-09: the applied solution
+
+#[test]
+fn aju09_files_without_the_applied_count_still_open() {
+    let mut help = HelpLog::default();
+    help.record(HelpStep::Solution);
+    let mut v: Value = serde_json::from_str(&capture(&r2(), None, help).to_json()).unwrap();
+    assert_eq!(v["help"]["solutionApplied"], 0);
+    v["help"].as_object_mut().unwrap().remove("solutionApplied");
+    let back = Exercise::parse(&v.to_string()).expect("a schema-1 file from v0.1 opens");
+    assert_eq!(back.help.solution_applied, 0);
+}
+
+#[test]
+fn aju09_the_applied_count_round_trips() {
+    let mut help = HelpLog::default();
+    for step in [
+        HelpStep::Solution,
+        HelpStep::SolutionPath,
+        HelpStep::SolutionApplied,
+    ] {
+        help.record(step);
+    }
+    let (back, _) = round_trip(&capture(&r2(), None, help));
+    assert_eq!(back.help.solution_applied, 1);
+}
+
+#[test]
+fn aju09_applying_without_seeing_the_path_is_inconsistent() {
+    let mut v = r2_file();
+    v["help"]["solution"] = 1.into();
+    v["help"]["solutionApplied"] = 1.into();
+    assert_eq!(open(&v), Err(StateError::InconsistentReveals));
+}

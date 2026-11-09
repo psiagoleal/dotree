@@ -314,7 +314,16 @@
 				/>
 			{/key}
 		{/if}
-		<SolutionHelp {session} {view} onhelp={() => (helps = session.helpLog())} />
+		<SolutionHelp
+			{session}
+			{view}
+			readOnly={narrow}
+			onhelp={() => (helps = session.helpLog())}
+			onapply={() => {
+				helps = session.helpLog();
+				refresh(m.solution_applied());
+			}}
+		/>
 	</section>
 
 	<CircuitView {session} {snap} {top} critical={showCritical} />

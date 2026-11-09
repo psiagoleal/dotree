@@ -65,7 +65,8 @@ describe('helpLogItems (AJU-07)', () => {
 		lowerBound: 0,
 		lowerBoundPath: 0,
 		solution: 0,
-		solutionPath: 0
+		solutionPath: 0,
+		solutionApplied: 0
 	};
 
 	it('is empty when no help was used', () => {
@@ -81,5 +82,14 @@ describe('helpLogItems (AJU-07)', () => {
 			'próximas jogadas: 3',
 			'solução automática: 1 (nível a nível: 0)'
 		]);
+	});
+
+	it('says how many times the solution replaced the circuit (AJU-09)', () => {
+		expect(
+			helpLogItems({ ...none, solution: 1, solutionPath: 1, solutionApplied: 1 }, 'pt-br')
+		).toEqual(['solução automática: 1 (nível a nível: 1)', 'solução aplicada: 1 vez']);
+		expect(
+			helpLogItems({ ...none, solution: 1, solutionPath: 1, solutionApplied: 2 }, 'en')
+		).toEqual(['automatic solution: 1 (level by level: 1)', 'solution applied: 2 times']);
 	});
 });

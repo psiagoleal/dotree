@@ -112,6 +112,7 @@
 	"formed_cell": "{kind} formado.",
 	"level_concluded": "Nível {level} concluído.",
 	"undone": "Desfeito.",
+	"solution_applied": "Solução aplicada. Desfazer traz o seu circuito de volta.",
 	"redone": "Refeito.",
 	"metrics_title": "Circuito até agora",
 	"metric_area": "Área",
@@ -159,6 +160,7 @@
 	"help_lower_bound_path": "Ver a conta do limite",
 	"help_solution": "Solução automática",
 	"help_solution_path": "Ver a solução nível a nível",
+	"help_use_solution": "Usar esta solução",
 	"confirm_hint_title": "Ver uma dica?",
 	"confirm_hint_body": "A dica fala do nível atual, sem dizer quais pontos escolher.",
 	"confirm_next_move_title": "Ver a próxima jogada?",
@@ -171,6 +173,9 @@
 	"confirm_solution_body": "Primeiro, só as métricas finais; os níveis ficam para um segundo pedido. O seu circuito não muda.",
 	"confirm_solution_path_title": "Ver a solução nível a nível?",
 	"confirm_solution_path_body": "Antes, compare as métricas da solução com as do seu circuito.",
+	"confirm_use_solution_title": "Trocar o seu circuito pela solução?",
+	"confirm_use_solution_body": "O circuito que você montou dá lugar à solução de Dadda inteira. Desfazer (Ctrl+Z) traz o seu circuito de volta.",
+	"confirm_use_solution_ok": "Substituir",
 	"hint_min_levels_left": [
 		{
 			"declarations": ["input height", "input levels"],
@@ -221,6 +226,16 @@
 	"help_log_next_moves": "próximas jogadas: {count}",
 	"help_log_lower_bound": "limite inferior: {result} (conta: {path})",
 	"help_log_solution": "solução automática: {result} (nível a nível: {path})",
+	"help_log_solution_applied": [
+		{
+			"declarations": ["input count"],
+			"selectors": ["count"],
+			"match": {
+				"count=1": "solução aplicada: {count} vez",
+				"count=*": "solução aplicada: {count} vezes"
+			}
+		}
+	],
 	"circuit_title": "Circuito",
 	"diagram_title": "Diagrama de blocos",
 	"diagram_inputs": "Entradas e portas AND ({count})",

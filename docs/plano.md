@@ -320,7 +320,7 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
   versão.
 - **Fora de escopo:** Wallace, CSV, link compartilhável (v0.2).
 - **Depende de:** MT-16
-- **Em andamento (2026-11-05):** versões em 0.1.0 e conferidas por
-  `app/core/tests/release.rs`; o e2e de ENT-03 confere a versão exata na página; CHANGELOG
-  fechado; ModelSim conferido em 2026-11-06. Faltam a *tag* e a conferência da release e do
-  GHCR.
+- **Feito (2026-11-06):** versões em 0.1.0, conferidas por `app/core/tests/release.rs`; o
+  e2e de ENT-03 confere a versão exata na página; ModelSim ASE 10.1d conferido. *Tag*
+  `v0.1.0`: workflow Release verde, release com a seção do CHANGELOG, imagem
+  `ghcr.io/psiagoleal/dotree:0.1.0` lida sem login (ENT-05), site no ar.

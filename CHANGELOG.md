@@ -8,6 +8,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+### Adicionado
+- "Usar esta solução": depois de ver a solução de Dadda nível a nível, o aluno pode trocar
+  o próprio circuito por ela, com confirmação. A troca é um só passo de desfazer, conta no
+  registro de ajudas do resumo e vai para o arquivo do exercício (`help.solutionApplied`,
+  opcional, esquema 1 mantido). Não aparece no modo leitura (AJU-09, MT-20).
+
 ## [0.1.0] - 2026-11-05
 
 Primeira versão de uso: da expressão à matriz de pontos, compressão feita pelo aluno com
