@@ -168,7 +168,11 @@
   independentes do MT-14a e do MT-14b ficaram sem ele. Conferir endereço e porta no
   ambiente antes de tentar de novo.
 - O e2e de VER-04 cancela por volta de 0,7 s uma verificação de ~1,4 s; se ficar instável
-  numa máquina mais rápida, é o primeiro suspeito.
+  numa máquina mais rápida, é o primeiro suspeito. Em 2026-11-09 (PR do MT-21) falhou uma
+  vez no CI sem a barra de progresso aparecer, com o runner tão rápido quanto esta máquina
+  (GER-06: 11,4 ms nos dois) e sem reproduzir aqui (8 de 8, e a suíte com 2 workers). O
+  teste agora diz, na falha, o texto de `verify-result` e os erros da página, e o CI guarda
+  `test-results` com captura de tela: se voltar, a causa vem no artefato.
 - SvelteKit 3 não tem `$lib`: use `#lib/...` com extensão.
 - A porta 4173 costuma estar ocupada nesta máquina; o e2e usa 4180 (`E2E_PORT`).
 - Os testes de propriedade não gravam `*.proptest-regressions` (`failure_persistence: None`):

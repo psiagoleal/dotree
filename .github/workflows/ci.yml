@@ -70,12 +70,16 @@ jobs:
       - run: pnpm run test:e2e
         env:
           BASE_PATH: /dotree
+      # No CI o reporter é `github`, que não gera `playwright-report`: o que explica a falha
+      # (página no momento do erro e captura de tela) fica em `test-results`.
       - name: Relatório do Playwright em caso de falha
         if: failure()
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report
-          path: app/web/playwright-report
+          path: |
+            app/web/test-results
+            app/web/playwright-report
           retention-days: 7
       - name: Artefato para o GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

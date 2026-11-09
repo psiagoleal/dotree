@@ -26,6 +26,11 @@ test('a long verification shows progress, keeps the page alive and can be cancel
 	page
 }) => {
 	// 24 input bits: 2^24 cases, the longest run of spec 04, closed straight with the CPA.
+	const problems: string[] = [];
+	page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
+	page.on('console', (msg) => {
+		if (msg.type() === 'error') problems.push(`console: ${msg.text()}`);
+	});
 	await page.goto('./');
 	await page.getByLabel('Expressão').fill('A + B');
 	for (const v of ['A', 'B']) await page.locator(`input[name="width-${v}"]`).fill('12');
@@ -34,7 +39,17 @@ test('a long verification shows progress, keeps the page alive and can be cancel
 
 	await page.getByRole('button', { name: 'Verificar circuito' }).click();
 	const bar = page.getByRole('progressbar');
-	await expect(bar).toBeVisible();
+	// The bar shows only after 500 ms of running. If it never does, say what the page
+	// showed instead: a run that ended or failed early, or errors from the page.
+	try {
+		await expect(bar).toBeVisible();
+	} catch (e) {
+		const result = await page.getByTestId('verify-result').textContent();
+		throw new Error(
+			`${e}\nverify-result: ${JSON.stringify(result)}\n${problems.join('\n') || 'no page errors'}`,
+			{ cause: e }
+		);
+	}
 	await expect(page.getByText(/^Verificando: [\d.]+ de 16\.777\.216 casos$/)).toBeVisible();
 	// The bar keeps moving: the page handles the worker's messages while it runs.
 	const first = Number(await bar.getAttribute('value'));
