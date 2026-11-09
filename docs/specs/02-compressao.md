@@ -134,6 +134,27 @@ uma nota abaixo dos painéis oferece "Por quê?" (CMP-09).
   *Prova de CMP-13 a CMP-15:* R2 → 13 FA, 4 HA, 13 AND, 15 $A_{FA}$, 6 $T_{FA}$; células
   críticas 1, 2, 4, 6, 8, 9 e 12 a 17, obtidas à mão das prontidões do caso de referência.
 
+- **CMP-16** — O sistema DEVE mostrar a **tabela de alturas**: uma linha por nível
+  concluído, com a altura de cada coluna ($2^{W-1}$ à esquerda, como nos painéis) e
+  quantos FA e HA foram formados sobre ele; uma linha para o nível atual, com as células já
+  formadas nele; e, com o circuito completo, a linha do resultado no lugar da do nível
+  atual. O sistema DEVE exportá-la em Markdown a qualquer momento, porque ela só mostra o
+  circuito do próprio usuário. É a forma tabular da referência do curso (Parhami,
+  *Computer Arithmetic*, fig. 8.11).
+  *Prova:* teste do núcleo que compara a exportação de R2 completo com a tabela abaixo;
+  testes do núcleo do nível atual (células pendentes contadas; linha "atual" sem células);
+  teste de componente; teste de ponta a ponta do arquivo baixado.
+
+Tabela de alturas de R2 (MT-30), calculada à mão das células de R2 (spec 00):
+
+| Nível | $2^6$ | $2^5$ | $2^4$ | $2^3$ | $2^2$ | $2^1$ | $2^0$ | FA | HA |
+|---|---|---|---|---|---|---|---|---|---|
+| 0 | 0 | 0 | 1 | 2 | 5 | 7 | 5 | 2 | 1 |
+| 1 | 0 | 0 | 1 | 3 | 6 | 3 | 5 | 4 | 0 |
+| 2 | 0 | 0 | 2 | 3 | 3 | 1 | 5 | 3 | 1 |
+| 3 (CPA) | 0 | 1 | 2 | 2 | 1 | 2 | 3 | 4 | 2 |
+| Resultado | 1 | 1 | 1 | 1 | 1 | 1 | 1 | — | — |
+
 ## Fora de escopo
 
 Escolher manualmente a coluna da soma ou do vai-um ("modo de ligação manual", candidato à

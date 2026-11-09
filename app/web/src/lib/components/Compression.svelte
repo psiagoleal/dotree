@@ -20,6 +20,7 @@
 	import { helpLogItems } from '#lib/help.ts';
 	import type { ViewMode } from '#lib/view.ts';
 	import CircuitView from './CircuitView.svelte';
+	import HeightTable from './HeightTable.svelte';
 	import Coach from './Coach.svelte';
 	import ConfirmDialog from './ConfirmDialog.svelte';
 	import LevelPanel from './LevelPanel.svelte';
@@ -332,6 +333,7 @@
 		/>
 	</section>
 
+	<HeightTable {session} {snap} />
 	<CircuitView {session} {snap} {top} critical={showCritical} />
 	<!-- A changed circuit drops the verification result and stops a running one. -->
 	{#key snap}

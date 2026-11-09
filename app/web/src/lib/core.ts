@@ -273,6 +273,22 @@ export interface WiringRow {
 	carryResult: number | null;
 }
 
+/** One row of the height table (CMP-16): `heights[j]` is the height of column 2^j. */
+export interface HeightRow {
+	level: number;
+	kind: 'level' | 'cpa' | 'current' | 'result';
+	heights: number[];
+	fa: number;
+	ha: number;
+}
+
+/** Words of the height table's Markdown, in the interface's language. */
+export interface HeightHeaders {
+	level: string;
+	current: string;
+	result: string;
+}
+
 export interface TableHeaders {
 	cell: string;
 	level: string;
@@ -340,6 +356,9 @@ export interface CompressionSession {
 	diagram(): Diagram;
 	wiringTable(): WiringRow[];
 	wiringTableMarkdown(headers: TableHeaders): string;
+	/** Heights of every level so far, then the current level or the result (CMP-16). */
+	heightTable(): HeightRow[];
+	heightTableMarkdown(headers: HeightHeaders): string;
 	/** The complete circuit for the verification worker, or null while incomplete. */
 	netlist(): string | null;
 	vhdl(name: string, language: VhdlLanguage): VhdlResult;
@@ -387,6 +406,8 @@ function wrap(s: Session): CompressionSession {
 		diagram: () => JSON.parse(s.diagram()),
 		wiringTable: () => JSON.parse(s.wiringTable()),
 		wiringTableMarkdown: (headers) => s.wiringTableMarkdown(JSON.stringify(headers)),
+		heightTable: () => JSON.parse(s.heightTable()),
+		heightTableMarkdown: (headers) => s.heightTableMarkdown(JSON.stringify(headers)),
 		netlist: () => s.netlist() ?? null,
 		vhdl: (name, language) => JSON.parse(s.vhdl(name, language)),
 		exercise: () => s.exercise(),

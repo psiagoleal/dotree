@@ -86,3 +86,38 @@ fn wiring_markdown_uses_the_given_headers() {
         )
     );
 }
+
+// ------------------------------------------------- CMP-16: height table (MT-30)
+
+#[test]
+fn height_rows_go_from_level_0_to_the_result() {
+    let rows = parse(r2().height_table());
+    let rows = rows.as_array().unwrap();
+    assert_eq!(rows.len(), 5);
+    assert_eq!(
+        rows[0],
+        json!({"level": 0, "kind": "level", "heights": [5, 7, 5, 2, 1, 0, 0], "fa": 2, "ha": 1})
+    );
+    assert_eq!(rows[3]["kind"], "cpa");
+    assert_eq!(
+        rows[4],
+        json!({"level": 4, "kind": "result", "heights": [1, 1, 1, 1, 1, 1, 1], "fa": 0, "ha": 0})
+    );
+    assert_eq!(parse(r1().height_table())[0]["kind"], "current");
+}
+
+#[test]
+fn height_markdown_uses_the_given_headers() {
+    let headers = r#"{"level": "Level", "current": "current", "result": "Result"}"#;
+    let md = r1().height_table_markdown(headers);
+    assert_eq!(
+        md,
+        "| Level | $2^6$ | $2^5$ | $2^4$ | $2^3$ | $2^2$ | $2^1$ | $2^0$ | FA | HA |\n\
+         |---|---|---|---|---|---|---|---|---|---|\n\
+         | 0 (current) | 0 | 0 | 1 | 2 | 5 | 7 | 5 | 0 | 0 |\n"
+    );
+    assert!(
+        r2().height_table_markdown(headers)
+            .ends_with("| Result | 1 | 1 | 1 | 1 | 1 | 1 | 1 | — | — |\n")
+    );
+}

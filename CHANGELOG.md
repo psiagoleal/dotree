@@ -9,6 +9,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Tabela de alturas: a altura de cada coluna em cada nível, com os FA e HA formados sobre
+  ele, o nível atual e, no fim, o resultado; sempre visível e exportável em Markdown
+  (`dotree-alturas.md`), na forma tabular da referência do curso (CMP-16, MT-30).
 - Solução de Wallace ao lado da de Dadda, com o mesmo fluxo: métricas, depois os níveis
   com a regra do método numa frase, e "Usar a solução de Wallace". A regra é a da
   referência do curso (Parhami, fig. 8.10): todos os FA que cabem em cada coluna, HA só
@@ -36,6 +39,8 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   resultado de cada uma; o CI e o ModelSim ASE 10.1d simulam as duas (VHD-10, MT-21).
 
 ### Alterado
+- "Baixar tabela (Markdown)" virou "Baixar tabela de ligações (Markdown)", para não se
+  confundir com a tabela de alturas.
 - O botão "Solução automática" virou "Solução de Dadda", e os textos da solução (etapa 2,
   usar, registro de ajudas, aviso de aplicação) passaram a nomear o método.
 - O código de erro `constantTerm` deu lugar a `noVariables` (expressão sem variável).

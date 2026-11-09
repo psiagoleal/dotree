@@ -86,6 +86,12 @@ ou métrica fica em segundo plano.
   Wallace" (o botão da etapa 2 aparece só depois da etapa 1, por método). Cada solução nível
   a nível fica num quadro tracejado próprio, à parte do circuito do aluno, com a regra do
   método numa frase acima dos níveis. O resumo do circuito completo lista as ajudas usadas.
+- **Tabela de alturas** (MT-30): seção logo antes de "Circuito", sempre visível desde o
+  nível 0. Uma linha por nível ($2^{W-1}$ à esquerda, como nos painéis), com FA e HA
+  formados sobre ele; o nível atual em negrito; com o circuito completo, a linha
+  "Resultado". "Baixar tabela de alturas (Markdown)" sempre habilitado, porque a tabela só
+  mostra o circuito do próprio aluno. O botão da tabela de ligações passou a se chamar
+  "Baixar tabela de ligações (Markdown)".
 - **Circuito** (MT-14a): seção "Circuito" ao fim da compressão. Diagrama em SVG com o bloco
   "Entradas e portas AND (n)" no topo (expansível em portas, cada uma com o desenho de AND),
   os pesos $2^j$, uma linha de blocos por nível e os bits $R_j$ em roxo embaixo. Cada

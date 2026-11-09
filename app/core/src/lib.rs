@@ -8,6 +8,7 @@
 pub mod board;
 pub mod diagram;
 pub mod expr;
+pub mod heights;
 pub mod help;
 pub mod matrix;
 pub mod netlist;

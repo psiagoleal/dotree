@@ -19,7 +19,7 @@ async function show(session: CompressionSession, critical = false) {
 
 const blocks = (c: HTMLElement) => c.querySelectorAll('svg g.block');
 const svgButton = () => page.getByRole('button', { name: 'Baixar diagrama (SVG)' });
-const mdButton = () => page.getByRole('button', { name: 'Baixar tabela (Markdown)' });
+const mdButton = () => page.getByRole('button', { name: 'Baixar tabela de ligações (Markdown)' });
 
 describe('CircuitView (DIA-01, DIA-02, DIA-04, DIA-05, DIA-07)', () => {
 	it('before any concluded level there is no diagram yet (DIA-01)', async () => {

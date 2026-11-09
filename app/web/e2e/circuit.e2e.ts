@@ -7,6 +7,18 @@ import { r2ByMouse } from './r2';
 test.use({ locale: 'pt-BR' });
 
 /** The reference table of spec 05, the same text the core test reads. */
+/** The Markdown table of a spec that starts with `head`. */
+function specTable(file: string, head: string): string {
+	const spec = readFileSync(new URL(`../../../docs/specs/${file}`, import.meta.url), 'utf8');
+	const lines = spec.slice(spec.indexOf(head)).split('\n');
+	return lines
+		.slice(
+			0,
+			lines.findIndex((l) => !l.startsWith('|'))
+		)
+		.join('\n');
+}
+
 function referenceTable(): string {
 	const spec = readFileSync(new URL('../../../docs/specs/05-diagrama.md', import.meta.url), 'utf8');
 	const start = spec.indexOf('| Célula | Nível |');
@@ -64,9 +76,18 @@ test('R2: the diagram and the wiring table download as SVG and Markdown (DIA-02,
 	// DIA-06: the Markdown table is the reference table of spec 05, character for character.
 	const [mdFile] = await Promise.all([
 		page.waitForEvent('download'),
-		page.getByRole('button', { name: 'Baixar tabela (Markdown)' }).click()
+		page.getByRole('button', { name: 'Baixar tabela de ligações (Markdown)' }).click()
 	]);
 	expect(mdFile.suggestedFilename()).toBe('dotree-ligacoes.md');
 	const md = readFileSync((await mdFile.path())!, 'utf8');
 	expect(md.trim()).toBe(referenceTable().trim());
+
+	// CMP-16: the height table is the one of spec 02, character for character.
+	const [heightsFile] = await Promise.all([
+		page.waitForEvent('download'),
+		page.getByRole('button', { name: 'Baixar tabela de alturas (Markdown)' }).click()
+	]);
+	expect(heightsFile.suggestedFilename()).toBe('dotree-alturas.md');
+	const heights = readFileSync((await heightsFile.path())!, 'utf8');
+	expect(heights.trim()).toBe(specTable('02-compressao.md', '| Nível | $2^6$').trim());
 });
