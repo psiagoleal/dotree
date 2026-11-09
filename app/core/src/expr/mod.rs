@@ -17,7 +17,8 @@ pub const MAX_WIDTH: u32 = 16;
 pub const MAX_INPUT_BITS: u32 = 32;
 
 /// A product of distinct variables times a positive integer coefficient.
-/// `vars` is sorted and has no repetitions; it is never empty.
+/// `vars` is sorted and has no repetitions; it is empty for the additive constant (EXP-15),
+/// which the parser keeps as a single term.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Monomial {
     pub coefficient: u64,
@@ -37,7 +38,7 @@ impl fmt::Display for Polynomial {
             if i > 0 {
                 f.write_str(" + ")?;
             }
-            if term.coefficient != 1 {
+            if term.coefficient != 1 || term.vars.is_empty() {
                 write!(f, "{}", term.coefficient)?;
             }
             for v in &term.vars {
@@ -101,8 +102,8 @@ pub enum ExprError {
     RepeatedVariable {
         var: char,
     },
-    /// An additive constant such as `A + 5` (out of scope in v0.1, EXP-13).
-    ConstantTerm,
+    /// No variable at all, such as `2` or `3 + 5` (EXP-13).
+    NoVariables,
     /// A coefficient that does not fit in 64 bits after expansion.
     CoefficientTooLarge,
     /// The widths of the variables in use add up to more than `MAX_INPUT_BITS` (EXP-08).

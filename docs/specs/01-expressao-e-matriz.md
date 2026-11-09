@@ -18,6 +18,7 @@ os pontos pelas variáveis indexadas que eles representam ($a_1 b_0$).
 | Soma | `+` | `A + B` |
 | Produto | `*`, `×`, `·` ou justaposição | `A*B`, `A×B`, `AB`, `3(E+F)` |
 | Coeficiente | inteiro decimal de 1 a 4 294 967 295; por justaposição só **antes** de variável ou parêntese (`A2` é erro; `A*2` vale) | `3(E+F)`, `2A` |
+| Constante | inteiro somado, solto ou dentro de parênteses; as constantes se juntam num termo só (EXP-15) | `A + 36`, `3(A + 1)` = `3A + 3` |
 | Parênteses | agrupam e se distribuem, inclusive produto de somas | `(A+B)(C+D)` = `AC + AD + BC + BD` |
 | Espaços | ignorados | `3 (E + F)` = `3(E+F)` |
 
@@ -40,6 +41,10 @@ Variáveis de uma letra tornam a justaposição inequívoca (`AB` só pode ser $
    - As cópias de um mesmo monômio carregam **os mesmos sinais**: em $3E$, o ponto de $e_0$
      na coluna $2^0$ e o da coluna $2^1$ são o mesmo fio (*fan-out*), e nenhuma porta é
      duplicada.
+   - Com $n = 0$ (a constante), cada bit 1 gera um **ponto fixo em 1** (sinal `one`), sem
+     porta: $36 = 32 + 4$ dá um ponto na coluna $2^2$ e outro na $2^5$. O ponto fixo entra
+     na compressão como qualquer outro, e o app não simplifica a célula que o recebe
+     (um FA com uma entrada em 1 continua um FA).
 5. **Ordem de geração.** Os pontos são gerados, e numerados, nesta ordem: termo (na ordem da
    expressão combinada), depois cópia (deslocamento crescente), depois combinação de bits em
    ordem lexicográfica, com a **primeira** variável do monômio variando mais devagar
@@ -141,13 +146,22 @@ consumiram.
 - **EXP-11** — ONDE houver largura informada para uma variável que a expressão não usa, o
   sistema DEVE ignorá-la e avisar.
   *Prova:* teste do núcleo (aviso `UnusedWidth`) e teste de componente (o aviso aparece).
-- **EXP-13** — SE a expressão expandida tiver um termo constante (`A + 5`, `3(A + 1)`, `2`),
-  ENTÃO o sistema DEVE recusá-la: constantes aditivas estão fora da v0.1.
+- **EXP-13** — SE a expressão expandida não tiver nenhuma variável (`2`, `3 + 5`), ENTÃO o
+  sistema DEVE recusá-la: não há circuito a montar. (Até a v0.1, toda constante era
+  recusada; a v0.2 aceita a constante somada a variáveis, EXP-15.)
   *Prova:* teste do núcleo.
 - **EXP-14** — SE um coeficiente literal passar de 4 294 967 295, ou um coeficiente expandido
   não couber em 64 bits, ENTÃO o sistema DEVE recusar a expressão com o código do erro, sem
   travar.
   *Prova:* teste do núcleo (`99999999999A` e o produto de três coeficientes máximos).
+
+- **EXP-15** — QUANDO a expressão tiver termos constantes, o sistema DEVE juntá-los num
+  termo só, na posição do primeiro, com cor própria como qualquer termo (COR-01), e gerar
+  um ponto fixo em 1 para cada bit 1 desse termo; a constante entra em $v_{max}$ e,
+  portanto, em $W$.
+  *Prova:* teste do núcleo: `A + 5 + 2` → $A + 7$, com pontos fixos nas colunas 0, 1 e 2;
+  `3(A + 1)` → $3A + 3$; `A + 1` com $A$ de 2 bits dá $v_{max} = 4$ e $W = 3$; e a
+  verificação exaustiva de um circuito com constante dá 0 erros.
 
 ## Exemplos embutidos
 
@@ -157,4 +171,4 @@ consumiram.
 
 ## Fora de escopo
 
-Variáveis com mais de uma letra, expoentes (`A^2`), divisão, constantes aditivas, sinal.
+Variáveis com mais de uma letra, expoentes (`A^2`), divisão, sinal, constante subtraída.

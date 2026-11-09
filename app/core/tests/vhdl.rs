@@ -502,3 +502,23 @@ fn vhd04_the_testbench_checks_both_architectures() {
         assert!(tb.contains(structural) && tb.contains(beh), "{tb}");
     }
 }
+
+// ---------------------------------------------------------------- EXP-15 in VHDL (MT-28)
+
+#[test]
+fn exp15_the_fixed_dot_is_one_in_vhdl() {
+    let (m, _) = build("3(A + 1) + B", &[('A', 2), ('B', 2)]);
+    let r = dotree_core::help::dadda_solution(&m);
+    let n = Netlist::from_reduction(&m, &r).unwrap();
+    let fs = files(&m, &n, Language::PtBr);
+    assert!(top(&fs).contains("    signal one : std_logic;"));
+    assert!(top(&fs).contains("    one <= '1';"));
+    assert!(
+        top(&fs).contains("R = 3A + 3 + B"),
+        "the header keeps the constant"
+    );
+    let b = file(&fs, "dotree_circuito_comportamental.vhd");
+    assert!(b.contains("+ to_unsigned(3, W)\n"), "{b}");
+    let tb = file(&fs, "tb_dotree_circuito.vhd");
+    assert!(tb.contains("term := \"0011\";\n            expected := expected + term;"));
+}

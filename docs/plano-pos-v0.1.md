@@ -252,6 +252,12 @@ flowchart LR
   `app/web/src/**`, specs 00, 01, 05 e 06
 - **Critério de aceite:** testes do núcleo; e2e com o lab do cap. 8 (44 pontos e a
   constante, $W$ = 13); GHDL verde com a constante.
+- **Feito (2026-11-09):** EXP-13 refeito (só recusa expressão sem variável) e EXP-15 novo.
+  O sinal sem fatores, que a matriz já gerava como AND vazio, ganhou o nome `one`, `'1'` no
+  VHDL e o rótulo 1 na tela. O e2e usa uma expressão própria, `3(A + 1) + B` (os exemplos
+  do projeto não reproduzem enunciados de terceiros); o lab do cap. 8 foi conferido só
+  localmente: 46 pontos (44 + 2 fixos) e $W = 14$ com $A$ a $D$ de 4 bits ($v_{max} =
+  11916$), não 13 como anotado acima.
 
 ### MT-29: Solução de Wallace (P10)
 - **Objetivo:** `help::wallace_solution` (em cada nível, o máximo de FA e depois HA), com o

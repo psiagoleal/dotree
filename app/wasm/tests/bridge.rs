@@ -90,8 +90,8 @@ fn warnings_and_errors_are_codes() {
         json!({"code": "repeatedVariable", "var": "A"})
     );
     assert_eq!(
-        call("A + 5", json!({"A": 1}))["error"],
-        json!({"code": "constantTerm"})
+        call("2 + 3", json!({}))["error"],
+        json!({"code": "noVariables"})
     );
     assert_eq!(
         call("A*B + C", json!({"A": 16, "B": 16, "C": 1}))["error"],

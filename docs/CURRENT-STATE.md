@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-09
-- **Commit:** `afa4bbd` (MT-21, #38). O MT-22 ainda não foi commitado.
+- **Commit:** `15a1b9b` (MT-22, #39). O MT-28 ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -149,7 +149,10 @@
 - [x] MT-22: spec 10 (placa DE2). Topo `<nome>_de2`, testbench da placa, `.qpf`/`.qsf` com
       os 92 pinos; Quartus II 13.0 compilou o R2 (53 LE estrutural, 56 comportamental);
       GHDL e ModelSim conferidos. Falta conferir no FPGAEmuWeb e numa DE2 real.
-- [ ] Próximo: MT-28 (constante aditiva).
+- [x] MT-28: EXP-13 refeito e EXP-15 (constante aditiva). Ponto fixo `one`; GHDL e
+      ModelSim com `5A + 3B + 6`; reduções aleatórias com constante verificadas. Lab do
+      cap. 8 dá $W = 14$ (não 13) com 4 bits por variável: confirmar com a CA.
+- [ ] Próximo: MT-29 (solução de Wallace).
 
 ## Observações para a próxima sessão
 
@@ -192,6 +195,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-09 | `15a1b9b` | placa DE2 e Quartus (#39); constante aditiva | MT-22, MT-28 |
 | 2026-11-09 | `afa4bbd` | VHDL comportamental (#38); placa DE2 e projeto do Quartus | MT-21, MT-22 |
 | 2026-11-09 | `86233eb` | usar a solução e plano da disciplina (#37); VHDL comportamental | MT-20, MT-21 |
 | 2026-11-06 | `ce19784` | v0.1.0 publicada (#36); plano da disciplina; usar a solução | MT-17, MT-20 |

@@ -9,6 +9,12 @@ export interface SignalPart {
 
 const PART = /^([A-Za-z]+)(\d+)$/;
 
+/** Identifier of the fixed dots of the additive constant (EXP-15), drawn as `1`. */
+export const FIXED_ONE = 'one';
+
+/** What a dot is called on screen and to assistive technology: `1` for a fixed dot. */
+export const signalLabel = (signal: string) => (signal === FIXED_ONE ? '1' : signal);
+
 /** Letter and index of each factor, or null when the identifier has another shape. */
 export function signalParts(signal: string): SignalPart[] | null {
 	const parts: SignalPart[] = [];

@@ -14,7 +14,7 @@
 	import type { Snippet } from 'svelte';
 	import type { LevelPoint } from '#lib/core.ts';
 	import { m } from '#lib/paraglide/messages.js';
-	import { signalParts } from '#lib/signal.ts';
+	import { FIXED_ONE, signalLabel, signalParts } from '#lib/signal.ts';
 	import { columnLayout, type Group } from '#lib/levels.ts';
 	import type { ViewMode } from '#lib/view.ts';
 
@@ -78,7 +78,8 @@
 <!-- a₁b₀: letter and subscript per factor; any other shape is written as is. -->
 {#snippet indexed(signal: string)}
 	{@const parts = signalParts(signal)}
-	{#if parts}{#each parts as p, i (i)}{p.name}<sub>{p.index}</sub>{/each}{:else}{signal}{/if}
+	{#if signal === FIXED_ONE}1{:else if parts}{#each parts as p, i (i)}{p.name}<sub>{p.index}</sub
+			>{/each}{:else}{signal}{/if}
 {/snippet}
 
 {#snippet dot(p: LevelPoint)}
@@ -90,8 +91,8 @@
 			class:suggested={suggested.includes(p.id)}
 			style:--c={color(p)}
 			aria-pressed={selected.includes(p.id)}
-			aria-label={view === 'indexed' ? undefined : p.signal}
-			title={p.signal}
+			aria-label={view === 'indexed' ? undefined : signalLabel(p.signal)}
+			title={signalLabel(p.signal)}
 			data-signal={p.signal}
 			onclick={() => ontoggle(p.id)}
 			>{#if view === 'indexed'}{@render indexed(p.signal)}{/if}</button
@@ -104,8 +105,8 @@
 			style:--c={color(p)}
 			role="img"
 			tabindex="0"
-			aria-label={p.signal}
-			title={p.signal}
+			aria-label={signalLabel(p.signal)}
+			title={signalLabel(p.signal)}
 			data-signal={p.signal}
 			>{#if view === 'indexed'}{@render indexed(p.signal)}{/if}</span
 		>

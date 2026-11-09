@@ -33,7 +33,7 @@ válido.
   solução Dadda de R4 e um caso de 21 bits; teste do núcleo exige ASCII e o `use work.all`.
 - **VHD-02** — O topo DEVE usar os mesmos identificadores de sinal e de instância do
   diagrama e da tabela de ligações; um bit de resultado constante é atribuído com
-  `R(j) <= '0'`. A saída se chama `R`; uma variável de entrada chamada $R$ vira a porta
+  `R(j) <= '0'`, e o ponto fixo da constante (EXP-15) com `one <= '1'`. A saída se chama `R`; uma variável de entrada chamada $R$ vira a porta
   `R_IN`.
   *Prova:* teste do núcleo (mesmo conjunto de identificadores de DIA-03) e `2A` com $A$ de
   2 bits.

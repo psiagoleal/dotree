@@ -3,6 +3,7 @@
 // the core (ADR 0001); this only lays them out as formula, substitution and result, and
 // shows W through the powers of two around v_max: 2^(W-1) <= v_max < 2^W.
 import type { Input, Matrix } from './core';
+import { termText } from './term';
 
 export interface WidthPath {
 	inputs: Input[];
@@ -22,13 +23,14 @@ const power = (exponent: number) => ({ exponent, value: (2n ** BigInt(exponent))
 
 export function widthPath(m: Pick<Matrix, 'terms' | 'inputs' | 'vMax' | 'outputWidth'>): WidthPath {
 	const maxOf = new Map(m.inputs.map((i) => [i.var, i.max]));
-	const coefficient = (c: string) => (c === '1' ? [] : [c]);
+	// The constant (no variables) keeps its coefficient, even 1 (EXP-15).
+	const coefficient = (c: string, vars: string) => (c === '1' && vars !== '' ? [] : [c]);
 	return {
 		inputs: m.inputs,
-		symbolic: m.terms.map((t) => coefficient(t.coefficient).join('') + t.vars).join(' + '),
+		symbolic: m.terms.map(termText).join(' + '),
 		substituted: m.terms
 			.map((t) =>
-				[...coefficient(t.coefficient), ...[...t.vars].map((v) => maxOf.get(v))].join('·')
+				[...coefficient(t.coefficient, t.vars), ...[...t.vars].map((v) => maxOf.get(v))].join('·')
 			)
 			.join(' + '),
 		termValues: m.terms.length > 1 ? m.terms.map((t) => t.max).join(' + ') : null,

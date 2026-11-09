@@ -20,16 +20,24 @@ pub struct Factor {
     pub bit: u32,
 }
 
-/// A wire carried by input dots: a single variable bit (`e0`) or the AND of several
-/// (`a1_b0`, a partial product). Factors are sorted by variable.
+/// A wire carried by input dots: a single variable bit (`e0`), the AND of several
+/// (`a1_b0`, a partial product) or, with no factors, the constant 1 of the fixed dots
+/// (`one`, EXP-15). Factors are sorted by variable.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Signal {
     pub factors: Vec<Factor>,
 }
 
 impl Signal {
-    /// VHDL-safe identifier shared by every artifact (spec 05, "Nomes"): `a1_b0`, `e0`.
+    /// Identifier of the fixed dots of the constant (spec 05, "Nomes").
+    pub const ONE: &'static str = "one";
+
+    /// VHDL-safe identifier shared by every artifact (spec 05, "Nomes"): `a1_b0`, `e0`,
+    /// `one`.
     pub fn ident(&self) -> String {
+        if self.factors.is_empty() {
+            return Self::ONE.to_string();
+        }
         self.factors
             .iter()
             .map(|f| format!("{}{}", f.var.to_ascii_lowercase(), f.bit))

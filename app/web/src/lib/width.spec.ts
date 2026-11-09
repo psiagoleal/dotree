@@ -66,4 +66,19 @@ describe('widthPath (GER-03, step 2 of the width challenge)', () => {
 		expect(p.substituted).toBe('4294967295·255');
 		expect(p.upper).toEqual({ exponent: 40, value: '1099511627776' });
 	});
+
+	it('keeps the constant in the formula and the substitution (EXP-15)', () => {
+		const p = widthPath({
+			terms: [
+				{ coefficient: '3', vars: 'A', max: '9' },
+				{ coefficient: '1', vars: '', max: '1' }
+			],
+			inputs: [{ var: 'A', width: 2, max: '3' }],
+			vMax: '10',
+			outputWidth: 4
+		});
+		expect(p.symbolic).toBe('3A + 1');
+		expect(p.substituted).toBe('3·3 + 1');
+		expect(p.termValues).toBe('9 + 1');
+	});
 });

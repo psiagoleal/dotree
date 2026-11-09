@@ -4,10 +4,9 @@
 <script lang="ts">
 	import type { Term } from '#lib/core.ts';
 	import { m } from '#lib/paraglide/messages.js';
+	import { termText } from '#lib/term.ts';
 
 	let { terms }: { terms: Term[] } = $props();
-
-	const text = (t: Term) => (t.coefficient === '1' ? '' : t.coefficient) + t.vars;
 </script>
 
 <section class="legend">
@@ -17,7 +16,7 @@
 			<li>
 				<span class="swatch" style:--c={`var(--dot-term-${(i % 8) + 1})`}></span>
 				<span class="index">{i + 1}.</span>
-				<span class="term">{text(t)}</span>
+				<span class="term">{termText(t)}</span>
 			</li>
 		{/each}
 	</ol>

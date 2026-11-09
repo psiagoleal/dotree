@@ -257,3 +257,38 @@ fn signal_identifiers() {
     assert_eq!(s.ident(), "e12");
     assert!(!s.is_and());
 }
+
+// ---------------------------------------------------------------- EXP-15 (MT-28)
+
+#[test]
+fn exp15_each_bit_of_the_constant_is_a_fixed_dot() {
+    let m = matrix("A + 5 + 2", &[('A', 1)]);
+    assert_eq!(m.terms.len(), 2);
+    let one = Signal { factors: vec![] };
+    assert_eq!(one.ident(), "one");
+    assert!(!one.is_and());
+    let fixed: Vec<(u32, usize)> = m
+        .dots
+        .iter()
+        .filter(|d| m.signals[d.signal] == one)
+        .map(|d| (d.column, d.term))
+        .collect();
+    assert_eq!(
+        fixed,
+        [(0, 1), (1, 1), (2, 1)],
+        "7 = 1 + 2 + 4, all of term 1"
+    );
+    assert_eq!(m.and_gates(), 0, "a fixed dot is no gate");
+    // One signal for every fixed dot, like the copies of a term (EXP-02).
+    assert_eq!(m.signals.iter().filter(|s| **s == one).count(), 1);
+}
+
+#[test]
+fn exp15_the_constant_counts_in_v_max_and_w() {
+    let m = matrix("A + 1", &[('A', 2)]);
+    assert_eq!((m.v_max, m.output_width), (4, 3));
+    let m = matrix("3(A + 1)", &[('A', 2)]);
+    assert_eq!((m.v_max, m.output_width), (12, 4));
+    assert_eq!(column_idents(&m, 0), ["a0", "one"]);
+    assert_eq!(column_idents(&m, 1), ["a1", "a0", "one"]);
+}
