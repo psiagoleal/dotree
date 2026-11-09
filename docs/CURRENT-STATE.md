@@ -152,6 +152,9 @@
 - [x] MT-28: EXP-13 refeito e EXP-15 (constante aditiva). Ponto fixo `one`; GHDL e
       ModelSim com `5A + 3B + 6`; reduções aleatórias com constante verificadas. Lab do
       cap. 8 dá $W = 14$ (não 13) com 4 bits por variável: confirmar com a CA.
+      No CI, o e2e de VER-04 falhou de novo: com $A + B$, a verificação terminava antes
+      de o teste ver a barra. Agora usa $AB$ 12 × 12 com a solução de Dadda e um
+      MutationObserver desde o clique; uma mutação que esconde a barra é pega.
 - [ ] Próximo: MT-29 (solução de Wallace).
 
 ## Observações para a próxima sessão
