@@ -77,10 +77,10 @@ describe('autosaving', () => {
 		s.hint();
 		s.nextMove();
 		s.lowerBound(false);
-		s.solution(true);
+		s.solution(true, 'wallace');
 		s.revealWidth(7);
 		s.revealWidthPath();
-		s.applySolution();
+		s.applySolution('dadda');
 		expect(save).toHaveBeenCalledTimes(13);
 		expect(save).toHaveBeenLastCalledWith('state 13');
 	});

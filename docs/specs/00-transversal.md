@@ -40,7 +40,7 @@ funcionar sem instalação, num navegador comum.
 | Regras da notação (o que um FA e um HA fazem) | Largura da saída $W$ e $v_{max}$ (D-1) |
 | Altura de cada coluna no nível atual | Dica sobre o estado atual |
 | Contagem de FA, HA e AND do circuito montado | Próxima jogada sugerida |
-| Área e atraso do circuito montado (D-3) | Solução automática (Dadda) |
+| Área e atraso do circuito montado (D-3) | Solução automática (Dadda ou Wallace) |
 | Recusa de seleção inválida, com a regra que ela viola | Limite inferior de FA |
 
 - **GER-01** — O sistema DEVE exibir $W$, $v_{max}$, dica, próxima jogada, solução
@@ -63,7 +63,7 @@ chegou lá.
 |---|---|---|
 | Largura da saída | $W$ | $v_{max}$ com as entradas no máximo e $W = \lceil \log_2(v_{max}+1) \rceil$, com a substituição |
 | Limite inferior | O número | A fórmula (pontos − $W$) e o porquê (cada FA elimina 1 ponto, HA nenhum) |
-| Solução automática | Métricas finais: níveis, FA, HA, área, atraso | A solução nível a nível |
+| Solução automática (cada método) | Métricas finais: níveis, FA, HA, área, atraso | A solução nível a nível |
 
 - **GER-03** — ONDE uma resposta constar da tabela acima, o sistema DEVE revelá-la em duas
   etapas, cada uma com pedido e confirmação próprios, na ordem resultado → caminho.
@@ -173,7 +173,7 @@ $W = 4$, atraso 0.
 - Números com sinal (complemento de dois, Baugh-Wooley) e subtração.
 - Constantes aditivas na expressão (ex.: `+ 5`); entram na v0.2 (EXP-15).
 - Blocos AMM como célula composta; compressores 4:2; CPA que não seja *ripple*.
-- Solução automática de Wallace (v0.2); exportação em CSV (v0.2).
+- Exportação em CSV (v0.2). A solução de Wallace entrou na v0.2 (AJU-10, MT-29).
 - Contas de usuário, servidor, compartilhamento por link (D-6).
 - Síntese para FPGA dentro do app.
 - Medir se o app de fato melhora o aprendizado (estudo com alunos): desejável, fora do

@@ -38,11 +38,11 @@ test('a long verification shows progress, keeps the page alive and can be cancel
 	for (const v of ['A', 'B']) await page.locator(`input[name="width-${v}"]`).fill('12');
 	await page.getByRole('button', { name: 'Montar a matriz' }).click();
 	const show = page.getByRole('dialog').getByRole('button', { name: 'Mostrar', exact: true });
-	await page.getByRole('button', { name: 'Solução automática', exact: true }).click();
+	await page.getByRole('button', { name: 'Solução de Dadda', exact: true }).click();
 	await show.click();
-	await page.getByRole('button', { name: 'Ver a solução nível a nível' }).click();
+	await page.getByRole('button', { name: 'Ver a solução de Dadda nível a nível' }).click();
 	await show.click();
-	await page.getByRole('button', { name: 'Usar esta solução' }).click();
+	await page.getByRole('button', { name: 'Usar a solução de Dadda' }).click();
 	await page.getByRole('dialog').getByRole('button', { name: 'Substituir' }).click();
 	await expect(page.getByTestId('complete')).toBeVisible();
 

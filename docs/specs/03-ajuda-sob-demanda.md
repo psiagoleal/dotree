@@ -19,7 +19,7 @@ Do mais leve ao mais completo. Cada degrau é pedido separadamente.
 | **Dica** | Um fato sobre o estado atual, do catálogo abaixo, sem citar pontos | sim | não |
 | **Próxima jogada** | Destaca os pontos de uma célula que a solução Dadda formaria agora | sim | não |
 | **Limite inferior** | O menor número possível de FA | sim | sim |
-| **Solução automática** | A solução Dadda a partir da matriz inicial, num painel à parte | sim | sim |
+| **Solução automática** | A solução de Dadda ou a de Wallace (AJU-10), cada uma pedida à parte, a partir da matriz inicial, num painel à parte | sim | sim |
 
 ### Catálogo de dicas (v0.1)
 
@@ -39,7 +39,8 @@ aplica", mostraria quase sempre a mesma dica.)
 
 ## Interação (MT-13)
 
-Os quatro pedidos ficam numa seção "Ajuda" abaixo das ações da compressão. Dica e próxima
+Os pedidos ficam numa seção "Ajuda" abaixo das ações da compressão; a solução automática
+tem um botão por método, "Solução de Dadda" e "Solução de Wallace" (MT-29). Dica e próxima
 jogada falam do estado atual e somem na ação seguinte, para que uma resposta velha não
 fique na tela. Cada chamada à ajuda do núcleo é uma revelação e é contada (AJU-07); por
 isso a interface só chama depois da confirmação. O ciclo das dicas usa o próprio contador:
@@ -111,8 +112,30 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   ponta: R1 → etapa 2 → usar → "0 erros" na verificação e VHDL disponível; desfazer devolve
   o circuito do usuário; o resumo registra a aplicação.
 
+- **AJU-10** — O sistema DEVE oferecer, ao lado da de Dadda, a solução automática pelo
+  método de Wallace, com o mesmo fluxo de AJU-02, AJU-03 e AJU-09: duas etapas confirmadas,
+  painel à parte e "Usar a solução de Wallace" só depois da etapa 2 **dela**. Cada método
+  tem a própria contagem no registro de ajudas (AJU-07) e no arquivo do exercício
+  (`help.wallace`, `help.wallacePath`, `help.wallaceApplied`, opcionais). A etapa 2 mostra,
+  junto dos níveis, uma frase com a regra do método.
+  **Regra (a da referência do curso, Parhami, *Computer Arithmetic*, fig. 8.10):** a cada
+  nível, com altura máxima $h$, a altura-alvo é $2\lfloor h/3 \rfloor + (h \bmod 3)$, as
+  linhas que sobram ao agrupar de 3 em 3 (3 → 2, 4 → 3, 5 → 4, 6 → 4, 7 → 5, 9 → 6,
+  13 → 9). Cada coluna, da menor para a maior, usa **todos os FA** que os pontos livres
+  permitem (reduz o quanto antes) e um HA **só se** ainda passaria do alvo, contando os
+  vai-uns que chegam. No fim, o CPA de CMP-11. Não é o Wallace com HA em todo par que sobra.
+  A próxima jogada (AJU-04) e as dicas continuam sendo as de Dadda.
+  *Prova:* testes do núcleo com contagens calculadas à mão antes do código: R4 → 3 FA;
+  2 FA + 1 HA; CPA com 3 FA + 3 HA (8 FA, 4 HA, 5,5 $T_{FA}$, iguais às de Dadda); R1 →
+  4 FA; 4 FA; 2 FA; 2 FA + 1 HA; CPA com 1 FA + 2 HA (13 FA, 3 HA, 14,5 $A_{FA}$,
+  6 $T_{FA}$, contra 17 $A_{FA}$ e 7 $T_{FA}$ de Dadda); sete operandos de 6 bits →
+  12 FA; 6 FA; 6 FA; 4 FA + 1 HA e um somador de 7 bits, como na figura; propriedade com
+  expressões aleatórias (verifica, respeita os alvos e o limite inferior); testes da ponte
+  (cada método só se aplica depois da própria etapa 2); teste de componente; teste de
+  ponta a ponta: R1 → Wallace nível a nível → usar → "0 erros" e o registro da aplicação.
+
 ## Fora de escopo
 
-Solução de Wallace (v0.2, MT-29); busca da solução de menor atraso ou menor área; correção
+Busca da solução de menor atraso ou menor área; correção
 automática do circuito do usuário (AJU-09 substitui o circuito inteiro, não o corrige);
 ajuda por IA; "não perguntar de novo" (D-5).

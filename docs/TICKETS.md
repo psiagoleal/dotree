@@ -13,7 +13,6 @@ Nenhum: a v0.1.0 foi publicada.
 
 ## Até o projeto final da disciplina — v0.2 (aprovado em 2026-11-06)
 
-- [ ] [MT-29](plano-pos-v0.1.md#mt-29-solução-de-wallace-p10) — Solução de Wallace ao lado da de Dadda.
 - [ ] [MT-30](plano-pos-v0.1.md#mt-30-tabela-de-alturas-nível-a-nível-p11) — Tabela de alturas nível a nível.
 - [ ] [MT-38](plano-pos-v0.1.md#mt-38-comparação-de-soluções-p20) — Comparação de soluções (versão mínima).
 - [ ] [MT-31](plano-pos-v0.1.md#mt-31-entrada-por-alturas-com-perfil-alvo-de-saída-p12) — Entrada por alturas com perfil-alvo de saída (se der tempo).
@@ -35,6 +34,7 @@ Nenhum: a v0.1.0 foi publicada.
 
 ## Concluídos
 
+- [x] [MT-29](plano-pos-v0.1.md#mt-29-solução-de-wallace-p10) — Solução de Wallace ao lado da de Dadda, com o mesmo fluxo de revelação e aplicação.
 - [x] [MT-28](plano-pos-v0.1.md#mt-28-constante-aditiva-p9) — Constante aditiva (`+36`) como pontos fixos em 1, comprimidos como os outros.
 - [x] [MT-22](plano-pos-v0.1.md#mt-22-topo-para-a-de2-até-18-bits-e-projeto-do-quartus-p6-p8) — Topo DE2 até 18 bits e projeto do Quartus, compilado no Quartus II 13.0.
 - [x] [MT-21](plano-pos-v0.1.md#mt-21-vhdl-comportamental-p4) — VHDL comportamental com `numeric_std`, conferido pelo mesmo testbench.

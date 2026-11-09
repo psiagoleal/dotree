@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-09
-- **Commit:** `48cb595` (MT-28, #40). O override do `minimatch` ainda não foi commitado.
+- **Commit:** `b22bbc0` (override do `minimatch`, #41). O MT-29 ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -157,7 +157,10 @@
       MutationObserver desde o clique; uma mutação que esconde a barra é pega.
 - [x] Segurança: `minimatch` forçado para 11.0.1 por override (GHSA-g3hv-75wg-m249, alerta
       Dependabot 3). Remover quando o ESLint e o typescript-eslint aceitarem a 11.
-- [ ] Próximo: MT-29 (solução de Wallace).
+- [x] MT-29: AJU-10, solução de Wallace (regra da fig. 8.10 do Parhami, reproduzida nível
+      a nível). Achado: o Dadda do dotree gasta 3 HA a mais que a fig. 8.14 do livro no
+      mesmo exemplo (AJU-05 manda HA onde o livro usa FA): decidir com o usuário.
+- [ ] Próximo: MT-30 (tabela de alturas nível a nível).
 
 ## Observações para a próxima sessão
 
@@ -200,6 +203,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-09 | `b22bbc0` | override do `minimatch` (#41); solução de Wallace | MT-29 |
 | 2026-11-09 | `48cb595` | constante aditiva (#40); override do `minimatch` | MT-28 |
 | 2026-11-09 | `15a1b9b` | placa DE2 e Quartus (#39); constante aditiva | MT-22, MT-28 |
 | 2026-11-09 | `afa4bbd` | VHDL comportamental (#38); placa DE2 e projeto do Quartus | MT-21, MT-22 |

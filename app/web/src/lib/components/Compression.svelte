@@ -5,7 +5,13 @@
      it returns (ADR 0001). -->
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import type { Cell, CellKind, CompressionSession, Snapshot } from '#lib/core.ts';
+	import {
+		METHOD_NAME,
+		type Cell,
+		type CellKind,
+		type CompressionSession,
+		type Snapshot
+	} from '#lib/core.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import { cpaBlockMessage, rejectionMessage } from '#lib/errors.ts';
@@ -319,9 +325,9 @@
 			{view}
 			readOnly={narrow}
 			onhelp={() => (helps = session.helpLog())}
-			onapply={() => {
+			onapply={(method) => {
 				helps = session.helpLog();
-				refresh(m.solution_applied());
+				refresh(m.solution_applied({ method: METHOD_NAME[method] }));
 			}}
 		/>
 	</section>

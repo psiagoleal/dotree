@@ -28,20 +28,20 @@ async function open(readOnly = false) {
 	return { session, onhelp, onapply, container };
 }
 
-const useIt = () => page.getByRole('button', { name: 'Usar esta solução' });
+const useIt = () => page.getByRole('button', { name: 'Usar a solução de Dadda' });
 const replace = () => page.getByRole('dialog').getByRole('button', { name: 'Substituir' });
 
 async function revealPath() {
-	await page.getByRole('button', { name: 'Solução automática' }).click();
+	await page.getByRole('button', { name: 'Solução de Dadda' }).click();
 	await show().click();
-	await page.getByRole('button', { name: 'Ver a solução nível a nível' }).click();
+	await page.getByRole('button', { name: 'Ver a solução de Dadda nível a nível' }).click();
 	await show().click();
 }
 
 const show = () => page.getByRole('dialog').getByRole('button', { name: 'Mostrar' });
 const keepTrying = () => page.getByRole('button', { name: 'Vou tentar mais um pouco' });
 
-describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06)', () => {
+describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06, AJU-10)', () => {
 	it('lower bound: the number first, the reasoning only on a second request', async () => {
 		const { onhelp } = await open();
 		const pathButton = page.getByRole('button', { name: 'Ver a conta do limite' });
@@ -69,19 +69,21 @@ describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06)', () => {
 		const { session, container } = await open();
 		const before = JSON.stringify(session.snapshot());
 
-		await page.getByRole('button', { name: 'Solução automática' }).click();
+		await page.getByRole('button', { name: 'Solução de Dadda' }).click();
 		await show().click();
 		await expect
 			.element(page.getByTestId('solution-summary'))
 			.toHaveTextContent(/^Solução de Dadda: 4 níveis e o CPA; 13 FA, 8 HA; área 17 A_FA; atraso/);
 		expect(container.querySelectorAll('section.panel')).toHaveLength(0);
 
-		await page.getByRole('button', { name: 'Ver a solução nível a nível' }).click();
+		await page.getByRole('button', { name: 'Ver a solução de Dadda nível a nível' }).click();
 		await show().click();
 		await expect
-			.element(page.getByRole('heading', { name: 'Solução, nível 4: CPA' }))
+			.element(page.getByRole('heading', { name: 'Solução de Dadda, nível 4: CPA' }))
 			.toBeVisible();
-		await expect.element(page.getByRole('heading', { name: 'Solução, resultado' })).toBeVisible();
+		await expect
+			.element(page.getByRole('heading', { name: 'Solução de Dadda, resultado' }))
+			.toBeVisible();
 		expect(container.querySelectorAll('section.panel')).toHaveLength(6);
 		expect(JSON.stringify(session.snapshot())).toBe(before);
 		expect(session.helpLog()).toMatchObject({ solution: 1, solutionPath: 1 });
@@ -91,7 +93,8 @@ describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06)', () => {
 		const first = core.openSession(r1.expression, r1.widths);
 		first.lowerBound(false);
 		first.lowerBound(true);
-		first.solution(false).free();
+		first.solution(false, 'dadda').free();
+		first.solution(false, 'wallace').free();
 		const reopened = core.restoreSession(first.exercise());
 		first.free();
 		if (!reopened.ok) throw new Error(reopened.error.code);
@@ -104,7 +107,10 @@ describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06)', () => {
 		await expect.element(page.getByTestId('solution-summary')).toBeVisible();
 		await expect.element(page.getByTestId('solution')).not.toBeInTheDocument();
 		await expect
-			.element(page.getByRole('button', { name: 'Ver a solução nível a nível' }))
+			.element(page.getByTestId('wallace-summary'))
+			.toHaveTextContent(/^Solução de Wallace: /);
+		await expect
+			.element(page.getByRole('button', { name: 'Ver a solução de Dadda nível a nível' }))
 			.toBeVisible();
 		expect(session.helpLog()).toEqual(log);
 		expect(onhelp).not.toHaveBeenCalled();
@@ -113,10 +119,10 @@ describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06)', () => {
 	it('using the solution: offered only after the levels, asked first, then replaces the circuit (AJU-09)', async () => {
 		const { session, onapply } = await open();
 		await expect.element(useIt()).not.toBeInTheDocument();
-		await page.getByRole('button', { name: 'Solução automática' }).click();
+		await page.getByRole('button', { name: 'Solução de Dadda' }).click();
 		await show().click();
 		await expect.element(useIt()).not.toBeInTheDocument();
-		await page.getByRole('button', { name: 'Ver a solução nível a nível' }).click();
+		await page.getByRole('button', { name: 'Ver a solução de Dadda nível a nível' }).click();
 		await show().click();
 
 		await useIt().click();
@@ -128,6 +134,7 @@ describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06)', () => {
 		await useIt().click();
 		await replace().click();
 		expect(onapply).toHaveBeenCalledTimes(1);
+		expect(onapply).toHaveBeenCalledWith('dadda');
 		const snap = session.snapshot();
 		expect(snap.metrics).toMatchObject({ fa: 13, ha: 8 });
 		expect(snap.result).not.toBeNull();
@@ -139,5 +146,55 @@ describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06)', () => {
 		await revealPath();
 		await expect.element(page.getByTestId('solution')).toBeVisible();
 		await expect.element(useIt()).not.toBeInTheDocument();
+	});
+
+	it("Wallace's solution: its own two steps, with its rule, apart from Dadda's (AJU-10)", async () => {
+		const { session, container } = await open();
+		const before = JSON.stringify(session.snapshot());
+
+		await page.getByRole('button', { name: 'Solução de Wallace' }).click();
+		await expect.element(keepTrying()).toHaveFocus();
+		await show().click();
+		await expect
+			.element(page.getByTestId('wallace-summary'))
+			.toHaveTextContent(
+				/^Solução de Wallace: 4 níveis e o CPA; 13 FA, 3 HA; área 14,5 A_FA; atraso/
+			);
+		await expect.element(page.getByTestId('solution-summary')).not.toBeInTheDocument();
+		await expect
+			.element(page.getByRole('button', { name: 'Ver a solução de Dadda nível a nível' }))
+			.not.toBeInTheDocument();
+
+		await page.getByRole('button', { name: 'Ver a solução de Wallace nível a nível' }).click();
+		await show().click();
+		await expect
+			.element(page.getByTestId('wallace-rule'))
+			.toHaveTextContent(/^Wallace reduz o quanto antes/);
+		await expect
+			.element(page.getByRole('heading', { name: 'Solução de Wallace, nível 4: CPA' }))
+			.toBeVisible();
+		expect(container.querySelectorAll('section.panel')).toHaveLength(6);
+		expect(JSON.stringify(session.snapshot())).toBe(before);
+		expect(session.helpLog()).toMatchObject({
+			wallace: 1,
+			wallacePath: 1,
+			solution: 0,
+			solutionPath: 0
+		});
+	});
+
+	it("using Wallace's solution replaces the circuit with it (AJU-10)", async () => {
+		const { session, onapply } = await open();
+		await page.getByRole('button', { name: 'Solução de Wallace' }).click();
+		await show().click();
+		await page.getByRole('button', { name: 'Ver a solução de Wallace nível a nível' }).click();
+		await show().click();
+		await expect.element(useIt()).not.toBeInTheDocument();
+
+		await page.getByRole('button', { name: 'Usar a solução de Wallace' }).click();
+		await replace().click();
+		expect(onapply).toHaveBeenCalledWith('wallace');
+		expect(session.snapshot().metrics).toMatchObject({ fa: 13, ha: 3 });
+		expect(session.helpLog()).toMatchObject({ wallaceApplied: 1, solutionApplied: 0 });
 	});
 });

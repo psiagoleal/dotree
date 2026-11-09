@@ -24,6 +24,8 @@ async function expectNoAnswer(page: Page) {
 		'lower-bound-path',
 		'solution-summary',
 		'solution',
+		'wallace-summary',
+		'wallace',
 		'width-result',
 		'width-path'
 	]) {
@@ -32,7 +34,10 @@ async function expectNoAnswer(page: Page) {
 	await expect(page.locator('.dot.suggested')).toHaveCount(0);
 	const text = (await page.locator('main').innerText()).replace(/\s+/g, ' ');
 	expect(text).not.toMatch(/W = \d/);
-	expect(text).not.toMatch(/v_?max|Limite inferior:|Solução de Dadda|Próxima jogada do método/);
+	// The buttons name the methods; only an answer has the colon.
+	expect(text).not.toMatch(
+		/v_?max|Limite inferior:|Solução de (Dadda|Wallace):|Próxima jogada do método/
+	);
 	expect(text).not.toMatch(/faltam no mínimo|é a mais alta|pontos prontos|já pode ser fechado/);
 }
 
@@ -55,7 +60,8 @@ test('ajuda-nao-aparece-sem-pedido (GER-01, AJU-02)', async ({ page }) => {
 		['Dica', 'hint'],
 		['Próxima jogada', 'next-move'],
 		['Limite inferior', 'lower-bound'],
-		['Solução automática', 'solution-summary']
+		['Solução de Dadda', 'solution-summary'],
+		['Solução de Wallace', 'wallace-summary']
 	];
 	for (const [button] of steps) {
 		await page.getByRole('button', { name: button, exact: true }).click();
@@ -96,14 +102,14 @@ test('solution in two steps, without touching the circuit (GER-03, AJU-03, AJU-0
 	await page.getByRole('button', { name: 'Formar célula' }).click();
 	const metrics = await page.getByTestId('metrics').innerText();
 
-	await page.getByRole('button', { name: 'Solução automática' }).click();
+	await page.getByRole('button', { name: 'Solução de Dadda' }).click();
 	await show(page).click();
 	await expect(page.getByTestId('solution-summary')).toContainText(
 		'4 níveis e o CPA; 13 FA, 8 HA; área 17 A_FA'
 	);
 	await expect(page.getByTestId('solution')).toHaveCount(0);
 
-	await page.getByRole('button', { name: 'Ver a solução nível a nível' }).click();
+	await page.getByRole('button', { name: 'Ver a solução de Dadda nível a nível' }).click();
 	await show(page).click();
 	const solution = page.getByTestId('solution');
 	await expect(solution.locator('section.panel')).toHaveCount(6);
@@ -125,11 +131,11 @@ test('using the solution replaces the circuit in one undo step and is logged (AJ
 	await page.getByRole('button', { name: 'Formar célula' }).click();
 	await expect(current(page).locator('.cell')).toHaveCount(1);
 
-	const useIt = page.getByRole('button', { name: 'Usar esta solução' });
-	await page.getByRole('button', { name: 'Solução automática', exact: true }).click();
+	const useIt = page.getByRole('button', { name: 'Usar a solução de Dadda' });
+	await page.getByRole('button', { name: 'Solução de Dadda', exact: true }).click();
 	await show(page).click();
 	await expect(useIt).toHaveCount(0);
-	await page.getByRole('button', { name: 'Ver a solução nível a nível' }).click();
+	await page.getByRole('button', { name: 'Ver a solução de Dadda nível a nível' }).click();
 	await show(page).click();
 
 	await useIt.click();
@@ -141,7 +147,7 @@ test('using the solution replaces the circuit in one undo step and is logged (AJ
 	await page.getByRole('dialog').getByRole('button', { name: 'Substituir' }).click();
 	await expect(page.getByTestId('complete')).toBeVisible();
 	await expect(page.getByTestId('metrics')).toContainText(/FA\s*13/);
-	await expect(page.getByTestId('help-log')).toContainText('solução aplicada: 1 vez');
+	await expect(page.getByTestId('help-log')).toContainText('solução de Dadda aplicada: 1 vez');
 	await page.getByRole('button', { name: 'Verificar circuito' }).click();
 	await expect(page.getByTestId('verify-result')).toHaveText('16.384 casos, exaustivo, 0 erros.');
 	await expect(page.getByRole('button', { name: 'Baixar todos (.zip)' })).toBeEnabled();
@@ -153,4 +159,34 @@ test('using the solution replaces the circuit in one undo step and is logged (AJ
 	await expect(page.getByRole('heading', { name: /^Nível 0/ })).toBeVisible();
 	await page.getByRole('button', { name: 'Refazer' }).click();
 	await expect(page.getByTestId('complete')).toBeVisible();
+});
+
+test("Wallace's solution, applied, verifies and is logged apart (AJU-10)", async ({ page }) => {
+	await page.goto('./');
+	await page.getByRole('button', { name: 'Soma de produtos' }).click();
+
+	await page.getByRole('button', { name: 'Solução de Wallace', exact: true }).click();
+	await show(page).click();
+	await expect(page.getByTestId('wallace-summary')).toContainText(
+		'4 níveis e o CPA; 13 FA, 3 HA; área 14,5 A_FA'
+	);
+	await page.getByRole('button', { name: 'Ver a solução de Wallace nível a nível' }).click();
+	await show(page).click();
+	// R1 by hand (spec 03): 4 FA, 4 FA, 2 FA, 2 FA + 1 HA, and the CPA with 1 FA + 2 HA.
+	const wallace = page.getByTestId('wallace');
+	for (const [level, cells] of [4, 4, 2, 3, 3].entries()) {
+		await expect(page.getByTestId(`wallace-level-${level}`).locator('.cell')).toHaveCount(cells);
+	}
+	await expect(wallace.locator('.cell')).toHaveCount(16);
+
+	await page.getByRole('button', { name: 'Usar a solução de Wallace' }).click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Substituir' }).click();
+	await expect(page.getByTestId('complete')).toBeVisible();
+	await expect(page.getByTestId('metrics')).toContainText(/HA\s*3/);
+	await page.getByRole('button', { name: 'Verificar circuito' }).click();
+	await expect(page.getByTestId('verify-result')).toHaveText('16.384 casos, exaustivo, 0 erros.');
+	const log = page.getByTestId('help-log');
+	await expect(log).toContainText('solução de Wallace: 1 (nível a nível: 1)');
+	await expect(log).toContainText('solução de Wallace aplicada: 1 vez');
+	await expect(log).not.toContainText('solução de Dadda');
 });

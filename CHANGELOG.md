@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Solução de Wallace ao lado da de Dadda, com o mesmo fluxo: métricas, depois os níveis
+  com a regra do método numa frase, e "Usar a solução de Wallace". A regra é a da
+  referência do curso (Parhami, fig. 8.10): todos os FA que cabem em cada coluna, HA só
+  quando ela ainda passaria do alvo $2\lfloor h/3 \rfloor + (h \bmod 3)$. Cada método
+  tem a própria contagem no registro de ajudas e no arquivo do exercício
+  (`help.wallace`, `help.wallacePath`, `help.wallaceApplied`, opcionais; esquema 1
+  mantido) (AJU-10, MT-29).
 - Constante somada: `A + 36` e `3(A + 1)` passam a valer. As constantes se juntam num termo
   só, com cor própria, e cada bit 1 vira um ponto fixo em 1 (`one`, mostrado como 1), que o
   aluno comprime como os outros; a constante entra em $W$, na verificação e no VHDL
@@ -29,6 +36,8 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   resultado de cada uma; o CI e o ModelSim ASE 10.1d simulam as duas (VHD-10, MT-21).
 
 ### Alterado
+- O botão "Solução automática" virou "Solução de Dadda", e os textos da solução (etapa 2,
+  usar, registro de ajudas, aviso de aplicação) passaram a nomear o método.
 - O código de erro `constantTerm` deu lugar a `noVariables` (expressão sem variável).
 - Os nomes `dut`, `seg7`, `SW`, `LEDR` e `HEX0` a `HEX7` não servem mais como nome da
   entidade, porque o topo da placa os usa (PLA-07).

@@ -51,9 +51,13 @@ export function helpLogItems(log: HelpLog, locale?: Locale): string[] {
 	if (log.nextMoves > 0) items.push(m.help_log_next_moves({ count: log.nextMoves }, o));
 	if (log.lowerBound + log.lowerBoundPath > 0)
 		items.push(m.help_log_lower_bound({ result: log.lowerBound, path: log.lowerBoundPath }, o));
-	if (log.solution + log.solutionPath > 0)
-		items.push(m.help_log_solution({ result: log.solution, path: log.solutionPath }, o));
-	if (log.solutionApplied > 0)
-		items.push(m.help_log_solution_applied({ count: log.solutionApplied }, o));
+	const methods = [
+		['Dadda', log.solution, log.solutionPath, log.solutionApplied],
+		['Wallace', log.wallace, log.wallacePath, log.wallaceApplied]
+	] as const;
+	for (const [method, result, path, applied] of methods) {
+		if (result + path > 0) items.push(m.help_log_solution({ method, result, path }, o));
+		if (applied > 0) items.push(m.help_log_solution_applied({ method, count: applied }, o));
+	}
 	return items;
 }

@@ -112,7 +112,7 @@
 	"formed_cell": "{kind} formed.",
 	"level_concluded": "Level {level} concluded.",
 	"undone": "Undone.",
-	"solution_applied": "Solution applied. Undo brings your circuit back.",
+	"solution_applied": "{method}'s solution applied. Undo brings your circuit back.",
 	"redone": "Redone.",
 	"metrics_title": "Circuit so far",
 	"metric_area": "Area",
@@ -158,9 +158,9 @@
 	"help_next_move": "Next move",
 	"help_lower_bound": "Lower bound",
 	"help_lower_bound_path": "See how the bound is reached",
-	"help_solution": "Automatic solution",
-	"help_solution_path": "See the solution level by level",
-	"help_use_solution": "Use this solution",
+	"help_solution": "{method}'s solution",
+	"help_solution_path": "See {method}'s solution level by level",
+	"help_use_solution": "Use {method}'s solution",
 	"confirm_hint_title": "See a hint?",
 	"confirm_hint_body": "The hint talks about the current level, without saying which points to pick.",
 	"confirm_next_move_title": "See the next move?",
@@ -169,12 +169,12 @@
 	"confirm_lower_bound_body": "First only the number; the reasoning comes with a second request.",
 	"confirm_lower_bound_path_title": "See how the lower bound is reached?",
 	"confirm_lower_bound_path_body": "First try: how many points does each FA remove? And each HA?",
-	"confirm_solution_title": "See the automatic solution?",
+	"confirm_solution_title": "See {method}'s solution?",
 	"confirm_solution_body": "First only the final metrics; the levels come with a second request. Your circuit does not change.",
-	"confirm_solution_path_title": "See the solution level by level?",
+	"confirm_solution_path_title": "See {method}'s solution level by level?",
 	"confirm_solution_path_body": "First compare the solution's metrics with your circuit's.",
-	"confirm_use_solution_title": "Replace your circuit with the solution?",
-	"confirm_use_solution_body": "The circuit you built gives way to Dadda's whole solution. Undo (Ctrl+Z) brings your circuit back.",
+	"confirm_use_solution_title": "Replace your circuit with {method}'s solution?",
+	"confirm_use_solution_body": "The circuit you built gives way to {method}'s whole solution. Undo (Ctrl+Z) brings your circuit back.",
 	"confirm_use_solution_ok": "Replace",
 	"hint_min_levels_left": [
 		{
@@ -198,41 +198,57 @@
 	"lower_bound_path": "Points of the initial matrix minus W: {dots} − {width} = {value}. Each FA removes 1 point (3 in, 2 out), each dropped carry removes 1, and the HA removes none (2 in, 2 out). The complete circuit has at most W points, so FA + dropped carries ≥ {dots} − {width}. It is a lower bound, not necessarily the optimum.",
 	"solution_summary_cpa": [
 		{
-			"declarations": ["input levels", "input fa", "input ha", "input area", "input delay"],
+			"declarations": [
+				"input method",
+				"input levels",
+				"input fa",
+				"input ha",
+				"input area",
+				"input delay"
+			],
 			"selectors": ["levels"],
 			"match": {
-				"levels=1": "Dadda's solution: {levels} level and the CPA; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA.",
-				"levels=*": "Dadda's solution: {levels} levels and the CPA; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA."
+				"levels=1": "{method}'s solution: {levels} level and the CPA; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA.",
+				"levels=*": "{method}'s solution: {levels} levels and the CPA; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA."
 			}
 		}
 	],
 	"solution_summary": [
 		{
-			"declarations": ["input levels", "input fa", "input ha", "input area", "input delay"],
+			"declarations": [
+				"input method",
+				"input levels",
+				"input fa",
+				"input ha",
+				"input area",
+				"input delay"
+			],
 			"selectors": ["levels"],
 			"match": {
-				"levels=1": "Dadda's solution: {levels} level; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA.",
-				"levels=*": "Dadda's solution: {levels} levels; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA."
+				"levels=1": "{method}'s solution: {levels} level; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA.",
+				"levels=*": "{method}'s solution: {levels} levels; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA."
 			}
 		}
 	],
-	"solution_title": "Dadda's solution, level by level",
-	"solution_level": "Solution, level {level}",
-	"solution_cpa": "Solution, level {level}: CPA",
-	"solution_result": "Solution, result",
+	"solution_title": "{method}'s solution, level by level",
+	"solution_level": "{method}'s solution, level {level}",
+	"solution_cpa": "{method}'s solution, level {level}: CPA",
+	"solution_result": "{method}'s solution, result",
+	"solution_rule_dadda": "Dadda postpones the reduction: at each level, each column only comes down to the target height, the largest number of the sequence 2, 3, 4, 6, 9, 13… below the tallest column, with FA, and HA when only 1 is left to reduce.",
+	"solution_rule_wallace": "Wallace reduces as early as possible: at each level, each column uses every FA its points allow, and an HA only when it would still be over the target height, 2⌊h/3⌋ + (h mod 3) for the tallest height h.",
 	"help_log_title": "Help used",
 	"help_log_none": "Help used: none.",
 	"help_log_hints": "hints: {count}",
 	"help_log_next_moves": "next moves: {count}",
 	"help_log_lower_bound": "lower bound: {result} (reasoning: {path})",
-	"help_log_solution": "automatic solution: {result} (level by level: {path})",
+	"help_log_solution": "{method}'s solution: {result} (level by level: {path})",
 	"help_log_solution_applied": [
 		{
-			"declarations": ["input count"],
+			"declarations": ["input method", "input count"],
 			"selectors": ["count"],
 			"match": {
-				"count=1": "solution applied: {count} time",
-				"count=*": "solution applied: {count} times"
+				"count=1": "{method}'s solution applied: {count} time",
+				"count=*": "{method}'s solution applied: {count} times"
 			}
 		}
 	],

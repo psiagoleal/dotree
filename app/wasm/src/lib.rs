@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 use dotree_core::board::{self, BoardLimit};
 use dotree_core::diagram::{self, Endpoint, Layout, TableHeaders};
 use dotree_core::expr::{self, Analysis, Expected, ExprError, SyntaxErrorKind, Warning};
-use dotree_core::help::{self, HelpLog, HelpStep, Hint, NextMove};
+use dotree_core::help::{self, HelpLog, HelpStep, Hint, Method, NextMove};
 use dotree_core::matrix::{DotMatrix, MatrixError};
 use dotree_core::netlist::Netlist;
 use dotree_core::reduce::{
@@ -262,6 +262,47 @@ fn outcome(r: Result<Value, Rejection>) -> String {
     .to_string()
 }
 
+/// The method of an automatic solution (AJU-05, AJU-10).
+#[wasm_bindgen]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SolutionMethod {
+    Dadda,
+    Wallace,
+}
+
+impl SolutionMethod {
+    fn core(self) -> Method {
+        match self {
+            SolutionMethod::Dadda => Method::Dadda,
+            SolutionMethod::Wallace => Method::Wallace,
+        }
+    }
+
+    /// The three counted steps of this method: result, path, applied.
+    fn steps(self) -> [HelpStep; 3] {
+        match self {
+            SolutionMethod::Dadda => [
+                HelpStep::Solution,
+                HelpStep::SolutionPath,
+                HelpStep::SolutionApplied,
+            ],
+            SolutionMethod::Wallace => [
+                HelpStep::Wallace,
+                HelpStep::WallacePath,
+                HelpStep::WallaceApplied,
+            ],
+        }
+    }
+
+    /// How many times result, path and applied were counted for this method.
+    fn counts(self, l: &HelpLog) -> [u32; 3] {
+        match self {
+            SolutionMethod::Dadda => [l.solution, l.solution_path, l.solution_applied],
+            SolutionMethod::Wallace => [l.wallace, l.wallace_path, l.wallace_applied],
+        }
+    }
+}
+
 /// A compression in progress (MT-12a). Every action returns JSON; `snapshot` returns the
 /// whole state the interface draws. Times and areas are in half units (FA = 2, HA = 1).
 #[wasm_bindgen]
@@ -303,9 +344,9 @@ impl Session {
         json!({"dots": b.dots, "outputWidth": b.output_width, "value": b.value}).to_string()
     }
 
-    fn solution_session(&self) -> Session {
+    fn solution_session(&self, method: SolutionMethod) -> Session {
         Session::with(
-            help::dadda_solution(&self.matrix),
+            help::solution(&self.matrix, method.core()),
             self.matrix.clone(),
             &self.expression,
             &self.widths,
@@ -424,7 +465,8 @@ impl Session {
         let l = &self.log;
         json!({"width": self.width,
                "lowerBound": stage(l.lower_bound, l.lower_bound_path),
-               "solution": stage(l.solution, l.solution_path)})
+               "solution": stage(l.solution, l.solution_path),
+               "wallace": stage(l.wallace, l.wallace_path)})
         .to_string()
     }
 
@@ -557,34 +599,33 @@ impl Session {
         (self.log.lower_bound > 0).then(|| self.bound_json())
     }
 
-    /// Dadda's solution from level 0 as a separate session (AJU-03, AJU-05); `path` counts
-    /// step 2. The student's circuit is untouched.
-    pub fn solution(&mut self, path: bool) -> Session {
-        self.log.record(if path {
-            HelpStep::SolutionPath
-        } else {
-            HelpStep::Solution
-        });
-        self.solution_session()
+    /// The solution of `method` from level 0 as a separate session (AJU-03, AJU-05,
+    /// AJU-10); `path` counts step 2. The student's circuit is untouched.
+    pub fn solution(&mut self, path: bool, method: SolutionMethod) -> Session {
+        let [result, step2, _] = method.steps();
+        self.log.record(if path { step2 } else { result });
+        self.solution_session(method)
     }
 
     /// The solution again, uncounted, once it was revealed; `None` before that (GER-01).
     #[wasm_bindgen(js_name = shownSolution)]
-    pub fn shown_solution(&self) -> Option<Session> {
-        (self.log.solution > 0).then(|| self.solution_session())
+    pub fn shown_solution(&self, method: SolutionMethod) -> Option<Session> {
+        (method.counts(&self.log)[0] > 0).then(|| self.solution_session(method))
     }
 
-    /// Replaces the student's circuit with Dadda's solution as one undo step (AJU-09).
-    /// False, with nothing changed or counted, before step 2 of the solution was revealed
-    /// or when the circuit already is the solution.
+    /// Replaces the student's circuit with the solution of `method` as one undo step
+    /// (AJU-09, AJU-10). False, with nothing changed or counted, before step 2 of that
+    /// method's solution was revealed or when the circuit already is the solution.
     #[wasm_bindgen(js_name = applySolution)]
-    pub fn apply_solution(&mut self) -> bool {
-        if self.log.solution_path == 0 {
+    pub fn apply_solution(&mut self, method: SolutionMethod) -> bool {
+        if method.counts(&self.log)[1] == 0 {
             return false;
         }
-        let applied = self.reduction.adopt(&help::dadda_solution(&self.matrix));
+        let applied = self
+            .reduction
+            .adopt(&help::solution(&self.matrix, method.core()));
         if applied {
-            self.log.record(HelpStep::SolutionApplied);
+            self.log.record(method.steps()[2]);
         }
         applied
     }
@@ -733,7 +774,9 @@ impl Session {
         let l = &self.log;
         json!({"hints": l.hints, "nextMoves": l.next_moves, "lowerBound": l.lower_bound,
                "lowerBoundPath": l.lower_bound_path, "solution": l.solution,
-               "solutionPath": l.solution_path, "solutionApplied": l.solution_applied})
+               "solutionPath": l.solution_path, "solutionApplied": l.solution_applied,
+               "wallace": l.wallace, "wallacePath": l.wallace_path,
+               "wallaceApplied": l.wallace_applied})
         .to_string()
     }
 

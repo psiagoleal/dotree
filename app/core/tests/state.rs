@@ -332,3 +332,62 @@ fn aju09_applying_without_seeing_the_path_is_inconsistent() {
     v["help"]["solutionApplied"] = 1.into();
     assert_eq!(open(&v), Err(StateError::InconsistentReveals));
 }
+
+// ------------------------------------------------------------ AJU-10: Wallace (MT-29)
+
+#[test]
+fn aju10_files_without_wallace_still_open() {
+    let mut v: Value =
+        serde_json::from_str(&capture(&r2(), None, HelpLog::default()).to_json()).unwrap();
+    for key in ["wallace", "wallacePath", "wallaceApplied"] {
+        assert_eq!(v["help"][key], 0, "{key}");
+        v["help"].as_object_mut().unwrap().remove(key);
+    }
+    let back = Exercise::parse(&v.to_string()).expect("a schema-1 file from v0.1 opens");
+    assert_eq!(
+        (
+            back.help.wallace,
+            back.help.wallace_path,
+            back.help.wallace_applied
+        ),
+        (0, 0, 0)
+    );
+}
+
+#[test]
+fn aju10_the_wallace_counts_round_trip() {
+    let mut help = HelpLog::default();
+    for step in [
+        HelpStep::Wallace,
+        HelpStep::WallacePath,
+        HelpStep::WallaceApplied,
+    ] {
+        help.record(step);
+    }
+    let (back, _) = round_trip(&capture(&r2(), None, help));
+    assert_eq!(
+        (
+            back.help.wallace,
+            back.help.wallace_path,
+            back.help.wallace_applied
+        ),
+        (1, 1, 1)
+    );
+}
+
+#[test]
+fn aju10_inconsistent_wallace_reveals_are_refused() {
+    for (set, why) in [
+        (&[("wallacePath", 1)][..], "the path without the result"),
+        (
+            &[("wallace", 1), ("wallaceApplied", 1)][..],
+            "applied without the path",
+        ),
+    ] {
+        let mut v = r2_file();
+        for &(key, n) in set {
+            v["help"][key] = n.into();
+        }
+        assert_eq!(open(&v), Err(StateError::InconsistentReveals), "{why}");
+    }
+}
