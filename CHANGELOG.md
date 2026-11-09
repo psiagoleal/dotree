@@ -13,6 +13,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   o próprio circuito por ela, com confirmação. A troca é um só passo de desfazer, conta no
   registro de ajudas do resumo e vai para o arquivo do exercício (`help.solutionApplied`,
   opcional, esquema 1 mantido). Não aparece no modo leitura (AJU-09, MT-20).
+- VHDL comportamental: `<nome>_comportamental.vhd` tem as mesmas portas do topo e calcula
+  a expressão com `numeric_std`, sem células, para comparar no Quartus o circuito montado
+  com o que o sintetizador escolhe. O testbench confere as duas versões e informa o
+  resultado de cada uma; o CI e o ModelSim ASE 10.1d simulam as duas (VHD-10, MT-21).
+
+### Alterado
+- O testbench gerado instancia também a versão comportamental: as mensagens finais passam
+  a ser "ESTRUTURAL: …" e "COMPORTAMENTAL: …", e a simulação falha se qualquer uma errar.
 
 ## [0.1.0] - 2026-11-05
 

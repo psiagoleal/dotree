@@ -11,7 +11,7 @@ export default defineConfig({
 	testMatch: '**/*.e2e.ts',
 	forbidOnly: !!process.env.CI,
 	reporter: process.env.CI ? 'github' : 'list',
-	use: { baseURL: `http://localhost:${port}${base}/` },
+	use: { baseURL: `http://localhost:${port}${base}/`, screenshot: 'only-on-failure' },
 	projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 	webServer: {
 		command: `node e2e/serve.mjs build ${port} ${base}`,

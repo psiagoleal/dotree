@@ -106,10 +106,11 @@ fn vhd05_r2_files_in_both_languages() {
             "full_adder.vhd",
             "half_adder.vhd",
             "dotree_circuito.vhd",
+            "dotree_circuito_comportamental.vhd",
             "tb_dotree_circuito.vhd"
         ]
     );
-    let tb = |v: &Value| v["files"][3]["contents"].as_str().unwrap().to_owned();
+    let tb = |v: &Value| v["files"][4]["contents"].as_str().unwrap().to_owned();
     assert!(tb(&pt).contains("CASOS CORRETOS"));
     let en = vhdl("meu_somador", "en");
     assert_eq!(en["files"][2]["name"], "meu_somador.vhd");

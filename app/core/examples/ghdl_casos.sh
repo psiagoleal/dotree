@@ -22,9 +22,10 @@ while read -r caso tb esperado; do
   )
   rc=$?
   log="$DIR/$caso/sim.log"
-  final="$(grep -E 'CORRETOS|CORRECT|ERRADOS|WRONG' "$log" 2>/dev/null | tail -1 | sed 's/.*(report \(note\|failure\)): //')"
+  final="$(grep -E 'CORRETOS|CORRECT|ERRADOS|WRONG' "$log" 2>/dev/null | sed 's/.*(report \(note\|error\|failure\)): //' | paste -sd'|' | sed 's/|/ | /g')"
   case "$esperado" in
-    ok)    if [[ $rc -eq 0 ]] && grep -qE 'CASOS CORRETOS|CASES CORRECT' "$log"; then v=ok; else v=FALHOU; fi ;;
+    # Both architectures, structural and behavioral (VHD-10), must report all correct.
+    ok)    if [[ $rc -eq 0 ]] && [[ "$(grep -cE 'CASOS CORRETOS|CASES CORRECT' "$log")" -eq 2 ]]; then v=ok; else v=FALHOU; fi ;;
     falha) if [[ $rc -ne 0 ]] && grep -qE 'CASOS ERRADOS|CASES WRONG' "$log"; then v=ok; else v=FALHOU; fi ;;
     *)     v=FALHOU ;;
   esac

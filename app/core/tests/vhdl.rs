@@ -104,6 +104,7 @@ fn vhd01_r2_files() {
             "full_adder.vhd",
             "half_adder.vhd",
             "dotree_circuito.vhd",
+            "dotree_circuito_comportamental.vhd",
             "tb_dotree_circuito.vhd"
         ]
     );
@@ -124,6 +125,7 @@ fn vhd01_no_half_adder_file_without_has() {
         [
             "full_adder.vhd",
             "dotree_circuito.vhd",
+            "dotree_circuito_comportamental.vhd",
             "tb_dotree_circuito.vhd"
         ]
     );
@@ -347,6 +349,10 @@ fn entity_name_validation() {
     let fs = generate(&m, &n, "meu_somador", Language::PtBr).unwrap();
     assert!(fs.iter().any(|f| f.name == "meu_somador.vhd"));
     assert!(fs.iter().any(|f| f.name == "tb_meu_somador.vhd"));
+    assert!(
+        fs.iter()
+            .any(|f| f.name == "meu_somador_comportamental.vhd")
+    );
 }
 
 // ---------------------------------------------------------------- VHD-09 (MT-19)
@@ -388,5 +394,96 @@ fn vhd09_every_component_of_the_top_has_its_own_file() {
     assert_eq!(components, ["full_adder.vhd", "half_adder.vhd"]);
     for c in &components {
         assert!(names.contains(c.as_str()), "{c}");
+    }
+}
+
+// ---------------------------------------------------------------- VHD-10 (MT-21)
+
+fn behavioral(fs: &[VhdlFile]) -> &str {
+    file(fs, "dotree_circuito_comportamental.vhd")
+}
+
+/// The port clause of the entity in `text`: from `port (` to the `);` that closes it.
+fn port_clause(text: &str) -> Vec<String> {
+    let code = code_only(text);
+    let start = code.find("    port (").expect("port clause");
+    let end = start + code[start..].find("\n    );").expect("end of ports");
+    code[start..end].lines().map(str::to_string).collect()
+}
+
+#[test]
+fn vhd10_behavioral_has_the_ports_of_the_top() {
+    let (m, n) = r2();
+    let fs = files(&m, &n, Language::PtBr);
+    assert_eq!(port_clause(behavioral(&fs)), port_clause(top(&fs)));
+    assert!(behavioral(&fs).contains("entity dotree_circuito_comportamental is"));
+}
+
+#[test]
+fn vhd10_behavioral_is_the_expression_in_numeric_std() {
+    let (m, n) = r2();
+    let fs = files(&m, &n, Language::PtBr);
+    let b = code_only(behavioral(&fs));
+    for needle in [
+        "use ieee.numeric_std.all;",
+        "architecture comportamental of dotree_circuito_comportamental is",
+        "constant W : natural := 7;",
+        "resize(resize(unsigned(A), W) * resize(unsigned(B), W), W)",
+        "+ resize(resize(unsigned(C), W) * resize(unsigned(D), W), W)",
+        "+ resize(to_unsigned(3, W) * resize(unsigned(E), W), W)",
+        "+ resize(to_unsigned(3, W) * resize(unsigned(F), W), W)",
+        "+ resize(unsigned(G), W)",
+    ] {
+        assert!(b.contains(needle), "missing {needle:?}");
+    }
+    // No cells: the synthesizer chooses the circuit.
+    for absent in ["component", "port map", "use work.all"] {
+        assert!(!b.contains(absent), "{absent:?}");
+    }
+}
+
+#[test]
+fn vhd10_coefficients_beyond_integer_are_bit_strings() {
+    // 3 000 000 000 does not fit a VHDL-93 integer (2^31 - 1).
+    let (m, r) = build("3000000000A", &[('A', 1)]);
+    let n = Netlist::from_reduction(&m, &r).unwrap();
+    let fs = files(&m, &n, Language::En);
+    let b = behavioral(&fs);
+    let w = n.output_width as usize;
+    let bits = format!("unsigned'(\"{:0w$b}\")", 3_000_000_000u64);
+    assert!(
+        b.contains(&format!("resize({bits} * resize(unsigned(A), W), W)")),
+        "{b}"
+    );
+}
+
+#[test]
+fn vhd10_variable_named_r_keeps_its_port_name() {
+    let (m, mut r) = build("R + S", &[('R', 1), ('S', 1)]);
+    r.close_with_cpa().unwrap();
+    let n = Netlist::from_reduction(&m, &r).unwrap();
+    let fs = files(&m, &n, Language::PtBr);
+    assert!(behavioral(&fs).contains("resize(unsigned(R_IN), W)"));
+}
+
+#[test]
+fn vhd04_the_testbench_checks_both_architectures() {
+    let (m, n) = r2();
+    for (lang, structural, beh) in [
+        (
+            Language::PtBr,
+            "ESTRUTURAL: TODOS OS",
+            "COMPORTAMENTAL: TODOS OS",
+        ),
+        (Language::En, "STRUCTURAL: ALL", "BEHAVIORAL: ALL"),
+    ] {
+        let fs = files(&m, &n, lang);
+        let tb = file(&fs, "tb_dotree_circuito.vhd");
+        assert!(tb.contains("dut : entity work.dotree_circuito port map"));
+        assert!(tb.contains(
+            "dut_comp : entity work.dotree_circuito_comportamental port map (A => A, B => B, C => C, D => D, E => E, F => F, G => G, R => R_COMP);"
+        ));
+        assert!(tb.contains("if unsigned(R_COMP) /= expected then"));
+        assert!(tb.contains(structural) && tb.contains(beh), "{tb}");
     }
 }

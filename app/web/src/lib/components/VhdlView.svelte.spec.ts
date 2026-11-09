@@ -34,6 +34,7 @@ describe('VhdlView (VHD-05, VHD-07, VHD-08)', () => {
 			'full_adder.vhd',
 			'half_adder.vhd',
 			'dotree_circuito.vhd',
+			'dotree_circuito_comportamental.vhd',
 			'tb_dotree_circuito.vhd'
 		]);
 		await nameInput().fill('meu_somador');

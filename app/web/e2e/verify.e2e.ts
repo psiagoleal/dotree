@@ -26,6 +26,11 @@ test('a long verification shows progress, keeps the page alive and can be cancel
 	page
 }) => {
 	// 24 input bits: 2^24 cases, the longest run of spec 04, closed straight with the CPA.
+	const problems: string[] = [];
+	page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
+	page.on('console', (msg) => {
+		if (msg.type() === 'error') problems.push(`console: ${msg.text()}`);
+	});
 	await page.goto('./');
 	await page.getByLabel('Expressão').fill('A + B');
 	for (const v of ['A', 'B']) await page.locator(`input[name="width-${v}"]`).fill('12');
@@ -34,7 +39,17 @@ test('a long verification shows progress, keeps the page alive and can be cancel
 
 	await page.getByRole('button', { name: 'Verificar circuito' }).click();
 	const bar = page.getByRole('progressbar');
-	await expect(bar).toBeVisible();
+	// The bar shows only after 500 ms of running. If it never does, say what the page
+	// showed instead: a run that ended or failed early, or errors from the page.
+	try {
+		await expect(bar).toBeVisible();
+	} catch (e) {
+		const result = await page.getByTestId('verify-result').textContent();
+		throw new Error(
+			`${e}\nverify-result: ${JSON.stringify(result)}\n${problems.join('\n') || 'no page errors'}`,
+			{ cause: e }
+		);
+	}
 	await expect(page.getByText(/^Verificando: [\d.]+ de 16\.777\.216 casos$/)).toBeVisible();
 	// The bar keeps moving: the page handles the worker's messages while it runs.
 	const first = Number(await bar.getAttribute('value'));
@@ -57,6 +72,7 @@ test('R2: copy each VHDL file and download them all as a .zip (VHD-05)', async (
 		'full_adder.vhd',
 		'half_adder.vhd',
 		'dotree_circuito.vhd',
+		'dotree_circuito_comportamental.vhd',
 		'tb_dotree_circuito.vhd'
 	];
 	const contents: Record<string, string> = {};
@@ -67,6 +83,13 @@ test('R2: copy each VHDL file and download them all as a .zip (VHD-05)', async (
 		expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(contents[name]);
 	}
 	expect(contents['dotree_circuito.vhd']).toContain('entity dotree_circuito is');
+	// VHD-10: the behavioral twin, and the testbench that checks both.
+	expect(contents['dotree_circuito_comportamental.vhd']).toContain(
+		'entity dotree_circuito_comportamental is'
+	);
+	expect(contents['tb_dotree_circuito.vhd']).toContain(
+		'entity work.dotree_circuito_comportamental'
+	);
 
 	const downloading = page.waitForEvent('download');
 	await page.getByRole('button', { name: 'Baixar todos (.zip)' }).click();
