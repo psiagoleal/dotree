@@ -103,7 +103,7 @@ fn expr_error(e: &ExprError) -> Value {
         ExprError::WidthOutOfRange { var, width } => json!({"code": "widthOutOfRange", "var": var,
             "width": width, "min": expr::MIN_WIDTH, "max": expr::MAX_WIDTH}),
         ExprError::RepeatedVariable { var } => json!({"code": "repeatedVariable", "var": var}),
-        ExprError::ConstantTerm => json!({"code": "constantTerm"}),
+        ExprError::NoVariables => json!({"code": "noVariables"}),
         ExprError::CoefficientTooLarge => json!({"code": "coefficientTooLarge"}),
         ExprError::TooManyInputBits { total, limit } => {
             json!({"code": "tooManyInputBits", "total": total, "limit": limit})

@@ -252,8 +252,9 @@ pub(super) fn parse(src: &str) -> Result<Polynomial, ExprError> {
         // Only a stray ')' at depth 0 can stop expr() before the end.
         return Err(p.error_at(Some(tok), vec![Expected::Operator, Expected::End]));
     }
-    if poly.terms.iter().any(|t| t.vars.is_empty()) {
-        return Err(ExprError::ConstantTerm);
+    // A constant alone is no circuit (EXP-13); with variables, it is a term (EXP-15).
+    if poly.terms.iter().all(|t| t.vars.is_empty()) {
+        return Err(ExprError::NoVariables);
     }
     Ok(poly)
 }

@@ -25,24 +25,52 @@ test('R2: 16 384 cases, exhaustive, 0 errors (VER-01)', async ({ page }) => {
 test('a long verification shows progress, keeps the page alive and can be cancelled (VER-04)', async ({
 	page
 }) => {
-	// 24 input bits: 2^24 cases, the longest run of spec 04, closed straight with the CPA.
+	// 24 input bits: 2^24 cases, the longest run of spec 04. A product, not A + B: the 144
+	// dots of AB, reduced by Dadda, make the run about twice as long, and a CI runner ended
+	// A + B before the test saw the bar.
 	const problems: string[] = [];
 	page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
 	page.on('console', (msg) => {
 		if (msg.type() === 'error') problems.push(`console: ${msg.text()}`);
 	});
 	await page.goto('./');
-	await page.getByLabel('Expressão').fill('A + B');
+	await page.getByLabel('Expressão').fill('AB');
 	for (const v of ['A', 'B']) await page.locator(`input[name="width-${v}"]`).fill('12');
 	await page.getByRole('button', { name: 'Montar a matriz' }).click();
-	await page.getByRole('button', { name: 'Fechar com CPA' }).click();
+	const show = page.getByRole('dialog').getByRole('button', { name: 'Mostrar', exact: true });
+	await page.getByRole('button', { name: 'Solução automática', exact: true }).click();
+	await show.click();
+	await page.getByRole('button', { name: 'Ver a solução nível a nível' }).click();
+	await show.click();
+	await page.getByRole('button', { name: 'Usar esta solução' }).click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Substituir' }).click();
+	await expect(page.getByTestId('complete')).toBeVisible();
 
+	// The bar shows only after 500 ms of running, and a CI runner ends this run about a
+	// second later. The usual expect polls at 0, 100, 350, 850 ms… and can miss the whole
+	// window, so a MutationObserver records every value the bar takes, from the click on.
+	await page.evaluate(() => {
+		const seen: number[] = [];
+		(window as unknown as { seen: number[] }).seen = seen;
+		new MutationObserver(() => {
+			const bar = document.querySelector('progress');
+			if (bar && seen.at(-1) !== bar.value) seen.push(bar.value);
+		}).observe(document.body, { subtree: true, childList: true, attributes: true });
+	});
 	await page.getByRole('button', { name: 'Verificar circuito' }).click();
 	const bar = page.getByRole('progressbar');
-	// The bar shows only after 500 ms of running. If it never does, say what the page
-	// showed instead: a run that ended or failed early, or errors from the page.
+	// The bar keeps moving: the page handles the worker's messages while it runs. If it
+	// never shows, say what the page showed instead: a run that ended or failed early, or
+	// errors from the page.
 	try {
-		await expect(bar).toBeVisible();
+		await page.waitForFunction(
+			() => {
+				const seen = (window as unknown as { seen: number[] }).seen;
+				return seen.length >= 2 && seen.at(-1)! > seen[0] && !!document.querySelector('progress');
+			},
+			undefined,
+			{ timeout: 5000 }
+		);
 	} catch (e) {
 		const result = await page.getByTestId('verify-result').textContent();
 		throw new Error(
@@ -50,10 +78,8 @@ test('a long verification shows progress, keeps the page alive and can be cancel
 			{ cause: e }
 		);
 	}
+	await expect(bar).toBeVisible();
 	await expect(page.getByText(/^Verificando: [\d.]+ de 16\.777\.216 casos$/)).toBeVisible();
-	// The bar keeps moving: the page handles the worker's messages while it runs.
-	const first = Number(await bar.getAttribute('value'));
-	await expect.poll(async () => Number(await bar.getAttribute('value'))).toBeGreaterThan(first);
 
 	await page.getByRole('button', { name: 'Cancelar' }).click();
 	await expect(page.getByTestId('verify-result')).toHaveText(

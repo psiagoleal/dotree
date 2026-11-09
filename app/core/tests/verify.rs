@@ -306,3 +306,29 @@ fn timing_of_the_largest_exhaustive_case() {
     );
     assert_eq!(p.counterexample, None);
 }
+
+// ---------------------------------------------------------------- EXP-15 (MT-28)
+
+#[test]
+fn exp15_circuits_with_a_constant_verify_exhaustively() {
+    // Dadda's solution and random reductions, all checked against the expression.
+    for (src, widths) in [
+        ("3(A + 1) + B", &[('A', 2), ('B', 2)][..]),
+        ("5A + 3B + 6", &[('A', 3), ('B', 3)][..]),
+        ("A*B + 9", &[('A', 3), ('B', 3)][..]),
+    ] {
+        let w: BTreeMap<char, u32> = widths.iter().copied().collect();
+        let m = DotMatrix::build(&analyze(src, &w).unwrap()).unwrap();
+        let n = Netlist::from_reduction(&m, &dotree_core::help::dadda_solution(&m)).unwrap();
+        let p = Verifier::new(n).run_to_end();
+        assert_eq!(p.counterexample, None, "{src} (Dadda)");
+        let mut g = Lcg(7);
+        for _ in 0..20 {
+            let mut r = reduction(src, widths);
+            reduce_at_random(&mut r, &mut g);
+            let n = Netlist::from_reduction(&m, &r).unwrap();
+            let p = Verifier::new(n).run_to_end();
+            assert_eq!(p.counterexample, None, "{src} (random)");
+        }
+    }
+}

@@ -171,7 +171,7 @@ $W = 4$, atraso 0.
 ## Fora de escopo da v0.1 (vale para todas as specs)
 
 - Números com sinal (complemento de dois, Baugh-Wooley) e subtração.
-- Constantes aditivas na expressão (ex.: `+ 5`).
+- Constantes aditivas na expressão (ex.: `+ 5`); entram na v0.2 (EXP-15).
 - Blocos AMM como célula composta; compressores 4:2; CPA que não seja *ripple*.
 - Solução automática de Wallace (v0.2); exportação em CSV (v0.2).
 - Contas de usuário, servidor, compartilhamento por link (D-6).

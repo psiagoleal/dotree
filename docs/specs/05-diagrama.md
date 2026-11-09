@@ -13,6 +13,7 @@ dois artefatos que o estudante copia para a folha de resposta.
 |---|---|---|
 | Bit de entrada | $e_0$ | `e0` |
 | Produto parcial | $a_1 b_0$ | `a1_b0` |
+| Ponto fixo em 1 (constante, EXP-15) | $1$ | `one` |
 | Saídas da célula $n$ | $s_n$, $k_n$ | `s<n>`, `k<n>` |
 | Bit $j$ do resultado | $R_j$ | `R(j)` |
 | Célula $n$ | FA$n$ / HA$n$ | `FA<n>` / `HA<n>` |

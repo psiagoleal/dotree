@@ -48,9 +48,11 @@ mascarada para a largura total. A mesma codificação vale para o testbench VHDL
   coluna errada), que precisa ser pego.
 - **VER-04** — O sistema DEVE executar a verificação sem travar a interface, mostrar o
   progresso quando ela levar mais de 0,5 s e permitir cancelá-la.
-  *Prova:* teste de ponta a ponta com $A + B$ de 12 + 12 bits, fechado direto com o CPA:
+  *Prova:* teste de ponta a ponta com $AB$ de 12 × 12 bits, reduzido pela solução de Dadda:
   $2^{24}$ casos exaustivos, a verificação mais longa da tabela acima (progresso visível e
-  andando; cancelar devolve a interface sem resultado parcial). $A \times B$ de 16 × 16 bits
+  andando; cancelar devolve a interface sem resultado parcial). Até o MT-28 a prova usava
+  $A + B$ fechado direto com o CPA; num *runner* do CI essa verificação terminou antes de o
+  teste ver a barra, e o teste passou a registrar os valores da barra desde o clique. $A \times B$ de 16 × 16 bits
   passa de 24 bits e cai na amostra de $2^{20}$ vetores, que termina em cerca de 0,3 s, antes
   de o progresso aparecer.
   *Implementação (MT-14b):* a netlist vai em JSON para um *worker* com o próprio núcleo, que

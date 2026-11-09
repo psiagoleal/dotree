@@ -60,7 +60,7 @@
 	"error_missing_width": "Give the width of {var}.",
 	"error_width_out_of_range": "The width of {var} must be between {min} and {max} bits (it is {width}).",
 	"error_repeated_variable": "{var} appears twice in the same product: powers are out of this version.",
-	"error_constant_term": "Added constants (such as “+ 5”) are out of this version.",
+	"error_no_variables": "The expression needs at least one variable: constants alone make no circuit.",
 	"error_coefficient_too_large": "Coefficient too large.",
 	"error_too_many_input_bits": "The inputs add up to {total} bits; the limit is {limit}.",
 	"error_too_many_dots": "The matrix would have {count} dots; the limit is {limit}.",

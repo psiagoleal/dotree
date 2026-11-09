@@ -46,8 +46,8 @@ export function errorMessage(e: CoreError, locale?: Locale): string {
 			return m.error_width_out_of_range(e, o);
 		case 'repeatedVariable':
 			return m.error_repeated_variable({ var: e.var }, o);
-		case 'constantTerm':
-			return m.error_constant_term({}, o);
+		case 'noVariables':
+			return m.error_no_variables({}, o);
 		case 'coefficientTooLarge':
 			return m.error_coefficient_too_large({}, o);
 		case 'tooManyInputBits':

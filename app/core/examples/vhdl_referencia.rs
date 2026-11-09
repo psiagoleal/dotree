@@ -197,6 +197,18 @@ fn main() {
         &mut list,
     );
 
+    // EXP-15: an additive constant, its fixed dots tied to '1' (and the board top with it).
+    let mk = matrix("5A + 3B + 6", &[('A', 3), ('B', 3)]);
+    write(
+        dir,
+        "constante",
+        &mk,
+        &dadda(&mk),
+        Language::PtBr,
+        "ok",
+        &mut list,
+    );
+
     // A coefficient beyond a VHDL-93 integer: the behavioral twin writes it as a bit string.
     let mc = matrix("3000000000A", &[('A', 2)]);
     write(

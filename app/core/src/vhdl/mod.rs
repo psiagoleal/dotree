@@ -448,9 +448,6 @@ impl Gen<'_> {
             for f in &factors[1..] {
                 term = format!("resize({term} * {f}, W)");
             }
-            if factors.len() == 1 && !term.starts_with("resize(") {
-                term = format!("resize({term}, W)");
-            }
             let lead = if i == 0 { "      " } else { "    + " };
             let _ = writeln!(o, "        {lead}{term}");
         }
@@ -561,7 +558,13 @@ impl Gen<'_> {
                 .iter()
                 .map(|f| format!("{}({})", port_name(f.var), f.bit))
                 .collect();
-            let _ = writeln!(o, "    {} <= {};", s.ident(), rhs.join(" and "));
+            // The fixed dots of the constant (EXP-15) are the wire `one`, tied to '1'.
+            let rhs = if rhs.is_empty() {
+                "'1'".to_string()
+            } else {
+                rhs.join(" and ")
+            };
+            let _ = writeln!(o, "    {} <= {rhs};", s.ident());
         }
         let mut level = None;
         for c in &n.cells {

@@ -53,6 +53,17 @@ describe('LevelPanel', () => {
 		expect(s1.querySelector('sub')?.textContent).toBe('1');
 	});
 
+	it('writes the fixed dot of the constant as 1 (EXP-15)', async () => {
+		const withOne = [...points, pt(4, 1, 'one', 2)];
+		const { container } = await render(LevelPanel, { ...base, points: withOne, view: 'indexed' });
+		const one = container.querySelector<HTMLElement>('[data-signal="one"]')!;
+		expect(one.textContent).toBe('1');
+		expect(one.style.getPropertyValue('--c')).toBe('var(--dot-term-3)');
+		const dots = await render(LevelPanel, { ...base, points: withOne });
+		const plain = dots.container.querySelector<HTMLElement>('[data-signal="one"]')!;
+		expect(plain.getAttribute('aria-label')).toBe('1');
+	});
+
 	it('boxes each cell around its inputs: FA solid, HA dashed (CMP-05)', async () => {
 		const groups = [{ kind: 'ha' as const, inputs: [3, 2], label: 'HA 1' }];
 		const { container } = await render(LevelPanel, { ...base, groups });

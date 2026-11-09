@@ -9,6 +9,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Constante somada: `A + 36` e `3(A + 1)` passam a valer. As constantes se juntam num termo
+  só, com cor própria, e cada bit 1 vira um ponto fixo em 1 (`one`, mostrado como 1), que o
+  aluno comprime como os outros; a constante entra em $W$, na verificação e no VHDL
+  (`one <= '1'`). Uma expressão só com constantes é recusada (EXP-13, EXP-15, MT-28).
 - Placa DE2: com até 18 bits de entrada, o VHDL traz um topo `<nome>_de2` que lê as
   variáveis das chaves `SW` e mostra o resultado nos LEDs `LEDR` e, em hexadecimal, nos
   displays `HEX0` a `HEX7`; um testbench próprio; e o projeto do Quartus II (`.qpf` e
@@ -25,6 +29,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   resultado de cada uma; o CI e o ModelSim ASE 10.1d simulam as duas (VHD-10, MT-21).
 
 ### Alterado
+- O código de erro `constantTerm` deu lugar a `noVariables` (expressão sem variável).
 - Os nomes `dut`, `seg7`, `SW`, `LEDR` e `HEX0` a `HEX7` não servem mais como nome da
   entidade, porque o topo da placa os usa (PLA-07).
 - O testbench gerado instancia também a versão comportamental: as mensagens finais passam

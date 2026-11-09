@@ -29,7 +29,7 @@ const ALL: CoreError[] = [
 	{ code: 'missingWidth', var: 'B' },
 	{ code: 'widthOutOfRange', var: 'A', width: 17, min: 1, max: 16 },
 	{ code: 'repeatedVariable', var: 'A' },
-	{ code: 'constantTerm' },
+	{ code: 'noVariables' },
 	{ code: 'coefficientTooLarge' },
 	{ code: 'tooManyInputBits', total: 33, limit: 32 },
 	{ code: 'tooManyDots', count: 257, limit: 256 },

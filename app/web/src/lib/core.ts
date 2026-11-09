@@ -64,7 +64,7 @@ export type CoreError =
 	| { code: 'missingWidth'; var: string }
 	| { code: 'widthOutOfRange'; var: string; width: number; min: number; max: number }
 	| { code: 'repeatedVariable'; var: string }
-	| { code: 'constantTerm' }
+	| { code: 'noVariables' }
 	| { code: 'coefficientTooLarge' }
 	| { code: 'tooManyInputBits'; total: number; limit: number }
 	| { code: 'tooManyDots'; count: number; limit: number }

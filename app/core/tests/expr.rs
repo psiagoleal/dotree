@@ -249,13 +249,22 @@ fn exp11_unused_width_is_a_warning() {
     assert!(!a.widths.contains_key(&'Z'));
 }
 
-// ---------------------------------------------------------------- EXP-13: constants
+// ---------------------------------------------------------------- EXP-13, EXP-15: constants
 
 #[test]
-fn exp13_additive_constants_are_refused() {
-    for src in ["A + 5", "2", "3(A + 1)"] {
-        assert_eq!(parse(src), Err(ExprError::ConstantTerm), "{src:?}");
+fn exp13_an_expression_without_variables_is_refused() {
+    for src in ["2", "3 + 5", "2(3 + 1)"] {
+        assert_eq!(parse(src), Err(ExprError::NoVariables), "{src:?}");
     }
+}
+
+#[test]
+fn exp15_constants_join_in_one_term_where_the_first_was() {
+    assert_eq!(expanded("A + 5"), "A + 5");
+    assert_eq!(expanded("A + 5 + 2"), "A + 7");
+    assert_eq!(expanded("3(A + 1)"), "3A + 3");
+    assert_eq!(expanded("1 + A + 2B + 3"), "4 + A + 2B");
+    assert_eq!(expanded("A + 1"), "A + 1");
 }
 
 #[test]

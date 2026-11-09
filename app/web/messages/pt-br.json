@@ -60,7 +60,7 @@
 	"error_missing_width": "Informe a largura de {var}.",
 	"error_width_out_of_range": "A largura de {var} precisa ficar entre {min} e {max} bits (está em {width}).",
 	"error_repeated_variable": "{var} aparece duas vezes no mesmo produto: potências ficam fora desta versão.",
-	"error_constant_term": "Constantes somadas (como “+ 5”) ficam fora desta versão.",
+	"error_no_variables": "A expressão precisa de ao menos uma variável: só constantes não formam um circuito.",
 	"error_coefficient_too_large": "Coeficiente grande demais.",
 	"error_too_many_input_bits": "As entradas somam {total} bits; o limite é {limit}.",
 	"error_too_many_dots": "A matriz teria {count} pontos; o limite é {limit}.",
