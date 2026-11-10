@@ -81,8 +81,8 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   CMP-11.
   A solução é, por construção, seguir a Próxima jogada (AJU-04) desde o nível 0 até o
   fim: sugestão e solução nunca discordam.
-  **É o método clássico de Dadda** (HA quando falta reduzir só 1). A fig. 8.14 da
-  referência do curso (Parhami), com sete operandos de 6 bits, desenha uma variante: usa FA
+  **É o método clássico de Dadda** (HA quando falta reduzir só 1). A fig. 8.14 do
+  Parhami (*Computer Arithmetic*), com sete operandos de 6 bits, desenha uma variante: usa FA
   também onde falta reduzir 1 e, no terceiro nível, até em colunas que já estão no alvo,
   escolha que nenhuma regra coluna a coluna reproduz. O total de FA é o mesmo (33), mas a
   figura usa 3 HA e o método clássico, 6 (34,5 contra 36 $A_{FA}$; 9,5 contra
@@ -128,7 +128,7 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   tem a própria contagem no registro de ajudas (AJU-07) e no arquivo do exercício
   (`help.wallace`, `help.wallacePath`, `help.wallaceApplied`, opcionais). A etapa 2 mostra,
   junto dos níveis, uma frase com a regra do método.
-  **Regra (a da referência do curso, Parhami, *Computer Arithmetic*, fig. 8.10):** a cada
+  **Regra (a da fig. 8.10 do Parhami, *Computer Arithmetic*):** a cada
   nível, com altura máxima $h$, a altura-alvo é $2\lfloor h/3 \rfloor + (h \bmod 3)$, as
   linhas que sobram ao agrupar de 3 em 3 (3 → 2, 4 → 3, 5 → 4, 6 → 4, 7 → 5, 9 → 6,
   13 → 9). Cada coluna, da menor para a maior, usa **todos os FA** que os pontos livres

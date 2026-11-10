@@ -10,7 +10,7 @@
 ## Contexto
 
 O dotree é um site estático (ADR 0001). O autor quer um endereço público para mostrar o
-trabalho ao professor desde as primeiras versões, e quer o CI/CD pronto antes das
+trabalho desde as primeiras versões, e quer o CI/CD pronto antes das
 funcionalidades, para que cada uma entre já verificada. O repositório está no GitHub, é
 público e o projeto não tem orçamento.
 
@@ -35,7 +35,7 @@ público e o projeto não tem orçamento.
 ## Consequências
 
 - **Impacto positivo:** custo zero; tudo no mesmo lugar do código; endereço estável para
-  enviar ao professor; cada mudança chega ao ar verificada.
+  enviar a quem quiser ver; cada mudança chega ao ar verificada.
 - **Impacto negativo:** o caminho base `/dotree/` precisa ser respeitado pela build (rotas,
   arquivos e `.wasm`); o Pages não permite cabeçalhos HTTP próprios.
 - **Trade-offs aceitos:** sem pré-visualização por PR na v0.1.

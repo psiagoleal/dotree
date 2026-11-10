@@ -10,3 +10,4 @@ Registros de decisões estruturais (ver skill `adr-writer`). Use
 | [0001](0001-nucleo-rust-em-webassembly.md) | Núcleo em Rust compilado para WebAssembly, interface SvelteKit estática | Accepted |
 | [0002](0002-entrega-github-pages-e-actions.md) | Entrega por GitHub Actions, GitHub Pages e imagem no GHCR | Accepted |
 | [0003](0003-governanca-do-repositorio.md) | Governança do repositório público: tudo por PR, CI verde, só o dono mescla | Accepted |
+| [0004](0004-spec-viva-e-referencias-publicas.md) | Uma spec só, viva, e só referências públicas | Accepted |

@@ -1,6 +1,6 @@
 // Caminho relativo: app/core/src/heights/mod.rs
 //! The height table (spec 02, CMP-18; MT-30): the height of each column at each level and
-//! the cells formed over it, the tabular form of the course reference (Parhami, fig. 8.11).
+//! the cells formed over it, the tabular form of Parhami, fig. 8.11.
 
 use crate::reduce::{CellKind, Point, Reduction};
 

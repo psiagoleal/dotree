@@ -83,7 +83,7 @@ válido.
 ## Compatibilidade com ferramentas
 
 O alvo declarado é VHDL-93 sem construções de VHDL-2008, para que o código também rode no
-ModelSim ASE 10.1d e no Quartus usados em aula. A garantia **automática** é o GHDL em
+ModelSim ASE 10.1d e no Quartus II 13.0, que ainda suportam a DE2. A garantia **automática** é o GHDL em
 `--std=93` no CI. A compatibilidade com o ModelSim é conferida à mão antes de cada versão e
 registrada no CHANGELOG; em 2026-11-01 (MT-10), o R2 gerado compilou sem avisos no ModelSim
 ASE 10.1d e deu "TODOS OS 16384 CASOS CORRETOS". Em 2026-11-06, para a v0.1.0 (já com
@@ -99,7 +99,7 @@ pedir multiplicadores em lógica na síntese.
 Duas lições do primeiro contato com simuladores reais, que viraram critério:
 - o GHDL recusa caracteres fora do Latin-1 até em comentário (um travessão bastou), por isso
   os arquivos são ASCII;
-- o FPGAEmuWeb, usado em aula, lê a entidade de topo procurando `end <nome>;` ou
+- o FPGAEmuWeb lê a entidade de topo procurando `end <nome>;` ou
   `end entity;` e recusa `end entity <nome>;`; em 2026-11-05 (MT-19), a análise de portas
   do emulador leu as 8 portas do R2 gerado e reuniu os 3 arquivos do projeto;
 - o GHDL segue à risca a regra de ligação padrão do VHDL-93 e deixava todas as células sem

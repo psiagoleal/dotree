@@ -425,7 +425,7 @@ fn aju09_applying_is_recorded_in_the_help_log() {
 
 // ------------------------------------------------------- AJU-10: Wallace's solution (MT-29)
 
-/// Seven 6-bit operands, the example of the course reference (Parhami, *Computer
+/// Seven 6-bit operands, the example of Parhami (*Computer
 /// Arithmetic*, fig. 8.10). 42 input bits is over the interface's limit, so the
 /// analysis is assembled here; the matrix is built as usual.
 fn seven_operands() -> DotMatrix {
@@ -544,8 +544,8 @@ fn aju10_a_tree_level_can_complete_the_circuit_without_cpa() {
 
 #[test]
 fn aju05_classic_dadda_on_seven_operands() {
-    // The classic rule (an HA when only 1 is left to reduce), not the variant drawn in the
-    // course reference (Parhami, fig. 8.14: 6, 11, 7 and 4 FA + 1 HA, 33 FA and 3 HA in
+    // The classic rule (an HA when only 1 is left to reduce), not the variant drawn in
+    // Parhami, fig. 8.14 (6, 11, 7 and 4 FA + 1 HA, 33 FA and 3 HA in
     // all). The figure also puts FA in columns already at their target, which no
     // column-by-column rule reproduces; spec 03 keeps the classic method (MT-29b).
     let m = seven_operands();

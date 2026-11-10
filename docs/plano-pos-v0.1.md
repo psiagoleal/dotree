@@ -1,15 +1,14 @@
 <!-- Caminho relativo: docs/plano-pos-v0.1.md -->
 
-# Plano depois da v0.1 — laboratório de multiplicadores e conteúdo da disciplina
+# Plano depois da v0.1 — escala, placa e capítulos 4 a 12 do Parhami
 
-> **Plano, não spec.** Registra pedidos levantados ao usar o dotree num laboratório de
-> multiplicadores grandes (64 × 64 numa placa DE2), com a avaliação de cada um e uma ordem
+> **Plano, não spec.** Registra pedidos levantados ao usar o dotree com multiplicadores
+> grandes (64 × 64 numa placa DE2), com a avaliação de cada um e uma ordem
 > proposta. Nada aqui muda o escopo da v0.1 sem decisão do autor; cada ticket só começa
 > depois que a spec correspondente for atualizada e aprovada (`spec-como-contrato`).
-> Avaliação feita em 2026-11-05 sobre o código do commit `e0bad41`. Os pedidos P9 a P20,
-> sobre os capítulos 4 a 12 do livro-texto da disciplina, foram avaliados em 2026-11-06
-> sobre o commit `9f07dd2`, com a sessão "CA" (ver
-> [Conteúdo da disciplina](#conteúdo-da-disciplina-capítulos-4-a-12)).
+> Avaliação feita em 2026-11-05 sobre o código do commit `e0bad41`. Os pedidos P9 a P21,
+> sobre os capítulos 4 a 12 do Parhami, foram avaliados em 2026-11-06 sobre o commit
+> `9f07dd2` (ver [Capítulos 4 a 12](#capítulos-4-a-12-do-parhami)).
 
 ## Decisões do autor (2026-11-05)
 
@@ -26,28 +25,22 @@
   - portas com estes nomes ligam-se sozinhas à placa emulada: `CLOCK_50`, `CLK_500Hz`,
     `CLK_1Hz`, `CLK_10Hz`, `KEY` (4 bits), `SW` (18), `LEDR` (18), `HEX0` a `HEX7` (7 cada,
     ativos em 0);
-  - os pinos reais da DE2 para o `.qsf` vêm do manual da placa, conferidos contra os
-    arquivos de mapeamento do professor (que ficam fora do repositório).
+  - os pinos reais da DE2 para o `.qsf` vêm do manual da placa, conferidos contra o
+    arquivo de pinos distribuído com ela (que fica fora do repositório).
 - **MT-27** (blocos hierárquicos): escrever a ADR antes do código.
-- A sessão "CA", que acompanha a disciplina, pode ser consultada sobre o uso no
-  laboratório.
 
 ## Decisões do autor (2026-11-06)
 
-- O professor da disciplina indicou o dotree como projeto final (nota cheia de 17/11 a
-  03/12/2026) e quer usá-lo nas aulas de 2027/1. O plano de ensino pede "unidades
-  aritméticas e avaliação do custo em ASIC e/ou FPGA".
-- **Até o projeto final (v0.2):** MT-20, MT-21, MT-22, MT-28, MT-29, MT-30 e MT-38 (versão
-  mínima); MT-31 se der tempo. Entregável: *tag* `v0.2.0`, relatório da síntese no Quartus
-  (estrutural × comportamental; fica no repositório da disciplina, não aqui) e
-  demonstração no FPGAEmuWeb.
+- **v0.2:** MT-20, MT-21, MT-22, MT-28, MT-29, MT-30 e MT-38 (versão mínima); MT-31 se
+  der tempo. Entregável: *tag* `v0.2.0` e demonstração no FPGAEmuWeb. O relatório da
+  síntese no Quartus (estrutural × comportamental) fica fora deste repositório.
 - **Constante aditiva:** entra como ponto fixo em 1, comprimido como qualquer outro; o app
   não simplifica a célula que o recebe (fica como melhoria futura).
-- **Depois do projeto final:** ordem por dependências, com o módulo $2^n-1$ (P16) adiantado
-  para o início de 2027/1, porque o semestre começa por RNS. Marcos: $2^n-1$ no início do
-  semestre; célula composta (P13) por volta da 6.ª semana; números com sinal e Booth (P14,
-  P15) antes dos capítulos 9 e 10.
-- **Modelo de custo** (o mesmo dos problemas do curso): FA = 1 $A_{FA}$ e 1 $T_{FA}$; HA =
+- **Depois da v0.2:** ordem por dependências, com o módulo $2^n-1$ (P16) adiantado, porque
+  os sistemas de resíduos (cap. 4) vêm antes da multiplicação. Marcos: $2^n-1$ primeiro;
+  depois a célula composta (P13); por fim números com sinal e Booth (P14, P15), os
+  capítulos 9 e 10.
+- **Modelo de custo** (unitário, em $A_{FA}$ e $T_{FA}$): FA = 1 $A_{FA}$ e 1 $T_{FA}$; HA =
   0,5 e 0,5; MUX $2^a{:}1$ = $a/2$ $A_{FA}$ e $a/2$ $T_{FA}$; portas AND contadas à parte. O
   dotree já usa o de FA e HA.
 - **Multiplicação por constantes (2026-11-08):** as funções do gerador do SPIRAL (P21) entram
@@ -95,7 +88,7 @@ flowchart LR
 - **Fácil e de valor imediato (v0.2):** MT-19, MT-20, MT-21. Se o autor quiser, o MT-19
   cabe antes da v0.1.0: é só a forma do `end`, conferida pelo GHDL.
 - **Placa (v0.2 ou v0.3):** MT-22 e MT-23.
-- **Escala do laboratório (v0.3):** MT-24 a MT-27. Exigem revisão das specs 00, 01, 05 e
+- **Escala (v0.3):** MT-24 a MT-27. Exigem revisão das specs 00, 01, 05 e
   06 e provavelmente uma ADR (aritmética larga no núcleo e modelo de bloco hierárquico).
 
 ## Tickets propostos
@@ -182,40 +175,42 @@ flowchart LR
   final. Precisa de ADR.
 - **Depende de:** MT-25, MT-26
 
-## Conteúdo da disciplina (capítulos 4 a 12)
+## Capítulos 4 a 12 do Parhami
 
-Referência: B. Parhami, *Computer Arithmetic*, 2.ª ed., caps. 4 a 12. Os problemas e
-laboratórios da disciplina são material de terceiros: citados pelo número, nunca copiados.
+Referência: B. Parhami, *Computer Arithmetic*, 2.ª ed., caps. 4 a 12. Os exemplos e casos
+de referência do plano são do próprio projeto.
 
 ### O que a v0.1 já cobre
 
-- **8.3, quase todo:** um contador generalizado é uma matriz de bits independentes
-  ({2,2,3; …} = `A+B+C+2D+2E+4F+4G`, larguras 1). Falta parar num perfil de saída (P12).
-- **8.1 sem a constante** (F1 com 48 pontos, F2 com 56), **9.4 em parte** (978943·A até
-  14 bits de A) e o **AMM** $A \times B + C \times D + 2(E+F) + G$.
+- **Contadores paralelos generalizados (cap. 8), quase todos:** um contador é uma matriz
+  de bits independentes ({2,2,3; …} = `A+B+C+2D+2E+4F+4G`, larguras 1). Falta parar num
+  perfil de saída (P12).
+- **Somas de produtos sem constante aditiva**, **multiplicação por constante em parte**
+  (constante expandida em pontos, até 32 bits de entrada) e o **AMM** (cap. 12) como soma
+  de produtos.
 
 ### Os pedidos
 
 | # | Pedido (capítulo) | Situação hoje | Esforço | Specs |
 |---|---|---|---|---|
-| P9 | Constante aditiva: `+36`, `+8`, `+1164` (8.1, lab do cap. 8, cap. 5) | O parser já a representa como monômio sem variáveis e a recusa de propósito (`ConstantTerm`, EXP-13); um sinal sem fatores já vale 1 | **Pequeno-médio** | 00, 01, 05, 06 |
-| P10 | Solução de Wallace ao lado da de Dadda (8.3) | Só Dadda (`help::dadda_solution`) | **Pequeno-médio** | 03 |
-| P11 | Tabela de alturas nível a nível (8.2) | As alturas aparecem por painel, não numa tabela | **Pequeno** | 02 |
-| P12 | Entrada por alturas com perfil-alvo de saída: `{2,2,3; 1,1,1,1}`, `{3,3,3; 1,2,2,1}` (8.3) | A redução sempre para em 2 linhas + CPA. Na notação do professor, depois do ";" vêm as alturas de saída por coluna | **Pequeno** | 01, 02 |
-| P13 | Célula composta: contador 7:3, (5,5;4), compressor 4:2, AMM 2×2 (8.4, 12.1, 12.2) e multiplicador hierárquico (P3) | A célula é só `CellKind::{Fa, Ha}`, com duas saídas; um 7:3 tem 3 saídas em 3 colunas | **Grande** | 00, 02, 05, 06, 08 |
-| P14 | Ponto invertido: Baugh-Wooley e recodificação com dígito −1 (9.4, 9.5) | Sem sinal e sem NOT | **Médio-grande** | 00, 01, 04, 06 |
-| P15 | Booth radix-2 e radix-4, com mux e múltiplos (9.4, cap. 10) | Sem sinal selecionado por mux | **Grande** | 00, 01, 02, 06 |
-| P16 | Matriz módulo $2^n-1$ e depois $2^n+1$ (8.5, cap. 4, labs de RNS) | Sem volta de colunas. A árvore com volta não fecha laço; o CPA modular segue o padrão de dois somadores e um MUX 2:1, sem laço. $2^n+1$ pede P14 | **Médio** ($2^n-1$) a **grande** | 01, 02, 04, 06 |
+| P9 | Constante aditiva: `+36`, `+8`, `+1164` (caps. 5 e 8) | O parser já a representa como monômio sem variáveis e a recusa de propósito (`ConstantTerm`, EXP-13); um sinal sem fatores já vale 1 | **Pequeno-médio** | 00, 01, 05, 06 |
+| P10 | Solução de Wallace ao lado da de Dadda (cap. 8) | Só Dadda (`help::dadda_solution`) | **Pequeno-médio** | 03 |
+| P11 | Tabela de alturas nível a nível (cap. 8) | As alturas aparecem por painel, não numa tabela | **Pequeno** | 02 |
+| P12 | Entrada por alturas com perfil-alvo de saída: `{2,2,3; 1,1,1,1}`, `{3,3,3; 1,2,2,1}` (cap. 8) | A redução sempre para em 2 linhas + CPA. Na notação, depois do ";" vêm as alturas de saída por coluna | **Pequeno** | 01, 02 |
+| P13 | Célula composta: contador 7:3, (5,5;4), compressor 4:2, AMM 2×2 (caps. 8 e 12) e multiplicador hierárquico (P3) | A célula é só `CellKind::{Fa, Ha}`, com duas saídas; um 7:3 tem 3 saídas em 3 colunas | **Grande** | 00, 02, 05, 06, 08 |
+| P14 | Ponto invertido: Baugh-Wooley e recodificação com dígito −1 (cap. 9) | Sem sinal e sem NOT | **Médio-grande** | 00, 01, 04, 06 |
+| P15 | Booth radix-2 e radix-4, com mux e múltiplos (caps. 9 e 10) | Sem sinal selecionado por mux | **Grande** | 00, 01, 02, 06 |
+| P16 | Matriz módulo $2^n-1$ e depois $2^n+1$ (caps. 4 e 8) | Sem volta de colunas. A árvore com volta não fecha laço; o CPA modular segue o padrão de dois somadores e um MUX 2:1, sem laço. $2^n+1$ pede P14 | **Médio** ($2^n-1$) a **grande** | 01, 02, 04, 06 |
 | P17 | Escolha do CPA final: CLA, prefixo, *carry-select* (caps. 6 e 7) | Só *ripple* | **Médio-grande** | 00, 02, 05, 06 |
-| P18 | Variável derivada: múltiplos pré-computados ($7A$) e constante grande (9.4, 9.5) | Literal até $2^{32}$ (EXP-14), 256 pontos | **Grande** | 01, 02 |
-| P19 | Animação de *shift-add*, à esquerda e à direita (9.1) | Fora do modelo combinacional | **Médio** | nova |
+| P18 | Variável derivada: múltiplos pré-computados ($7A$) e constante grande (cap. 9) | Literal até $2^{32}$ (EXP-14), 256 pontos | **Grande** | 01, 02 |
+| P19 | Animação de *shift-add*, à esquerda e à direita (cap. 9) | Fora do modelo combinacional | **Médio** | nova |
 | P20 | Comparação visual de soluções do mesmo problema | Métricas de uma solução por vez | **Pequeno-médio** (mínima) | 02, 03 |
-| P21 | Bloco multiplicador por constantes (MCM), como o gerador do SPIRAL: Hcub com limite de profundidade (9.4, 9.5) | Constante só expandida em pontos; sem subtração nem múltiplo pré-computado | **Médio** | 01, 02, 06, nova |
+| P21 | Bloco multiplicador por constantes (MCM), como o gerador do SPIRAL: Hcub com limite de profundidade (cap. 9) | Constante só expandida em pontos; sem subtração nem múltiplo pré-computado | **Médio** | 01, 02, 06, nova |
 
 ### Dependências
 
-- P12 fecha o 8.3 inteiro **sem** célula composta; P13 só é preciso para **usar** esses
-  blocos como células (8.4).
+- P12 fecha os contadores generalizados **sem** célula composta; P13 só é preciso para
+  **usar** esses blocos como células.
 - P13 serve ao P3 (MT-27), ao P15 e ao P17.
 - P14 precisa de P9 (a correção de sinal é constante); P15 precisa de P14 e de P13.
 - P16 com $2^n+1$ precisa de P14 (volta invertida).
@@ -250,28 +245,25 @@ flowchart LR
   viram pontos fixos com cor própria, que o aluno comprime como os outros; VHDL com `'1'`.
 - **Arquivos no escopo:** `app/core/src/{expr,matrix,netlist,vhdl,diagram}/**`,
   `app/web/src/**`, specs 00, 01, 05 e 06
-- **Critério de aceite:** testes do núcleo; e2e com o lab do cap. 8 (44 pontos e a
-  constante, $W$ = 13); GHDL verde com a constante.
+- **Critério de aceite:** testes do núcleo; e2e com uma soma de produtos com constante;
+  GHDL verde com a constante.
 - **Feito (2026-11-09):** EXP-13 refeito (só recusa expressão sem variável) e EXP-15 novo.
   O sinal sem fatores, que a matriz já gerava como AND vazio, ganhou o nome `one`, `'1'` no
-  VHDL e o rótulo 1 na tela. O e2e usa uma expressão própria, `3(A + 1) + B` (os exemplos
-  do projeto não reproduzem enunciados de terceiros); o lab do cap. 8 foi conferido só
-  localmente: 46 pontos (44 + 2 fixos) e $W = 14$ com $A$ a $D$ de 4 bits ($v_{max} =
-  11916$), não 13 como anotado acima.
+  VHDL e o rótulo 1 na tela. O e2e usa uma expressão própria, `3(A + 1) + B`; um caso
+  maior (46 pontos, 2 deles fixos, $W = 14$) foi conferido localmente.
 
 ### MT-29: Solução de Wallace (P10)
 - **Objetivo:** `help::wallace_solution` (em cada nível, o máximo de FA e depois HA), com o
   mesmo fluxo de revelação e aplicação do MT-20.
 - **Critério de aceite:** testes do núcleo com R1 e R2 conferidos à mão; e2e de aplicar.
 - **Depende de:** MT-20
-- **Feito (2026-11-09):** AJU-10. A regra é a da fig. 8.10 do Parhami (referência do
-  curso): alvo $2\lfloor h/3 \rfloor + (h \bmod 3)$, todos os FA que cabem e HA só se a
+- **Feito (2026-11-09):** AJU-10. A regra é a da fig. 8.10 do Parhami: alvo $2\lfloor h/3 \rfloor + (h \bmod 3)$, todos os FA que cabem e HA só se a
   coluna ainda passaria do alvo; reproduz a figura nível a nível (12, 6, 6, 4 + 1 HA).
   R1: 13 FA, 3 HA, 14,5 $A_{FA}$, 6 $T_{FA}$ (Dadda: 17 e 7). **Achado:** a fig. 8.14
   (Dadda, mesmos sete operandos) dá 6, 11, 7 e 4 FA + 1 HA, mas o Dadda do dotree dá
   5 FA + 1 HA, 10 + 1, 5 + 2, 6 + 1 (33 FA e 6 HA no total, contra 33 e 3): o livro usa FA
   também onde falta reduzir só 1, e AJU-05 manda usar HA. Mudar AJU-05 altera R1, R4 e a
-  próxima jogada; fica para decisão (proposta: ticket próprio depois do projeto final).
+  próxima jogada; fica para decisão (proposta: ticket próprio depois da v0.2).
   **Decidido (MT-29b, 2026-11-09):** manter o Dadda clássico. A figura não segue regra
   coluna a coluna (no 3.º nível põe FA em colunas já no alvo); a variante "FA sempre que
   passa do alvo" iguala os totais da figura (33 FA, 3 HA), mas não os níveis 2 e 3, e em R1
@@ -291,13 +283,13 @@ flowchart LR
 - **Objetivo:** aceitar `{2,2,3; 1,1,1,1}` (alturas de entrada e de saída, do bit mais
   significativo ao menos), parar quando o perfil de saída for atingido e mostrar área e
   atraso do bloco; o nome do bloco conhecido aparece só como revelação opcional.
-- **Critério de aceite:** a solução ótima reproduz as áreas e atrasos dos 11 itens do
-  gabarito do problema 8.3, citados pela fonte, sem copiar o documento.
+- **Critério de aceite:** a solução ótima reproduz as áreas e os atrasos de 11 perfis de
+  referência do projeto, conferidos à mão e por uma busca exaustiva independente.
 - **MT-31a, núcleo (feito em 2026-11-10):** EXP-16, EXP-17, CMP-19 e AJU-12. Módulo
   `dotree_core::profile`: leitura do perfil, matriz equivalente (uma variável de 1 bit por
   ponto), perfil atingido, circuito ótimo por aprofundamento iterativo na área (FA e HA
   sobre os pontos mais cedo prontos; poda por 1 meia-unidade de área por ponto excedente;
-  limite de 1 milhão de níveis tentados) e classificação do bloco. Os 11 itens batem; a
+  limite de 1 milhão de níveis tentados) e classificação do bloco. Os 11 perfis batem; a
   leitura recusa os perfis que nenhum circuito atinge (coluna que nunca esvazia).
 - **MT-31b, interface (feito em 2026-11-10):** o campo aceita a notação, sem larguras, com
   exemplo; painel do perfil (pedido, colunas acima, atingido com área e atraso); a solução
@@ -308,7 +300,7 @@ flowchart LR
 ### MT-32: Célula composta (P13)
 - **Objetivo:** modelo de célula com entradas e saídas em várias colunas, custo e atraso
   vindos da rede interna; contadores, compressor 4:2 e AMM 2×2 como os primeiros tipos.
-- **Decisão pendente:** ADR 0004 (modelo de célula composta), que vale também para o MT-27.
+- **Decisão pendente:** ADR própria (modelo de célula composta), que vale também para o MT-27.
 
 ### MT-33: Ponto invertido e números com sinal (P14)
 - **Objetivo:** pontos negados e a constante de correção; Baugh-Wooley e recodificação com
@@ -320,7 +312,7 @@ flowchart LR
 
 ### MT-35: Matriz módulo $2^n-1$ e $2^n+1$ (P16)
 - **Objetivo:** pesos com volta direta ($2^n-1$) e invertida ($2^n+1$); CPA modular com dois
-  somadores e MUX 2:1. Começa por $2^n-1$, para o início de 2027/1.
+  somadores e MUX 2:1. Começa por $2^n-1$.
 - **Depende de:** MT-33 (só a parte $2^n+1$)
 
 ### MT-36: Escolha do CPA final (P17)
@@ -369,9 +361,9 @@ A animação de *shift-add* (P19) fica sem ticket até haver espaço depois da v
 - **Decisões do autor:** a spec é **uma só e viva**, atualizada a cada versão (não uma
   spec por versão); o histórico de cada versão fica no git e no CHANGELOG. O projeto é
   público: só se citam livros e artigos de acesso público (Parhami; Wallace, 1964; Dadda,
-  1965), **nunca** material de disciplina (listas, gabaritos, laboratórios, slides),
-  nem por referência. Inclui a varredura das menções que já existem no repositório.
-- **Critério de aceite:** nenhuma menção a material de disciplina nos arquivos
+  1965), **nunca** material didático não publicado, nem por referência (ADR 0004). Inclui
+  a varredura das menções que já existem no repositório.
+- **Critério de aceite:** nenhuma menção a material didático não publicado nos arquivos
   versionados do projeto; cada limitação declarada aponta para a spec ou o ticket que a
   trataria; README conferido contra o app publicado.
 
@@ -382,3 +374,22 @@ A animação de *shift-add* (P19) fica sem ticket até haver espaço depois da v
 - **Critério de aceite:** testes de componente, de acessibilidade (GER-07) e de ponta a
   ponta; os textos não revelam solução de nenhum exercício.
 - **Depende de:** MT-40a
+
+## Limitações da entrada por alturas (achadas no MT-31b, 2026-11-10)
+
+### MT-41: Dica e próxima jogada que respeitam o perfil de saída
+- **Objetivo:** num exercício de perfil, a dica e a próxima jogada (AJU-03, AJU-04) param
+  quando o perfil é atingido e sugerem células que levam a ele, em vez de seguir o Dadda
+  até a soma completa.
+- **Situação hoje:** as duas seguem o Dadda; num perfil com saída redundante, sugerem
+  reduzir além do pedido. A solução ótima (AJU-12) já respeita o perfil.
+- **Critério de aceite:** testes do núcleo com perfis de saída redundante; a sugestão nunca
+  passa do perfil.
+
+### MT-42: Busca do ótimo fora da linha principal
+- **Objetivo:** rodar a busca do circuito ótimo (AJU-12) num *worker*, como a verificação
+  (VER), com indicação de progresso, para a página não travar nos perfis grandes.
+- **Situação hoje:** a busca roda na linha principal na primeira vez que a ajuda abre; no
+  pior caso medido (26 pontos), leva cerca de 0,5 s fora do navegador.
+- **Critério de aceite:** e2e que interage com a página durante a busca; GER-06 (100 ms no
+  p95) medido com o maior perfil aceito.

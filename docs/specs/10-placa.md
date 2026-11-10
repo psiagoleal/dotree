@@ -5,7 +5,7 @@
 ## Resultado
 
 Com o circuito completo e até 18 bits de entrada, o estudante leva o circuito para a placa
-DE2 da aula sem escrever nada: as variáveis vêm das chaves `SW`, o resultado aparece nos
+DE2 sem escrever nada: as variáveis vêm das chaves `SW`, o resultado aparece nos
 LEDs vermelhos `LEDR` e em hexadecimal nos displays `HEX0` a `HEX7`. Junto vem o projeto do
 Quartus II com o dispositivo e as atribuições de pinos. As portas têm os nomes que o
 FPGAEmuWeb liga sem mapeamento manual.
@@ -66,7 +66,7 @@ A tabela de pinos (`app/core/src/board/mod.rs`) segue o *DE2 Development and Edu
 Board User Manual* (Terasic), tabelas das chaves, dos LEDs e dos displays de sete
 segmentos, que é a mesma informação do arquivo `DE2_pin_assignments` distribuído com a
 placa. Em 2026-11-09 (MT-22), as 92 atribuições foram conferidas uma a uma contra duas
-cópias desse arquivo, a dos materiais da disciplina e uma pública, sem divergência. Para
+cópias desse arquivo, sem divergência. Para
 repetir a conferência, há um teste que lê um arquivo de pinos indicado em
 `DE2_PINS_FILE` e o compara com a tabela; sem a variável, o teste é pulado. O arquivo de
 pinos não é copiado para o repositório.

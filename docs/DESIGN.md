@@ -2,13 +2,13 @@
 
 # Contrato visual do dotree
 
-> O que a interface precisa respeitar para ficar coerente com as figuras de aula e
-> acessível. Os valores moram em `app/web/src/app.css` (*tokens* CSS); este documento diz o
+> O que a interface precisa respeitar para ficar coerente com os diagramas de pontos
+> (Parhami, cap. 8) e acessível. Os valores moram em `app/web/src/app.css` (*tokens* CSS); este documento diz o
 > que cada um significa. A paleta é conferida por teste (`src/lib/palette.spec.ts`, COR-03).
 
 ## Princípio
 
-A tela imita a folha de exercício das aulas: colunas de pontos com o peso $2^j$ no topo, o
+A tela imita um exercício resolvido no papel: colunas de pontos com o peso $2^j$ no topo, o
 maior peso à esquerda, células desenhadas como retângulos em volta dos pontos que consomem,
 um painel por nível e uma seta de um painel para o seguinte. Tudo o que não é ponto, célula
 ou métrica fica em segundo plano.
@@ -28,7 +28,7 @@ ou métrica fica em segundo plano.
 | Saída de célula (soma, vai-um) | `--dot-generated` | `#1d1d1f` preto | `#ececf1` |
 | Bit do resultado | `--dot-result` | `#6b2fb3` roxo | `#b197fc` |
 
-- Como nas figuras de aula: cada termo da expressão combinada tem uma cor; o que as células
+- Cada termo da expressão combinada tem uma cor; o que as células
   produzem é preto; o resultado final é roxo. O roxo fica **reservado** ao resultado.
 - Do 9.º termo em diante, as cores se repetem e a legenda numera os termos (COR-03).
 - **Regras conferidas por teste**, nos dois temas: contraste de pelo menos 3:1 com o fundo;
@@ -41,7 +41,7 @@ ou métrica fica em segundo plano.
 
 | Elemento | Forma |
 |---|---|
-| Ponto | quadrado de 14 px (como nas figuras de aula), cor do papel acima |
+| Ponto | quadrado de 14 px, cor do papel acima |
 | Ponto selecionado | contorno de 2 px na cor de destaque, deslocado 2 px |
 | Ponto da próxima jogada | contorno tracejado de 2 px na cor de destaque, deslocado 3 px (AJU-04); selecionar o ponto troca pelo contorno da seleção |
 | Ponto em foco pelo teclado | o anel de foco padrão (`:focus-visible`) |

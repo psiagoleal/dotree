@@ -14,7 +14,7 @@ preservam o valor ponderado ($x + y + z = s + 2k$), o vai-um descartado vale sem
 (CMP-09), e o app posiciona soma e vai-um sozinho. A verificação existe por três motivos:
 
 1. provar que o **núcleo** implementa essas regras, como teste de propriedade;
-2. dar ao usuário a mesma evidência que ele daria em aula: "16 384 casos corretos";
+2. dar ao usuário a mesma evidência que ele daria ao simular o VHDL: "16 384 casos corretos";
 3. ser a referência do testbench VHDL gerado (`VHD`), que usa a mesma sequência de vetores.
 
 ## Vetores de teste
