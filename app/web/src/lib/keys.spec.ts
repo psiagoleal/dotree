@@ -38,6 +38,18 @@ describe('keyAction (VIS-03, GER-07)', () => {
 		expect(keyAction(key('v', { tagName: 'BUTTON' }))).toBe('toggleView');
 	});
 
+	it('never fires inside an open dialog, which has its own keys (GER-11)', () => {
+		const inDialog = {
+			tagName: 'BUTTON',
+			closest: (s: string) => (s === 'dialog[open]' ? {} : null)
+		};
+		expect(keyAction(key('v', inDialog))).toBeNull();
+		expect(keyAction(key('f', inDialog))).toBeNull();
+		expect(keyAction(key('z', inDialog, { ctrlKey: true }))).toBeNull();
+		const outside = { tagName: 'BUTTON', closest: () => null };
+		expect(keyAction(key('v', outside))).toBe('toggleView');
+	});
+
 	it('plain keys with a modifier are left to the browser', () => {
 		expect(keyAction(key('v', null, { ctrlKey: true }))).toBeNull();
 		expect(keyAction(key('f', null, { altKey: true }))).toBeNull();

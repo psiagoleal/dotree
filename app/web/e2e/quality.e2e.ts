@@ -112,6 +112,9 @@ for (const scheme of ['light', 'dark'] as const) {
 		await page.goto('./');
 		await expect(page.getByTestId('core-status')).toBeVisible();
 		await audit(page, 'start');
+		await page.getByRole('button', { name: 'Como usar' }).click();
+		await audit(page, 'how to use');
+		await page.keyboard.press('Escape');
 
 		await page.getByRole('button', { name: 'Soma de produtos' }).click();
 		await page.getByRole('button', { name: 'Mostrar a resposta' }).click();

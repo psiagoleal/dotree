@@ -13,8 +13,7 @@ Nenhum: a v0.1.0 foi publicada.
 
 ## v0.2 (aprovado em 2026-11-06)
 
-- [ ] [MT-40a](plano-pos-v0.1.md#mt-40a-documentação-pública-e-referências) — README da v0.2, limitações, metodologia e referências públicas; spec viva (ADR 0004); varredura das referências não públicas.
-- [ ] [MT-40b](plano-pos-v0.1.md#mt-40b-ajuda-dentro-do-app) — Seção "Como usar" no app, nos dois idiomas.
+- [ ] [MT-43](plano-pos-v0.1.md#mt-43-publicar-a-v020) — Publicar a v0.2.0: versões, CHANGELOG, ModelSim à mão, *tag*.
 
 ## Depois da v0.2 (ordem por dependências)
 
@@ -35,6 +34,8 @@ Nenhum: a v0.1.0 foi publicada.
 
 ## Concluídos
 
+- [x] [MT-40b](plano-pos-v0.1.md#mt-40b-ajuda-dentro-do-app) — "Como usar" no cabeçalho, nos dois idiomas, sem contar ajuda (GER-11).
+- [x] [MT-40a](plano-pos-v0.1.md#mt-40a-documentação-pública-e-referências) — README da v0.2, limitações, metodologia e referências públicas; spec viva (ADR 0004); varredura das referências não públicas.
 - [x] [MT-31b](plano-pos-v0.1.md#mt-31-entrada-por-alturas-com-perfil-alvo-de-saída-p12) — Interface da entrada por alturas: campo, painel do perfil, solução ótima e nome do bloco como ajuda contada.
 - [x] [MT-31a](plano-pos-v0.1.md#mt-31-entrada-por-alturas-com-perfil-alvo-de-saída-p12) — Núcleo da entrada por alturas: perfil, circuito ótimo (11 perfis de referência) e bloco conhecido.
 - [x] [MT-38](plano-pos-v0.1.md#mt-38-comparação-de-soluções-p20) — Comparação de soluções, versão mínima (AJU-11): tabela lado a lado e fronteira não dominada.

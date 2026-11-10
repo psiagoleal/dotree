@@ -128,6 +128,18 @@ bits do resultado. A convenção é fixa (D-2).
   matriz, diagrama e VHDL visíveis em modo leitura e desabilitar a formação de células, com
   um aviso (D-4).
   *Prova:* teste de ponta a ponta com janela de 390 px.
+- **GER-11** — O sistema DEVE oferecer no cabeçalho, a qualquer momento e em qualquer
+  largura de janela, a seção "Como usar", com os passos, os atalhos de teclado, o que cada
+  ajuda revela e como é contada, as limitações e as referências (só públicas, ADR 0004).
+  Abri-la NÃO DEVE pedir confirmação nem contar ajuda, e o texto NÃO DEVE depender do
+  exercício aberto, para não revelar resposta de nenhum. Fechá-la (botão ou Esc) DEVE
+  devolver o foco ao botão que a abriu, e os atalhos da página não agem enquanto ela está
+  aberta.
+  *Prova:* teste de componente (abre sem diálogo de confirmação, mostra as cinco partes nos
+  dois idiomas, fecha pelo botão e por Esc e devolve o foco); teste de unidade dos atalhos
+  dentro de um diálogo; teste de ponta a ponta que abre a seção no meio de um exercício,
+  em janela larga e de 390 px, e confere que o registro de ajudas não mudou; auditoria axe
+  com a seção aberta nos dois temas (GER-07).
 
 ## Casos de referência
 

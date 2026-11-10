@@ -374,6 +374,21 @@ A animação de *shift-add* (P19) fica sem ticket até haver espaço depois da v
 - **Critério de aceite:** testes de componente, de acessibilidade (GER-07) e de ponta a
   ponta; os textos não revelam solução de nenhum exercício.
 - **Depende de:** MT-40a
+- **Feito (2026-11-10):** GER-11 na spec 00. `Guide.svelte` no cabeçalho, com o texto
+  montado em `guide.ts` a partir do catálogo (cinco partes, testadas nos dois idiomas);
+  diálogo modal que devolve o foco ao botão mesmo quando o clique não o focou; `keys.ts`
+  ignora atalhos dentro de diálogo aberto. E2e no meio de um exercício (o registro de
+  ajudas salvo não muda, V não troca a visão), em 390 px e em inglês; axe com o guia
+  aberto nos dois temas. 5 mutações pegas (uma só depois do teste do clique sem foco).
+
+### MT-43: Publicar a v0.2.0
+- **Objetivo:** versões em 0.2.0 (crates, pacote web, badge do README), seção `[0.2.0]` do
+  CHANGELOG, aviso "Em construção" da página revisto, conferência manual do VHDL no
+  ModelSim ASE 10.1d (estrutural, comportamental e topo da placa), *tag* `v0.2.0` criada
+  pelo autor.
+- **Critério de aceite:** `app/core/tests/release.rs` e o e2e de ENT-03 com 0.2.0; release
+  do GitHub e imagem `0.2.0` no GHCR (ENT-05); site no ar com a versão.
+- **Depende de:** MT-40b
 
 ## Limitações da entrada por alturas (achadas no MT-31b, 2026-11-10)
 
