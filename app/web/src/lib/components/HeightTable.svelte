@@ -1,28 +1,31 @@
 <!-- Caminho relativo: app/web/src/lib/components/HeightTable.svelte -->
 <!-- The height table (spec 02, CMP-16): the height of each column at each level, with the
      cells formed over it, the tabular form of the course reference (Parhami, fig. 8.11).
-     It shows only the student's own circuit, so it is always visible and exportable.
-     Redrawn whenever the parent passes a new snapshot. -->
+     For the student's own circuit it is always visible and exportable; the comparison
+     (MT-38) shows one per solution whose levels were revealed. -->
 <script lang="ts">
-	import type { CompressionSession, HeightRow, Snapshot } from '#lib/core.ts';
+	import type { HeightHeaders, HeightRow } from '#lib/core.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { download } from '#lib/download.ts';
 
 	let {
-		session,
-		snap
+		rows,
+		markdown,
+		title = m.heights_title(),
+		exportLabel = m.export_heights(),
+		filename = 'dotree-alturas.md',
+		testid = 'height-table'
 	}: {
-		session: CompressionSession;
-		/** The latest snapshot: a new one means the circuit changed. */
-		snap: Snapshot;
+		rows: HeightRow[];
+		/** The same table as Markdown, from the core, with words in this language. */
+		markdown: (headers: HeightHeaders) => string;
+		title?: string;
+		exportLabel?: string;
+		filename?: string;
+		testid?: string;
 	} = $props();
 
 	const id = $props.id();
-
-	const rows = $derived.by(() => {
-		void snap;
-		return session.heightTable();
-	});
 	/** Highest column first, as in the level panels. */
 	const columns = $derived(rows.length === 0 ? [] : [...rows[0].heights.keys()].reverse());
 
@@ -45,19 +48,19 @@
 			current: m.heights_current(),
 			result: m.heights_result()
 		};
-		download('dotree-alturas.md', session.heightTableMarkdown(headers), 'text/markdown');
+		download(filename, markdown(headers), 'text/markdown');
 	}
 </script>
 
 <section class="heights" aria-labelledby={`${id}-title`}>
-	<h3 id={`${id}-title`}>{m.heights_title()}</h3>
+	<h3 id={`${id}-title`}>{title}</h3>
 	<div class="tools">
-		<button type="button" onclick={exportMarkdown}>{m.export_heights()}</button>
+		<button type="button" onclick={exportMarkdown}>{exportLabel}</button>
 	</div>
 	<!-- Scrolls sideways on narrow screens, so it takes focus for the arrow keys (GER-07). -->
 	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-	<div class="table-wrap" role="region" aria-label={m.heights_title()} tabindex="0">
-		<table data-testid="height-table" aria-labelledby={`${id}-title`}>
+	<div class="table-wrap" role="region" aria-label={title} tabindex="0">
+		<table data-testid={testid} aria-labelledby={`${id}-title`}>
 			<thead>
 				<tr>
 					<th scope="col">{m.table_level()}</th>

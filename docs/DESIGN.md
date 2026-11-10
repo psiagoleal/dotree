@@ -86,6 +86,12 @@ ou métrica fica em segundo plano.
   Wallace" (o botão da etapa 2 aparece só depois da etapa 1, por método). Cada solução nível
   a nível fica num quadro tracejado próprio, à parte do circuito do aluno, com a regra do
   método numa frase acima dos níveis. O resumo do circuito completo lista as ajudas usadas.
+- **Comparação de soluções** (MT-38): na seção "Ajuda", logo depois das soluções. Sem
+  solução revelada, só uma frase dizendo o que pedir. Depois, uma tabela com uma linha por
+  medida e uma coluna por solução ("Seu circuito", "Dadda (clássico)", "Wallace"), números
+  alinhados à direita e o "sim" da linha "não dominada" em negrito; notas da fronteira e
+  do Dadda clássico abaixo; a tabela de alturas de cada solução cujos níveis foram vistos,
+  com o próprio botão de exportação.
 - **Tabela de alturas** (MT-30): seção logo antes de "Circuito", sempre visível desde o
   nível 0. Uma linha por nível ($2^{W-1}$ à esquerda, como nos painéis), com FA e HA
   formados sobre ele; o nível atual em negrito; com o circuito completo, a linha

@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-09
-- **Commit:** `c7fe552` (MT-30, #44). O MT-29b ainda não foi commitado.
+- **Commit:** `7ee1cc3` (MT-29b, #45). O MT-38 ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -166,7 +166,10 @@
       teste, que exigia o nível de CPA. Corrigido nos dois métodos, com o caso fixado.
 - [x] MT-29b: Dadda mantido clássico (decisão do usuário); spec 03 documenta a diferença
       para a fig. 8.14 do Parhami; teste de regressão nos sete operandos.
-- [ ] Próximo: MT-38 (comparação de soluções, versão mínima), com nota sobre o Dadda clássico.
+- [x] MT-38 (mínimo): AJU-11, comparação lado a lado de aluno, Dadda clássico e Wallace,
+      sem revelar nem contar ajuda; em R1 o Wallace domina.
+- [ ] Próximo: MT-31 (entrada por alturas, se der tempo) ou fechar a v0.2.0 para o projeto
+      final (03/12): decidir com o usuário.
 
 ## Observações para a próxima sessão
 
@@ -209,6 +212,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-09 | `7ee1cc3` | Dadda clássico documentado (#45); comparação de soluções | MT-38 |
 | 2026-11-09 | `c7fe552` | tabela de alturas (#44); Dadda clássico documentado | MT-29b |
 | 2026-11-09 | `2e099f7` | solução de Wallace (#43); tabela de alturas | MT-30 |
 | 2026-11-09 | `b22bbc0` | override do `minimatch` (#41); solução de Wallace | MT-29 |

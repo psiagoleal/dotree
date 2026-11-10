@@ -20,6 +20,7 @@
 	import { helpLogItems } from '#lib/help.ts';
 	import type { ViewMode } from '#lib/view.ts';
 	import CircuitView from './CircuitView.svelte';
+	import Comparison from './Comparison.svelte';
 	import HeightTable from './HeightTable.svelte';
 	import Coach from './Coach.svelte';
 	import ConfirmDialog from './ConfirmDialog.svelte';
@@ -59,6 +60,10 @@
 	// Read again after each revealed help; the summary shows it (AJU-07).
 	let helps = $state.raw(untrack(() => session.helpLog()));
 	const helpItems = $derived(helpLogItems(helps));
+	const heightRows = $derived.by(() => {
+		void snap;
+		return session.heightTable();
+	});
 	let explained = $state(false);
 	// GER-10: below 768 px the exercise is read-only; the same width as the CSS breakpoint.
 	const NARROW = '(max-width: 767.98px)';
@@ -331,9 +336,10 @@
 				refresh(m.solution_applied({ method: METHOD_NAME[method] }));
 			}}
 		/>
+		<Comparison {session} {snap} {helps} />
 	</section>
 
-	<HeightTable {session} {snap} />
+	<HeightTable rows={heightRows} markdown={(h) => session.heightTableMarkdown(h)} />
 	<CircuitView {session} {snap} {top} critical={showCritical} />
 	<!-- A changed circuit drops the verification result and stops a running one. -->
 	{#key snap}

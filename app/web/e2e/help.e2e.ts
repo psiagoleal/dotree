@@ -3,6 +3,7 @@
 // (GER-01, AJU-02); results come before paths (GER-03); the solution leaves the student's
 // circuit alone (AJU-03).
 import { expect, test, type Page } from '@playwright/test';
+import { r2ByMouse } from './r2';
 
 test.use({ locale: 'pt-BR' });
 
@@ -189,4 +190,42 @@ test("Wallace's solution, applied, verifies and is logged apart (AJU-10)", async
 	await expect(log).toContainText('solução de Wallace: 1 (nível a nível: 1)');
 	await expect(log).toContainText('solução de Wallace aplicada: 1 vez');
 	await expect(log).not.toContainText('solução de Dadda');
+});
+
+test('comparing R2 with Dadda and Wallace: only what was revealed, nothing counted (MT-38)', async ({
+	page
+}) => {
+	await page.goto('./');
+	await r2ByMouse(page);
+	await page.getByRole('button', { name: 'Fechar com CPA' }).click();
+	const comparison = page.getByTestId('comparison');
+	await expect(comparison.getByTestId('comparison-empty')).toBeVisible();
+
+	for (const method of ['Dadda', 'Wallace']) {
+		await page.getByRole('button', { name: `Solução de ${method}`, exact: true }).click();
+		await show(page).click();
+	}
+	const log = await page.getByTestId('help-log').innerText();
+	const rows = comparison.getByTestId('comparison-table').locator('tr');
+	await expect(rows.nth(0)).toHaveText(/Seu circuito\s*Dadda \(clássico\)\s*Wallace/);
+	await expect(rows.nth(1)).toHaveText(/Área \(A_FA\)\s*15\s*17\s*14,5/);
+	await expect(rows.nth(2)).toHaveText(/Atraso \(T_FA\)\s*6\s*7\s*6/);
+	await expect(rows.nth(4)).toHaveText(/HA\s*4\s*8\s*3/);
+	await expect(rows.nth(9)).toHaveText(/Área × atraso\s*90\s*119\s*87/);
+	await expect(rows.last()).toHaveText(/Não dominada\s*não\s*não\s*sim/);
+	await expect(comparison.locator('[data-testid^="height-table-"]')).toHaveCount(0);
+
+	// Wallace's levels bring its height table into the comparison.
+	await page.getByRole('button', { name: 'Ver a solução de Wallace nível a nível' }).click();
+	await show(page).click();
+	await expect(comparison.getByTestId('height-table-wallace').locator('tbody tr')).toHaveCount(6);
+	await expect(comparison.getByTestId('height-table-dadda')).toHaveCount(0);
+	// The comparison itself counts nothing: only the Wallace path was added to the log.
+	await expect(page.getByTestId('help-log')).not.toHaveText(log);
+	await expect(page.getByTestId('help-log')).toContainText(
+		'solução de Wallace: 1 (nível a nível: 1)'
+	);
+	await expect(page.getByTestId('help-log')).toContainText(
+		'solução de Dadda: 1 (nível a nível: 0)'
+	);
 });
