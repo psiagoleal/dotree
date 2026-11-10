@@ -28,7 +28,8 @@ const r1: Matrix = {
 	outputWidth: 7,
 	vMax: '71',
 	andGates: 13,
-	warnings: []
+	warnings: [],
+	profile: null
 };
 
 const result = () => page.getByTestId('width-result');

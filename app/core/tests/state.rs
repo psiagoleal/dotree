@@ -391,3 +391,89 @@ fn aju10_inconsistent_wallace_reveals_are_refused() {
         assert_eq!(open(&v), Err(StateError::InconsistentReveals), "{why}");
     }
 }
+
+// ------------------------------------------------- AJU-12: height profiles (MT-31b)
+
+/// `{5; 2,1}` with the two FA of its optimum, as the student would build it.
+fn profile_exercise(help: HelpLog) -> Exercise {
+    let p = dotree_core::profile::parse("{5; 2,1}").unwrap().unwrap();
+    let r = p.optimal().unwrap();
+    Exercise::capture("{5; 2,1}", &BTreeMap::new(), &r, None, help)
+}
+
+#[test]
+fn exp16_a_profile_exercise_round_trips() {
+    let mut help = HelpLog::default();
+    for step in [
+        HelpStep::Optimal,
+        HelpStep::OptimalPath,
+        HelpStep::OptimalApplied,
+        HelpStep::Block,
+    ] {
+        help.record(step);
+    }
+    let ex = profile_exercise(help);
+    let (back, r) = round_trip(&ex);
+    assert_eq!(back, ex);
+    assert_eq!(r.heights(), vec![1, 2, 0]);
+    assert_eq!(
+        (
+            back.help.optimal,
+            back.help.optimal_path,
+            back.help.optimal_applied,
+            back.help.block
+        ),
+        (1, 1, 1, 1)
+    );
+}
+
+#[test]
+fn aju12_files_without_the_profile_counts_still_open() {
+    let mut v = r2_file();
+    for key in ["optimal", "optimalPath", "optimalApplied", "block"] {
+        assert_eq!(v["help"][key], 0, "{key}");
+        v["help"].as_object_mut().unwrap().remove(key);
+    }
+    assert_eq!(open(&v), Ok(()));
+}
+
+#[test]
+fn aju12_inconsistent_profile_reveals_are_refused() {
+    let file = |help: &[(&str, u32)]| {
+        let mut v: Value =
+            serde_json::from_str(&profile_exercise(HelpLog::default()).to_json()).unwrap();
+        for &(key, n) in help {
+            v["help"][key] = n.into();
+        }
+        v
+    };
+    assert_eq!(open(&file(&[("optimal", 1), ("block", 1)])), Ok(()));
+    for (set, why) in [
+        (&[("optimalPath", 1)][..], "the path without the result"),
+        (
+            &[("optimal", 1), ("optimalApplied", 1)][..],
+            "applied without the path",
+        ),
+    ] {
+        assert_eq!(
+            open(&file(set)),
+            Err(StateError::InconsistentReveals),
+            "{why}"
+        );
+    }
+    // An expression has no profile: no optimum and no block to reveal.
+    for key in ["optimal", "block"] {
+        let mut v = r2_file();
+        v["help"][key] = 1.into();
+        assert_eq!(open(&v), Err(StateError::InconsistentReveals), "{key}");
+    }
+}
+
+#[test]
+fn exp17_a_bad_profile_is_a_bad_expression() {
+    let mut v: Value =
+        serde_json::from_str(&profile_exercise(HelpLog::default()).to_json()).unwrap();
+    v["expression"] = "{7; 1,1}".into();
+    v["levels"] = json!([]);
+    assert_eq!(open(&v), Err(StateError::BadExpression));
+}

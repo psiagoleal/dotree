@@ -348,5 +348,70 @@
 	"verify_error_load": "The verification could not run: the verification module did not load. Reload the page with the network available.",
 	"read_only_notice": "Narrow screen: below 768 px the exercise is read-only. Matrix, diagram, verification and VHDL stay available; to form cells, use a wider window.",
 	"file_subject": "the file",
-	"saved_subject": "the saved content"
+	"saved_subject": "the saved content",
+	"form_profile_hint": "Or a height profile: the input heights and, after the semicolon, the output heights, from the most significant column to the least. E.g. {example}",
+	"example_profile": "Height profile",
+	"error_profile_syntax": "Malformed height profile at column {column}. Use heights separated by commas, a semicolon and the output heights, in braces, as in {example}.",
+	"error_profile_no_dots": "The profile has no input dot.",
+	"error_profile_too_many_dots": "The profile has {dots} dots; the limit is {limit}, one per letter from A to Z.",
+	"error_profile_too_many_columns": "A list of the profile has more than {limit} columns.",
+	"error_profile_output_too_small": "The output cannot hold the input from column 2^{column} up: dots never move to a lower column.",
+	"error_profile_empty_column": "The output asks for 0 dots in column 2^{column}, but it will always hold at least one: a column with a dot never empties, since every cell leaves its sum in it.",
+	"profile_title": "Output profile",
+	"profile_target": "Asked for: {profile}, from the most significant column to the least. The reduction stops when no column is above the height asked for.",
+	"profile_reached": "Profile reached: area {area} A_FA, delay {delay} T_FA.",
+	"profile_over": "Not yet: {columns}.",
+	"profile_over_column": "column 2^{column} has {height}, the profile asks for {target}",
+	"profile_pending": "Conclude the level to check the profile.",
+	"profile_block_ask": "Which block is this?",
+	"profile_block_confirm_title": "See the name of the block?",
+	"profile_block_confirm_body": "Recognising the block is part of the exercise. The name counts as help.",
+	"block_full_adder": "It is a full adder (FA).",
+	"block_half_adder": "It is a half adder (HA).",
+	"block_adder": "It is a {bits}-bit adder.",
+	"block_adder_carry_in": "It is a {bits}-bit adder with carry in.",
+	"block_carry_save": "It is {bits} FA side by side: a {bits}-bit carry-save adder.",
+	"block_counter": "It is a generalized parallel counter: the output has one bit per column.",
+	"block_compressor": "It is a compressor: the output stays in redundant form, with more than one bit in some column.",
+	"optimal_ask": "Optimal solution",
+	"optimal_ask_path": "See the optimal solution level by level",
+	"optimal_use": "Use the optimal solution",
+	"optimal_confirm_title": "See the optimal solution?",
+	"optimal_confirm_path_title": "See the optimal solution level by level?",
+	"optimal_confirm_use_title": "Replace your circuit with the optimal solution?",
+	"optimal_confirm_use_body": "The circuit you built gives way to the whole optimal solution. Undo (Ctrl+Z) brings your circuit back.",
+	"optimal_title": "Optimal solution, level by level",
+	"optimal_level": "Optimal solution, level {level}",
+	"optimal_output": "Optimal solution, output in the profile",
+	"optimal_rule": "The optimal solution comes from a search: among the circuits of FA and HA that reach the profile, the one with the least area and, among those, the least delay. Each cell takes the earliest ready dots of its column.",
+	"optimal_summary": [
+		{
+			"declarations": ["input levels", "input fa", "input ha", "input area", "input delay"],
+			"selectors": ["levels"],
+			"match": {
+				"levels=1": "Optimal solution: {levels} level; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA.",
+				"levels=*": "Optimal solution: {levels} levels; {fa} FA, {ha} HA; area {area} A_FA; delay {delay} T_FA."
+			}
+		}
+	],
+	"optimal_applied": "Optimal solution applied. Undo brings your circuit back.",
+	"optimal_too_large": "This profile is too large for the search of the optimal solution: it passed its limit of attempts.",
+	"optimal_no_circuit": "No circuit of FA and HA reaches this profile.",
+	"help_log_optimal": "optimal solution: {result} (level by level: {path})",
+	"help_log_optimal_applied": [
+		{
+			"declarations": ["input count"],
+			"selectors": ["count"],
+			"match": {
+				"count=1": "optimal solution applied: {count} time",
+				"count=*": "optimal solution applied: {count} times"
+			}
+		}
+	],
+	"help_log_block": "block name: {count}",
+	"comparison_optimal": "Optimal (profile)",
+	"comparison_missing_optimal": "The optimal solution comes in here once you ask for its metrics.",
+	"comparison_profile_note": "With an output profile, a solution counts as complete when it reaches the profile.",
+	"comparison_heights_title_optimal": "Height table: optimal solution",
+	"comparison_heights_export_optimal": "Download the heights of the optimal solution (Markdown)"
 }

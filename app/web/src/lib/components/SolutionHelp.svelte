@@ -1,8 +1,8 @@
 <!-- Caminho relativo: app/web/src/lib/components/SolutionHelp.svelte -->
 <!-- Lower bound and automatic solutions (spec 03): all depend only on the initial matrix and
      come in two steps, result first and path on a second request, each confirmed (GER-03).
-     Dadda's solution (AJU-05) and Wallace's (AJU-10) are revealed and used apart, each in a
-     MethodSolution. A reopened exercise shows what was already revealed, uncounted (SAL-02). -->
+     Dadda's solution (AJU-05), Wallace's (AJU-10) and, for a height profile, the optimal one
+     (AJU-12) are revealed and used apart, each in a MethodSolution. A reopened exercise shows what was already revealed, uncounted (SAL-02). -->
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { CompressionSession, LowerBound, Method } from '#lib/core.ts';
@@ -35,7 +35,10 @@
 	let bound = $state.raw<LowerBound | null>(untrack(() => session.shownLowerBound()));
 	let boundPath = $state(shown.lowerBound === 'path');
 
-	const METHODS: Method[] = ['dadda', 'wallace'];
+	// The optimal solution exists only for a height profile (AJU-12).
+	const METHODS: Method[] = untrack(() =>
+		session.snapshot().profile ? ['dadda', 'wallace', 'optimal'] : ['dadda', 'wallace']
+	);
 
 	async function askBound() {
 		if (!(await boundDialog.ask())) return;

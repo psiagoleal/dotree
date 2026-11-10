@@ -304,6 +304,12 @@ pub enum HelpStep {
     Wallace,
     WallacePath,
     WallaceApplied,
+    /// The same three steps for the optimal circuit of a height profile (AJU-12).
+    Optimal,
+    OptimalPath,
+    OptimalApplied,
+    /// The name of the known block a height profile describes (AJU-12).
+    Block,
 }
 
 /// How many times each help step was revealed, for the summary of a complete circuit
@@ -327,6 +333,16 @@ pub struct HelpLog {
     pub wallace_path: u32,
     #[serde(default)]
     pub wallace_applied: u32,
+    /// The optimal circuit of a height profile and the name of its block (AJU-12). Absent
+    /// in files before MT-31b: 0, schema still 1.
+    #[serde(default)]
+    pub optimal: u32,
+    #[serde(default)]
+    pub optimal_path: u32,
+    #[serde(default)]
+    pub optimal_applied: u32,
+    #[serde(default)]
+    pub block: u32,
 }
 
 impl HelpLog {
@@ -342,6 +358,10 @@ impl HelpLog {
             HelpStep::Wallace => &mut self.wallace,
             HelpStep::WallacePath => &mut self.wallace_path,
             HelpStep::WallaceApplied => &mut self.wallace_applied,
+            HelpStep::Optimal => &mut self.optimal,
+            HelpStep::OptimalPath => &mut self.optimal_path,
+            HelpStep::OptimalApplied => &mut self.optimal_applied,
+            HelpStep::Block => &mut self.block,
         };
         *n += 1;
     }

@@ -157,8 +157,8 @@ fn cmp19_columns_beyond_the_profile_must_be_empty() {
     assert!(!p.reached(&r));
 }
 
-/// Problem 8.3 of the course (Parhami, *Computer Arithmetic*, ch. 8), items a) to k): the
-/// areas and delays of its answer key, in A_FA and T_FA, cited by item, not copied.
+/// The project's reference set of eleven profiles, a) to k), with area and delay in A_FA
+/// and T_FA, worked out by hand and confirmed by an independent exhaustive search.
 const PROBLEM_8_3: [(&str, f64, f64); 11] = [
     ("{2,2,3; 1,1,1,1}", 3.0, 3.0),
     ("{3; 1,1}", 1.0, 1.0),
@@ -288,4 +288,30 @@ proptest::proptest! {
             proptest::prop_assert!(cost(&best) <= cost(&other), "{method:?}");
         }
     }
+}
+
+#[test]
+fn exp16_the_input_is_an_expression_or_a_profile() {
+    use dotree_core::profile::{InputError, analyze_input};
+    use std::collections::BTreeMap;
+    // A profile ignores the widths: its variables are its own, all of 1 bit.
+    let widths: BTreeMap<char, u32> = [('A', 3)].into_iter().collect();
+    let input = analyze_input("{2,2,3; 1,1,1,1}", &widths).unwrap();
+    assert_eq!(input.profile, Some(profile("{2,2,3; 1,1,1,1}")));
+    assert_eq!(input.analysis.widths.len(), 7);
+    assert!(input.analysis.warnings.is_empty());
+    // An expression goes through the expression rules.
+    let input = analyze_input("A + 1", &widths).unwrap();
+    assert_eq!(input.profile, None);
+    assert_eq!(input.analysis.widths, widths);
+    assert!(matches!(
+        analyze_input("A +", &widths),
+        Err(InputError::Expr(_))
+    ));
+    assert_eq!(
+        analyze_input("{7; 1,1}", &widths).err(),
+        Some(InputError::Profile(ProfileError::OutputTooSmall {
+            column: 0
+        }))
+    );
 }

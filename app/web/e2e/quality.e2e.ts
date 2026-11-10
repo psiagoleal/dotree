@@ -132,5 +132,18 @@ for (const scheme of ['light', 'dark'] as const) {
 			await page.getByRole('dialog').getByRole('button', { name: 'Mostrar', exact: true }).click();
 		}
 		await audit(page, 'complete circuit');
+
+		// A height profile (MT-31b): its panel, the optimum and the block name.
+		await page.getByLabel('Expressão').fill('{5; 2,1}');
+		await page.getByRole('button', { name: 'Montar a matriz' }).click();
+		await page.getByRole('dialog').getByRole('button', { name: 'Descartar' }).click();
+		await page.getByRole('button', { name: 'Qual bloco é este?' }).click();
+		await page.getByRole('dialog').getByRole('button', { name: 'Mostrar', exact: true }).click();
+		for (const ask of ['Solução ótima', 'Ver a solução ótima nível a nível']) {
+			await page.getByRole('button', { name: ask, exact: true }).click();
+			await page.getByRole('dialog').getByRole('button', { name: 'Mostrar', exact: true }).click();
+		}
+		await expect(page.getByTestId('optimal-result')).toBeVisible();
+		await audit(page, 'height profile');
 	});
 }

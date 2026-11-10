@@ -159,21 +159,30 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   522; só o Wallace é não dominado. Teste da fronteira (empate, compromisso, incompleto);
   teste de componente (nada antes da etapa 1, tabela de alturas só depois da etapa 2,
   registro de ajudas igual); teste de ponta a ponta com R2.
-- **AJU-12** — ONDE a matriz vier de um perfil de alturas (EXP-16), o sistema DEVE saber
-  calcular o **circuito ótimo** que atinge o perfil (CMP-19): a menor área e, entre os de
-  menor área, o menor atraso e depois o menor número de níveis, com FA e HA sobre os pontos
-  mais cedo prontos de cada coluna. SE a busca passar do limite, ENTÃO o sistema DEVE dizer
-  que o perfil é grande demais, sem travar. O sistema DEVE também saber nomear o bloco
-  conhecido que o perfil descreve: FA, HA, somador de $n$ bits, somador de $n$ bits com
-  vai-um de entrada, $n$ FA lado a lado (*carry-save*), contador (saída de um bit por
-  coluna) ou compressor (saída redundante). Mostrar o ótimo e o nome é ajuda revelada sob
-  pedido e contada, como as outras (MT-31b, com a interface).
-  *Prova:* teste do núcleo: o ótimo reproduz as áreas e os atrasos dos 11 itens do
-  gabarito do problema 8.3 da disciplina, citados pelo item (a: 3 e 3; b: 1 e 1; c: 4 e 3;
-  d: 6 e 4; e: 1,5 e 1,5; f: 2,5 e 2,5; g: 4 e 3; h: 3 e 1; i: 7 e 4; j: 3 e 2; k: 2 e 2,
-  em $A_{FA}$ e $T_{FA}$); f) dá FA, FA e HA nos níveis 0, 1 e 2; proptest: com saída de um
-  bit por coluna, o ótimo nunca perde para Dadda nem Wallace em (área, atraso); a busca de
-  26 pontos em quatro colunas para no limite; os blocos de cada item.
+- **AJU-12** — ONDE a matriz vier de um perfil de alturas (EXP-16), o sistema DEVE
+  oferecer, ao lado de Dadda e Wallace, a **solução ótima** que atinge o perfil (CMP-19):
+  a menor área e, entre as de menor área, o menor atraso e depois o menor número de níveis,
+  com FA e HA sobre os pontos mais cedo prontos de cada coluna. Ela segue o fluxo das
+  outras soluções: etapa 1 (métricas), etapa 2 (níveis, com a regra numa frase) e "Usar a
+  solução ótima" num passo de desfazer, cada um confirmado e contado à parte. Como a
+  solução para no perfil, o último painel é a saída no perfil, que pode ser redundante. Ela entra
+  na comparação (AJU-11), onde, com perfil, conta como completa a solução que o atinge.
+  SE a busca passar do limite, ENTÃO o sistema DEVE dizer que o perfil é grande demais em
+  vez de oferecê-la, sem travar e sem contar nada. O sistema DEVE também oferecer o
+  **nome do bloco conhecido** que o perfil descreve (FA, HA, somador de $n$ bits, somador
+  de $n$ bits com vai-um de entrada, $n$ FA lado a lado, contador ou compressor) como
+  ajuda confirmada e contada: reconhecer o bloco faz parte do exercício. Para uma
+  expressão, nem a solução ótima nem o nome do bloco aparecem.
+  *Prova:* teste do núcleo: o ótimo reproduz área e atraso dos 11 perfis de referência do
+  projeto, conferidos à mão e por uma busca exaustiva independente (a: 3 e 3; b: 1 e 1;
+  c: 4 e 3; d: 6 e 4; e: 1,5 e 1,5; f: 2,5 e 2,5; g: 4 e 3; h: 3 e 1; i: 7 e 4; j: 3 e 2;
+  k: 2 e 2, em $A_{FA}$ e $T_{FA}$); f) dá FA, FA e HA nos níveis 0, 1 e 2; proptest: com
+  saída de um bit por coluna, o ótimo nunca perde para Dadda nem Wallace em (área,
+  atraso); a busca de 26 pontos em quatro colunas para no limite; os blocos de cada item.
+  Testes da ponte (contagens, `optimalSearch` sem contar, nome revelado de novo sem
+  contar); testes de componente (duas etapas, saída redundante, perfil grande demais,
+  nada para uma expressão, comparação); teste de ponta a ponta com `{5; 2,1}` (bloco,
+  ótimo aplicado, registro e retomada depois de recarregar).
 
 ## Fora de escopo
 

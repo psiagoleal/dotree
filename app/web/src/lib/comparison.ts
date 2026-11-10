@@ -5,6 +5,7 @@
 import type { Snapshot } from '#lib/core.ts';
 
 export interface Figures {
+	/** Complete, or the height profile reached. */
 	complete: boolean;
 	area: number;
 	delay: number;
@@ -26,7 +27,8 @@ export function figures(s: Snapshot): Figures {
 	const delay = s.metrics.delay / 2;
 	const cpa = s.levels.find((l) => l.cpa);
 	return {
-		complete: s.result !== null,
+		// With a height profile, reaching it is what completes the circuit (AJU-12).
+		complete: s.result !== null || s.profile?.reached === true,
 		area,
 		delay,
 		fa: s.metrics.fa,

@@ -2,6 +2,7 @@
 // Words the codes the core returns (IDI-05), in the current or a given language.
 import { m } from '#lib/paraglide/messages.js';
 import type { CoreError, CoreWarning, CpaBlock, ExerciseError, Rejection } from '#lib/core.ts';
+import { PROFILE_EXAMPLE } from '#lib/expression.ts';
 
 type Locale = 'pt-br' | 'en';
 
@@ -56,6 +57,21 @@ export function errorMessage(e: CoreError, locale?: Locale): string {
 			return m.error_too_many_dots(e, o);
 		case 'badWidths':
 			return m.error_bad_widths({}, o);
+		case 'profile':
+			switch (e.kind) {
+				case 'syntax':
+					return m.error_profile_syntax({ column: e.column, example: PROFILE_EXAMPLE }, o);
+				case 'noDots':
+					return m.error_profile_no_dots({}, o);
+				case 'tooManyDots':
+					return m.error_profile_too_many_dots({ dots: e.dots, limit: e.limit }, o);
+				case 'tooManyColumns':
+					return m.error_profile_too_many_columns({ limit: e.limit }, o);
+				case 'outputTooSmall':
+					return m.error_profile_output_too_small({ column: e.column }, o);
+				case 'emptyColumn':
+					return m.error_profile_empty_column({ column: e.column }, o);
+			}
 	}
 	return m.error_bad_widths({}, o);
 }

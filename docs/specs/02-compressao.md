@@ -161,11 +161,16 @@ Tabela de alturas de R2 (MT-30), calculada à mão das células de R2 (spec 00):
   perfil de saída por **atingido** quando o nível atual não tiver célula pendente e
   nenhuma coluna passar da altura pedida para ela; uma coluna além das listadas pede 0.
   Atingir o perfil não completa o circuito (CMP-12): com 2 numa coluna, a saída continua
-  redundante. A mecânica não muda: o usuário pode seguir reduzindo.
+  redundante. A mecânica não muda: o usuário pode seguir reduzindo. A interface DEVE
+  mostrar o perfil pedido (da coluna mais significativa para a menos) e, enquanto não for
+  atingido, as colunas acima dele, com altura e alvo, ou que falta concluir o nível; ao
+  atingi-lo, a área e o atraso do circuito e o resumo das ajudas usadas, como num circuito
+  completo.
   *Prova:* testes do núcleo: `{3,3,3; 1,2,2,1}` só é atingido ao concluir o nível dos três
   FA; `{5; 2,1}` (W = 3) é atingido com alturas 1, 2, 0 e deixa de ser quando um FA põe
   ponto na coluna 2; `{2; 2}` é atingido pela própria entrada e deixa de ser com um HA
-  pendente.
+  pendente. Teste da ponte (`snapshot().profile`); testes de componente das três
+  situações; teste de ponta a ponta de `{3; 1,1}` (1 $A_{FA}$, 1 $T_{FA}$).
 
 ## Fora de escopo
 

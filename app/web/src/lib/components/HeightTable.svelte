@@ -1,6 +1,6 @@
 <!-- Caminho relativo: app/web/src/lib/components/HeightTable.svelte -->
 <!-- The height table (spec 02, CMP-18): the height of each column at each level, with the
-     cells formed over it, the tabular form of the course reference (Parhami, fig. 8.11).
+     cells formed over it, the tabular form of Parhami, *Computer Arithmetic*, fig. 8.11.
      For the student's own circuit it is always visible and exportable; the comparison
      (MT-38) shows one per solution whose levels were revealed. -->
 <script lang="ts">

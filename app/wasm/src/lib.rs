@@ -3,6 +3,7 @@
 //! crate only converts core results into JSON for the interface. Errors and warnings travel
 //! as codes with parameters; the interface words them (IDI-05).
 
+use std::cell::OnceCell;
 use std::collections::BTreeMap;
 
 use dotree_core::board::{self, BoardLimit};
@@ -12,6 +13,7 @@ use dotree_core::heights::{self, HeightHeaders, RowKind};
 use dotree_core::help::{self, HelpLog, HelpStep, Hint, Method, NextMove};
 use dotree_core::matrix::{DotMatrix, MatrixError};
 use dotree_core::netlist::Netlist;
+use dotree_core::profile::{self, Block, InputError, Profile, ProfileError, SearchError};
 use dotree_core::reduce::{
     CellKind, CpaBlock, Origin, PendingCell, Point, PointId, Reduction, Rejection,
 };
@@ -74,6 +76,9 @@ struct MatrixDto {
     v_max: String,
     and_gates: usize,
     warnings: Vec<Value>,
+    /// Input and output heights of a height profile (EXP-16), column 0 first; null for an
+    /// expression.
+    profile: Option<Value>,
 }
 
 fn expected_code(e: Expected) -> &'static str {
@@ -112,6 +117,39 @@ fn expr_error(e: &ExprError) -> Value {
     }
 }
 
+fn profile_error(e: &ProfileError) -> Value {
+    match *e {
+        ProfileError::Syntax { column } => {
+            json!({"code": "profile", "kind": "syntax", "column": column})
+        }
+        ProfileError::NoDots => json!({"code": "profile", "kind": "noDots"}),
+        ProfileError::TooManyDots { dots, limit } => {
+            json!({"code": "profile", "kind": "tooManyDots", "dots": dots, "limit": limit})
+        }
+        ProfileError::TooManyColumns { limit } => {
+            json!({"code": "profile", "kind": "tooManyColumns", "limit": limit})
+        }
+        ProfileError::OutputTooSmall { column } => {
+            json!({"code": "profile", "kind": "outputTooSmall", "column": column})
+        }
+        ProfileError::EmptyColumn { column } => {
+            json!({"code": "profile", "kind": "emptyColumn", "column": column})
+        }
+    }
+}
+
+fn block_json(b: Block) -> Value {
+    match b {
+        Block::FullAdder => json!({"code": "fullAdder"}),
+        Block::HalfAdder => json!({"code": "halfAdder"}),
+        Block::Adder { bits } => json!({"code": "adder", "bits": bits}),
+        Block::AdderWithCarryIn { bits } => json!({"code": "adderWithCarryIn", "bits": bits}),
+        Block::CarrySave { bits } => json!({"code": "carrySave", "bits": bits}),
+        Block::Counter => json!({"code": "counter"}),
+        Block::Compressor => json!({"code": "compressor"}),
+    }
+}
+
 fn failure(error: Value) -> String {
     json!({"ok": false, "error": error}).to_string()
 }
@@ -135,22 +173,29 @@ fn parse_widths(widths_json: &str) -> Result<BTreeMap<char, u32>, Value> {
     Ok(widths)
 }
 
-fn analyze_and_build(src: &str, widths_json: &str) -> Result<(Analysis, DotMatrix), Value> {
+/// The analysed input (an expression, or a height profile, EXP-16) and its matrix.
+type Built = (Analysis, DotMatrix, Option<Profile>);
+
+fn analyze_and_build(src: &str, widths_json: &str) -> Result<Built, Value> {
     let widths = parse_widths(widths_json)?;
-    let analysis = expr::analyze(src, &widths).map_err(|e| expr_error(&e))?;
+    let input = profile::analyze_input(src, &widths).map_err(|e| match e {
+        InputError::Expr(e) => expr_error(&e),
+        InputError::Profile(e) => profile_error(&e),
+    })?;
+    let analysis = input.analysis;
     let m = DotMatrix::build(&analysis).map_err(|e| match e {
         MatrixError::TooManyDots { count, limit } => {
             json!({"code": "tooManyDots", "count": count, "limit": limit})
         }
     })?;
-    Ok((analysis, m))
+    Ok((analysis, m, input.profile))
 }
 
 /// Builds the level-0 matrix of `src` with the widths in `widths_json` (an object such as
 /// `{"A": 3, "B": 2}`). Returns `{"ok": true, "matrix": …}` or `{"ok": false, "error": …}`.
 #[wasm_bindgen(js_name = buildMatrix)]
 pub fn build_matrix(src: &str, widths_json: &str) -> String {
-    let (analysis, m) = match analyze_and_build(src, widths_json) {
+    let (analysis, m, profile) = match analyze_and_build(src, widths_json) {
         Ok(built) => built,
         Err(e) => return failure(e),
     };
@@ -206,6 +251,7 @@ pub fn build_matrix(src: &str, widths_json: &str) -> String {
                 Warning::UnusedWidth { var } => json!({"code": "unusedWidth", "var": var}),
             })
             .collect(),
+        profile: profile.map(|p| json!({"input": p.input, "output": p.output})),
     };
     json!({"ok": true, "matrix": dto}).to_string()
 }
@@ -269,16 +315,11 @@ fn outcome(r: Result<Value, Rejection>) -> String {
 pub enum SolutionMethod {
     Dadda,
     Wallace,
+    /// The optimal circuit of a height profile (AJU-12).
+    Optimal,
 }
 
 impl SolutionMethod {
-    fn core(self) -> Method {
-        match self {
-            SolutionMethod::Dadda => Method::Dadda,
-            SolutionMethod::Wallace => Method::Wallace,
-        }
-    }
-
     /// The three counted steps of this method: result, path, applied.
     fn steps(self) -> [HelpStep; 3] {
         match self {
@@ -292,6 +333,11 @@ impl SolutionMethod {
                 HelpStep::WallacePath,
                 HelpStep::WallaceApplied,
             ],
+            SolutionMethod::Optimal => [
+                HelpStep::Optimal,
+                HelpStep::OptimalPath,
+                HelpStep::OptimalApplied,
+            ],
         }
     }
 
@@ -300,6 +346,7 @@ impl SolutionMethod {
         match self {
             SolutionMethod::Dadda => [l.solution, l.solution_path, l.solution_applied],
             SolutionMethod::Wallace => [l.wallace, l.wallace_path, l.wallace_applied],
+            SolutionMethod::Optimal => [l.optimal, l.optimal_path, l.optimal_applied],
         }
     }
 }
@@ -320,6 +367,10 @@ pub struct Session {
     widths: BTreeMap<char, u32>,
     /// The width challenge, once answered or given up (EXP-10); outside the undo history.
     width: Option<WidthReveal>,
+    /// The height profile the exercise was opened with (EXP-16), if any.
+    profile: Option<Profile>,
+    /// Its optimal circuit, searched once on first need (AJU-12).
+    optimal: OnceCell<Result<Reduction, SearchError>>,
 }
 
 impl Session {
@@ -328,6 +379,7 @@ impl Session {
         matrix: DotMatrix,
         expression: &str,
         widths: &BTreeMap<char, u32>,
+        profile: Option<Profile>,
     ) -> Session {
         Session {
             reduction,
@@ -337,6 +389,24 @@ impl Session {
             expression: expression.into(),
             widths: widths.clone(),
             width: None,
+            profile,
+            optimal: OnceCell::new(),
+        }
+    }
+
+    /// The optimal circuit of the profile, searched once; `None` without a profile.
+    fn optimal(&self) -> Option<&Result<Reduction, SearchError>> {
+        let p = self.profile.as_ref()?;
+        Some(self.optimal.get_or_init(|| p.optimal()))
+    }
+
+    /// The circuit of `method` from level 0; `None` for the optimum when there is no
+    /// profile or the search found nothing.
+    fn solution_reduction(&self, method: SolutionMethod) -> Option<Reduction> {
+        match method {
+            SolutionMethod::Dadda => Some(help::solution(&self.matrix, Method::Dadda)),
+            SolutionMethod::Wallace => Some(help::solution(&self.matrix, Method::Wallace)),
+            SolutionMethod::Optimal => self.optimal()?.as_ref().ok().cloned(),
         }
     }
 
@@ -345,12 +415,17 @@ impl Session {
         json!({"dots": b.dots, "outputWidth": b.output_width, "value": b.value}).to_string()
     }
 
+    /// The solution of `method` as a session of its own. Without an optimum (no profile, or
+    /// a search that found nothing), the optimum's session is the empty circuit; the
+    /// interface asks for it only after `optimalSearch` said "ok".
     fn solution_session(&self, method: SolutionMethod) -> Session {
         Session::with(
-            help::solution(&self.matrix, method.core()),
+            self.solution_reduction(method)
+                .unwrap_or_else(|| Reduction::new(&self.matrix)),
             self.matrix.clone(),
             &self.expression,
             &self.widths,
+            self.profile.clone(),
         )
     }
 
@@ -394,9 +469,14 @@ fn pending(c: &PendingCell) -> Value {
 impl Session {
     /// Opens a session on the level-0 matrix, or returns the error JSON of `buildMatrix`.
     pub fn open(src: &str, widths_json: &str) -> Result<Session, String> {
-        let (_, m) = analyze_and_build(src, widths_json).map_err(|e| e.to_string())?;
-        let widths = parse_widths(widths_json).expect("checked by analyze_and_build");
-        Ok(Session::with(Reduction::new(&m), m, src, &widths))
+        let (_, m, profile) = analyze_and_build(src, widths_json).map_err(|e| e.to_string())?;
+        // A profile ignores the widths (EXP-16), so its file keeps none.
+        let widths = if profile.is_some() {
+            BTreeMap::new()
+        } else {
+            parse_widths(widths_json).expect("checked by analyze_and_build")
+        };
+        Ok(Session::with(Reduction::new(&m), m, src, &widths, profile))
     }
 
     // ------------------------------------------------------------ exercise file (spec 08)
@@ -418,7 +498,7 @@ impl Session {
         let open = || {
             let ex = Exercise::parse(file)?;
             let (m, r) = ex.restore()?;
-            let mut s = Session::with(r, m, &ex.expression, &ex.widths);
+            let mut s = Session::with(r, m, &ex.expression, &ex.widths, ex.profile());
             s.log = ex.help;
             s.width = ex.reveals.width;
             Ok(s)
@@ -467,7 +547,9 @@ impl Session {
         json!({"width": self.width,
                "lowerBound": stage(l.lower_bound, l.lower_bound_path),
                "solution": stage(l.solution, l.solution_path),
-               "wallace": stage(l.wallace, l.wallace_path)})
+               "wallace": stage(l.wallace, l.wallace_path),
+               "optimal": stage(l.optimal, l.optimal_path),
+               "block": l.block > 0})
         .to_string()
     }
 
@@ -509,6 +591,9 @@ impl Session {
             "result": r.result(),
             // Shown only on request (CMP-15); pending cells by index into current.pending.
             "critical": {"cells": critical.cells, "pending": critical.pending},
+            // The output profile, column 0 first, and whether it was reached (CMP-19).
+            "profile": self.profile.as_ref().map(|p| json!({
+                "output": p.output, "reached": p.reached(r)})),
         })
         .to_string()
     }
@@ -622,13 +707,47 @@ impl Session {
         if method.counts(&self.log)[1] == 0 {
             return false;
         }
-        let applied = self
-            .reduction
-            .adopt(&help::solution(&self.matrix, method.core()));
+        let Some(solution) = self.solution_reduction(method) else {
+            return false;
+        };
+        let applied = self.reduction.adopt(&solution);
         if applied {
             self.log.record(method.steps()[2]);
         }
         applied
+    }
+
+    /// Whether the optimal circuit of the profile can be shown: "ok", "tooLarge" or
+    /// "noCircuit"; `None` without a profile. Reveals and counts nothing (AJU-12): it may
+    /// take a moment the first time, as it runs the search.
+    #[wasm_bindgen(js_name = optimalSearch)]
+    pub fn optimal_search(&self) -> Option<String> {
+        Some(
+            match self.optimal()? {
+                Ok(_) => "ok",
+                Err(SearchError::TooLarge) => "tooLarge",
+                Err(SearchError::NoCircuit) => "noCircuit",
+            }
+            .into(),
+        )
+    }
+
+    /// The known block the profile describes, as a counted reveal (AJU-12); `null` without
+    /// a profile, uncounted.
+    pub fn block(&mut self) -> String {
+        let Some(p) = &self.profile else {
+            return Value::Null.to_string();
+        };
+        let block = block_json(p.block());
+        self.log.record(HelpStep::Block);
+        block.to_string()
+    }
+
+    /// The block again, uncounted, once it was revealed; `None` before that (GER-01).
+    #[wasm_bindgen(js_name = shownBlock)]
+    pub fn shown_block(&self) -> Option<String> {
+        let p = self.profile.as_ref()?;
+        (self.log.block > 0).then(|| block_json(p.block()).to_string())
     }
 
     // ------------------------------------------------------------ diagram (spec 05, MT-14a)
@@ -814,7 +933,9 @@ impl Session {
                "lowerBoundPath": l.lower_bound_path, "solution": l.solution,
                "solutionPath": l.solution_path, "solutionApplied": l.solution_applied,
                "wallace": l.wallace, "wallacePath": l.wallace_path,
-               "wallaceApplied": l.wallace_applied})
+               "wallaceApplied": l.wallace_applied, "optimal": l.optimal,
+               "optimalPath": l.optimal_path, "optimalApplied": l.optimal_applied,
+               "block": l.block})
         .to_string()
     }
 

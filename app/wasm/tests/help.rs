@@ -37,7 +37,8 @@ fn nothing_is_counted_before_a_request() {
         parse(r1().help_log()),
         json!({"hints": 0, "nextMoves": 0, "lowerBound": 0, "lowerBoundPath": 0,
                "solution": 0, "solutionPath": 0, "solutionApplied": 0,
-               "wallace": 0, "wallacePath": 0, "wallaceApplied": 0})
+               "wallace": 0, "wallacePath": 0, "wallaceApplied": 0,
+               "optimal": 0, "optimalPath": 0, "optimalApplied": 0, "block": 0})
     );
 }
 

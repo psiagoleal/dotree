@@ -9,6 +9,10 @@ describe('variablesIn', () => {
 		expect(variablesIn('a*b')).toEqual([]);
 	});
 
+	it('a height profile has no variable to size (EXP-16)', () => {
+		expect(variablesIn(' {2,2,3; 1,1,1,1}')).toEqual([]);
+	});
+
 	it('every example gives a width to each of its variables (EXP-12)', () => {
 		for (const ex of EXAMPLES) {
 			expect(Object.keys(ex.widths).sort()).toEqual(variablesIn(ex.expression));

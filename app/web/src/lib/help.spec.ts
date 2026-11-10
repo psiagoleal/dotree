@@ -69,7 +69,11 @@ describe('helpLogItems (AJU-07)', () => {
 		solutionApplied: 0,
 		wallace: 0,
 		wallacePath: 0,
-		wallaceApplied: 0
+		wallaceApplied: 0,
+		optimal: 0,
+		optimalPath: 0,
+		optimalApplied: 0,
+		block: 0
 	};
 
 	it('is empty when no help was used', () => {
@@ -103,6 +107,20 @@ describe('helpLogItems (AJU-07)', () => {
 			'solução de Dadda: 1 (nível a nível: 0)',
 			'solução de Wallace: 1 (nível a nível: 1)',
 			'solução de Wallace aplicada: 1 vez'
+		]);
+	});
+
+	it('counts the optimal solution and the block name of a profile apart (AJU-12)', () => {
+		expect(
+			helpLogItems({ ...none, optimal: 1, optimalPath: 1, optimalApplied: 2, block: 1 }, 'pt-br')
+		).toEqual([
+			'solução ótima: 1 (nível a nível: 1)',
+			'solução ótima aplicada: 2 vezes',
+			'nome do bloco: 1'
+		]);
+		expect(helpLogItems({ ...none, optimal: 1, block: 1 }, 'en')).toEqual([
+			'optimal solution: 1 (level by level: 0)',
+			'block name: 1'
 		]);
 	});
 });

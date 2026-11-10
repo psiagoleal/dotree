@@ -3,7 +3,13 @@
      (EXP-01, EXP-12). Validation is the core's job; this only collects the input. -->
 <script lang="ts">
 	import { m } from '#lib/paraglide/messages.js';
-	import { DEFAULT_WIDTH, EXAMPLES, variablesIn, type Example } from '#lib/expression.ts';
+	import {
+		DEFAULT_WIDTH,
+		EXAMPLES,
+		PROFILE_EXAMPLE,
+		variablesIn,
+		type Example
+	} from '#lib/expression.ts';
 
 	let {
 		onbuild
@@ -18,7 +24,8 @@
 	const exampleName: Record<Example['id'], () => string> = {
 		r1: m.example_r1,
 		r3: m.example_r3,
-		r4: m.example_r4
+		r4: m.example_r4,
+		profile: m.example_profile
 	};
 
 	function widthsInUse(): Record<string, number> {
@@ -54,7 +61,9 @@
 			aria-describedby="expr-hint"
 		/>
 	</label>
-	<p id="expr-hint" class="hint">{m.form_expression_hint()}</p>
+	<p id="expr-hint" class="hint">
+		{m.form_expression_hint()}<br />{m.form_profile_hint({ example: PROFILE_EXAMPLE })}
+	</p>
 
 	{#if vars.length > 0}
 		<fieldset class="widths">

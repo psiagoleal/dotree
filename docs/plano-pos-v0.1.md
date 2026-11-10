@@ -299,9 +299,11 @@ flowchart LR
   sobre os pontos mais cedo prontos; poda por 1 meia-unidade de área por ponto excedente;
   limite de 1 milhão de níveis tentados) e classificação do bloco. Os 11 itens batem; a
   leitura recusa os perfis que nenhum circuito atinge (coluna que nunca esvazia).
-- **MT-31b, interface:** o campo aceita a notação; o painel mostra o perfil, se foi
-  atingido e, então, área e atraso; o ótimo e o nome do bloco como ajuda contada (etapa 1:
-  área e atraso; etapa 2: os níveis), com registro no arquivo do exercício.
+- **MT-31b, interface (feito em 2026-11-10):** o campo aceita a notação, sem larguras, com
+  exemplo; painel do perfil (pedido, colunas acima, atingido com área e atraso); a solução
+  ótima como terceiro método, no mesmo fluxo de Dadda e Wallace e na comparação; o nome
+  do bloco como ajuda confirmada e contada; quatro contagens opcionais no arquivo
+  (esquema 1).
 
 ### MT-32: Célula composta (P13)
 - **Objetivo:** modelo de célula com entradas e saídas em várias colunas, custo e atraso
@@ -358,3 +360,25 @@ flowchart LR
 - **Depende de:** MT-33, MT-37
 
 A animação de *shift-add* (P19) fica sem ticket até haver espaço depois da v0.4.
+
+## Antes da v0.2.0 (decisão do autor, 2026-11-10)
+
+### MT-40a: Documentação pública e referências
+- **Objetivo:** README da v0.2 (o que o app faz, passo a passo, limitações declaradas,
+  metodologia e referências); ADR e spec onde faltarem.
+- **Decisões do autor:** a spec é **uma só e viva**, atualizada a cada versão (não uma
+  spec por versão); o histórico de cada versão fica no git e no CHANGELOG. O projeto é
+  público: só se citam livros e artigos de acesso público (Parhami; Wallace, 1964; Dadda,
+  1965), **nunca** material de disciplina (listas, gabaritos, laboratórios, slides),
+  nem por referência. Inclui a varredura das menções que já existem no repositório.
+- **Critério de aceite:** nenhuma menção a material de disciplina nos arquivos
+  versionados do projeto; cada limitação declarada aponta para a spec ou o ticket que a
+  trataria; README conferido contra o app publicado.
+
+### MT-40b: Ajuda dentro do app
+- **Objetivo:** seção "Como usar", em português e inglês, aberta pelo cabeçalho: os
+  passos, os atalhos, o que cada ajuda revela e como é contada, as limitações e as
+  referências.
+- **Critério de aceite:** testes de componente, de acessibilidade (GER-07) e de ponta a
+  ponta; os textos não revelam solução de nenhum exercício.
+- **Depende de:** MT-40a
