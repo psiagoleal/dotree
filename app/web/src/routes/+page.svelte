@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import LanguageSwitch from '#lib/components/LanguageSwitch.svelte';
+	import Guide from '#lib/components/Guide.svelte';
 	import ExpressionForm from '#lib/components/ExpressionForm.svelte';
 	import Compression from '#lib/components/Compression.svelte';
 	import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
@@ -166,7 +167,10 @@
 
 <header>
 	<h1>{m.app_title()}</h1>
-	<LanguageSwitch />
+	<div class="header-actions">
+		<Guide />
+		<LanguageSwitch />
+	</div>
 </header>
 
 <main>
@@ -306,6 +310,13 @@
 		justify-content: space-between;
 		gap: var(--space-3);
 		border-bottom: 1px solid var(--color-border);
+	}
+	.header-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: flex-end;
+		gap: var(--space-2);
 	}
 	h1 {
 		margin: 0;

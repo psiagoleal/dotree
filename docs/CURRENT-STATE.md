@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-10
-- **Commit:** `4772336` (MT-31b, #48). O MT-40a ainda não foi commitado.
+- **Commit:** `35b13e2` (MT-40a, #49). O MT-40b ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -180,7 +180,13 @@
       com o fora de escopo da versão atual; varredura das referências a material didático
       não publicado em docs, specs, ADR, CHANGELOG e `AGENTS.md`. MT-41 e MT-42 abertos
       para as duas limitações novas da entrada por alturas.
-- [ ] Próximo: MT-40b (ajuda no app); depois, a v0.2.0.
+- [x] MT-40a mesclado (#49).
+- [x] MT-40b: "Como usar" no cabeçalho (GER-11), `Guide.svelte` e `guide.ts`; atalhos
+      ignorados com diálogo aberto. 180 testes de unidade/componente, 55 e2e; 5 mutações
+      pegas.
+- [ ] Próximo: MT-43, publicar a v0.2.0 (versões em `Cargo.toml`, `package.json` e badge do
+      README, seção do CHANGELOG, ModelSim à mão, *tag* pelo autor). O aviso "Em
+      construção" da página (`wip_notice`) pode ser revisto junto.
 - Mensagens de commit antigas (a do MT-31a, `90df97e`, e outras) citam material não
   público; ficam no histórico, porque reescrevê-lo pede *force push* no `main` (ADR 0003).
 
@@ -223,6 +229,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-10 | `35b13e2` | Documentação pública, ADR 0004 (#49); "Como usar" no app | MT-40b |
 | 2026-11-10 | `4772336` | Interface da entrada por alturas (#48); documentação pública, ADR 0004 | MT-40a |
 | 2026-11-10 | `90df97e` | Núcleo da entrada por alturas (#47); interface da entrada por alturas | MT-31b |
 | 2026-11-10 | `6049fa4` | Comparação de soluções (#46); núcleo da entrada por alturas | MT-31a |

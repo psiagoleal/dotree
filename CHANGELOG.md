@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- "Como usar", no cabeçalho, em português e inglês: os passos (expressão ou perfil de
+  alturas, largura, compressão, CPA, verificação e exportação), os atalhos de teclado, o
+  que cada ajuda revela e como é contada, as limitações e as referências públicas. Abre
+  sem confirmação, não conta ajuda e não depende do exercício aberto; Esc ou "Fechar"
+  devolvem o foco ao botão. Os atalhos da página não agem com um diálogo aberto
+  (GER-11, MT-40b).
 - README da v0.2: o que o app faz, passo a passo, limitações (cada uma com o critério ou
   o ticket que a trataria), metodologia e referências públicas (Parhami, caps. 8, 11 e 12;
   Wallace, 1964; Dadda, 1965; manual da DE2). ADR 0004: uma spec só, viva, atualizada no

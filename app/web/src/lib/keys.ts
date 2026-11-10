@@ -1,6 +1,7 @@
 // Caminho relativo: app/web/src/lib/keys.ts
 // Keyboard shortcuts of the page (VIS-03, GER-07). None fires inside a text field: V and F
-// are variable names, and Ctrl+Z there undoes the text.
+// are variable names, and Ctrl+Z there undoes the text. None fires inside an open dialog
+// either: it covers the page and has its own keys (GER-11).
 
 export type KeyAction = 'toggleView' | 'form' | 'clearSelection' | 'undo' | 'redo';
 
@@ -9,6 +10,7 @@ const TYPING = new Set(['INPUT', 'TEXTAREA', 'SELECT']);
 export function keyAction(e: KeyboardEvent): KeyAction | null {
 	const target = e.target as HTMLElement | null;
 	if (target && (TYPING.has(target.tagName) || target.isContentEditable)) return null;
+	if (target?.closest?.('dialog[open]')) return null;
 	const key = e.key.toLowerCase();
 	if (e.ctrlKey || e.metaKey) {
 		if (e.altKey) return null;
