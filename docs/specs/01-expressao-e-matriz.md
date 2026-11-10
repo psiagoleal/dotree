@@ -165,8 +165,8 @@ consumiram.
 
 ## Entrada por alturas (MT-31)
 
-A notação do problema 8.3 da disciplina (Parhami, *Computer Arithmetic*, cap. 8):
-`{2,2,3; 1,1,1,1}` dá as alturas das colunas de entrada e, depois do `;`, as de saída,
+A notação dos contadores paralelos generalizados (Parhami, *Computer Arithmetic*, cap. 8),
+com a saída também por alturas: `{2,2,3; 1,1,1,1}` dá as alturas das colunas de entrada e, depois do `;`, as de saída,
 sempre da coluna mais significativa para a menos. O perfil de saída diz onde a redução
 para (CMP-19).
 
@@ -176,6 +176,9 @@ para (CMP-19).
   expressão $A + B + C + 2D + 2E + 4F + 4G$, sem portas AND.
   *Prova:* teste do núcleo: `{2,2,3; 1,1,1,1}` → alturas 3, 2, 2 a partir de $2^0$,
   $W = 4$, 0 AND e a expressão acima; espaços livres; uma expressão comum não é perfil.
+  Na interface, o campo da expressão aceita o perfil, não pede larguras (as que sobraram
+  no formulário são ignoradas e não vão para o arquivo), a dica mostra a notação e há o
+  exemplo `{5,5; 1,1,1,1}`; testes da ponte, de unidade e de ponta a ponta.
 - **EXP-17** — SE o perfil estiver malformado, ENTÃO o sistema DEVE apontar a coluna do
   caractere (contada a partir de 1). SE não tiver pontos, passar de 26 pontos ou de 16
   colunas numa lista, ENTÃO o sistema DEVE recusá-lo informando o limite. SE a saída não
@@ -189,9 +192,8 @@ para (CMP-19).
 
   *Prova:* testes do núcleo das posições e dos limites; `{7; 1,1}` (valor, coluna 0),
   `{1,1; 3}` (valor, coluna 1), `{2; 2,0}` (coluna 0 vazia) e `{2,4; 1,0,3,1}` (coluna 2
-  vazia); proptest: todo perfil pequeno aceito tem circuito (AJU-12).
-
-A interface (o campo aceitar a notação e mostrar o perfil) é o MT-31b.
+  vazia); proptest: todo perfil pequeno aceito tem circuito (AJU-12); códigos na ponte e
+  mensagens nos dois idiomas, com a coluna; teste de ponta a ponta das recusas.
 
 ## Exemplos embutidos
 

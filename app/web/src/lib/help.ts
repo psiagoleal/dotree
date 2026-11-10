@@ -59,5 +59,10 @@ export function helpLogItems(log: HelpLog, locale?: Locale): string[] {
 		if (result + path > 0) items.push(m.help_log_solution({ method, result, path }, o));
 		if (applied > 0) items.push(m.help_log_solution_applied({ method, count: applied }, o));
 	}
+	if (log.optimal + log.optimalPath > 0)
+		items.push(m.help_log_optimal({ result: log.optimal, path: log.optimalPath }, o));
+	if (log.optimalApplied > 0)
+		items.push(m.help_log_optimal_applied({ count: log.optimalApplied }, o));
+	if (log.block > 0) items.push(m.help_log_block({ count: log.block }, o));
 	return items;
 }

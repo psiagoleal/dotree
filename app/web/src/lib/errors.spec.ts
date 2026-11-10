@@ -10,6 +10,7 @@ import {
 	warningMessage,
 	type FileError
 } from './errors';
+import { PROFILE_EXAMPLE } from './expression';
 
 const ALL: CoreError[] = [
 	...(
@@ -33,7 +34,13 @@ const ALL: CoreError[] = [
 	{ code: 'coefficientTooLarge' },
 	{ code: 'tooManyInputBits', total: 33, limit: 32 },
 	{ code: 'tooManyDots', count: 257, limit: 256 },
-	{ code: 'badWidths' }
+	{ code: 'badWidths' },
+	{ code: 'profile', kind: 'syntax', column: 6 },
+	{ code: 'profile', kind: 'noDots' },
+	{ code: 'profile', kind: 'tooManyDots', dots: 27, limit: 26 },
+	{ code: 'profile', kind: 'tooManyColumns', limit: 16 },
+	{ code: 'profile', kind: 'outputTooSmall', column: 0 },
+	{ code: 'profile', kind: 'emptyColumn', column: 2 }
 ];
 
 describe('errorMessage', () => {
@@ -43,7 +50,8 @@ describe('errorMessage', () => {
 			const texts = ALL.map((e) => errorMessage(e, locale));
 			for (const t of texts) {
 				expect(t.length).toBeGreaterThan(5);
-				expect(t).not.toMatch(/[{}]/);
+				// The profile example is the only text in braces.
+				expect(t.replace(PROFILE_EXAMPLE, '')).not.toMatch(/[{}]/);
 			}
 			expect(new Set(texts).size).toBe(texts.length);
 		}
@@ -179,6 +187,17 @@ describe('fileErrorMessage (SAL-03)', () => {
 		// SAL-05: the copy in local storage is not a file.
 		expect(fileErrorMessage({ code: 'oldSchema', found: 0 }, 'pt-br', true)).toBe(
 			'o conteúdo salvo usa o esquema 0, antigo demais para esta versão.'
+		);
+	});
+});
+
+describe('profile errors (EXP-17)', () => {
+	it('point at the column and show the notation', () => {
+		expect(errorMessage({ code: 'profile', kind: 'syntax', column: 6 }, 'pt-br')).toBe(
+			'Perfil de alturas malformado na coluna 6. Use alturas separadas por vírgula, um ponto e vírgula e as alturas da saída, entre chaves, como {2,2,3; 1,1,1,1}.'
+		);
+		expect(errorMessage({ code: 'profile', kind: 'emptyColumn', column: 2 }, 'en')).toMatch(
+			/^The output asks for 0 dots in column 2\^2, but it will always hold at least one/
 		);
 	});
 });

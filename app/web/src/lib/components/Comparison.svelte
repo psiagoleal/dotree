@@ -3,13 +3,8 @@
      revealed. It reveals nothing new (GER-01): a solution enters with step 1 of its help (its
      metrics) and its height table with step 2 (its levels); nothing here is counted. -->
 <script lang="ts">
-	import {
-		METHOD_NAME,
-		type CompressionSession,
-		type HelpLog,
-		type Method,
-		type Snapshot
-	} from '#lib/core.ts';
+	import type { CompressionSession, HelpLog, Method, Snapshot } from '#lib/core.ts';
+	import { STAGE_KEY, methodTexts } from '#lib/methods.ts';
 	import { figures, nonDominated, type Figures } from '#lib/comparison.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
@@ -28,8 +23,10 @@
 	} = $props();
 
 	const id = $props.id();
-	const METHODS: Method[] = ['dadda', 'wallace'];
-	const STAGE_KEY = { dadda: 'solution', wallace: 'wallace' } as const;
+	// The optimal solution exists only for a height profile (AJU-12).
+	const METHODS: Method[] = $derived(
+		snap.profile ? ['dadda', 'wallace', 'optimal'] : ['dadda', 'wallace']
+	);
 
 	interface Shown {
 		method: Method;
@@ -55,11 +52,11 @@
 
 	const columns = $derived([
 		{
-			label: snap.result ? m.comparison_student() : m.comparison_student_incomplete(),
+			label: figures(snap).complete ? m.comparison_student() : m.comparison_student_incomplete(),
 			f: figures(snap)
 		},
 		...shown.map((s) => ({
-			label: s.method === 'dadda' ? m.comparison_dadda() : m.comparison_wallace(),
+			label: methodTexts(s.method).comparison,
 			f: figures(s.snap)
 		}))
 	]);
@@ -137,16 +134,19 @@
 		{#if shown.some((s) => s.method === 'dadda')}
 			<p class="note">{m.comparison_dadda_note()}</p>
 		{/if}
+		{#if snap.profile}
+			<p class="note">{m.comparison_profile_note()}</p>
+		{/if}
 		{#each missing as method (method)}
-			<p class="note">{m.comparison_missing({ method: METHOD_NAME[method] })}</p>
+			<p class="note">{methodTexts(method).missing}</p>
 		{/each}
 		{#each shown as s (s.method)}
 			{#if s.heights}
 				<HeightTable
 					rows={s.heights}
 					markdown={markdown(s.method)}
-					title={m.comparison_heights_title({ method: METHOD_NAME[s.method] })}
-					exportLabel={m.comparison_heights_export({ method: METHOD_NAME[s.method] })}
+					title={methodTexts(s.method).heightsTitle}
+					exportLabel={methodTexts(s.method).heightsExport}
 					filename={`dotree-alturas-${s.method}.md`}
 					testid={`height-table-${s.method}`}
 				/>

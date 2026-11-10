@@ -9,13 +9,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
-- Núcleo da entrada por alturas (a interface vem no MT-31b): `{2,2,3; 1,1,1,1}`, a
-  notação do problema 8.3 da disciplina, vira uma matriz com um ponto por unidade de
-  altura, cada um uma variável de 1 bit, e um perfil de saída onde a redução para. O
-  núcleo calcula o circuito ótimo para o perfil (menor área, depois menor atraso), que
-  reproduz as áreas e os atrasos dos 11 itens do gabarito, e nomeia o bloco conhecido
-  (FA, HA, somador, *carry-save*, contador ou compressor). Perfis que nenhum circuito
-  atinge são recusados na leitura, com a coluna (EXP-16, EXP-17, CMP-19, AJU-12, MT-31a).
+- Entrada por alturas: o campo da expressão aceita `{2,2,3; 1,1,1,1}`, as alturas das
+  colunas de entrada e, depois do `;`, as de saída, da mais significativa para a menos
+  (a notação dos contadores paralelos generalizados do cap. 8 do Parhami, com a saída
+  também por alturas). Cada ponto vira uma variável de 1 bit, sem larguras a informar, e
+  há um exemplo pronto. Um painel mostra o perfil pedido, as colunas ainda acima dele e,
+  quando atingido, a área e o atraso do circuito. Ao lado de Dadda e Wallace, a **solução
+  ótima** (menor área, depois menor atraso), em duas etapas e aplicável, e o nome do
+  bloco conhecido (FA, HA, somador, *carry-save*, contador ou compressor) são ajudas
+  pedidas e contadas (`help.optimal`, `help.optimalPath`, `help.optimalApplied`,
+  `help.block`, opcionais; esquema 1 mantido). Perfis que nenhum circuito atinge são
+  recusados com a coluna. O ótimo reproduz os 11 perfis de referência do projeto,
+  conferidos à mão e por uma busca exaustiva independente (EXP-16, EXP-17, CMP-19,
+  AJU-12, MT-31).
 - Comparação de soluções: o seu circuito ao lado das soluções de Dadda e de Wallace já
   pedidas, com área, atraso, FA, HA, AND, níveis, largura do CPA, células no caminho
   crítico, área × atraso, área × atraso² e quem é não dominada; a tabela de alturas de

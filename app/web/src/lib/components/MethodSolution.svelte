@@ -1,12 +1,14 @@
 <!-- Caminho relativo: app/web/src/lib/components/MethodSolution.svelte -->
-<!-- The automatic solution of one method (spec 03): Dadda's (AJU-05) or Wallace's (AJU-10).
+<!-- The automatic solution of one method (spec 03): Dadda's (AJU-05), Wallace's (AJU-10) or
+     the optimal circuit of a height profile (AJU-12).
      Two steps, each confirmed (GER-03): the final metrics, then the levels with the method's
      rule. The solution is a separate session from the core; the student's circuit is
      untouched (AJU-03) until the student, having seen the levels, asks to use it (AJU-09).
      A reopened exercise shows what was already revealed, uncounted (SAL-02). -->
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { METHOD_NAME, type CompressionSession, type Method, type Snapshot } from '#lib/core.ts';
+	import type { CompressionSession, Method, Snapshot } from '#lib/core.ts';
+	import { STAGE_KEY, methodTexts } from '#lib/methods.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import { formatHalves } from '#lib/levels.ts';
@@ -37,10 +39,12 @@
 	let applyDialog: ConfirmDialog;
 
 	// The parent re-creates this component for each session, so these are read once.
-	const name = untrack(() => METHOD_NAME[method]);
+	const t = $derived(methodTexts(method));
 	// Dadda keeps the test ids it had before Wallace came (MT-20).
 	const tid = untrack(() => (method === 'dadda' ? 'solution' : method));
-	const stage = untrack(() => session.revealed()[method === 'dadda' ? 'solution' : 'wallace']);
+	const stage = untrack(() => session.revealed()[STAGE_KEY[method]]);
+	// The optimum may not exist or be too large to search; asking reveals nothing (AJU-12).
+	const search = untrack(() => (method === 'optimal' ? session.optimalSearch() : 'ok'));
 	let solution = $state.raw<Snapshot | null>(
 		untrack(() => {
 			const s = session.shownSolution(method);
@@ -82,49 +86,47 @@
 	}
 
 	function summary(s: Snapshot): string {
-		const cpa = s.levels.some((l) => l.cpa);
 		const args = {
-			method: name,
 			levels: s.levels.filter((l) => !l.cpa).length,
 			fa: s.metrics.fa,
 			ha: s.metrics.ha,
 			area: halves(s.metrics.area),
 			delay: halves(s.metrics.delay)
 		};
-		return cpa ? m.solution_summary_cpa(args) : m.solution_summary(args);
+		return t.summary(
+			args,
+			s.levels.some((l) => l.cpa)
+		);
 	}
 </script>
 
-<div class="buttons">
-	<button type="button" class="secondary" onclick={askSolution}>
-		{m.help_solution({ method: name })}
-	</button>
-	{#if solution && !solutionPath}
-		<button type="button" class="secondary" onclick={askSolutionPath}>
-			{m.help_solution_path({ method: name })}
-		</button>
-	{/if}
-	{#if solutionPath && !readOnly}
-		<button type="button" class="secondary" onclick={apply}>
-			{m.help_use_solution({ method: name })}
-		</button>
-	{/if}
-</div>
+{#if search === 'ok'}
+	<div class="buttons">
+		<button type="button" class="secondary" onclick={askSolution}>{t.ask}</button>
+		{#if solution && !solutionPath}
+			<button type="button" class="secondary" onclick={askSolutionPath}>{t.askPath}</button>
+		{/if}
+		{#if solutionPath && !readOnly}
+			<button type="button" class="secondary" onclick={apply}>{t.use}</button>
+		{/if}
+	</div>
+{:else if search}
+	<p class="note" data-testid={`${tid}-unavailable`}>
+		{search === 'tooLarge' ? m.optimal_too_large() : m.optimal_no_circuit()}
+	</p>
+{/if}
 
 {#if solution}
 	<p data-testid={`${tid}-summary`}>{summary(solution)}</p>
-	{#if solutionPath && solution.result}
-		{@const top = solution.result.length - 1}
-		<section class="solution" data-testid={tid} aria-label={m.solution_title({ method: name })}>
-			<h3>{m.solution_title({ method: name })}</h3>
-			<p data-testid={`${tid}-rule`}>
-				{method === 'dadda' ? m.solution_rule_dadda() : m.solution_rule_wallace()}
-			</p>
+	<!-- The optimum stops at the profile, so its output may be redundant, not a result. -->
+	{#if solutionPath && (solution.result || solution.profile?.reached)}
+		{@const top = solution.heights.length - 1}
+		<section class="solution" data-testid={tid} aria-label={t.title}>
+			<h3>{t.title}</h3>
+			<p data-testid={`${tid}-rule`}>{t.rule}</p>
 			{#each solution.levels as level, i (i)}
 				<LevelPanel
-					title={level.cpa
-						? m.solution_cpa({ method: name, level: i })
-						: m.solution_level({ method: name, level: i })}
+					title={level.cpa ? t.cpa(i) : t.level(i)}
 					testid={`${tid}-level-${i}`}
 					points={level.points}
 					groups={level.cells.map((c) => ({
@@ -136,7 +138,7 @@
 				/>
 			{/each}
 			<LevelPanel
-				title={m.solution_result({ method: name })}
+				title={t.last}
 				testid={`${tid}-result`}
 				points={solution.current.points}
 				groups={[]}
@@ -148,20 +150,16 @@
 	{/if}
 {/if}
 
-<ConfirmDialog
-	bind:this={solutionDialog}
-	title={m.confirm_solution_title({ method: name })}
-	body={m.confirm_solution_body()}
-/>
+<ConfirmDialog bind:this={solutionDialog} title={t.confirmTitle} body={m.confirm_solution_body()} />
 <ConfirmDialog
 	bind:this={solutionPathDialog}
-	title={m.confirm_solution_path_title({ method: name })}
+	title={t.confirmPathTitle}
 	body={m.confirm_solution_path_body()}
 />
 <ConfirmDialog
 	bind:this={applyDialog}
-	title={m.confirm_use_solution_title({ method: name })}
-	body={m.confirm_use_solution_body({ method: name })}
+	title={t.confirmUseTitle}
+	body={t.confirmUseBody}
 	confirmLabel={m.confirm_use_solution_ok()}
 />
 
@@ -182,6 +180,9 @@
 	}
 	p {
 		margin: 0;
+	}
+	.note {
+		color: var(--color-muted);
 	}
 	.solution {
 		display: grid;

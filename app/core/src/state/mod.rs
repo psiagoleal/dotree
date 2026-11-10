@@ -12,9 +12,9 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::expr;
 use crate::help::HelpLog;
 use crate::matrix::DotMatrix;
+use crate::profile::{self, Profile};
 use crate::reduce::{CellKind, PointId, Reduction};
 
 /// Tag that tells an exercise file from any other JSON.
@@ -200,6 +200,11 @@ impl Exercise {
         serde_json::from_value(v).map_err(malformed)
     }
 
+    /// The height profile of the exercise, when it was opened with one (EXP-16).
+    pub fn profile(&self) -> Option<Profile> {
+        profile::parse(&self.expression).ok().flatten()
+    }
+
     /// Rebuilds the matrix and replays every cell through the rules.
     pub fn restore(&self) -> Result<(DotMatrix, Reduction), StateError> {
         let h = &self.help;
@@ -213,12 +218,18 @@ impl Exercise {
             || (h.solution_applied > 0 && h.solution_path == 0)
             || (h.wallace_path > 0 && h.wallace == 0)
             || (h.wallace_applied > 0 && h.wallace_path == 0)
+            || (h.optimal_path > 0 && h.optimal == 0)
+            || (h.optimal_applied > 0 && h.optimal_path == 0)
         {
             return Err(StateError::InconsistentReveals);
         }
-        let analysis =
-            expr::analyze(&self.expression, &self.widths).map_err(|_| StateError::BadExpression)?;
-        let matrix = DotMatrix::build(&analysis).map_err(|_| StateError::BadExpression)?;
+        let input = profile::analyze_input(&self.expression, &self.widths)
+            .map_err(|_| StateError::BadExpression)?;
+        // Only a height profile has an optimal circuit and a block to name (AJU-12).
+        if input.profile.is_none() && (h.optimal > 0 || h.block > 0) {
+            return Err(StateError::InconsistentReveals);
+        }
+        let matrix = DotMatrix::build(&input.analysis).map_err(|_| StateError::BadExpression)?;
         let mut r = Reduction::new(&matrix);
 
         for (level, saved) in self.levels.iter().enumerate() {

@@ -348,5 +348,70 @@
 	"verify_error_load": "A verificação não pôde rodar: o módulo de verificação não carregou. Recarregue a página com a rede disponível.",
 	"read_only_notice": "Tela estreita: abaixo de 768 px o exercício fica em modo leitura. Matriz, diagrama, verificação e VHDL continuam disponíveis; para formar células, use uma janela mais larga.",
 	"file_subject": "o arquivo",
-	"saved_subject": "o conteúdo salvo"
+	"saved_subject": "o conteúdo salvo",
+	"form_profile_hint": "Ou um perfil de alturas, com as alturas da entrada e, depois do ponto e vírgula, as da saída, da coluna mais significativa para a menos. Ex.: {example}",
+	"example_profile": "Perfil de alturas",
+	"error_profile_syntax": "Perfil de alturas malformado na coluna {column}. Use alturas separadas por vírgula, um ponto e vírgula e as alturas da saída, entre chaves, como {example}.",
+	"error_profile_no_dots": "O perfil não tem nenhum ponto de entrada.",
+	"error_profile_too_many_dots": "O perfil tem {dots} pontos; o limite é {limit}, um por letra de A a Z.",
+	"error_profile_too_many_columns": "Uma lista do perfil passa de {limit} colunas.",
+	"error_profile_output_too_small": "A saída não comporta a entrada da coluna 2^{column} para cima: os pontos nunca descem de coluna.",
+	"error_profile_empty_column": "A saída pede 0 pontos na coluna 2^{column}, mas ela sempre terá pelo menos um: uma coluna com ponto nunca esvazia, porque toda célula deixa a soma nela.",
+	"profile_title": "Perfil de saída",
+	"profile_target": "Pedido: {profile}, da coluna mais significativa para a menos. A redução para quando nenhuma coluna passar da altura pedida.",
+	"profile_reached": "Perfil atingido: área {area} A_FA, atraso {delay} T_FA.",
+	"profile_over": "Ainda não: {columns}.",
+	"profile_over_column": "a coluna 2^{column} tem {height}, o perfil pede {target}",
+	"profile_pending": "Conclua o nível para conferir o perfil.",
+	"profile_block_ask": "Qual bloco é este?",
+	"profile_block_confirm_title": "Ver o nome do bloco?",
+	"profile_block_confirm_body": "Reconhecer o bloco faz parte do exercício. O nome conta como ajuda.",
+	"block_full_adder": "É um somador completo (FA).",
+	"block_half_adder": "É um meio somador (HA).",
+	"block_adder": "É um somador de {bits} bits.",
+	"block_adder_carry_in": "É um somador de {bits} bits com vai-um de entrada.",
+	"block_carry_save": "São {bits} FA lado a lado: um somador carry-save de {bits} bits.",
+	"block_counter": "É um contador paralelo generalizado: a saída tem um bit por coluna.",
+	"block_compressor": "É um compressor: a saída fica em forma redundante, com mais de um bit em alguma coluna.",
+	"optimal_ask": "Solução ótima",
+	"optimal_ask_path": "Ver a solução ótima nível a nível",
+	"optimal_use": "Usar a solução ótima",
+	"optimal_confirm_title": "Ver a solução ótima?",
+	"optimal_confirm_path_title": "Ver a solução ótima nível a nível?",
+	"optimal_confirm_use_title": "Trocar o seu circuito pela solução ótima?",
+	"optimal_confirm_use_body": "O circuito que você montou dá lugar à solução ótima inteira. Desfazer (Ctrl+Z) traz o seu circuito de volta.",
+	"optimal_title": "Solução ótima, nível a nível",
+	"optimal_level": "Solução ótima, nível {level}",
+	"optimal_output": "Solução ótima, saída no perfil",
+	"optimal_rule": "A solução ótima vem de uma busca: entre os circuitos de FA e HA que atingem o perfil, o de menor área e, entre esses, o de menor atraso. Cada célula usa os pontos mais cedo prontos da sua coluna.",
+	"optimal_summary": [
+		{
+			"declarations": ["input levels", "input fa", "input ha", "input area", "input delay"],
+			"selectors": ["levels"],
+			"match": {
+				"levels=1": "Solução ótima: {levels} nível; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA.",
+				"levels=*": "Solução ótima: {levels} níveis; {fa} FA, {ha} HA; área {area} A_FA; atraso {delay} T_FA."
+			}
+		}
+	],
+	"optimal_applied": "Solução ótima aplicada. Desfazer traz o seu circuito de volta.",
+	"optimal_too_large": "Este perfil é grande demais para a busca da solução ótima: ela passou do limite de tentativas.",
+	"optimal_no_circuit": "Nenhum circuito de FA e HA atinge este perfil.",
+	"help_log_optimal": "solução ótima: {result} (nível a nível: {path})",
+	"help_log_optimal_applied": [
+		{
+			"declarations": ["input count"],
+			"selectors": ["count"],
+			"match": {
+				"count=1": "solução ótima aplicada: {count} vez",
+				"count=*": "solução ótima aplicada: {count} vezes"
+			}
+		}
+	],
+	"help_log_block": "nome do bloco: {count}",
+	"comparison_optimal": "Ótima (perfil)",
+	"comparison_missing_optimal": "A solução ótima entra aqui depois que você pedir as métricas dela.",
+	"comparison_profile_note": "Com um perfil de saída, conta como completa a solução que atinge o perfil.",
+	"comparison_heights_title_optimal": "Tabela de alturas: solução ótima",
+	"comparison_heights_export_optimal": "Baixar alturas da solução ótima (Markdown)"
 }

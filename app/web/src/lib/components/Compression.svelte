@@ -5,19 +5,14 @@
      it returns (ADR 0001). -->
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import {
-		METHOD_NAME,
-		type Cell,
-		type CellKind,
-		type CompressionSession,
-		type Snapshot
-	} from '#lib/core.ts';
+	import { type Cell, type CellKind, type CompressionSession, type Snapshot } from '#lib/core.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import { cpaBlockMessage, rejectionMessage } from '#lib/errors.ts';
 	import { keyAction } from '#lib/keys.ts';
 	import { formatHalves, visibleTop } from '#lib/levels.ts';
 	import { helpLogItems } from '#lib/help.ts';
+	import { methodTexts } from '#lib/methods.ts';
 	import type { ViewMode } from '#lib/view.ts';
 	import CircuitView from './CircuitView.svelte';
 	import Comparison from './Comparison.svelte';
@@ -25,6 +20,7 @@
 	import Coach from './Coach.svelte';
 	import ConfirmDialog from './ConfirmDialog.svelte';
 	import LevelPanel from './LevelPanel.svelte';
+	import ProfileStatus from './ProfileStatus.svelte';
 	import Rules from './Rules.svelte';
 	import SolutionHelp from './SolutionHelp.svelte';
 	import VerifyView from './VerifyView.svelte';
@@ -200,6 +196,15 @@
 		>
 	</div>
 
+	{#if snap.profile}
+		<ProfileStatus
+			{session}
+			{snap}
+			profile={snap.profile}
+			onhelp={() => (helps = session.helpLog())}
+		/>
+	{/if}
+
 	{#each snap.levels as level, i (i)}
 		<LevelPanel
 			title={level.cpa ? m.level_cpa({ level: i }) : m.level_title({ level: i })}
@@ -263,6 +268,9 @@
 		<p class="complete" data-testid="complete">
 			{m.complete({ width: snap.result.length, top: snap.result.length - 1 })}
 		</p>
+	{/if}
+	<!-- The summary of helps closes a complete circuit, or a reached profile (CMP-19). -->
+	{#if snap.result || snap.profile?.reached}
 		<p class="help-log" data-testid="help-log">
 			{helpItems.length === 0
 				? m.help_log_none()
@@ -333,7 +341,7 @@
 			onhelp={() => (helps = session.helpLog())}
 			onapply={(method) => {
 				helps = session.helpLog();
-				refresh(m.solution_applied({ method: METHOD_NAME[method] }));
+				refresh(methodTexts(method).applied);
 			}}
 		/>
 		<Comparison {session} {snap} {helps} />

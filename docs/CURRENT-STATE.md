@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-10
-- **Commit:** `6049fa4` (MT-38, #46). O MT-31a ainda não foi commitado.
+- **Commit:** `90df97e` (MT-31a, #47). O MT-31b ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -172,8 +172,13 @@
       ótimo reproduz os 11 itens do gabarito do 8.3; conferido também contra uma busca
       exaustiva em Python (141 perfis com solução, mesmos números). Corrigido o CMP-16
       repetido na spec 02: a tabela de alturas passou a CMP-18.
-- [ ] Próximo: MT-31b (interface da entrada por alturas); depois, fechar a v0.2.0 para o
-      projeto final (03/12).
+- [x] MT-31b: interface da entrada por alturas (EXP-16, EXP-17, CMP-19, AJU-12). Ótimo
+      como terceiro método; nome do bloco como ajuda contada; 4 contagens opcionais no
+      arquivo. 7 mutações pegas.
+- [ ] Próximo: MT-40a (README, limitações, metodologia, referências públicas, spec viva,
+      varredura das menções à disciplina), MT-40b (ajuda no app); depois, a v0.2.0.
+- Regra nova do autor (2026-11-10): o projeto é público; só livros e artigos públicos
+  como referência, nunca material de disciplina, nem por referência.
 
 ## Observações para a próxima sessão
 
@@ -216,6 +221,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-10 | `90df97e` | Núcleo da entrada por alturas (#47); interface da entrada por alturas | MT-31b |
 | 2026-11-10 | `6049fa4` | Comparação de soluções (#46); núcleo da entrada por alturas | MT-31a |
 | 2026-11-09 | `7ee1cc3` | Dadda clássico documentado (#45); comparação de soluções | MT-38 |
 | 2026-11-09 | `c7fe552` | tabela de alturas (#44); Dadda clássico documentado | MT-29b |

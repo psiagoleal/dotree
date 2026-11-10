@@ -51,6 +51,12 @@ arquivo.
   `help.wallaceApplied` contam as etapas e as aplicações da solução de Wallace, à parte das
   de Dadda. São opcionais (valem 0 em arquivos da v0.1), então o esquema continua 1. Etapa
   2 sem a 1, ou aplicação sem a etapa 2 de Wallace, é revelação inconsistente.
+- **Perfil de alturas (EXP-16, AJU-12, MT-31).** Um exercício aberto com um perfil guarda
+  o texto do perfil em `expression` e nenhuma largura. `help.optimal`,
+  `help.optimalPath`, `help.optimalApplied` e `help.block` contam as etapas e as
+  aplicações da solução ótima e o nome do bloco; são opcionais, então o esquema continua
+  1. As regras de inconsistência são as de Wallace, e ótimo ou bloco num exercício sem
+  perfil também é revelação inconsistente.
 
 - **Salvamento automático (MT-15b).** O que vai para o armazenamento local é o mesmo
   arquivo do exercício, sob a chave `dotree.exercise`, gravado depois de cada ação e de

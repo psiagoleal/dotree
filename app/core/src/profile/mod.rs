@@ -3,14 +3,15 @@
 //! spec 02 CMP-19, spec 03 AJU-12).
 //!
 //! `{2,2,3; 1,1,1,1}` gives the heights of the input columns and of the output columns,
-//! from the most significant to the least, as in the course's problem 8.3 (Parhami,
-//! *Computer Arithmetic*, ch. 8). Each dot is an independent 1-bit variable, so the profile
-//! is an ordinary expression (`A + B + C + 2D + 2E + 4F + 4G`) plus a place to stop: the
-//! reduction reaches the profile when no column is taller than its target.
+//! from the most significant to the least: the notation of generalized parallel counters
+//! (Parhami, *Computer Arithmetic*, ch. 8), with the output written as heights too. Each
+//! dot is an independent 1-bit variable, so the profile is an ordinary expression
+//! (`A + B + C + 2D + 2E + 4F + 4G`) plus a place to stop: the reduction reaches the profile
+//! when no column is taller than its target.
 
 use std::collections::{BTreeMap, HashMap};
 
-use crate::expr::analyze;
+use crate::expr::{Analysis, ExprError, analyze};
 use crate::matrix::DotMatrix;
 use crate::reduce::{CellKind, PointId, Reduction};
 
@@ -74,6 +75,39 @@ pub enum Block {
     Counter,
     /// Output with some column of 2 or more: a compressor to a redundant form.
     Compressor,
+}
+
+/// What the user typed, analysed: an expression, or a height profile and its equivalent
+/// expression (EXP-16).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Input {
+    pub analysis: Analysis,
+    pub profile: Option<Profile>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum InputError {
+    Expr(ExprError),
+    Profile(ProfileError),
+}
+
+/// Reads `src` as a height profile when it starts with `{`, or else as an expression with
+/// `widths`. A profile ignores the widths: its variables are its own, all of 1 bit.
+pub fn analyze_input(src: &str, widths: &BTreeMap<char, u32>) -> Result<Input, InputError> {
+    match parse(src).map_err(InputError::Profile)? {
+        Some(profile) => {
+            let (expression, own) = profile.expression();
+            let analysis = analyze(&expression, &own).expect("a parsed profile is valid");
+            Ok(Input {
+                analysis,
+                profile: Some(profile),
+            })
+        }
+        None => Ok(Input {
+            analysis: analyze(src, widths).map_err(InputError::Expr)?,
+            profile: None,
+        }),
+    }
 }
 
 /// The profile in `src`, or `None` when `src` is an expression (it does not start with `{`).

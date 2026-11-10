@@ -47,6 +47,8 @@ export interface Matrix {
 	vMax: string;
 	andGates: number;
 	warnings: CoreWarning[];
+	/** Heights of a height profile (EXP-16), column 0 first; null for an expression. */
+	profile: { input: number[]; output: number[] } | null;
 }
 
 export type CoreWarning = { code: 'unusedWidth'; var: string };
@@ -73,7 +75,12 @@ export type CoreError =
 	| { code: 'coefficientTooLarge' }
 	| { code: 'tooManyInputBits'; total: number; limit: number }
 	| { code: 'tooManyDots'; count: number; limit: number }
-	| { code: 'badWidths' };
+	| { code: 'badWidths' }
+	| { code: 'profile'; kind: 'syntax'; column: number }
+	| { code: 'profile'; kind: 'noDots' }
+	| { code: 'profile'; kind: 'tooManyDots'; dots: number; limit: number }
+	| { code: 'profile'; kind: 'tooManyColumns'; limit: number }
+	| { code: 'profile'; kind: 'outputTooSmall' | 'emptyColumn'; column: number };
 
 export type BuildResult = { ok: true; matrix: Matrix } | { ok: false; error: CoreError };
 
@@ -129,6 +136,9 @@ export interface Snapshot {
 	result: (number | null)[] | null;
 	/** Cells on a path of maximum delay: numbers, and indices into `current.pending` (CMP-15). */
 	critical: { cells: number[]; pending: number[] };
+	/** The output profile, column 0 first, and whether it was reached (CMP-19); null for an
+	 *  expression. */
+	profile: { output: number[]; reached: boolean } | null;
 }
 
 export type CpaBlock =
@@ -186,18 +196,34 @@ export interface HelpLog {
 	wallace: number;
 	wallacePath: number;
 	wallaceApplied: number;
+	/** The same three counts for the optimal circuit of a profile, and the block name (AJU-12). */
+	optimal: number;
+	optimalPath: number;
+	optimalApplied: number;
+	block: number;
 }
 
-/** The method of an automatic solution (AJU-05, AJU-10). */
-export type Method = 'dadda' | 'wallace';
+/** The method of an automatic solution (AJU-05, AJU-10), and the optimal circuit of a
+ *  height profile (AJU-12). */
+export type Method = 'dadda' | 'wallace' | 'optimal';
 
-/** The proper name of each method, the same in every language. */
-export const METHOD_NAME: Record<Method, string> = { dadda: 'Dadda', wallace: 'Wallace' };
+/** The methods named after their authors: the same name in every language. */
+export type NamedMethod = Exclude<Method, 'optimal'>;
+export const METHOD_NAME: Record<NamedMethod, string> = { dadda: 'Dadda', wallace: 'Wallace' };
 
 const WASM_METHOD: Record<Method, SolutionMethod> = {
 	dadda: SolutionMethod.Dadda,
-	wallace: SolutionMethod.Wallace
+	wallace: SolutionMethod.Wallace,
+	optimal: SolutionMethod.Optimal
 };
+
+/** Whether the optimal circuit of the profile can be shown (AJU-12). */
+export type OptimalSearch = 'ok' | 'tooLarge' | 'noCircuit';
+
+/** The known block a profile describes (AJU-12). */
+export type Block =
+	| { code: 'fullAdder' | 'halfAdder' | 'counter' | 'compressor' }
+	| { code: 'adder' | 'adderWithCarryIn' | 'carrySave'; bits: number };
 
 // ---------------------------------------------------------------- exercise file (MT-15a)
 
@@ -215,6 +241,8 @@ export interface Revealed {
 	lowerBound: RevealStage;
 	solution: RevealStage;
 	wallace: RevealStage;
+	optimal: RevealStage;
+	block: boolean;
 }
 
 /** Why an exercise file cannot be opened (SAL-03). */
@@ -375,6 +403,13 @@ export interface CompressionSession {
 	/** Already revealed helps, again and uncounted; null before their reveal. */
 	shownLowerBound(): LowerBound | null;
 	shownSolution(method: Method): CompressionSession | null;
+	/** Whether the profile's optimum can be shown; null without a profile. Reveals and
+	 *  counts nothing, but runs the search the first time (AJU-12). */
+	optimalSearch(): OptimalSearch | null;
+	/** The block the profile describes: a counted reveal (AJU-12); null without a profile. */
+	block(): Block | null;
+	/** The block again, uncounted, once revealed; null before that. */
+	shownBlock(): Block | null;
 	/** Releases the WASM memory; the session is unusable afterwards. */
 	free(): void;
 }
@@ -423,6 +458,12 @@ function wrap(s: Session): CompressionSession {
 		shownSolution: (method) => {
 			const o = s.shownSolution(WASM_METHOD[method]);
 			return o === undefined ? null : wrap(o);
+		},
+		optimalSearch: () => (s.optimalSearch() as OptimalSearch | undefined) ?? null,
+		block: () => JSON.parse(s.block()),
+		shownBlock: () => {
+			const b = s.shownBlock();
+			return b === undefined ? null : JSON.parse(b);
 		},
 		free: () => s.free()
 	};
