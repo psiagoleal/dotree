@@ -281,7 +281,7 @@ flowchart LR
 ### MT-30: Tabela de alturas nível a nível (P11)
 - **Objetivo:** tabela com a altura de cada coluna em cada nível, exportável em Markdown.
 - **Critério de aceite:** teste com as alturas do R2 (spec 05).
-- **Feito (2026-11-09):** CMP-16 na spec 02 (não na 05: a tabela é da compressão), com a
+- **Feito (2026-11-09):** CMP-18 na spec 02 (não na 05: a tabela é da compressão), com a
   tabela de R2 calculada à mão e conferida pelo teste do núcleo e pelo arquivo baixado no
   teste de ponta a ponta. Forma tabular da fig. 8.11 do Parhami: linhas por nível, coluna
   mais alta à esquerda, FA e HA por nível. Só o circuito do aluno; as soluções de Dadda e
@@ -293,6 +293,15 @@ flowchart LR
   atraso do bloco; o nome do bloco conhecido aparece só como revelação opcional.
 - **Critério de aceite:** a solução ótima reproduz as áreas e atrasos dos 11 itens do
   gabarito do problema 8.3, citados pela fonte, sem copiar o documento.
+- **MT-31a, núcleo (feito em 2026-11-10):** EXP-16, EXP-17, CMP-19 e AJU-12. Módulo
+  `dotree_core::profile`: leitura do perfil, matriz equivalente (uma variável de 1 bit por
+  ponto), perfil atingido, circuito ótimo por aprofundamento iterativo na área (FA e HA
+  sobre os pontos mais cedo prontos; poda por 1 meia-unidade de área por ponto excedente;
+  limite de 1 milhão de níveis tentados) e classificação do bloco. Os 11 itens batem; a
+  leitura recusa os perfis que nenhum circuito atinge (coluna que nunca esvazia).
+- **MT-31b, interface:** o campo aceita a notação; o painel mostra o perfil, se foi
+  atingido e, então, área e atraso; o ótimo e o nome do bloco como ajuda contada (etapa 1:
+  área e atraso; etapa 2: os níveis), com registro no arquivo do exercício.
 
 ### MT-32: Célula composta (P13)
 - **Objetivo:** modelo de célula com entradas e saídas em várias colunas, custo e atraso

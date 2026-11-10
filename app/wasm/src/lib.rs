@@ -698,7 +698,7 @@ impl Session {
         Value::from(rows).to_string()
     }
 
-    /// Height of each column at each level, with the cells formed over it (CMP-16):
+    /// Height of each column at each level, with the cells formed over it (CMP-18):
     /// concluded levels, then the current level or the result.
     #[wasm_bindgen(js_name = heightTable)]
     pub fn height_table(&self) -> String {
@@ -718,7 +718,7 @@ impl Session {
         Value::from(rows).to_string()
     }
 
-    /// The height table as Markdown (CMP-16), with words in the interface's language:
+    /// The height table as Markdown (CMP-18), with words in the interface's language:
     /// `{"level", "current", "result"}`.
     #[wasm_bindgen(js_name = heightTableMarkdown)]
     pub fn height_table_markdown(&self, headers_json: &str) -> String {

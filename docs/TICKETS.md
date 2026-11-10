@@ -13,7 +13,7 @@ Nenhum: a v0.1.0 foi publicada.
 
 ## Até o projeto final da disciplina — v0.2 (aprovado em 2026-11-06)
 
-- [ ] [MT-31](plano-pos-v0.1.md#mt-31-entrada-por-alturas-com-perfil-alvo-de-saída-p12) — Entrada por alturas com perfil-alvo de saída (se der tempo).
+- [ ] [MT-31b](plano-pos-v0.1.md#mt-31-entrada-por-alturas-com-perfil-alvo-de-saída-p12) — Interface da entrada por alturas: campo, perfil atingido, ótimo e nome do bloco como ajuda contada.
 
 ## Depois do projeto final (ordem por dependências)
 
@@ -32,8 +32,9 @@ Nenhum: a v0.1.0 foi publicada.
 
 ## Concluídos
 
+- [x] [MT-31a](plano-pos-v0.1.md#mt-31-entrada-por-alturas-com-perfil-alvo-de-saída-p12) — Núcleo da entrada por alturas: perfil, circuito ótimo (os 11 itens do 8.3) e bloco conhecido.
 - [x] [MT-38](plano-pos-v0.1.md#mt-38-comparação-de-soluções-p20) — Comparação de soluções, versão mínima (AJU-11): tabela lado a lado e fronteira não dominada.
-- [x] [MT-30](plano-pos-v0.1.md#mt-30-tabela-de-alturas-nível-a-nível-p11) — Tabela de alturas nível a nível, exportável em Markdown (CMP-16).
+- [x] [MT-30](plano-pos-v0.1.md#mt-30-tabela-de-alturas-nível-a-nível-p11) — Tabela de alturas nível a nível, exportável em Markdown (CMP-18).
 - [x] [MT-29](plano-pos-v0.1.md#mt-29-solução-de-wallace-p10) — Solução de Wallace ao lado da de Dadda, com o mesmo fluxo de revelação e aplicação.
 - [x] [MT-28](plano-pos-v0.1.md#mt-28-constante-aditiva-p9) — Constante aditiva (`+36`) como pontos fixos em 1, comprimidos como os outros.
 - [x] [MT-22](plano-pos-v0.1.md#mt-22-topo-para-a-de2-até-18-bits-e-projeto-do-quartus-p6-p8) — Topo DE2 até 18 bits e projeto do Quartus, compilado no Quartus II 13.0.

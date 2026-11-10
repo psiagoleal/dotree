@@ -87,7 +87,7 @@ fn wiring_markdown_uses_the_given_headers() {
     );
 }
 
-// ------------------------------------------------- CMP-16: height table (MT-30)
+// ------------------------------------------------- CMP-18: height table (MT-30)
 
 #[test]
 fn height_rows_go_from_level_0_to_the_result() {

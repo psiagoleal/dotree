@@ -163,6 +163,36 @@ consumiram.
   `3(A + 1)` → $3A + 3$; `A + 1` com $A$ de 2 bits dá $v_{max} = 4$ e $W = 3$; e a
   verificação exaustiva de um circuito com constante dá 0 erros.
 
+## Entrada por alturas (MT-31)
+
+A notação do problema 8.3 da disciplina (Parhami, *Computer Arithmetic*, cap. 8):
+`{2,2,3; 1,1,1,1}` dá as alturas das colunas de entrada e, depois do `;`, as de saída,
+sempre da coluna mais significativa para a menos. O perfil de saída diz onde a redução
+para (CMP-19).
+
+- **EXP-16** — QUANDO o texto começar por `{`, o sistema DEVE lê-lo como perfil de alturas
+  e montar a matriz com um ponto por unidade de altura, cada ponto uma variável própria de
+  1 bit (`A` a `Z`, coluna a coluna a partir da menos significativa). O perfil equivale à
+  expressão $A + B + C + 2D + 2E + 4F + 4G$, sem portas AND.
+  *Prova:* teste do núcleo: `{2,2,3; 1,1,1,1}` → alturas 3, 2, 2 a partir de $2^0$,
+  $W = 4$, 0 AND e a expressão acima; espaços livres; uma expressão comum não é perfil.
+- **EXP-17** — SE o perfil estiver malformado, ENTÃO o sistema DEVE apontar a coluna do
+  caractere (contada a partir de 1). SE não tiver pontos, passar de 26 pontos ou de 16
+  colunas numa lista, ENTÃO o sistema DEVE recusá-lo informando o limite. SE a saída não
+  comportar a entrada, ENTÃO o sistema DEVE recusá-lo nomeando a coluna, em dois casos:
+  - **valor:** o valor da entrada da coluna $c$ para cima passa do que a saída da coluna
+    $c$ para cima comporta (pontos nunca descem de coluna);
+  - **coluna vazia:** a saída pede 0 numa coluna que sempre terá ponto (uma coluna com
+    ponto nunca esvazia, porque toda célula deixa a soma nela). Entram nessa coluna, no
+    mínimo, os pontos dela e os vai-uns das $\lceil (n - t)/2 \rceil$ células que a coluna
+    de baixo precisa (cada célula tira no máximo 2 pontos da própria coluna).
+
+  *Prova:* testes do núcleo das posições e dos limites; `{7; 1,1}` (valor, coluna 0),
+  `{1,1; 3}` (valor, coluna 1), `{2; 2,0}` (coluna 0 vazia) e `{2,4; 1,0,3,1}` (coluna 2
+  vazia); proptest: todo perfil pequeno aceito tem circuito (AJU-12).
+
+A interface (o campo aceitar a notação e mostrar o perfil) é o MT-31b.
+
 ## Exemplos embutidos
 
 - **EXP-12** — O sistema DEVE oferecer exemplos prontos (no mínimo R1, R3 e R4) que

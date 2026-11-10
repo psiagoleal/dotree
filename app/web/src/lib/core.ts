@@ -273,7 +273,7 @@ export interface WiringRow {
 	carryResult: number | null;
 }
 
-/** One row of the height table (CMP-16): `heights[j]` is the height of column 2^j. */
+/** One row of the height table (CMP-18): `heights[j]` is the height of column 2^j. */
 export interface HeightRow {
 	level: number;
 	kind: 'level' | 'cpa' | 'current' | 'result';
@@ -356,7 +356,7 @@ export interface CompressionSession {
 	diagram(): Diagram;
 	wiringTable(): WiringRow[];
 	wiringTableMarkdown(headers: TableHeaders): string;
-	/** Heights of every level so far, then the current level or the result (CMP-16). */
+	/** Heights of every level so far, then the current level or the result (CMP-18). */
 	heightTable(): HeightRow[];
 	heightTableMarkdown(headers: HeightHeaders): string;
 	/** The complete circuit for the verification worker, or null while incomplete. */
