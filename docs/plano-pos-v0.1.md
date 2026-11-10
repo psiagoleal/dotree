@@ -328,6 +328,11 @@ flowchart LR
 - **Critério de aceite:** e2e com R1 (aluno × Dadda × Wallace) e os números conferidos
   contra as métricas de cada solução.
 - **Depende de:** MT-29
+- **Feito, versão mínima (2026-11-09):** AJU-11. Tabela lado a lado (aluno, Dadda clássico,
+  Wallace) com todas as medidas do objetivo, menos o gráfico, e a linha "não dominada";
+  tabela de alturas de cada solução cujos níveis foram revelados. Nada é revelado nem
+  contado pela comparação. Em R1, o Wallace (14,5 $A_{FA}$, 6 $T_{FA}$) domina R2 e o
+  Dadda. Falta: gráfico com a fronteira, versões salvas, perfis sobrepostos, Quartus.
 
 ### MT-39: Multiplicação por constantes, MCM (P21)
 - **Objetivo:** dado $Y = c_1 A$ (ou várias constantes sobre a mesma variável), calcular o

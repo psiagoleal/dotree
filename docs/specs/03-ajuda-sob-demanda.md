@@ -144,6 +144,22 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   (cada método só se aplica depois da própria etapa 2); teste de componente; teste de
   ponta a ponta: R1 → Wallace nível a nível → usar → "0 erros" e o registro da aplicação.
 
+- **AJU-11** — O sistema DEVE mostrar a **comparação de soluções**: o circuito do usuário
+  ao lado de cada solução automática já revelada, com área, atraso, FA, HA, AND, níveis
+  antes do CPA, largura do CPA, células no caminho crítico, área × atraso, área × atraso²
+  e se a solução é **não dominada** em área e atraso entre as completas (um circuito
+  incompleto fica de fora da fronteira). A comparação NÃO DEVE revelar nem contar nada: a
+  coluna de um método entra com a etapa 1 dele (as métricas), e a tabela de alturas dele
+  (CMP-16), com a etapa 2 (os níveis). Junto do Dadda, uma nota diz que é o clássico
+  (AJU-05). Versão mínima do MT-38; o gráfico área × atraso, as versões salvas e os números
+  do Quartus ficam para depois.
+  *Prova:* teste com o núcleo real dos números de R1, calculados à mão das métricas: aluno
+  (R2) 15 $A_{FA}$, 6 $T_{FA}$, 13 FA, 4 HA, 3 níveis, CPA de 6 bits, 90 e 540; Dadda 17,
+  7, 8 HA, 4 níveis, CPA de 6, 119 e 833; Wallace 14,5, 6, 3 HA, 4 níveis, CPA de 3, 87 e
+  522; só o Wallace é não dominado. Teste da fronteira (empate, compromisso, incompleto);
+  teste de componente (nada antes da etapa 1, tabela de alturas só depois da etapa 2,
+  registro de ajudas igual); teste de ponta a ponta com R2.
+
 ## Fora de escopo
 
 Busca da solução de menor atraso ou menor área; correção

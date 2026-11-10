@@ -14,7 +14,10 @@ beforeAll(async () => {
 });
 
 async function show(session: CompressionSession) {
-	return render(HeightTable, { session, snap: session.snapshot() });
+	return render(HeightTable, {
+		rows: session.heightTable(),
+		markdown: (h) => session.heightTableMarkdown(h)
+	});
 }
 
 function cells(container: HTMLElement): string[][] {

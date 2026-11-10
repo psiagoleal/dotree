@@ -9,6 +9,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Comparação de soluções: o seu circuito ao lado das soluções de Dadda e de Wallace já
+  pedidas, com área, atraso, FA, HA, AND, níveis, largura do CPA, células no caminho
+  crítico, área × atraso, área × atraso² e quem é não dominada; a tabela de alturas de
+  cada solução entra quando os níveis dela foram vistos. A comparação não revela nem conta
+  ajuda (AJU-11, MT-38, versão mínima).
 - Tabela de alturas: a altura de cada coluna em cada nível, com os FA e HA formados sobre
   ele, o nível atual e, no fim, o resultado; sempre visível e exportável em Markdown
   (`dotree-alturas.md`), na forma tabular da referência do curso (CMP-16, MT-30).
