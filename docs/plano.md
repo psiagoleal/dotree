@@ -36,7 +36,7 @@ flowchart LR
   MT16 --> MT17[MT-17 release v0.1.0]
 ```
 
-O que vem depois da v0.1 (pedidos do laboratório de multiplicadores: larguras de 64 bits,
+O que vem depois da v0.1 (pedidos de uso com multiplicadores grandes: larguras de 64 bits,
 fatias, blocos hierárquicos, VHDL comportamental, placa DE2, Quartus) está avaliado em
 [`plano-pos-v0.1.md`](plano-pos-v0.1.md).
 
@@ -55,7 +55,7 @@ interface só começa a consumir uma API do núcleo depois que ela tem teste.
 ### MT-0d: Escrever o contrato visual (`docs/DESIGN.md`)
 - **Objetivo:** fixar paleta dos termos (8 cores, claro/escuro, COR-03), cor de resultado,
   preto dos pontos gerados, tipografia, espaçamento e o desenho de ponto, célula e painel de
-  nível, no estilo das figuras de aula.
+  nível, no estilo dos diagramas de pontos do Parhami (cap. 8).
 - **Arquivos no escopo:** `docs/DESIGN.md`, `app/web/src/app.css`
 - **Critério de aceite:** teste de unidade da paleta (contraste ≥ 3:1 nos dois temas) passa
   em `pnpm --dir app/web run test`.

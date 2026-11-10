@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-10
-- **Commit:** `90df97e` (MT-31a, #47). O MT-31b ainda não foi commitado.
+- **Commit:** `4772336` (MT-31b, #48). O MT-40a ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -115,9 +115,9 @@
       o armazenamento bloqueado. Dois e2e antigos que recarregavam a página foram ajustados
       (a recarga agora oferece retomar). 181 testes Rust, 132 de unidade/componente, 37
       e2e; 6 mutações pegas.
-- [x] Pedidos do laboratório de multiplicadores avaliados em `docs/plano-pos-v0.1.md`
+- [x] Pedidos de uso com multiplicadores grandes avaliados em `docs/plano-pos-v0.1.md`
       (MT-19 a MT-27, aguardam decisão do autor).
-- [x] MT-15b mesclado (#32). Decisões do autor sobre os pedidos do laboratório registradas
+- [x] MT-15b mesclado (#32). Decisões do autor sobre esses pedidos registradas
       em `docs/plano-pos-v0.1.md` (ordem aprovada; MT-19 antecipado; placa pelas portas
       padrão do FPGAEmuWeb).
 - [x] MT-19: `end <nome>;` nas entidades (VHD-09). Conferido com o GHDL local (imagem do
@@ -133,12 +133,12 @@
 - [x] MT-17: v0.1.0 publicada (#36). Versões conferidas por `app/core/tests/release.rs`;
       ModelSim ASE 10.1d conferido pelo agente (`~/altera/13.0/modelsim_ase/bin`); workflow
       Release verde, release com a seção do CHANGELOG, imagem `0.1.0` lida sem login no GHCR.
-- [x] Plano da disciplina (caps. 4 a 12) combinado com a sessão CA e aprovado pelo autor:
-      P9 a P20 e MT-28 a MT-38 em `docs/plano-pos-v0.1.md`; até o projeto final (03/12):
-      MT-20, 21, 22, 28, 29, 30, 38 e, se der tempo, 31.
+- [x] Plano dos capítulos 4 a 12 do Parhami aprovado pelo autor: P9 a P20 e MT-28 a
+      MT-38 em `docs/plano-pos-v0.1.md`; na v0.2: MT-20, 21, 22, 28, 29, 30, 38 e, se der
+      tempo, 31.
 - [x] P21/MT-39 (2026-11-08): multiplicação por constantes como o gerador do SPIRAL,
       reimplementada a partir do artigo do Hcub (o código deles é GPL; o dotree segue MIT);
-      depois do MT-33 e do MT-37, sem mexer na fila até o projeto final.
+      depois do MT-33 e do MT-37, sem mexer na fila da v0.2.
 - [x] MT-20: AJU-09 ("Usar esta solução"). `Reduction::adopt`, `Session.applySolution`,
       `HelpLog.solution_applied` (opcional no arquivo). 197 testes Rust, 139 de
       unidade/componente, 45 e2e; 3 mutações pegas (botão no modo leitura, aplicar sem a
@@ -150,8 +150,7 @@
       os 92 pinos; Quartus II 13.0 compilou o R2 (53 LE estrutural, 56 comportamental);
       GHDL e ModelSim conferidos. Falta conferir no FPGAEmuWeb e numa DE2 real.
 - [x] MT-28: EXP-13 refeito e EXP-15 (constante aditiva). Ponto fixo `one`; GHDL e
-      ModelSim com `5A + 3B + 6`; reduções aleatórias com constante verificadas. Lab do
-      cap. 8 dá $W = 14$ (não 13) com 4 bits por variável: confirmar com a CA.
+      ModelSim com `5A + 3B + 6`; reduções aleatórias com constante verificadas.
       No CI, o e2e de VER-04 falhou de novo: com $A + B$, a verificação terminava antes
       de o teste ver a barra. Agora usa $AB$ 12 × 12 com a solução de Dadda e um
       MutationObserver desde o clique; uma mutação que esconde a barra é pega.
@@ -169,16 +168,21 @@
 - [x] MT-38 (mínimo): AJU-11, comparação lado a lado de aluno, Dadda clássico e Wallace,
       sem revelar nem contar ajuda; em R1 o Wallace domina.
 - [x] MT-31a: EXP-16, EXP-17, CMP-19 e AJU-12 no núcleo (`dotree_core::profile`). O
-      ótimo reproduz os 11 itens do gabarito do 8.3; conferido também contra uma busca
+      ótimo reproduz 11 perfis de referência do projeto; conferido também contra uma busca
       exaustiva em Python (141 perfis com solução, mesmos números). Corrigido o CMP-16
       repetido na spec 02: a tabela de alturas passou a CMP-18.
 - [x] MT-31b: interface da entrada por alturas (EXP-16, EXP-17, CMP-19, AJU-12). Ótimo
       como terceiro método; nome do bloco como ajuda contada; 4 contagens opcionais no
       arquivo. 7 mutações pegas.
-- [ ] Próximo: MT-40a (README, limitações, metodologia, referências públicas, spec viva,
-      varredura das menções à disciplina), MT-40b (ajuda no app); depois, a v0.2.0.
-- Regra nova do autor (2026-11-10): o projeto é público; só livros e artigos públicos
-  como referência, nunca material de disciplina, nem por referência.
+- [x] MT-31b mesclado (#48).
+- [x] MT-40a: README da v0.2 (o que faz, passo a passo, limitações com ticket, metodologia,
+      referências públicas); ADR 0004 (spec única e viva; só referências públicas); spec 00
+      com o fora de escopo da versão atual; varredura das referências a material didático
+      não publicado em docs, specs, ADR, CHANGELOG e `AGENTS.md`. MT-41 e MT-42 abertos
+      para as duas limitações novas da entrada por alturas.
+- [ ] Próximo: MT-40b (ajuda no app); depois, a v0.2.0.
+- Mensagens de commit antigas (a do MT-31a, `90df97e`, e outras) citam material não
+  público; ficam no histórico, porque reescrevê-lo pede *force push* no `main` (ADR 0003).
 
 ## Observações para a próxima sessão
 
@@ -207,13 +211,11 @@
   `test-results` com captura de tela: se voltar, a causa vem no artefato.
 - SvelteKit 3 não tem `$lib`: use `#lib/...` com extensão.
 - O Quartus II 13.0 está em `~/altera/13.0/quartus/bin` e compila o projeto gerado:
-  `quartus_sh --flow compile <nome>` na pasta dos arquivos. O arquivo de pinos da DE2 da
-  disciplina serve para `DE2_PINS_FILE=<caminho> cargo test -p dotree-core --test board`.
+  `quartus_sh --flow compile <nome>` na pasta dos arquivos. Um arquivo de pinos da DE2 serve para `DE2_PINS_FILE=<caminho> cargo test -p dotree-core --test board`.
 - A porta 4173 costuma estar ocupada nesta máquina; o e2e usa 4180 (`E2E_PORT`).
 - Os testes de propriedade não gravam `*.proptest-regressions` (`failure_persistence: None`):
   as mutações deixavam ali casos que só falham no código mutado (MT-7, MT-9, MT-8).
-- O exercício que originou o projeto não pode vir para cá (material de terceiros e
-  solução de lista avaliada).
+- O exercício que originou o projeto não vem para cá (material de terceiros; ADR 0004).
 
 ---
 
@@ -221,6 +223,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-10 | `4772336` | Interface da entrada por alturas (#48); documentação pública, ADR 0004 | MT-40a |
 | 2026-11-10 | `90df97e` | Núcleo da entrada por alturas (#47); interface da entrada por alturas | MT-31b |
 | 2026-11-10 | `6049fa4` | Comparação de soluções (#46); núcleo da entrada por alturas | MT-31a |
 | 2026-11-09 | `7ee1cc3` | Dadda clássico documentado (#45); comparação de soluções | MT-38 |
@@ -230,8 +233,8 @@
 | 2026-11-09 | `48cb595` | constante aditiva (#40); override do `minimatch` | MT-28 |
 | 2026-11-09 | `15a1b9b` | placa DE2 e Quartus (#39); constante aditiva | MT-22, MT-28 |
 | 2026-11-09 | `afa4bbd` | VHDL comportamental (#38); placa DE2 e projeto do Quartus | MT-21, MT-22 |
-| 2026-11-09 | `86233eb` | usar a solução e plano da disciplina (#37); VHDL comportamental | MT-20, MT-21 |
-| 2026-11-06 | `ce19784` | v0.1.0 publicada (#36); plano da disciplina; usar a solução | MT-17, MT-20 |
+| 2026-11-09 | `86233eb` | usar a solução e plano dos caps. 4 a 12 (#37); VHDL comportamental | MT-20, MT-21 |
+| 2026-11-06 | `ce19784` | v0.1.0 publicada (#36); plano dos caps. 4 a 12; usar a solução | MT-17, MT-20 |
 | 2026-11-05 | `9f07dd2` | qualidade e FPGAEmuWeb (#33); preparação da v0.1.0 | MT-16, MT-19, MT-17 |
 | 2026-11-05 | `76654f4` | salvamento automático (#32); acessibilidade, rede, desempenho, tela pequena; VHDL para o FPGAEmuWeb | MT-15b, MT-16, MT-19 |
 | 2026-11-05 | `e0bad41` | exportar e abrir (#31); salvamento automático e retomada; plano pós-v0.1 | MT-15a, MT-15b |

@@ -74,7 +74,7 @@ pub fn wallace_target(height: u32) -> Option<u32> {
 /// The next cell of Wallace's method (AJU-10): in each column, from the lowest, as many FA
 /// as the free points allow, at the earliest opportunity; then an HA only if the column
 /// would still be over the level's target, counting the carries that come in. The rule of
-/// the course reference (Parhami, fig. 8.10), not the HA on every leftover pair.
+/// Parhami, fig. 8.10, not the HA on every leftover pair.
 fn wallace_move(r: &Reduction) -> NextMove {
     if r.is_complete() {
         return NextMove::Complete;

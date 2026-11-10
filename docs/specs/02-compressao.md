@@ -6,7 +6,7 @@
 
 O usuário reduz a matriz até restar no máximo um ponto por coluna, escolhendo cada célula.
 O app aplica a regra da célula, posiciona as saídas e mostra o efeito na hora, nível a
-nível, como nos painéis das aulas.
+nível, um painel por nível.
 
 ## Mecânica
 
@@ -139,8 +139,8 @@ uma nota abaixo dos painéis oferece "Por quê?" (CMP-09).
   quantos FA e HA foram formados sobre ele; uma linha para o nível atual, com as células já
   formadas nele; e, com o circuito completo, a linha do resultado no lugar da do nível
   atual. O sistema DEVE exportá-la em Markdown a qualquer momento, porque ela só mostra o
-  circuito do próprio usuário. É a forma tabular da referência do curso (Parhami,
-  *Computer Arithmetic*, fig. 8.11).
+  circuito do próprio usuário. É a forma tabular da fig. 8.11 do Parhami
+  (*Computer Arithmetic*).
   *Prova:* teste do núcleo que compara a exportação de R2 completo com a tabela abaixo;
   testes do núcleo do nível atual (células pendentes contadas; linha "atual" sem células);
   teste de componente; teste de ponta a ponta do arquivo baixado.

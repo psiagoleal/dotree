@@ -33,8 +33,10 @@
 
 <!-- USER:BEGIN id=confidencialidade-projeto -->
 - **Material de terceiros nunca entra no repositório** (que é público): enunciados, PDFs,
-  figuras e soluções de professores ficam fora. Exemplos e casos de referência usam
-  expressões genéricas; o livro-texto (Parhami, *Computer Arithmetic*) é citado, não copiado.
+  figuras e soluções ficam fora. Material didático não publicado (listas, soluções,
+  roteiros, slides) não é citado nem por referência (ADR 0004). Exemplos e casos de
+  referência são do próprio projeto; só livros e artigos públicos são citados (Parhami,
+  *Computer Arithmetic*; Wallace, 1964; Dadda, 1965), nunca copiados.
 - O app não envia dado do usuário para lugar nenhum (spec `GER-04`, `GER-07`).
 <!-- USER:END -->
 

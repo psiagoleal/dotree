@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- README da v0.2: o que o app faz, passo a passo, limitações (cada uma com o critério ou
+  o ticket que a trataria), metodologia e referências públicas (Parhami, caps. 8, 11 e 12;
+  Wallace, 1964; Dadda, 1965; manual da DE2). ADR 0004: uma spec só, viva, atualizada no
+  mesmo PR que muda o app, e só referências de acesso público; a spec 00 passa a listar o
+  fora de escopo da versão atual. Tickets MT-41 e MT-42 para as limitações da entrada por
+  alturas (MT-40a).
 - Entrada por alturas: o campo da expressão aceita `{2,2,3; 1,1,1,1}`, as alturas das
   colunas de entrada e, depois do `;`, as de saída, da mais significativa para a menos
   (a notação dos contadores paralelos generalizados do cap. 8 do Parhami, com a saída
@@ -29,10 +35,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   ajuda (AJU-11, MT-38, versão mínima).
 - Tabela de alturas: a altura de cada coluna em cada nível, com os FA e HA formados sobre
   ele, o nível atual e, no fim, o resultado; sempre visível e exportável em Markdown
-  (`dotree-alturas.md`), na forma tabular da referência do curso (CMP-18, MT-30).
+  (`dotree-alturas.md`), na forma tabular da fig. 8.11 do Parhami (CMP-18, MT-30).
 - Solução de Wallace ao lado da de Dadda, com o mesmo fluxo: métricas, depois os níveis
   com a regra do método numa frase, e "Usar a solução de Wallace". A regra é a da
-  referência do curso (Parhami, fig. 8.10): todos os FA que cabem em cada coluna, HA só
+  fig. 8.10 do Parhami: todos os FA que cabem em cada coluna, HA só
   quando ela ainda passaria do alvo $2\lfloor h/3 \rfloor + (h \bmod 3)$. Cada método
   tem a própria contagem no registro de ajudas e no arquivo do exercício
   (`help.wallace`, `help.wallacePath`, `help.wallaceApplied`, opcionais; esquema 1
@@ -121,7 +127,7 @@ verificação exaustiva no navegador e VHDL-93 com testbench, em português e in
   montar outra matriz. A `Session` ganhou `closeWithCpa`, `goToLevel` e, no snapshot, o
   motivo do bloqueio do CPA, o resultado e as células críticas (MT-12b).
 - Interface: compressão nível a nível. Selecionar pontos com o mouse ou o teclado, formar
-  FA e HA (retângulos em volta dos pontos, como nas aulas), recusas que citam a regra,
+  FA e HA (retângulos em volta dos pontos), recusas que citam a regra,
   concluir nível com um painel por nível, desfazer e refazer (botões e Ctrl+Z/Ctrl+Y),
   métricas ao vivo (FA, HA, AND, área, atraso) e altura de cada coluna. A ponte WASM ganhou
   a `Session`, que guarda o exercício no núcleo (MT-12a).
@@ -131,10 +137,10 @@ verificação exaustiva no navegador e VHDL-93 com testbench, em português e in
   (etapa 2); diálogo de confirmação reutilizável, com o foco em "vou tentar mais um pouco".
   O núcleo passou a expor o máximo de cada entrada e de cada termo (MT-11b).
 - Interface: formulário da expressão com uma largura por variável e os exemplos R1, R3 e R4;
-  matriz de pontos colorida por termo, com legenda, no estilo das figuras de aula; erros e
+  matriz de pontos colorida por termo, com legenda; erros e
   avisos do núcleo traduzidos nos dois idiomas. Ponte WASM `buildMatrix` (JSON com códigos)
   (MT-11a).
-- Contrato visual (`docs/DESIGN.md`): cores dos pontos no estilo das aulas (um termo por cor,
+- Contrato visual (`docs/DESIGN.md`): cores dos pontos (um termo por cor,
   saídas de célula em preto, resultado em roxo), desenho de células e painéis, interação;
   paleta em *tokens* CSS conferida por teste de contraste e distância de cor (MT-0d).
 - Núcleo: `help` com o método de Dadda (próxima jogada a partir do estado do aluno e solução

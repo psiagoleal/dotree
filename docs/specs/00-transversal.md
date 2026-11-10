@@ -99,7 +99,7 @@ Os mesmos nomes valem na interface, no núcleo, nos testes e no VHDL gerado.
 
 A prontidão de cada saída é a maior prontidão entre as entradas mais o atraso da célula.
 Todo ponto de entrada nasce em $t = 0$. O atraso do circuito é a maior prontidão entre os
-bits do resultado. A convenção é fixa na v0.1 (D-2).
+bits do resultado. A convenção é fixa (D-2).
 
 - **GER-04** — O sistema DEVE calcular área e atraso pela convenção acima.
   *Prova:* casos de referência R2, R3 e R4 no núcleo.
@@ -168,13 +168,24 @@ $W = 4$, atraso 0.
 **R4 — multiplicador 4×4.** $R = A \times B$, 4 bits cada: 16 pontos, alturas
 1, 2, 3, 4, 3, 2, 1, 16 AND, $W = 8$, limite inferior de 8 FA.
 
-## Fora de escopo da v0.1 (vale para todas as specs)
+## Fora de escopo da versão atual (vale para todas as specs)
 
-- Números com sinal (complemento de dois, Baugh-Wooley) e subtração.
-- Constantes aditivas na expressão (ex.: `+ 5`); entram na v0.2 (EXP-15).
-- Blocos AMM como célula composta; compressores 4:2; CPA que não seja *ripple*.
-- Exportação em CSV (v0.2). A solução de Wallace entrou na v0.2 (AJU-10, MT-29).
+A lista acompanha o `main` (ADR 0004): o que sai dela vira critério numa spec e entra no
+`CHANGELOG.md`. Cada item aponta para o ticket que o trataria, em
+[`plano-pos-v0.1.md`](../plano-pos-v0.1.md).
+
+- Números com sinal (complemento de dois, Baugh-Wooley), subtração e Booth (MT-33, MT-34).
+- Células compostas no exercício: contadores maiores, compressor 4:2, blocos AMM e
+  multiplicadores hierárquicos (MT-32, MT-27). Na entrada por alturas, o nome do bloco
+  conhecido aparece só como ajuda (AJU-12).
+- CPA que não seja *ripple* (MT-36).
+- Mais de 16 bits por variável, 32 bits de entrada ou 256 pontos (MT-24, MT-25); fatias de
+  variáveis (MT-26); múltiplos pré-computados e multiplicação por constantes (MT-37,
+  MT-39).
+- Matriz módulo $2^n \pm 1$ (MT-35).
+- Exportação em CSV.
 - Contas de usuário, servidor, compartilhamento por link (D-6).
-- Síntese para FPGA dentro do app.
+- Síntese para FPGA dentro do app: área e atraso seguem o modelo unitário acima, não
+  números de síntese.
 - Medir se o app de fato melhora o aprendizado (estudo com alunos): desejável, fora do
   software.

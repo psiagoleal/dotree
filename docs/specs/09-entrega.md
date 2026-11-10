@@ -5,8 +5,7 @@
 ## Resultado
 
 Cada mudança é verificada automaticamente, e o que chega a `main` vai ao ar no GitHub Pages
-sem passo manual, num endereço que pode ser enviado a quem quiser ver (inclusive o
-professor). A mesma build roda num contêiner para quem quiser hospedar por conta própria.
+sem passo manual, num endereço que pode ser enviado a quem quiser ver. A mesma build roda num contêiner para quem quiser hospedar por conta própria.
 Decisão e alternativas: [ADR 0002](../adr/0002-entrega-github-pages-e-actions.md).
 
 ## Critérios

@@ -5,7 +5,7 @@
 ## Resultado
 
 O usuário digita uma expressão e a largura de cada variável, e o app mostra a matriz de
-pontos no estilo das aulas: colunas da direita ($2^0$) para a esquerda, cada coluna com seu
+pontos no estilo do Parhami (cap. 8): colunas da direita ($2^0$) para a esquerda, cada coluna com seu
 peso no topo, pontos empilhados e **coloridos por termo**. A qualquer momento ele pode trocar
 os pontos pelas variáveis indexadas que eles representam ($a_1 b_0$).
 
@@ -68,9 +68,9 @@ Variáveis de uma letra tornam a justaposição inequívoca (`AB` só pode ser $
   descartar a compressão em andamento somente depois de confirmação do usuário.
   *Prova:* teste de ponta a ponta.
 
-## Critérios — cores (estilo das aulas)
+## Critérios — cores
 
-Como nas figuras de aula: cada termo da expressão tem uma cor; pontos produzidos por células
+Cada termo da expressão tem uma cor; pontos produzidos por células
 (somas e vai-uns) são **pretos**; os bits do resultado, no fim, ganham uma cor própria de
 "resultado". As células formadas aparecem como um retângulo envolvendo os pontos que
 consumiram.

@@ -7,7 +7,7 @@
 
 ## Origem
 
-O projeto nasceu de um exercício de Circuitos Aritméticos (mestrado, UFSC, 2026): projetar
+O projeto nasceu de um exercício de aritmética computacional (2026): projetar
 o circuito de uma soma de produtos com operandos de poucos bits, usando a **notação de
 pontos** — cada bit é um ponto, cada coluna é um peso
 $2^j$ — e comprimindo a matriz com somadores completos (FA), meio-somadores (HA) e um
@@ -44,9 +44,9 @@ Resolver à mão envolveu sempre os mesmos passos:
 
 ## Acréscimos do autor (2026-10-30, segunda rodada)
 
-- Hospedagem no **GitHub Pages** enquanto o app for só WASM, para enviar o link ao professor.
+- Hospedagem no **GitHub Pages** enquanto o app for só WASM, com um link que se possa enviar a qualquer pessoa.
 - Preparar desde já toda a estrutura de **CI/CD**.
-- Pontos **diferenciados por cores**, como nas figuras das aulas (cada termo uma cor; pontos
+- Pontos **diferenciados por cores** (cada termo uma cor; pontos
   gerados por FA em preto).
 - Alternar, a qualquer momento, entre a **representação por pontos** e a representação com
   **variáveis indexadas** ($a_i b_j$).
@@ -58,7 +58,7 @@ Resolver à mão envolveu sempre os mesmos passos:
 
 ## Material de terceiros
 
-Enunciados, figuras e soluções do professor **não** entram neste repositório (que é
-público). Os exemplos embutidos no app são expressões genéricas; a referência ao livro-texto
-é bibliográfica: B. Parhami, *Computer Arithmetic: Algorithms and Hardware Designs*,
-caps. 11–12.
+Material didático não publicado **não** entra neste repositório (que é público), nem
+como citação (ADR 0004). Os exemplos embutidos no app são expressões genéricas; as
+referências são bibliográficas e públicas: B. Parhami, *Computer Arithmetic: Algorithms and
+Hardware Designs*, caps. 8, 11 e 12; Wallace (1964); Dadda (1965).

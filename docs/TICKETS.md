@@ -11,15 +11,17 @@
 
 Nenhum: a v0.1.0 foi publicada.
 
-## Até o projeto final da disciplina — v0.2 (aprovado em 2026-11-06)
+## v0.2 (aprovado em 2026-11-06)
 
-- [ ] [MT-40a](plano-pos-v0.1.md#mt-40a-documentação-pública-e-referências) — README da v0.2, limitações, metodologia e referências públicas; spec viva; varredura das menções à disciplina.
+- [ ] [MT-40a](plano-pos-v0.1.md#mt-40a-documentação-pública-e-referências) — README da v0.2, limitações, metodologia e referências públicas; spec viva (ADR 0004); varredura das referências não públicas.
 - [ ] [MT-40b](plano-pos-v0.1.md#mt-40b-ajuda-dentro-do-app) — Seção "Como usar" no app, nos dois idiomas.
 
-## Depois do projeto final (ordem por dependências)
+## Depois da v0.2 (ordem por dependências)
 
-- [ ] [MT-35](plano-pos-v0.1.md#mt-35-matriz-módulo-2n-1-e-2n1-p16) — Matriz módulo $2^n-1$ (início de 2027/1) e $2^n+1$.
-- [ ] [MT-32](plano-pos-v0.1.md#mt-32-célula-composta-p13) — Célula composta (ADR 0004): contadores, 4:2, AMM 2×2.
+- [ ] [MT-41](plano-pos-v0.1.md#mt-41-dica-e-próxima-jogada-que-respeitam-o-perfil-de-saída) — Dica e próxima jogada que param no perfil de saída.
+- [ ] [MT-42](plano-pos-v0.1.md#mt-42-busca-do-ótimo-fora-da-linha-principal) — Busca do ótimo num *worker*, sem travar a página.
+- [ ] [MT-35](plano-pos-v0.1.md#mt-35-matriz-módulo-2n-1-e-2n1-p16) — Matriz módulo $2^n-1$ e $2^n+1$.
+- [ ] [MT-32](plano-pos-v0.1.md#mt-32-célula-composta-p13) — Célula composta (ADR própria): contadores, 4:2, AMM 2×2.
 - [ ] [MT-33](plano-pos-v0.1.md#mt-33-ponto-invertido-e-números-com-sinal-p14) — Ponto invertido: Baugh-Wooley e dígito −1.
 - [ ] [MT-34](plano-pos-v0.1.md#mt-34-booth-radix-2-e-radix-4-p15) — Booth radix-2 e radix-4.
 - [ ] [MT-36](plano-pos-v0.1.md#mt-36-escolha-do-cpa-final-p17) — Escolha do CPA final.
@@ -34,7 +36,7 @@ Nenhum: a v0.1.0 foi publicada.
 ## Concluídos
 
 - [x] [MT-31b](plano-pos-v0.1.md#mt-31-entrada-por-alturas-com-perfil-alvo-de-saída-p12) — Interface da entrada por alturas: campo, painel do perfil, solução ótima e nome do bloco como ajuda contada.
-- [x] [MT-31a](plano-pos-v0.1.md#mt-31-entrada-por-alturas-com-perfil-alvo-de-saída-p12) — Núcleo da entrada por alturas: perfil, circuito ótimo (os 11 itens do 8.3) e bloco conhecido.
+- [x] [MT-31a](plano-pos-v0.1.md#mt-31-entrada-por-alturas-com-perfil-alvo-de-saída-p12) — Núcleo da entrada por alturas: perfil, circuito ótimo (11 perfis de referência) e bloco conhecido.
 - [x] [MT-38](plano-pos-v0.1.md#mt-38-comparação-de-soluções-p20) — Comparação de soluções, versão mínima (AJU-11): tabela lado a lado e fronteira não dominada.
 - [x] [MT-30](plano-pos-v0.1.md#mt-30-tabela-de-alturas-nível-a-nível-p11) — Tabela de alturas nível a nível, exportável em Markdown (CMP-18).
 - [x] [MT-29](plano-pos-v0.1.md#mt-29-solução-de-wallace-p10) — Solução de Wallace ao lado da de Dadda, com o mesmo fluxo de revelação e aplicação.

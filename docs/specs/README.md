@@ -2,9 +2,11 @@
 
 # Specs do dotree
 
-> **Estado: v0.1 aprovada pelo autor em 2026-10-30.** Decisões D-1 a D-6 confirmadas; spec
-> criticada em contexto limpo e corrigida. Mudanças daqui em diante seguem a regra de
-> manutenção abaixo (EXP-13 e EXP-14 entraram com o MT-3).
+> **Spec única e viva ([ADR 0004](../adr/0004-spec-viva-e-referencias-publicas.md)):**
+> descreve o que o `main` faz e muda no mesmo PR que muda o comportamento. O estado de cada
+> versão fica na *tag* do git, e o que mudou, no [`CHANGELOG.md`](../../CHANGELOG.md). A
+> base, a v0.1, foi aprovada pelo autor em 2026-10-30 (decisões D-1 a D-6, spec criticada
+> em contexto limpo e corrigida).
 
 A spec fixa **o resultado** e dura. A sequência de trabalho (o plano) mora em
 `docs/TICKETS.md`, e as decisões com alternativa descartada moram em `docs/adr/`. Os testes
@@ -23,10 +25,10 @@ são a spec em forma executável: cada critério tem uma prova associada.
 
 | Arquivo | Assunto | Prefixos |
 |---|---|---|
-| [`00-transversal.md`](00-transversal.md) | Objetivo, princípio didático, revelação em duas etapas, glossário, custo, não-funcionais, casos de referência | `GER` |
-| [`01-expressao-e-matriz.md`](01-expressao-e-matriz.md) | Expressão → matriz, cores por termo, visão de variáveis indexadas, desafio de $W$ | `EXP`, `COR`, `VIS` |
-| [`02-compressao.md`](02-compressao.md) | Níveis, FA, HA, CPA e métricas do circuito do usuário | `CMP` |
-| [`03-ajuda-sob-demanda.md`](03-ajuda-sob-demanda.md) | Dicas, próxima jogada, limite inferior e solução Dadda — só quando pedidas | `AJU` |
+| [`00-transversal.md`](00-transversal.md) | Objetivo, princípio didático, revelação em duas etapas, glossário, custo, não-funcionais, casos de referência, fora de escopo | `GER` |
+| [`01-expressao-e-matriz.md`](01-expressao-e-matriz.md) | Expressão ou perfil de alturas → matriz, cores por termo, visão de variáveis indexadas, desafio de $W$ | `EXP`, `COR`, `VIS` |
+| [`02-compressao.md`](02-compressao.md) | Níveis, FA, HA, CPA, métricas, tabela de alturas e perfil de saída do circuito do usuário | `CMP` |
+| [`03-ajuda-sob-demanda.md`](03-ajuda-sob-demanda.md) | Dicas, próxima jogada, limite inferior, soluções de Dadda, Wallace e ótima, comparação e nome do bloco — só quando pedidos | `AJU` |
 | [`04-verificacao.md`](04-verificacao.md) | Simulação, amostragem e contraexemplo | `VER` |
 | [`05-diagrama.md`](05-diagrama.md) | Diagrama de blocos, nomes e tabela de ligações | `DIA` |
 | [`06-vhdl.md`](06-vhdl.md) | VHDL-93 estrutural, comportamental e testbench | `VHD` |
@@ -44,11 +46,12 @@ são a spec em forma executável: cada critério tem uma prova associada.
 | D-3 | Área e atraso do próprio circuito sempre visíveis | CMP-15 |
 | D-4 | Alvo ≥ 768 px; abaixo disso, só leitura | GER-10 |
 | D-5 | Confirmação a cada pedido de ajuda | AJU-02 |
-| D-6 | Compartilhar por link fica fora da v0.1 | 08 |
-| — | Wallace e exportação CSV ficam para a v0.2 (Wallace feito: AJU-10, MT-29) | 00, 03, 05 |
-| — | Cores por termo no estilo das aulas; alternância pontos ↔ variáveis indexadas | COR, VIS |
+| D-6 | Compartilhar por link fica fora do escopo | 08 |
+| — | Solução de Wallace na v0.2 (AJU-10, MT-29); exportação CSV fora do escopo | 00, 03, 05 |
+| — | Cores por termo; alternância pontos ↔ variáveis indexadas | COR, VIS |
 | — | Revelação em duas etapas: resultado, depois caminho | GER-03 |
-| — | Exemplos próprios do projeto (nenhum enunciado de terceiros) | 00 |
+| — | Exemplos próprios do projeto; só referências públicas (ADR 0004) | 00 |
+| — | Uma spec só, viva, atualizada a cada versão (ADR 0004) | todas |
 
 ## Regra de manutenção
 
