@@ -1,5 +1,5 @@
 // Caminho relativo: app/core/tests/heights.rs
-//! Spec 02, CMP-16 — the height table, level by level (MT-30).
+//! Spec 02, CMP-18 — the height table, level by level (MT-30).
 
 mod common;
 
@@ -40,7 +40,7 @@ fn row(level: usize, kind: RowKind, msb_first: &[u32], fa: usize, ha: usize) -> 
 }
 
 #[test]
-fn cmp16_r2_complete_matches_the_spec() {
+fn cmp18_r2_complete_matches_the_spec() {
     let mut r = r1();
     replay_r2_tree(&mut r);
     r.close_with_cpa().unwrap();
@@ -58,7 +58,7 @@ fn cmp16_r2_complete_matches_the_spec() {
 }
 
 #[test]
-fn cmp16_the_current_level_counts_its_pending_cells() {
+fn cmp18_the_current_level_counts_its_pending_cells() {
     let mut r = r1();
     assert_eq!(
         height_table(&r),
@@ -73,7 +73,7 @@ fn cmp16_the_current_level_counts_its_pending_cells() {
 }
 
 #[test]
-fn cmp16_before_the_cpa_the_last_row_is_the_current_level() {
+fn cmp18_before_the_cpa_the_last_row_is_the_current_level() {
     let mut r = r1();
     replay_r2_tree(&mut r);
     let table = height_table(&r);
@@ -90,7 +90,7 @@ fn cmp16_before_the_cpa_the_last_row_is_the_current_level() {
 }
 
 #[test]
-fn cmp16_headers_come_from_the_interface() {
+fn cmp18_headers_come_from_the_interface() {
     let r = r1();
     let en = HeightHeaders {
         level: "Level",

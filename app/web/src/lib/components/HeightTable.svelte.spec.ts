@@ -1,5 +1,5 @@
 // Caminho relativo: app/web/src/lib/components/HeightTable.svelte.spec.ts
-// The height table of R2 (spec 02, CMP-16), against the real core.
+// The height table of R2 (spec 02, CMP-18), against the real core.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { page } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
@@ -29,7 +29,7 @@ function cells(container: HTMLElement): string[][] {
 const exportButton = () =>
 	page.getByRole('button', { name: 'Baixar tabela de alturas (Markdown)' });
 
-describe('HeightTable (CMP-16)', () => {
+describe('HeightTable (CMP-18)', () => {
 	it('R2 complete: one row per level, highest column first, and the result', async () => {
 		const { container } = await show(r2(core));
 		await expect.element(page.getByRole('table', { name: 'Tabela de alturas' })).toBeVisible();

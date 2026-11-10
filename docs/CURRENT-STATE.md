@@ -8,8 +8,8 @@
 ## Último turno
 
 - **Branch:** `main`
-- **Data:** 2026-11-09
-- **Commit:** `7ee1cc3` (MT-29b, #45). O MT-38 ainda não foi commitado.
+- **Data:** 2026-11-10
+- **Commit:** `6049fa4` (MT-38, #46). O MT-31a ainda não foi commitado.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -160,7 +160,7 @@
 - [x] MT-29: AJU-10, solução de Wallace (regra da fig. 8.10 do Parhami, reproduzida nível
       a nível). Achado: o Dadda do dotree gasta 3 HA a mais que a fig. 8.14 do livro no
       mesmo exemplo (AJU-05 manda HA onde o livro usa FA): decidir com o usuário.
-- [x] MT-30: CMP-16, tabela de alturas nível a nível com exportação em Markdown; R2
+- [x] MT-30: CMP-18, tabela de alturas nível a nível com exportação em Markdown; R2
       conferido à mão contra a spec 02. No CI, o proptest do Wallace (MT-29) achou um
       circuito completo sem CPA (`A*B + 5C*D + C`, 1 bit); o defeito era do auxiliar de
       teste, que exigia o nível de CPA. Corrigido nos dois métodos, com o caso fixado.
@@ -168,8 +168,12 @@
       para a fig. 8.14 do Parhami; teste de regressão nos sete operandos.
 - [x] MT-38 (mínimo): AJU-11, comparação lado a lado de aluno, Dadda clássico e Wallace,
       sem revelar nem contar ajuda; em R1 o Wallace domina.
-- [ ] Próximo: MT-31 (entrada por alturas, se der tempo) ou fechar a v0.2.0 para o projeto
-      final (03/12): decidir com o usuário.
+- [x] MT-31a: EXP-16, EXP-17, CMP-19 e AJU-12 no núcleo (`dotree_core::profile`). O
+      ótimo reproduz os 11 itens do gabarito do 8.3; conferido também contra uma busca
+      exaustiva em Python (141 perfis com solução, mesmos números). Corrigido o CMP-16
+      repetido na spec 02: a tabela de alturas passou a CMP-18.
+- [ ] Próximo: MT-31b (interface da entrada por alturas); depois, fechar a v0.2.0 para o
+      projeto final (03/12).
 
 ## Observações para a próxima sessão
 
@@ -212,6 +216,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-10 | `6049fa4` | Comparação de soluções (#46); núcleo da entrada por alturas | MT-31a |
 | 2026-11-09 | `7ee1cc3` | Dadda clássico documentado (#45); comparação de soluções | MT-38 |
 | 2026-11-09 | `c7fe552` | tabela de alturas (#44); Dadda clássico documentado | MT-29b |
 | 2026-11-09 | `2e099f7` | solução de Wallace (#43); tabela de alturas | MT-30 |

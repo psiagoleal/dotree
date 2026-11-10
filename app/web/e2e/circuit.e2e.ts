@@ -82,7 +82,7 @@ test('R2: the diagram and the wiring table download as SVG and Markdown (DIA-02,
 	const md = readFileSync((await mdFile.path())!, 'utf8');
 	expect(md.trim()).toBe(referenceTable().trim());
 
-	// CMP-16: the height table is the one of spec 02, character for character.
+	// CMP-18: the height table is the one of spec 02, character for character.
 	const [heightsFile] = await Promise.all([
 		page.waitForEvent('download'),
 		page.getByRole('button', { name: 'Baixar tabela de alturas (Markdown)' }).click()

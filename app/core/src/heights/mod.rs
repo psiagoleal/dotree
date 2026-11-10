@@ -1,5 +1,5 @@
 // Caminho relativo: app/core/src/heights/mod.rs
-//! The height table (spec 02, CMP-16; MT-30): the height of each column at each level and
+//! The height table (spec 02, CMP-18; MT-30): the height of each column at each level and
 //! the cells formed over it, the tabular form of the course reference (Parhami, fig. 8.11).
 
 use crate::reduce::{CellKind, Point, Reduction};
@@ -84,7 +84,7 @@ pub struct HeightHeaders<'a> {
     pub result: &'a str,
 }
 
-/// The table as Markdown (CMP-16), highest column first, as in the level panels.
+/// The table as Markdown (CMP-18), highest column first, as in the level panels.
 pub fn height_table_markdown(rows: &[HeightRow], headers: HeightHeaders) -> String {
     let width = rows.first().map_or(0, |r| r.heights.len());
     let columns: Vec<String> = (0..width).rev().map(|j| format!("$2^{j}$")).collect();

@@ -134,7 +134,7 @@ uma nota abaixo dos painéis oferece "Por quê?" (CMP-09).
   *Prova de CMP-13 a CMP-15:* R2 → 13 FA, 4 HA, 13 AND, 15 $A_{FA}$, 6 $T_{FA}$; células
   críticas 1, 2, 4, 6, 8, 9 e 12 a 17, obtidas à mão das prontidões do caso de referência.
 
-- **CMP-16** — O sistema DEVE mostrar a **tabela de alturas**: uma linha por nível
+- **CMP-18** — O sistema DEVE mostrar a **tabela de alturas**: uma linha por nível
   concluído, com a altura de cada coluna ($2^{W-1}$ à esquerda, como nos painéis) e
   quantos FA e HA foram formados sobre ele; uma linha para o nível atual, com as células já
   formadas nele; e, com o circuito completo, a linha do resultado no lugar da do nível
@@ -154,6 +154,18 @@ Tabela de alturas de R2 (MT-30), calculada à mão das células de R2 (spec 00):
 | 2 | 0 | 0 | 2 | 3 | 3 | 1 | 5 | 3 | 1 |
 | 3 (CPA) | 0 | 1 | 2 | 2 | 1 | 2 | 3 | 4 | 2 |
 | Resultado | 1 | 1 | 1 | 1 | 1 | 1 | 1 | — | — |
+
+## Critérios — perfil-alvo de saída (MT-31)
+
+- **CMP-19** — ONDE a matriz vier de um perfil de alturas (EXP-16), o sistema DEVE dar o
+  perfil de saída por **atingido** quando o nível atual não tiver célula pendente e
+  nenhuma coluna passar da altura pedida para ela; uma coluna além das listadas pede 0.
+  Atingir o perfil não completa o circuito (CMP-12): com 2 numa coluna, a saída continua
+  redundante. A mecânica não muda: o usuário pode seguir reduzindo.
+  *Prova:* testes do núcleo: `{3,3,3; 1,2,2,1}` só é atingido ao concluir o nível dos três
+  FA; `{5; 2,1}` (W = 3) é atingido com alturas 1, 2, 0 e deixa de ser quando um FA põe
+  ponto na coluna 2; `{2; 2}` é atingido pela própria entrada e deixa de ser com um HA
+  pendente.
 
 ## Fora de escopo
 

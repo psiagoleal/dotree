@@ -150,7 +150,7 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   e se a solução é **não dominada** em área e atraso entre as completas (um circuito
   incompleto fica de fora da fronteira). A comparação NÃO DEVE revelar nem contar nada: a
   coluna de um método entra com a etapa 1 dele (as métricas), e a tabela de alturas dele
-  (CMP-16), com a etapa 2 (os níveis). Junto do Dadda, uma nota diz que é o clássico
+  (CMP-18), com a etapa 2 (os níveis). Junto do Dadda, uma nota diz que é o clássico
   (AJU-05). Versão mínima do MT-38; o gráfico área × atraso, as versões salvas e os números
   do Quartus ficam para depois.
   *Prova:* teste com o núcleo real dos números de R1, calculados à mão das métricas: aluno
@@ -159,9 +159,24 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   522; só o Wallace é não dominado. Teste da fronteira (empate, compromisso, incompleto);
   teste de componente (nada antes da etapa 1, tabela de alturas só depois da etapa 2,
   registro de ajudas igual); teste de ponta a ponta com R2.
+- **AJU-12** — ONDE a matriz vier de um perfil de alturas (EXP-16), o sistema DEVE saber
+  calcular o **circuito ótimo** que atinge o perfil (CMP-19): a menor área e, entre os de
+  menor área, o menor atraso e depois o menor número de níveis, com FA e HA sobre os pontos
+  mais cedo prontos de cada coluna. SE a busca passar do limite, ENTÃO o sistema DEVE dizer
+  que o perfil é grande demais, sem travar. O sistema DEVE também saber nomear o bloco
+  conhecido que o perfil descreve: FA, HA, somador de $n$ bits, somador de $n$ bits com
+  vai-um de entrada, $n$ FA lado a lado (*carry-save*), contador (saída de um bit por
+  coluna) ou compressor (saída redundante). Mostrar o ótimo e o nome é ajuda revelada sob
+  pedido e contada, como as outras (MT-31b, com a interface).
+  *Prova:* teste do núcleo: o ótimo reproduz as áreas e os atrasos dos 11 itens do
+  gabarito do problema 8.3 da disciplina, citados pelo item (a: 3 e 3; b: 1 e 1; c: 4 e 3;
+  d: 6 e 4; e: 1,5 e 1,5; f: 2,5 e 2,5; g: 4 e 3; h: 3 e 1; i: 7 e 4; j: 3 e 2; k: 2 e 2,
+  em $A_{FA}$ e $T_{FA}$); f) dá FA, FA e HA nos níveis 0, 1 e 2; proptest: com saída de um
+  bit por coluna, o ótimo nunca perde para Dadda nem Wallace em (área, atraso); a busca de
+  26 pontos em quatro colunas para no limite; os blocos de cada item.
 
 ## Fora de escopo
 
-Busca da solução de menor atraso ou menor área; correção
+Busca da solução de menor atraso ou menor área fora do perfil de alturas (AJU-12); correção
 automática do circuito do usuário (AJU-09 substitui o circuito inteiro, não o corrige);
 ajuda por IA; "não perguntar de novo" (D-5).

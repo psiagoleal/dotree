@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- Núcleo da entrada por alturas (a interface vem no MT-31b): `{2,2,3; 1,1,1,1}`, a
+  notação do problema 8.3 da disciplina, vira uma matriz com um ponto por unidade de
+  altura, cada um uma variável de 1 bit, e um perfil de saída onde a redução para. O
+  núcleo calcula o circuito ótimo para o perfil (menor área, depois menor atraso), que
+  reproduz as áreas e os atrasos dos 11 itens do gabarito, e nomeia o bloco conhecido
+  (FA, HA, somador, *carry-save*, contador ou compressor). Perfis que nenhum circuito
+  atinge são recusados na leitura, com a coluna (EXP-16, EXP-17, CMP-19, AJU-12, MT-31a).
 - Comparação de soluções: o seu circuito ao lado das soluções de Dadda e de Wallace já
   pedidas, com área, atraso, FA, HA, AND, níveis, largura do CPA, células no caminho
   crítico, área × atraso, área × atraso² e quem é não dominada; a tabela de alturas de
@@ -16,7 +23,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   ajuda (AJU-11, MT-38, versão mínima).
 - Tabela de alturas: a altura de cada coluna em cada nível, com os FA e HA formados sobre
   ele, o nível atual e, no fim, o resultado; sempre visível e exportável em Markdown
-  (`dotree-alturas.md`), na forma tabular da referência do curso (CMP-16, MT-30).
+  (`dotree-alturas.md`), na forma tabular da referência do curso (CMP-18, MT-30).
 - Solução de Wallace ao lado da de Dadda, com o mesmo fluxo: métricas, depois os níveis
   com a regra do método numa frase, e "Usar a solução de Wallace". A regra é a da
   referência do curso (Parhami, fig. 8.10): todos os FA que cabem em cada coluna, HA só
