@@ -9,11 +9,7 @@
 
 ## Em aberto
 
-Nenhum: a v0.1.0 foi publicada.
-
-## v0.2 (aprovado em 2026-11-06)
-
-- [ ] [MT-43](plano-pos-v0.1.md#mt-43-publicar-a-v020) — Publicar a v0.2.0: versões, CHANGELOG, ModelSim à mão, *tag*.
+- [ ] [MT-43](plano-pos-v0.1.md#mt-43-publicar-a-v020) — Publicar a v0.2.0: versões, CHANGELOG e ModelSim prontos; falta a *tag* do autor e conferir release, imagem e site.
 
 ## Depois da v0.2 (ordem por dependências)
 

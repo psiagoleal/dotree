@@ -7,7 +7,7 @@
 	"status_error_title": "O núcleo do dotree não carregou.",
 	"status_error_reason": "Motivo: {reason}",
 	"status_error_report": "Abrir uma issue no GitHub",
-	"wip_notice": "Em construção: o dotree já monta a matriz, comprime até o circuito completo, desenha o diagrama de blocos, verifica o circuito, gera o VHDL e oferece ajuda sob demanda; o exercício fica salvo neste navegador e pode ser exportado e aberto como arquivo.",
+	"about_notice": "Tudo roda neste navegador: o exercício fica salvo aqui e pode ser exportado e aberto como arquivo. Cada regra do app está escrita na especificação, que acompanha o que está no ar.",
 	"spec_link": "Ler a especificação",
 	"language_label": "Idioma",
 	"language_pt_br": "Português",

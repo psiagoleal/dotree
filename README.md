@@ -7,20 +7,20 @@
 > didática para treinar a intuição em árvores de redução (Wallace, Dadda).
 
 [![CI](https://github.com/psiagoleal/dotree/actions/workflows/ci.yml/badge.svg)](https://github.com/psiagoleal/dotree/actions/workflows/ci.yml)
-![version](https://img.shields.io/badge/version-0.1.0-blue)
+![version](https://img.shields.io/badge/version-0.2.0-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
 
 **No ar:** <https://psiagoleal.github.io/dotree/> — sempre o que está no `main`. Última
-versão marcada: 0.1.0; a 0.2.0 está em preparação.
+versão marcada: 0.2.0.
 
 *Interface em português e inglês. Tudo roda no navegador: nenhum dado sai do seu
 computador.*
 
 ## Estado
 
-O `main` tem a v0.2 quase completa: o exercício da v0.1 (da expressão ao VHDL) mais
-constante aditiva, soluções de Dadda e de Wallace aplicáveis, comparação de soluções,
-tabela de alturas, topo para a placa DE2 e entrada por perfil de alturas com solução ótima.
+A v0.2.0 é o exercício da v0.1 (da expressão ao VHDL) mais constante aditiva, soluções de
+Dadda e de Wallace aplicáveis, comparação de soluções, tabela de alturas, topo para a placa
+DE2 e entrada por perfil de alturas com solução ótima.
 O contrato é uma spec só, viva ([`docs/specs/`](docs/specs/README.md), ADR
 [0004](docs/adr/0004-spec-viva-e-referencias-publicas.md)); o que vem depois está em
 [`docs/plano-pos-v0.1.md`](docs/plano-pos-v0.1.md) e no painel
@@ -152,7 +152,7 @@ docker run --rm -p 8080:8080 dotree    # http://localhost:8080
 Ou a imagem publicada de cada versão:
 
 ```bash
-docker run --rm -p 8080:8080 ghcr.io/psiagoleal/dotree:0.1.0
+docker run --rm -p 8080:8080 ghcr.io/psiagoleal/dotree:0.2.0
 ```
 
 ## Estrutura de diretórios

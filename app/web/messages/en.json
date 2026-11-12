@@ -7,7 +7,7 @@
 	"status_error_title": "The dotree core failed to load.",
 	"status_error_reason": "Reason: {reason}",
 	"status_error_report": "Open an issue on GitHub",
-	"wip_notice": "Under construction: dotree already builds the matrix, compresses it to a complete circuit, draws the block diagram, verifies the circuit, generates VHDL and offers help on demand; the exercise is saved in this browser and can be exported and opened as a file.",
+	"about_notice": "Everything runs in this browser: the exercise is saved here and can be exported and opened as a file. Every rule of the app is written in the specification, which follows what is live.",
 	"spec_link": "Read the specification",
 	"language_label": "Language",
 	"language_pt_br": "Português",

@@ -294,7 +294,9 @@
 		</section>
 	{/if}
 
-	<p class="notice">{m.wip_notice()} <a href={SPEC_URL}>{m.spec_link()}</a></p>
+	<p class="notice" data-testid="about-notice">
+		{m.about_notice()} <a href={SPEC_URL}>{m.spec_link()}</a>
+	</p>
 </main>
 
 <style>

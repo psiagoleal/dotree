@@ -389,6 +389,13 @@ A animação de *shift-add* (P19) fica sem ticket até haver espaço depois da v
 - **Critério de aceite:** `app/core/tests/release.rs` e o e2e de ENT-03 com 0.2.0; release
   do GitHub e imagem `0.2.0` no GHCR (ENT-05); site no ar com a versão.
 - **Depende de:** MT-40b
+- **Preparado (2026-11-10):** versões em 0.2.0 (`Cargo.toml`, `package.json`, badge e
+  imagem do README), seção `[0.2.0]` do CHANGELOG (as notas da release saem dela, conferido
+  com o `awk` do `release.yml`); o aviso "Em construção" virou uma nota que não envelhece,
+  com o link da spec, conferida por e2e nos dois idiomas. ModelSim ASE 10.1d: os 11 casos
+  de `vhdl_referencia` compilaram sem avisos e deram o veredito esperado (8 corretos, 3
+  estragados acusados). Falta a *tag* `v0.2.0`, pelo autor, e conferir release, imagem
+  `0.2.0` no GHCR e site.
 
 ## Limitações da entrada por alturas (achadas no MT-31b, 2026-11-10)
 
