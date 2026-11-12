@@ -8,8 +8,8 @@
 ## Último turno
 
 - **Branch:** `main`
-- **Data:** 2026-11-10
-- **Commit:** `fc928bf` (MT-40b, #50). O MT-43 ainda não foi commitado.
+- **Data:** 2026-11-12
+- **Commit:** `4dd6493` (MT-43, #51), *tag* `v0.2.0`.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -189,9 +189,9 @@
       por `about_notice` (nota sem "Em construção", e2e nos dois idiomas). ModelSim ASE
       10.1d rodado pelo agente nos 11 casos de `vhdl_referencia`: sem avisos, vereditos
       esperados. 268 testes Rust, 180 de unidade/componente, 56 e2e.
-- [ ] Próximo: depois do merge, a *tag* `v0.2.0` pelo autor; conferir o workflow Release,
-      a release com a seção do CHANGELOG, a imagem `0.2.0` no GHCR e o site. Depois,
-      MT-41.
+- [x] v0.2.0 publicada (#51): workflow Release verde, release com a seção do CHANGELOG,
+      imagem `0.2.0` lida sem login no GHCR, site com "versão 0.2.0".
+- [ ] Próximo: MT-41 (dica e próxima jogada que param no perfil de saída).
 - Mensagens de commit antigas (a do MT-31a, `90df97e`, e outras) citam material não
   público; ficam no histórico, porque reescrevê-lo pede *force push* no `main` (ADR 0003).
 
@@ -234,6 +234,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-12 | `4dd6493` | v0.2.0 publicada (#51) | MT-43 |
 | 2026-11-10 | `fc928bf` | "Como usar" no app (#50); preparação da v0.2.0 | MT-43 |
 | 2026-11-10 | `35b13e2` | Documentação pública, ADR 0004 (#49); "Como usar" no app | MT-40b |
 | 2026-11-10 | `4772336` | Interface da entrada por alturas (#48); documentação pública, ADR 0004 | MT-40a |

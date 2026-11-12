@@ -9,7 +9,7 @@
 
 ## Em aberto
 
-- [ ] [MT-43](plano-pos-v0.1.md#mt-43-publicar-a-v020) — Publicar a v0.2.0: versões, CHANGELOG e ModelSim prontos; falta a *tag* do autor e conferir release, imagem e site.
+Nenhum: a v0.2.0 foi publicada.
 
 ## Depois da v0.2 (ordem por dependências)
 
@@ -30,6 +30,7 @@
 
 ## Concluídos
 
+- [x] [MT-43](plano-pos-v0.1.md#mt-43-publicar-a-v020) — v0.2.0 publicada: release, imagem pública no GHCR e site no ar.
 - [x] [MT-40b](plano-pos-v0.1.md#mt-40b-ajuda-dentro-do-app) — "Como usar" no cabeçalho, nos dois idiomas, sem contar ajuda (GER-11).
 - [x] [MT-40a](plano-pos-v0.1.md#mt-40a-documentação-pública-e-referências) — README da v0.2, limitações, metodologia e referências públicas; spec viva (ADR 0004); varredura das referências não públicas.
 - [x] [MT-31b](plano-pos-v0.1.md#mt-31-entrada-por-alturas-com-perfil-alvo-de-saída-p12) — Interface da entrada por alturas: campo, painel do perfil, solução ótima e nome do bloco como ajuda contada.
