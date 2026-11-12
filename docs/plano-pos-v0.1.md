@@ -394,8 +394,10 @@ A animação de *shift-add* (P19) fica sem ticket até haver espaço depois da v
   com o `awk` do `release.yml`); o aviso "Em construção" virou uma nota que não envelhece,
   com o link da spec, conferida por e2e nos dois idiomas. ModelSim ASE 10.1d: os 11 casos
   de `vhdl_referencia` compilaram sem avisos e deram o veredito esperado (8 corretos, 3
-  estragados acusados). Falta a *tag* `v0.2.0`, pelo autor, e conferir release, imagem
-  `0.2.0` no GHCR e site.
+  estragados acusados).
+- **Feito (2026-11-12):** *tag* `v0.2.0` pelo autor (#51); workflow Release verde, release
+  com a seção do CHANGELOG, imagem `ghcr.io/psiagoleal/dotree:0.2.0` lida sem login
+  (ENT-05), site no ar com "versão 0.2.0" e a nota nova.
 
 ## Limitações da entrada por alturas (achadas no MT-31b, 2026-11-10)
 
