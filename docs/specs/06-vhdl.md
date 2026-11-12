@@ -91,6 +91,10 @@ ASE 10.1d e deu "TODOS OS 16384 CASOS CORRETOS". Em 2026-11-06, para a v0.1.0 (j
 Em 2026-11-09 (MT-21), com a versão comportamental, o ModelSim compilou R2, o coeficiente
 grande e o comportamental estragado sem avisos; os dois primeiros deram todos os casos
 corretos nas duas versões, e o terceiro acusou 9216 casos errados só na comportamental.
+Em 2026-11-10, para a v0.2.0, os 11 casos de `examples/vhdl_referencia.rs` (os do GHDL no
+CI, com constante e placa DE2) compilaram sem avisos no ModelSim; os 8 corretos deram todos
+os casos certos em cada versão, e os 3 estragados de propósito acusaram erro só na versão
+estragada.
 
 No Quartus, os `*` da versão comportamental podem ser mapeados nos multiplicadores
 embutidos da FPGA. Para comparar só elementos lógicos com a versão estrutural, é preciso

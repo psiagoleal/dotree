@@ -15,6 +15,27 @@ test('loads under the Pages base path and runs the WASM core of this release (EN
 	);
 });
 
+test('the page note describes the released app and links the living spec (MT-43)', async ({
+	browser
+}) => {
+	for (const [locale, text, link] of [
+		['pt-BR', 'Tudo roda neste navegador', 'Ler a especificação'],
+		['en-US', 'Everything runs in this browser', 'Read the specification']
+	] as const) {
+		const context = await browser.newContext({ locale });
+		const page = await context.newPage();
+		await page.goto('./');
+		const note = page.getByTestId('about-notice');
+		await expect(note).toContainText(text);
+		await expect(note).not.toContainText(/constru/i);
+		await expect(note.getByRole('link', { name: link })).toHaveAttribute(
+			'href',
+			/docs\/specs\/README\.md$/
+		);
+		await context.close();
+	}
+});
+
 test('first visit follows the browser language (IDI-03)', async ({ browser }) => {
 	for (const [locale, tagline] of [
 		['pt-BR', /Monte a matriz de pontos/],

@@ -8,6 +8,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+## [0.2.0] - 2026-11-12
+
+Segunda versão: ao exercício da v0.1 somam-se a constante aditiva, as soluções de Dadda e
+de Wallace aplicáveis, a tabela de alturas, a comparação de soluções, o topo para a placa
+DE2, a versão comportamental do VHDL, a entrada por perfil de alturas com a solução ótima
+e o guia "Como usar". O VHDL dos 11 casos de referência foi conferido à mão no ModelSim
+ASE 10.1d: compilou sem avisos, os 8 casos corretos deram todos os casos certos nas
+versões estrutural, comportamental e da placa, e os 3 estragados de propósito acusaram
+erro.
+
 ### Adicionado
 - "Como usar", no cabeçalho, em português e inglês: os passos (expressão ou perfil de
   alturas, largura, compressão, CPA, verificação e exportação), os atalhos de teclado, o
@@ -69,6 +79,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   resultado de cada uma; o CI e o ModelSim ASE 10.1d simulam as duas (VHD-10, MT-21).
 
 ### Alterado
+- O aviso "Em construção" no pé da página deu lugar a uma nota que não envelhece: tudo
+  roda no navegador, o exercício fica salvo e pode ser exportado, e cada regra está na
+  especificação, com o link (MT-43).
 - "Baixar tabela (Markdown)" virou "Baixar tabela de ligações (Markdown)", para não se
   confundir com a tabela de alturas.
 - O botão "Solução automática" virou "Solução de Dadda", e os textos da solução (etapa 2,
