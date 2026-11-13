@@ -7,16 +7,23 @@
 > Atualizado **sempre** que um ticket é criado, concluído ou abandonado — skill
 > `micro-ticket-planner`.
 
-## Em aberto
+## Em aberto: v0.3 (entrega em 03/12/2026; decidido em 2026-11-13)
 
-Nenhum: a v0.2.0 foi publicada.
+- [ ] [MT-44](plano-pos-v0.1.md#mt-44-solução-dadda-parhami) — Terceiro método para expressões: "Dadda (Parhami)", a variante da fig. 8.14.
+- [ ] [MT-45](plano-pos-v0.1.md#mt-45-custos-configuráveis) — Área e atraso configuráveis por componente, em múltiplos de 0,01.
+- [ ] [MT-32a](plano-pos-v0.1.md#mt-32a-contadores-no-núcleo) — Contadores 7:3 e 15:4 no núcleo, com ADR, verificação e VHDL.
+- [ ] [MT-32b](plano-pos-v0.1.md#mt-32b-contadores-na-interface) — Contadores na interface, no diagrama e nas tabelas.
+- [ ] [MT-25a](plano-pos-v0.1.md#mt-25a-limites-até-64-bits-de-entrada-p1-degrau-1) — Limites: 32 bits por variável, 64 de entrada, até 1024 pontos; matriz com zoom e rolagem.
+- [ ] [MT-42](plano-pos-v0.1.md#mt-42-busca-do-ótimo-fora-da-linha-principal) — Busca do ótimo num *worker*, sem travar a página.
+- [ ] [MT-46](plano-pos-v0.1.md#mt-46-otimizador) — Otimizador: opções não dominadas ao lado do circuito do aluno (busca exata nas pequenas, heurística nas grandes).
+- [ ] [MT-47](plano-pos-v0.1.md#mt-47-publicar-a-v030) — Publicar a v0.3.0.
+- [ ] [MT-48](plano-pos-v0.1.md#mt-48-vídeos-automatizados) — Vídeos de todas as funcionalidades, gerados pelo Playwright.
 
 ## Depois da v0.2 (ordem por dependências)
 
 - [ ] [MT-41](plano-pos-v0.1.md#mt-41-dica-e-próxima-jogada-que-respeitam-o-perfil-de-saída) — Dica e próxima jogada que param no perfil de saída.
-- [ ] [MT-42](plano-pos-v0.1.md#mt-42-busca-do-ótimo-fora-da-linha-principal) — Busca do ótimo num *worker*, sem travar a página.
 - [ ] [MT-35](plano-pos-v0.1.md#mt-35-matriz-módulo-2n-1-e-2n1-p16) — Matriz módulo $2^n-1$ e $2^n+1$.
-- [ ] [MT-32](plano-pos-v0.1.md#mt-32-célula-composta-p13) — Célula composta (ADR própria): contadores, 4:2, AMM 2×2.
+- [ ] [MT-32](plano-pos-v0.1.md#mt-32-célula-composta-p13) — Célula composta de várias colunas: compressor 4:2 e AMM 2×2 (os contadores de uma coluna estão na v0.3).
 - [ ] [MT-33](plano-pos-v0.1.md#mt-33-ponto-invertido-e-números-com-sinal-p14) — Ponto invertido: Baugh-Wooley e dígito −1.
 - [ ] [MT-34](plano-pos-v0.1.md#mt-34-booth-radix-2-e-radix-4-p15) — Booth radix-2 e radix-4.
 - [ ] [MT-36](plano-pos-v0.1.md#mt-36-escolha-do-cpa-final-p17) — Escolha do CPA final.

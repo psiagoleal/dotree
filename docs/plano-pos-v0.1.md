@@ -161,6 +161,8 @@ flowchart LR
 - **Objetivo:** 64 bits por variável, 128 de entrada, 4096 pontos; matriz com zoom e
   rolagem; desempenho medido com 4096 pontos.
 - **Depende de:** MT-24
+- **Degrau 1 adiantado (2026-11-13):** o MT-25a, na v0.3, sobe até 64 bits de entrada e
+  1024 pontos, sem inteiro largo; zoom e rolagem chegam com ele. Aqui fica o resto.
 
 ### MT-26: Fatias de variáveis (P2)
 - **Objetivo:** `A[63:32]` na expressão, com a largura da variável inteira declarada uma
@@ -301,6 +303,9 @@ flowchart LR
 - **Objetivo:** modelo de célula com entradas e saídas em várias colunas, custo e atraso
   vindos da rede interna; contadores, compressor 4:2 e AMM 2×2 como os primeiros tipos.
 - **Decisão pendente:** ADR própria (modelo de célula composta), que vale também para o MT-27.
+- **Dividido em 2026-11-13** (ver [v0.3](#v03-até-a-entrega-de-03122026)): MT-32a e MT-32b
+  tratam os contadores de uma coluna (7:3, 15:4); o compressor 4:2 e o AMM 2×2, que
+  ocupam várias colunas, ficam para depois da entrega.
 
 ### MT-33: Ponto invertido e números com sinal (P14)
 - **Objetivo:** pontos negados e a constante de correção; Baugh-Wooley e recodificação com
@@ -417,3 +422,153 @@ A animação de *shift-add* (P19) fica sem ticket até haver espaço depois da v
   pior caso medido (26 pontos), leva cerca de 0,5 s fora do navegador.
 - **Critério de aceite:** e2e que interage com a página durante a busca; GER-06 (100 ms no
   p95) medido com o maior perfil aceito.
+- **Passa a ser pré-requisito do MT-46** (otimizador), decidido em 2026-11-13.
+
+## v0.3: até a entrega de 03/12/2026
+
+### Decisões do autor (2026-11-13)
+
+Depois da conversa com o professor, que pediu um projeto "mais interessante" e deu ideias
+sem fixar solução:
+
+- **Terceiro método de solução para expressões, "Dadda (Parhami)":** a variante da
+  fig. 8.14, com FA sempre que a coluna passa do alvo e tem 3 pontos ou mais. A decisão do
+  MT-29b continua: o Dadda clássico segue como o método que a próxima jogada ensina; a
+  variante entra **ao lado**, não no lugar.
+- **Contadores de uma coluna:** 7:3 e 15:4 (o "15:6" da conversa era 15:4), além de FA
+  (3:2) e HA (2:2).
+- **Custos configuráveis:** área e atraso de cada componente, com o padrão de hoje (FA = 1
+  e 1, HA = 0,5 e 0,5, em $A_{FA}$ e $T_{FA}$), em **múltiplos de 0,01**, para as contas
+  continuarem exatas.
+- **Otimizador:** apresenta opções otimizadas ao lado do circuito do aluno.
+- **Vídeo:** um ou mais vídeos que mostram todas as funcionalidades, gerados de forma
+  automatizada, no fim do fluxo.
+- **Limites maiores (degrau 1):** 32 bits por variável, 64 bits de entrada, saída até
+  128 bits e até 1024 pontos (um multiplicador 32 × 32), sem inteiro largo no núcleo: as
+  entradas já cabem num `u64` e os valores num `u128`. O degrau 2 (64 × 64: 128 bits de
+  entrada, 4096 pontos, MT-24 a MT-27) fica para depois da entrega.
+- **Corte para caber o degrau 1:** o MT-46 entra com a busca exata em matrizes pequenas e
+  uma heurística nas grandes; a comparação de várias heurísticas e o gráfico área × atraso
+  ficam para depois. O MT-48 grava primeiro os vídeos por funcionalidade; o completo, se
+  sobrar tempo.
+- **Prazo:** entrega em 03/12/2026. A *tag* `v0.3.0` sai antes do vídeo, para o vídeo
+  mostrar a versão marcada.
+
+### Ordem e datas-meta
+
+```mermaid
+flowchart LR
+  MT44[MT-44 Dadda Parhami] --> MT45[MT-45 custos configuráveis]
+  MT45 --> MT32a[MT-32a contadores no núcleo]
+  MT32a --> MT32b[MT-32b contadores na interface]
+  MT32b --> MT25a[MT-25a limites até 64 bits de entrada]
+  MT25a --> MT42[MT-42 busca num worker]
+  MT42 --> MT46[MT-46 otimizador]
+  MT46 --> MT47[MT-47 publicar a v0.3.0]
+  MT47 --> MT48[MT-48 vídeos automatizados]
+```
+
+| Ticket | Tamanho | Meta | Specs |
+|---|---|---|---|
+| MT-44 | Pequeno | 14/11 | 03 |
+| MT-45 | Médio | 17/11 | 02, 03, 07 (arquivo) |
+| MT-32a | Grande | 21/11 | 00, 02, 04, 05, 06 + ADR |
+| MT-32b | Médio | 23/11 | 02, 05 |
+| MT-25a | Médio-grande | 26/11 | 00, 01, 02, 04, 06 |
+| MT-42 | Pequeno-médio | 27/11 | 03 |
+| MT-46 | Grande (com o corte) | 29/11 | 03 |
+| MT-47 | Pequeno | 30/11 | 09 |
+| MT-48 | Médio | 02/12 | — (fora do app) |
+
+O dia 03/12 fica de folga. As datas são metas, não compromissos. Se o MT-32a atrasar mais
+de dois dias, o MT-46 fica só com a busca exata em matrizes pequenas, sem a heurística.
+Depois da entrega: MT-41 e a fila de "Depois da v0.2".
+
+### MT-44: Solução "Dadda (Parhami)"
+- **Objetivo:** terceiro método para expressões, no mesmo fluxo de Dadda e Wallace:
+  métricas, níveis em duas etapas, "Usar esta solução", contagem própria no registro de
+  ajudas e no arquivo (opcional, esquema 1) e uma coluna na comparação (AJU-11).
+- **Regra:** os mesmos alvos do Dadda (2, 3, 4, 6, 9…); em cada coluna, FA enquanto ela
+  passa do alvo e tem 3 pontos ou mais, HA só quando restam 2. Iguala os totais da
+  fig. 8.14 (33 FA e 3 HA), mas não cada nível da figura; a spec diz isso.
+- **Critério de aceite:** contagens calculadas à mão antes do código: sete operandos de
+  6 bits → 6 FA, 11 FA, 5 FA e 5 FA + 2 HA por nível, CPA 6 FA + 1 HA, 33 FA e 3 HA, 34,5 $A_{FA}$;
+  cinco operandos de 6 bits → 21 FA e 4 HA, 23 $A_{FA}$ (contra 24 do clássico); circuito
+  verificado (VER-01); e2e de revelar e aplicar.
+
+### MT-45: Custos configuráveis
+- **Objetivo:** painel com área e atraso de cada componente (FA, HA e, com o MT-32, os
+  contadores), em múltiplos de 0,01, com o padrão de hoje e um botão para restaurá-lo. As
+  métricas, a comparação, a solução ótima e o otimizador usam os valores escolhidos; o
+  arquivo do exercício guarda os custos num campo opcional (esquema 1 mantido).
+- **Núcleo:** área e atraso passam de meias unidades para centésimos inteiros; os
+  testes com o padrão continuam dando os mesmos números.
+- **Critério de aceite:** teste do núcleo com custos não padrão calculados à mão (o
+  caminho crítico pode mudar de ramo); arquivo antigo abre com o padrão; e2e de mudar e
+  restaurar.
+
+### MT-32a: Contadores no núcleo
+- **Objetivo:** ADR do modelo de célula composta (vale para o MT-27); contadores de uma
+  coluna m:n (7:3 e 15:4), com saídas em $\lceil \log_2(m+1) 
+ceil$ colunas; custo e
+  atraso padrão tirados da rede interna de FA e HA, configuráveis pelo MT-45;
+  verificação, netlist e VHDL (entidade do contador montada com FA e HA, conferida pelo
+  GHDL e pelo ModelSim).
+- **Critério de aceite:** testes com um 7:3 e um 15:4 isolados (todas as entradas) e numa
+  redução de R1; GHDL verde.
+- **Depende de:** MT-45
+
+### MT-32b: Contadores na interface
+- **Objetivo:** escolher o contador ao formar a célula (pelo mouse e pelo teclado), com a
+  recusa explicada quando faltam pontos; diagrama de blocos, tabela de ligações e tabela de
+  alturas com o contador.
+- **Critério de aceite:** e2e que comprime um exercício usando 7:3; auditoria de
+  acessibilidade.
+- **Depende de:** MT-32a
+
+### MT-25a: Limites até 64 bits de entrada (P1, degrau 1)
+- **Objetivo:** 32 bits por variável, 64 bits de entrada no total e até 1024 pontos, com a
+  saída até 128 bits; matriz com zoom e rolagem; diagrama de blocos e tabelas legíveis
+  com cerca de mil células. A verificação segue por amostra acima de 24 bits e o
+  testbench, acima de 20.
+- **Primeiro passo:** medir, num multiplicador 32 × 32 com a solução de Dadda aplicada,
+  o tempo de cada ação na página. Se 1024 pontos não passarem no GER-06 (100 ms no p95),
+  o limite de pontos fica no maior tamanho que passar, registrado na spec.
+- **Critério de aceite:** testes do núcleo com 32 × 32 (matriz, Dadda, verificação por
+  amostra, VHDL analisado pelo GHDL); e2e que monta o 32 × 32, aplica a solução e navega
+  pela matriz; GER-06 medido.
+- **Depende de:** MT-32b (a tela já com contadores)
+
+### MT-46: Otimizador
+- **Objetivo:** dado o exercício (expressão ou perfil), procurar circuitos com FA, HA e
+  contadores, pelos custos do MT-45, e mostrar na comparação as opções não dominadas
+  (área × atraso) ao lado do circuito do aluno, cada uma aplicável como as outras
+  soluções e contada como ajuda. Estende a busca exata do AJU-12 às expressões; acima de
+  um tamanho, usa uma heurística, que a tela nomeia como tal.
+- **Critério de aceite:** nos perfis de referência, o otimizador acha o mesmo ótimo do
+  AJU-12; em R1, nenhuma opção mostrada é dominada por Dadda, Dadda (Parhami) ou Wallace;
+  a busca roda no *worker* sem travar a página (GER-06).
+- **Depende de:** MT-25a, MT-42
+- **Corte (2026-11-13):** busca exata em matrizes pequenas e uma heurística nas grandes;
+  a comparação de várias heurísticas e o gráfico área × atraso ficam para depois.
+
+### MT-47: Publicar a v0.3.0
+- **Objetivo:** como o MT-43: versões, seção do CHANGELOG, ModelSim à mão (agora com os
+  contadores), *tag* pelo autor, release, imagem e site conferidos.
+- **Depende de:** MT-46
+
+### MT-48: Vídeos automatizados
+- **Objetivo:** um vídeo por funcionalidade e um vídeo completo, gravados pelo Playwright
+  sobre o site da v0.3.0, a partir de um roteiro versionado (cada cena: ações e uma
+  legenda na tela, em português). Um comando gera tudo de novo; o `ffmpeg` converte para
+  MP4. Os vídeos vão como anexos da release, não para o repositório.
+- **Cenas:** expressão e matriz; perfil de alturas; compressão com FA, HA e contadores;
+  ajudas em duas etapas; Dadda, Dadda (Parhami), Wallace e ótimo; custos configuráveis;
+  otimizador e comparação; tabela de alturas; diagrama e tabela de ligações; verificação;
+  VHDL e placa DE2; exportar e abrir; "Como usar"; inglês e tema escuro.
+- **Em aberto:** narração por voz sintetizada fica fora, a menos que o autor peça.
+- **Corte (2026-11-13):** primeiro os vídeos por funcionalidade; o completo, se sobrar
+  tempo.
+- **Critério de aceite:** o comando gera os vídeos do zero numa máquina limpa; cada cena
+  termina numa verificação do Playwright, para o roteiro quebrar se o app mudar.
+- **Depende de:** MT-47
