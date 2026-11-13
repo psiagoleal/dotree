@@ -191,7 +191,11 @@
       esperados. 268 testes Rust, 180 de unidade/componente, 56 e2e.
 - [x] v0.2.0 publicada (#51): workflow Release verde, release com a seção do CHANGELOG,
       imagem `0.2.0` lida sem login no GHCR, site com "versão 0.2.0".
-- [ ] Próximo: MT-41 (dica e próxima jogada que param no perfil de saída).
+- [x] Plano da v0.3 aprovado pelo autor (2026-11-13), entrega em 03/12/2026: MT-44
+      (Dadda Parhami), MT-45 (custos em centésimos), MT-32a/b (contadores 7:3 e 15:4),
+      MT-25a (64 bits de entrada, 1024 pontos), MT-42, MT-46 (otimizador), MT-47
+      (v0.3.0) e MT-48 (vídeos pelo Playwright).
+- [ ] Próximo: MT-44. O MT-41 fica para depois da entrega.
 - Mensagens de commit antigas (a do MT-31a, `90df97e`, e outras) citam material não
   público; ficam no histórico, porque reescrevê-lo pede *force push* no `main` (ADR 0003).
 
