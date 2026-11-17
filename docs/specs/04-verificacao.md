@@ -10,7 +10,8 @@ as entradas, ou para uma amostra declarada quando elas são muitas.
 ## Por que verificar se o app já aplica as regras
 
 Todo circuito completo montado pela interface é correto **por construção**: FA e HA
-preservam o valor ponderado ($x + y + z = s + 2k$), o vai-um descartado vale sempre 0
+preservam o valor ponderado ($x + y + z = s + 2k$), assim como os contadores (a soma das
+entradas é a contagem $s + 2k + 4k_2 + 8k_3$), o vai-um descartado vale sempre 0
 (CMP-09), e o app posiciona soma e vai-um sozinho. A verificação existe por três motivos:
 
 1. provar que o **núcleo** implementa essas regras, como teste de propriedade;
@@ -39,7 +40,9 @@ mascarada para a largura total. A mesma codificação vale para o testbench VHDL
 - **VER-01** — QUANDO o circuito estiver completo e o usuário pedir verificação, o sistema
   DEVE simular o circuito célula a célula para os vetores da tabela acima, comparar com o
   valor da expressão e informar quantos casos conferiu e se foi exaustivo ou por amostra.
-  *Prova:* R2 → 16 384 casos, exaustivo, 0 erros.
+  Um contador é simulado pela contagem das entradas em 1, não pela sua rede de FA, que é
+  conferida à parte pelo testbench VHDL (VHD-11).
+  *Prova:* R2 → 16 384 casos, exaustivo, 0 erros; contadores em CMP-20.
 - **VER-02** — O sistema DEVE gerar a amostra exatamente como descrito acima.
   *Prova:* teste do núcleo com os 8 primeiros vetores fixados.
 - **VER-03** — SE algum caso falhar, ENTÃO o sistema DEVE mostrar o primeiro contraexemplo:

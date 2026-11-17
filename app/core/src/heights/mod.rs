@@ -25,33 +25,53 @@ pub struct HeightRow {
     pub heights: Vec<u32>,
     pub fa: usize,
     pub ha: usize,
+    /// Counters 7:3 and 15:4 (ADR 0005).
+    pub c73: usize,
+    pub c154: usize,
+}
+
+#[derive(Default)]
+struct Counts {
+    fa: usize,
+    ha: usize,
+    c73: usize,
+    c154: usize,
+}
+
+fn count(kinds: impl Iterator<Item = CellKind>) -> Counts {
+    let mut n = Counts::default();
+    for k in kinds {
+        match k {
+            CellKind::Fa => n.fa += 1,
+            CellKind::Ha => n.ha += 1,
+            CellKind::C73 => n.c73 += 1,
+            CellKind::C154 => n.c154 += 1,
+        }
+    }
+    n
 }
 
 /// Rows of the concluded levels, then the current level or, once complete, the result.
 pub fn height_table(r: &Reduction) -> Vec<HeightRow> {
     let width = r.heights().len();
-    let count = |kinds: &mut dyn Iterator<Item = CellKind>| {
-        kinds.fold((0, 0), |(fa, ha), k| match k {
-            CellKind::Fa => (fa + 1, ha),
-            CellKind::Ha => (fa, ha + 1),
-        })
-    };
     let mut rows: Vec<HeightRow> = r
         .levels()
         .iter()
         .enumerate()
         .map(|(level, l)| {
-            let (fa, ha) = count(&mut l.cells.iter().map(|c| c.kind));
+            let n = count(l.cells.iter().map(|c| c.kind));
             HeightRow {
                 level,
                 kind: if l.cpa { RowKind::Cpa } else { RowKind::Level },
                 heights: heights(&l.points, width),
-                fa,
-                ha,
+                fa: n.fa,
+                ha: n.ha,
+                c73: n.c73,
+                c154: n.c154,
             }
         })
         .collect();
-    let (fa, ha) = count(&mut r.pending().iter().map(|c| c.kind));
+    let n = count(r.pending().iter().map(|c| c.kind));
     rows.push(HeightRow {
         level: r.level(),
         kind: if r.is_complete() {
@@ -60,8 +80,10 @@ pub fn height_table(r: &Reduction) -> Vec<HeightRow> {
             RowKind::Current
         },
         heights: r.heights(),
-        fa,
-        ha,
+        fa: n.fa,
+        ha: n.ha,
+        c73: n.c73,
+        c154: n.c154,
     });
     rows
 }

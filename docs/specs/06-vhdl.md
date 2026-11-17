@@ -15,6 +15,8 @@ sintetizador (Quartus) o circuito montado à mão com o que a ferramenta escolhe
 |---|---|
 | `full_adder.vhd` | Entidade `full_adder` (x, y, z → s, k) |
 | `half_adder.vhd` | Entidade `half_adder` (x, y → s, k), só quando o circuito tem HA |
+| `counter_7_3.vhd` | Entidade `counter_7_3` (x0…x6 → y0, y1, y2) com 4 `full_adder`, quando o circuito tem 7:3 ou 15:4 |
+| `counter_15_4.vhd` | Entidade `counter_15_4` (x0…x14 → y0…y3) com 2 `counter_7_3` e 3 `full_adder`, quando o circuito tem 15:4 |
 | `<nome>.vhd` | Topo estrutural: portas AND, uma instância por célula, com os identificadores de `05-diagrama.md` |
 | `<nome>_comportamental.vhd` | Entidade `<nome>_comportamental`: as mesmas portas do topo e a expressão em `numeric_std`, sem células |
 | `tb_<nome>.vhd` | Testbench que percorre os vetores de `04-verificacao.md` e compara as duas versões com a expressão |
@@ -30,7 +32,8 @@ válido.
   componentes do VHDL-93 exige). Os arquivos DEVEM ser ASCII puro: o português dos
   comentários vai sem acento.
   *Prova:* em CI (job `vhdl`), o GHDL 6 em `--std=93` analisa, elabora e simula R2, R3, a
-  solução Dadda de R4 e um caso de 21 bits; teste do núcleo exige ASCII e o `use work.all`.
+  solução Dadda de R4, um caso de 21 bits, as variáveis `I`, `J`, `N`, `V` e `W` e os
+  contadores de VHD-11; teste do núcleo exige ASCII e o `use work.all`.
 - **VHD-02** — O topo DEVE usar os mesmos identificadores de sinal e de instância do
   diagrama e da tabela de ligações; um bit de resultado constante é atribuído com
   `R(j) <= '0'`, e o ponto fixo da constante (EXP-15) com `one <= '1'`. A saída se chama `R`; uma variável de entrada chamada $R$ vira a porta
@@ -81,6 +84,14 @@ válido.
   $3 \cdot 10^9$ e a variável `R_IN`); em CI, o GHDL simula R2, R3, R4, a amostra de 21
   bits e o coeficiente grande nas duas versões.
 
+- **VHD-11** — QUANDO o circuito tiver contadores (CMP-20), o sistema DEVE gerar a
+  entidade de cada tipo usado, montada com `full_adder` pela rede da ADR 0005, e instanciar
+  cada contador como `C73_<n>` ou `C154_<n>`, com as saídas descartadas em `open`.
+  *Prova:* testes do núcleo (arquivos e ordem, instância, `open`, nomes reservados, mesmos
+  identificadores do diagrama, cabeçalho com custos); em CI, o GHDL simula o 7:3 isolado
+  (128 casos), o 15:4 isolado (32 768) e R1 com um 7:3 (16 384), e acusa o 7:3 estragado
+  de propósito (as saídas do último FA trocadas).
+
 ## Compatibilidade com ferramentas
 
 O alvo declarado é VHDL-93 sem construções de VHDL-2008, para que o código também rode no
@@ -108,7 +119,12 @@ Duas lições do primeiro contato com simuladores reais, que viraram critério:
   `end entity;` e recusa `end entity <nome>;`; em 2026-11-05 (MT-19), a análise de portas
   do emulador leu as 8 portas do R2 gerado e reuniu os 3 arquivos do projeto;
 - o GHDL segue à risca a regra de ligação padrão do VHDL-93 e deixava todas as células sem
-  ligação; o ModelSim é permissivo e escondia o problema. O `use work.all` resolve nos dois.
+  ligação; o ModelSim é permissivo e escondia o problema. O `use work.all` resolve nos dois;
+- o VHDL não distingue maiúsculas: o laço `for n` e a variável `v` do testbench escondiam
+  as portas de variáveis `N` e `V`, e a constante `W` da versão comportamental escondia a
+  porta `W` (achado com o 15:4 do MT-32a, que usa as variáveis `A` a `O`). Os nomes locais
+  agora têm mais de uma letra, e a constante se chama `R_WIDTH`. As variáveis `S` e `K`
+  ainda colidem com as saídas `s<n>` e `k<n>` das células (MT-49).
 
 ## Fora de escopo
 

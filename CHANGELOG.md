@@ -24,6 +24,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   custos. Trocar não conta como ajuda nem entra no desfazer; os custos vão no arquivo
   (`costs`, opcional e só escrito quando difere do padrão; esquema 1 mantido) e passam
   para a próxima matriz (GER-12, MT-45).
+- **Contadores 7:3 e 15:4 no núcleo** (ADR 0005): 7 ou 15 pontos de uma coluna viram um
+  contador que põe a contagem em 3 ou 4 colunas (`s<n>`, `k<n>`, `k<n>_2`, `k<n>_3`).
+  Custo padrão tirado da rede de FA do VHDL (7:3: 4 $A_{FA}$ e 3 $T_{FA}$; 15:4: 11 e 5),
+  ou próprio (`costs.c73Area` etc., opcionais). Verificação, netlist, tabela de alturas,
+  arquivo (`c73`, `c154`) e VHDL (`counter_7_3.vhd`, `counter_15_4.vhd`, conferidos no
+  GHDL). A interface só forma contadores no MT-32b; até lá, 7 ou 15 pontos continuam
+  recusados (CMP-20, VHD-11, MT-32a).
+
+### Corrigido
+- VHDL de expressões com as variáveis `N`, `V`, `I`, `J` ou `W`: o VHDL não distingue
+  maiúsculas, e o laço, a variável e a função do testbench e a constante `W` da versão
+  comportamental escondiam essas portas, então o testbench (ou a versão comportamental)
+  não compilava. Os nomes locais agora têm mais de uma letra, e a constante se chama
+  `R_WIDTH`. As variáveis `S` e `K` ainda colidem com as saídas das células (MT-49).
 
 ### Alterado
 - O núcleo mede tempos e áreas em centésimos de $T_{FA}$ e $A_{FA}$, e não mais em meias

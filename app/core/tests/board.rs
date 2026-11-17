@@ -319,8 +319,8 @@ fn pla06_board_testbench() {
         assert!(tb.contains(
             "dut : entity work.dotree_circuito_de2 port map (SW => SW, LEDR => LEDR, HEX0 => HEX0"
         ));
-        assert!(tb.contains("for n in 0 to 16383 loop"));
-        assert!(tb.contains("SW(13 downto 0) <= v;"));
+        assert!(tb.contains("for idx in 0 to 16383 loop"));
+        assert!(tb.contains("SW(13 downto 0) <= vec;"));
         assert!(tb.contains(done), "{lang:?}");
     }
 }

@@ -547,6 +547,7 @@ fn odd_costs() -> Costs {
         fa_delay: 40,
         ha_area: 70,
         ha_delay: 50,
+        ..Costs::default()
     }
 }
 

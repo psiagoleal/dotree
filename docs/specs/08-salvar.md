@@ -32,7 +32,7 @@ arquivo.
   `expression`, `widths`, `levels` (cada um com `cpa` e `cells`), `pending` (células do
   nível atual, na ordem em que foram formadas), `reveals.width` (resposta dada, ou `null`
   para quem desistiu, e se a conta foi aberta) e `help` (o registro de ajudas, AJU-07).
-  Cada célula guarda `kind`, `column` e `inputs`. As entradas são **posições na ordem
+  Cada célula guarda `kind` (`fa`, `ha` e, no núcleo, `c73` e `c154`), `column` e `inputs`. As entradas são **posições na ordem
   canônica dos pontos do nível**, e não ids internos, porque voltar de nível gera ids
   novos. O nível do CPA não lista células: elas decorrem dos pontos do nível.
 - **Revelações.** O limite inferior e a solução revelados (etapa 1 ou 2) decorrem do

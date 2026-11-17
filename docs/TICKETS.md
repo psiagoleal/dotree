@@ -9,7 +9,6 @@
 
 ## Em aberto: v0.3 (entrega em 03/12/2026; decidido em 2026-11-13)
 
-- [ ] [MT-32a](plano-pos-v0.1.md#mt-32a-contadores-no-núcleo) — Contadores 7:3 e 15:4 no núcleo, com ADR, verificação e VHDL.
 - [ ] [MT-32b](plano-pos-v0.1.md#mt-32b-contadores-na-interface) — Contadores na interface, no diagrama e nas tabelas.
 - [ ] [MT-25a](plano-pos-v0.1.md#mt-25a-limites-até-64-bits-de-entrada-p1-degrau-1) — Limites: 32 bits por variável, 64 de entrada, até 1024 pontos; matriz com zoom e rolagem.
 - [ ] [MT-42](plano-pos-v0.1.md#mt-42-busca-do-ótimo-fora-da-linha-principal) — Busca do ótimo num *worker*, sem travar a página.
@@ -19,6 +18,7 @@
 
 ## Depois da v0.2 (ordem por dependências)
 
+- [ ] [MT-49](plano-pos-v0.1.md#mt-49-nomes-das-variáveis-s-e-k-no-vhdl) — Variáveis `S` e `K` colidem com `s<n>` e `k<n>` no VHDL.
 - [ ] [MT-41](plano-pos-v0.1.md#mt-41-dica-e-próxima-jogada-que-respeitam-o-perfil-de-saída) — Dica e próxima jogada que param no perfil de saída.
 - [ ] [MT-35](plano-pos-v0.1.md#mt-35-matriz-módulo-2n-1-e-2n1-p16) — Matriz módulo $2^n-1$ e $2^n+1$.
 - [ ] [MT-32](plano-pos-v0.1.md#mt-32-célula-composta-p13) — Célula composta de várias colunas: compressor 4:2 e AMM 2×2 (os contadores de uma coluna estão na v0.3).
@@ -35,6 +35,7 @@
 
 ## Concluídos
 
+- [x] [MT-32a](plano-pos-v0.1.md#mt-32a-contadores-no-núcleo) — Contadores 7:3 e 15:4 no núcleo, com ADR 0005, verificação e VHDL conferido no GHDL.
 - [x] [MT-45](plano-pos-v0.1.md#mt-45-custos-configuráveis) — Área e atraso configuráveis por componente, em múltiplos de 0,01.
 - [x] [MT-44](plano-pos-v0.1.md#mt-44-solução-dadda-parhami) — Terceiro método para expressões: "Dadda (Parhami)", a variante da fig. 8.14.
 - [x] [MT-43](plano-pos-v0.1.md#mt-43-publicar-a-v020) — v0.2.0 publicada: release, imagem pública no GHCR e site no ar.

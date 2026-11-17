@@ -308,9 +308,9 @@ fn vhd04_exhaustive_testbench_up_to_20_bits() {
     let (m, n) = r2();
     let fs = files(&m, &n, Language::PtBr);
     let tb = file(&fs, "tb_dotree_circuito.vhd");
-    assert!(tb.contains("for n in 0 to 16383 loop"));
-    assert!(tb.contains("A <= v(2 downto 0);"));
-    assert!(tb.contains("G <= v(13 downto 13);"));
+    assert!(tb.contains("for idx in 0 to 16383 loop"));
+    assert!(tb.contains("A <= vec(2 downto 0);"));
+    assert!(tb.contains("G <= vec(13 downto 13);"));
 }
 
 #[test]
@@ -442,12 +442,12 @@ fn vhd10_behavioral_is_the_expression_in_numeric_std() {
     for needle in [
         "use ieee.numeric_std.all;",
         "architecture comportamental of dotree_circuito_comportamental is",
-        "constant W : natural := 7;",
-        "resize(resize(unsigned(A), W) * resize(unsigned(B), W), W)",
-        "+ resize(resize(unsigned(C), W) * resize(unsigned(D), W), W)",
-        "+ resize(to_unsigned(3, W) * resize(unsigned(E), W), W)",
-        "+ resize(to_unsigned(3, W) * resize(unsigned(F), W), W)",
-        "+ resize(unsigned(G), W)",
+        "constant R_WIDTH : natural := 7;",
+        "resize(resize(unsigned(A), R_WIDTH) * resize(unsigned(B), R_WIDTH), R_WIDTH)",
+        "+ resize(resize(unsigned(C), R_WIDTH) * resize(unsigned(D), R_WIDTH), R_WIDTH)",
+        "+ resize(to_unsigned(3, R_WIDTH) * resize(unsigned(E), R_WIDTH), R_WIDTH)",
+        "+ resize(to_unsigned(3, R_WIDTH) * resize(unsigned(F), R_WIDTH), R_WIDTH)",
+        "+ resize(unsigned(G), R_WIDTH)",
     ] {
         assert!(b.contains(needle), "missing {needle:?}");
     }
@@ -467,7 +467,9 @@ fn vhd10_coefficients_beyond_integer_are_bit_strings() {
     let w = n.output_width as usize;
     let bits = format!("unsigned'(\"{:0w$b}\")", 3_000_000_000u64);
     assert!(
-        b.contains(&format!("resize({bits} * resize(unsigned(A), W), W)")),
+        b.contains(&format!(
+            "resize({bits} * resize(unsigned(A), R_WIDTH), R_WIDTH)"
+        )),
         "{b}"
     );
 }
@@ -478,7 +480,7 @@ fn vhd10_variable_named_r_keeps_its_port_name() {
     r.close_with_cpa().unwrap();
     let n = Netlist::from_reduction(&m, &r).unwrap();
     let fs = files(&m, &n, Language::PtBr);
-    assert!(behavioral(&fs).contains("resize(unsigned(R_IN), W)"));
+    assert!(behavioral(&fs).contains("resize(unsigned(R_IN), R_WIDTH)"));
 }
 
 #[test]
@@ -518,7 +520,48 @@ fn exp15_the_fixed_dot_is_one_in_vhdl() {
         "the header keeps the constant"
     );
     let b = file(&fs, "dotree_circuito_comportamental.vhd");
-    assert!(b.contains("+ to_unsigned(3, W)\n"), "{b}");
+    assert!(b.contains("+ to_unsigned(3, R_WIDTH)\n"), "{b}");
     let tb = file(&fs, "tb_dotree_circuito.vhd");
     assert!(tb.contains("term := \"0011\";\n            expected := expected + term;"));
+}
+
+#[test]
+fn vhd04_testbench_locals_do_not_hide_the_ports() {
+    // VHDL ignores case: a loop `for n` or a `variable v` hid the ports N and V, and the
+    // testbench of `… + N` did not compile (found by GHDL with the 15:4 of MT-32a).
+    let (m, r) = build(
+        "I + J + N + S + V + W",
+        &[('I', 1), ('J', 1), ('N', 1), ('S', 1), ('V', 1), ('W', 1)],
+    );
+    let m2 = m.clone();
+    let mut r = r;
+    let ids: Vec<usize> = r.points().iter().map(|p| p.id).collect();
+    r.form_cell(&ids[..3]).unwrap();
+    r.form_cell(&ids[3..6]).unwrap();
+    r.conclude_level().unwrap();
+    while !r.is_complete() {
+        r.close_with_cpa().unwrap();
+    }
+    let n = Netlist::from_reduction(&m2, &r).unwrap();
+    let ports: BTreeSet<String> = ["i", "j", "n", "s", "v", "w", "r"].map(String::from).into();
+    for f in files(&m, &n, Language::PtBr)
+        .iter()
+        .filter(|f| f.name.starts_with("tb_") || f.name.contains("comportamental"))
+    {
+        for line in code_only(&f.contents).lines().map(str::trim) {
+            let local = line
+                .strip_prefix("variable ")
+                .or_else(|| line.strip_prefix("constant "))
+                .or_else(|| line.strip_prefix("for "))
+                .or_else(|| line.strip_prefix("function to_bin("))
+                .and_then(|rest| rest.split([' ', ':']).next());
+            if let Some(name) = local {
+                assert!(
+                    !ports.contains(&name.to_ascii_lowercase()),
+                    "{}: {line}",
+                    f.name
+                );
+            }
+        }
+    }
 }

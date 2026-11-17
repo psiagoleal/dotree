@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-17
-- **Commit:** `a6eaf5f` (MT-44, #58); última *tag* `v0.2.0`.
+- **Commit:** `76ae246` (MT-45, #59); última *tag* `v0.2.0`.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -196,13 +196,20 @@
       MT-25a (64 bits de entrada, 1024 pontos), MT-42, MT-46 (otimizador), MT-47
       (v0.3.0) e MT-48 (vídeos pelo Playwright).
 - [x] MT-44 mesclado (#58): solução Dadda (Parhami) ao lado de Dadda e Wallace (AJU-13).
-- [x] MT-45 preparado: custos de FA e HA configuráveis em múltiplos de 0,01 (GER-12),
+- [x] MT-45 mesclado (#59): custos de FA e HA configuráveis em múltiplos de 0,01 (GER-12),
       núcleo em centésimos, busca ótima e arquivo com os custos, painel "Custos das
       células". 297 testes Rust, 192 de unidade/componente, 59 e2e; 12 mutações: 9 pegas
       de primeira, 2 sobreviventes que viraram testes (vai-um do CPA por último, desempate
       da busca pelo atraso do FA) e 1 que apontou uma dependência redundante, removida.
-- [ ] Próximo: MT-32a (contadores 7:3 e 15:4 no núcleo, com ADR). O MT-41 fica para depois
-      da entrega.
+- [x] MT-32a preparado: contadores 7:3 e 15:4 no núcleo (ADR 0005, CMP-20, VHD-11),
+      custo padrão da rede de FA, verificação pela contagem, arquivo e VHDL. O GHDL deu os
+      17 casos com o veredito esperado (7:3 com 128, 15:4 com 32 768 e R1 com 7:3 com
+      16 384 casos corretos; 7:3 estragado acusado). Achou também nomes do testbench que
+      escondiam as portas `N`, `V`, `I`, `J` e `W` (corrigido) e a colisão de `S` e `K`
+      com `s<n>`/`k<n>` (MT-49, aberto). 319 testes Rust; web sem mudança (192 e 59 e2e);
+      16 mutações pegas (uma depois de um teste novo da tabela de alturas). A interface
+      recusa contadores até o MT-32b.
+- [ ] Próximo: MT-32b (contadores na interface). O MT-41 fica para depois da entrega.
 - Mensagens de commit antigas (a do MT-31a, `90df97e`, e outras) citam material não
   público; ficam no histórico, porque reescrevê-lo pede *force push* no `main` (ADR 0003).
 
@@ -211,6 +218,8 @@
 - A trava de worktree para sessões em segundo plano foi desligada neste repositório
   (`.claude/settings.json`, `worktree.bgIsolation = none`) a pedido do autor, porque o
   `AGENTS.md` proíbe o agente de rodar `git worktree`.
+- Mutação à mão: ao devolver o arquivo original, toque nele (`touch`) ou o cargo usa o
+  binário mutado, porque a cópia de volta tem data mais antiga que a última build.
 - Não use `pkill -f` com um padrão que apareça na própria linha de comando: mata o shell
   da ferramenta (exit 144). Guarde o PID do servidor e use `kill`.
 - Abaixo de 768 px o exercício é só leitura (GER-10): testes de componente precisam de
@@ -245,6 +254,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-17 | `76ae246` | custos configuráveis (#59); contadores no núcleo | MT-45, MT-32a |
 | 2026-11-17 | `a6eaf5f` | Dadda (Parhami) (#58); custos configuráveis | MT-44, MT-45 |
 | 2026-11-13 | `dde1251` | plano da v0.3 (#55); Dadda (Parhami) | MT-44 |
 | 2026-11-12 | `4dd6493` | v0.2.0 publicada (#51) | MT-43 |

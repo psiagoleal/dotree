@@ -151,6 +151,7 @@ fn simulate_scalar(n: &Netlist, packed: u64) -> u128 {
         Wire::Input(i) => input(i),
         Wire::Sum(c) => sum[c],
         Wire::Carry(c) => carry[c],
+        Wire::Upper(..) => panic!("FA and HA only"),
     };
     for c in &n.cells {
         let total: u64 = c.inputs.iter().map(|&w| get(w, &sum, &carry)).sum();

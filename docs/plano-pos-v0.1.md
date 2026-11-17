@@ -520,14 +520,19 @@ Depois da entrega: MT-41 e a fila de "Depois da v0.2".
 
 ### MT-32a: Contadores no núcleo
 - **Objetivo:** ADR do modelo de célula composta (vale para o MT-27); contadores de uma
-  coluna m:n (7:3 e 15:4), com saídas em $\lceil \log_2(m+1) 
-ceil$ colunas; custo e
+  coluna m:n (7:3 e 15:4), com saídas em $\lceil \log_2(m+1) \rceil$ colunas; custo e
   atraso padrão tirados da rede interna de FA e HA, configuráveis pelo MT-45;
   verificação, netlist e VHDL (entidade do contador montada com FA e HA, conferida pelo
   GHDL e pelo ModelSim).
 - **Critério de aceite:** testes com um 7:3 e um 15:4 isolados (todas as entradas) e numa
   redução de R1; GHDL verde.
 - **Depende de:** MT-45
+- **Feito (2026-11-17):** ADR 0005; CMP-20 na spec 02 e VHD-11 na spec 06, notas nas
+  specs 00, 04, 05 e 08. Custo padrão da rede de FA, que segue o FA em vigor (o 15:4 é
+  feito de dois 7:3 e 3 FA, não de FA e HA); custos próprios opcionais no núcleo. O módulo
+  WebAssembly recusa contadores até o MT-32b. O GHDL achou nomes do testbench que
+  escondiam as portas `N`, `V`, `I`, `J` e `W` (corrigido) e a colisão de `S` e `K` com
+  `s<n>` e `k<n>` (MT-49). O ModelSim fica para o MT-47.
 
 ### MT-32b: Contadores na interface
 - **Objetivo:** escolher o contador ao formar a célula (pelo mouse e pelo teclado), com a
@@ -535,6 +540,11 @@ ceil$ colunas; custo e
   alturas com o contador.
 - **Critério de aceite:** e2e que comprime um exercício usando 7:3; auditoria de
   acessibilidade.
+- **Herdado do MT-32a:** tirar as duas travas do módulo WebAssembly (7 ou 15 pontos e
+  arquivo com contador); campos de custo dos contadores no painel (o tipo `Costs` da web
+  ganha os quatro opcionais); a tabela de ligações tem colunas fixas x, y, z, soma e
+  vai-um, e precisa mostrar 7 ou 15 entradas e as saídas `k<n>_2` e `k<n>_3`; a origem
+  `upper` dos pontos no snapshot.
 - **Depende de:** MT-32a
 
 ### MT-25a: Limites até 64 bits de entrada (P1, degrau 1)
@@ -583,3 +593,12 @@ ceil$ colunas; custo e
 - **Critério de aceite:** o comando gera os vídeos do zero numa máquina limpa; cada cena
   termina numa verificação do Playwright, para o roteiro quebrar se o app mudar.
 - **Depende de:** MT-47
+
+### MT-49: Nomes das variáveis S e K no VHDL
+- **Problema:** o bit $j$ de uma variável `S` se chama `s<j>`, o mesmo nome da soma da
+  célula $j$ (e `K` colide com o vai-um `k<j>`). Com $S$ de 2 bits e uma célula, o topo
+  declara `s1` duas vezes e o GHDL recusa. Achado no MT-32a.
+- **Objetivo:** dar aos bits de entrada de `S` e `K` (ou às saídas das células) nomes que
+  não colidem, nos mesmos identificadores do diagrama, da tabela e do VHDL (spec 05).
+- **Critério de aceite:** caso do GHDL com `S` e `K` de 2 bits verde; teste do núcleo
+  de que nenhum identificador de entrada coincide com o de uma saída de célula.

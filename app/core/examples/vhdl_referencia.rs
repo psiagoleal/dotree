@@ -251,5 +251,85 @@ fn main() {
     let files = generate(&mw, &dadda(&mw), DEFAULT_NAME, Language::En).expect("generate");
     write_files(dir, "placa_larga", &files, (&tb, "ok", 1), &mut list);
 
+    // Variables named like the testbench locals of before (`n`, `v`, `i`, `j`) and like the
+    // behavioral constant (`W`): VHDL ignores case, so each name must stay distinct. (`S` and
+    // `K` still clash with the cell outputs `s<n>` and `k<n>`: MT-49.)
+    let vars: Vec<(char, u32)> = ['I', 'J', 'N', 'V', 'W'].map(|v| (v, 2)).to_vec();
+    let mn = matrix("I*J + N + V*W", &vars);
+    write(
+        dir,
+        "nomes",
+        &mn,
+        &dadda(&mn),
+        Language::PtBr,
+        "ok",
+        &mut list,
+    );
+
+    // VHD-11 (MT-32a): the counters on every input, alone and in a reduction of R1.
+    for (case, n, lang) in [("c73", 7, Language::PtBr), ("c154", 15, Language::En)] {
+        let vars: Vec<(char, u32)> = ('A'..='O').take(n).map(|v| (v, 1)).collect();
+        let src: Vec<String> = vars.iter().map(|(v, _)| v.to_string()).collect();
+        let mc = matrix(&src.join("+"), &vars);
+        let mut r = Reduction::new(&mc);
+        let ids: Vec<usize> = r.points().iter().map(|p| p.id).collect();
+        r.form_cell(&ids).expect("a counter");
+        r.conclude_level().expect("level with cells");
+        let nc = Netlist::from_reduction(&mc, &r).expect("complete");
+        write(dir, case, &mc, &nc, lang, "ok", &mut list);
+    }
+    let (m1, n1) = r1_with_7_3();
+    write(dir, "r1_c73", &m1, &n1, Language::PtBr, "ok", &mut list);
+
+    // The 7:3 with its last FA's outputs swapped: the testbench must catch it.
+    let mut files = generate(&m1, &n1, DEFAULT_NAME, Language::PtBr).expect("generate");
+    let f = files
+        .iter_mut()
+        .find(|f| f.name == "counter_7_3.vhd")
+        .expect("counter file");
+    let last = "s => y1, k => y2);";
+    assert!(f.contents.contains(last), "an FA to break");
+    f.contents = f.contents.replace(last, "s => y2, k => y1);");
+    let tb = format!("tb_{DEFAULT_NAME}");
+    write_files(dir, "r1_c73_quebrado", &files, (&tb, "falha", 2), &mut list);
+
     fs::write(dir.join("casos.txt"), list).expect("write list");
+}
+
+/// R1 with a 7:3 over the seven points of column 1, then FA only, every 3 points of each
+/// column per level, and the CPA.
+fn r1_with_7_3() -> (DotMatrix, Netlist) {
+    let m = matrix(
+        "A*B + C*D + 3(E+F) + G",
+        &[
+            ('A', 3),
+            ('B', 3),
+            ('C', 2),
+            ('D', 2),
+            ('E', 2),
+            ('F', 1),
+            ('G', 1),
+        ],
+    );
+    let mut r = Reduction::new(&m);
+    let col = |r: &Reduction, c: u32| -> Vec<usize> {
+        r.points()
+            .iter()
+            .filter(|p| p.column == c)
+            .map(|p| p.id)
+            .collect()
+    };
+    r.form_cell(&col(&r, 1)).expect("a 7:3");
+    r.conclude_level().expect("level with cells");
+    while r.cpa_status().is_err() {
+        for c in 0..m.output_width {
+            for g in col(&r, c).chunks_exact(3) {
+                r.form_cell(g).expect("an FA");
+            }
+        }
+        r.conclude_level().expect("level with cells");
+    }
+    r.close_with_cpa().expect("CPA");
+    let n = Netlist::from_reduction(&m, &r).expect("complete");
+    (m, n)
 }

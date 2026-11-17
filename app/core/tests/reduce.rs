@@ -401,6 +401,7 @@ fn origins_point_to_the_right_cells() {
             Origin::Input { dot } => assert!(dot < 20),
             Origin::Sum { cell } => assert_eq!(r.signal(p), format!("s{cell}")),
             Origin::Carry { cell } => assert_eq!(r.signal(p), format!("k{cell}")),
+            Origin::Upper { .. } => panic!("R2 has no counter"),
         }
     }
 }

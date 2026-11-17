@@ -21,6 +21,18 @@ pub enum Wire {
     Sum(usize),
     /// Carry output of cell `n` (`k<n>`).
     Carry(usize),
+    /// Output of weight `2^bit` of counter `n` (`k<n>_<bit>`, ADR 0005).
+    Upper(usize, u8),
+}
+
+impl Wire {
+    /// The cell that drives this wire, `None` for an input.
+    pub fn cell(self) -> Option<usize> {
+        match self {
+            Wire::Input(_) => None,
+            Wire::Sum(n) | Wire::Carry(n) | Wire::Upper(n, _) => Some(n),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -36,6 +48,21 @@ pub struct NetCell {
     pub inputs: Vec<Wire>,
     /// False when the carry fell at or beyond `W` and was dropped (CMP-09).
     pub has_carry: bool,
+    /// Outputs of weight 2 and 3 of a counter that fall below `W` (ADR 0005).
+    pub upper: u8,
+}
+
+impl NetCell {
+    /// Output wires, bit 0 first: sum, carry and a counter's bits 2 and 3, without the
+    /// dropped ones.
+    pub fn outputs(&self) -> Vec<Wire> {
+        let mut out = vec![Wire::Sum(self.number)];
+        if self.has_carry {
+            out.push(Wire::Carry(self.number));
+        }
+        out.extend((0..self.upper).map(|i| Wire::Upper(self.number, i + 2)));
+        out
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -90,6 +117,7 @@ impl Netlist {
                 Origin::Input { dot } => Wire::Input(matrix.dots[dot].signal),
                 Origin::Sum { cell } => Wire::Sum(cell),
                 Origin::Carry { cell } => Wire::Carry(cell),
+                Origin::Upper { cell, bit } => Wire::Upper(cell, bit),
             }
         };
         let mut cells: Vec<NetCell> = reduction
@@ -104,6 +132,7 @@ impl Netlist {
                 column: c.column,
                 inputs: c.inputs.iter().map(|&id| wire_of(id)).collect(),
                 has_carry: c.carry.is_some(),
+                upper: c.upper.len() as u8,
             })
             .collect();
         cells.sort_by_key(|c| c.number);
@@ -122,12 +151,13 @@ impl Netlist {
         }
     }
 
-    /// Identifier of a wire: `a1_b0`, `e0`, `s3`, `k3`.
+    /// Identifier of a wire: `a1_b0`, `e0`, `s3`, `k3`, `k3_2`.
     pub fn ident(&self, wire: Wire) -> String {
         match wire {
             Wire::Input(i) => self.signals[i].ident(),
             Wire::Sum(n) => format!("s{n}"),
             Wire::Carry(n) => format!("k{n}"),
+            Wire::Upper(n, bit) => format!("k{n}_{bit}"),
         }
     }
 
@@ -166,10 +196,7 @@ impl Netlist {
             let latest = c
                 .inputs
                 .iter()
-                .map(|&w| match w {
-                    Wire::Input(_) => 0,
-                    Wire::Sum(p) | Wire::Carry(p) => ready[p].0,
-                })
+                .map(|&w| w.cell().map_or(0, |p| ready[p].0))
                 .max()
                 .unwrap_or(0);
             ready[c.number] = Time(latest + self.costs.delay(c.kind).0);
@@ -182,15 +209,19 @@ impl Netlist {
         self.ready().into_iter().max().unwrap_or_default()
     }
 
-    /// Area of the FA and HA in hundredths of `A_FA`.
+    /// Area of the cells in hundredths of `A_FA`.
     pub fn area(&self) -> u32 {
         self.cells.iter().map(|c| self.costs.area(c.kind)).sum()
     }
 
+    /// Number of cells of `kind`.
+    pub fn count(&self, kind: CellKind) -> usize {
+        self.cells.iter().filter(|c| c.kind == kind).count()
+    }
+
     /// Number of FA and HA cells.
     pub fn cell_counts(&self) -> (usize, usize) {
-        let fa = self.cells.iter().filter(|c| c.kind == CellKind::Fa).count();
-        (fa, self.cells.len() - fa)
+        (self.count(CellKind::Fa), self.count(CellKind::Ha))
     }
 
     /// Number of AND gates: input signals that are partial products.
