@@ -51,6 +51,9 @@ arquivo.
   `help.wallaceApplied` contam as etapas e as aplicações da solução de Wallace, à parte das
   de Dadda. São opcionais (valem 0 em arquivos da v0.1), então o esquema continua 1. Etapa
   2 sem a 1, ou aplicação sem a etapa 2 de Wallace, é revelação inconsistente.
+- **Solução Dadda (Parhami) (AJU-13, MT-44).** `help.parhami`, `help.parhamiPath` e
+  `help.parhamiApplied`, com as mesmas regras das de Wallace; opcionais (valem 0 em
+  arquivos da v0.2), então o esquema continua 1.
 - **Perfil de alturas (EXP-16, AJU-12, MT-31).** Um exercício aberto com um perfil guarda
   o texto do perfil em `expression` e nenhuma largura. `help.optimal`,
   `help.optimalPath`, `help.optimalApplied` e `help.block` contam as etapas e as

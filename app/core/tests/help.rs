@@ -10,7 +10,7 @@ use dotree_core::expr::analyze;
 use dotree_core::expr::{Analysis, parse};
 use dotree_core::help::{
     HelpLog, HelpStep, Hint, LowerBound, Method, NextMove, dadda_solution, dadda_target, hints,
-    lower_bound, next_move, solution, wallace_solution, wallace_target,
+    lower_bound, next_move, parhami_solution, solution, wallace_solution, wallace_target,
 };
 use dotree_core::matrix::DotMatrix;
 use dotree_core::netlist::Netlist;
@@ -517,7 +517,7 @@ fn aju10_r1_wallace_matches_the_hand_computation() {
 }
 
 #[test]
-fn aju10_seven_operands_as_in_the_course_reference() {
+fn aju10_seven_operands_as_in_fig_8_10() {
     let m = seven_operands();
     // Fig. 8.10: 12 FA, 6 FA, 6 FA, 4 FA + 1 HA, then a 7-bit adder (2^1 to 2^7).
     let r = wallace_solution(&m);
@@ -618,6 +618,112 @@ proptest! {
         let r = wallace_solution(&m);
         prop_assert!(r.is_complete());
         assert_respects_wallace_targets(&r, m.output_width);
+        prop_assert!(verifies(&m, &r));
+        let dropped = r.levels().iter().flat_map(|l| &l.cells).filter(|c| c.carry.is_none()).count();
+        prop_assert!(r.metrics().fa + dropped >= lower_bound(&m).value);
+    }
+}
+
+// ------------------------------------------------ AJU-13: Dadda (Parhami) (MT-44)
+
+/// `n` operands of 6 bits.
+fn operands(n: usize) -> DotMatrix {
+    let names: Vec<char> = ('A'..='Z').take(n).collect();
+    let src = names
+        .iter()
+        .map(char::to_string)
+        .collect::<Vec<_>>()
+        .join(" + ");
+    let widths: Vec<(char, u32)> = names.iter().map(|&v| (v, 6)).collect();
+    matrix(&src, &widths)
+}
+
+// Counts computed before the code by a separate script of the rule (MT-44): Dadda's
+// targets, and in each column over the target an FA while it has 3 free points.
+
+#[test]
+fn aju13_parhami_on_seven_operands_has_the_totals_of_fig_8_14() {
+    // 42 input bits: over EXP-08's limit, so built without it, as the classic test does.
+    let m = seven_operands();
+    let r = parhami_solution(&m);
+    assert_eq!(
+        cells_per_level(&r),
+        [(6, 0), (11, 0), (5, 0), (5, 2), (6, 1)]
+    );
+    let mt = r.metrics();
+    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (33, 3, 69));
+    assert_respects_targets(&r, m.output_width);
+    assert!(verifies(&m, &r));
+}
+
+#[test]
+fn aju13_parhami_on_five_operands_saves_two_ha() {
+    let m = operands(5);
+    let r = parhami_solution(&m);
+    assert_eq!(cells_per_level(&r), [(6, 0), (5, 0), (5, 2), (5, 2)]);
+    let mt = r.metrics();
+    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (21, 4, 46));
+    let classic = dadda_solution(&m).metrics();
+    assert_eq!((classic.fa, classic.ha, classic.area_halves()), (21, 6, 48));
+    assert_respects_targets(&r, m.output_width);
+    assert!(verifies(&m, &r));
+}
+
+#[test]
+fn aju13_parhami_on_r1() {
+    // MT-29b already measured this variant on R1: 15.5 A_FA and 7 T_FA.
+    let m = r1_matrix();
+    let r = parhami_solution(&m);
+    assert_eq!(
+        cells_per_level(&r),
+        [(1, 0), (4, 0), (3, 0), (2, 3), (3, 2)]
+    );
+    let mt = r.metrics();
+    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (13, 5, 31));
+    assert_eq!(mt.delay, Time(14));
+    assert_respects_targets(&r, m.output_width);
+    assert!(verifies(&m, &r));
+}
+
+#[test]
+fn aju13_solution_by_method_and_its_own_counts() {
+    let m = r1_matrix();
+    assert_eq!(
+        solution(&m, Method::DaddaParhami).levels(),
+        parhami_solution(&m).levels()
+    );
+    let mut log = HelpLog::default();
+    for step in [
+        HelpStep::Parhami,
+        HelpStep::ParhamiPath,
+        HelpStep::ParhamiPath,
+        HelpStep::ParhamiApplied,
+    ] {
+        log.record(step);
+    }
+    assert_eq!(
+        (log.parhami, log.parhami_path, log.parhami_applied),
+        (1, 2, 1)
+    );
+    assert_eq!((log.solution, log.wallace), (0, 0));
+}
+
+proptest! {
+    #![proptest_config(ProptestConfig {
+        cases: 64,
+        failure_persistence: None,
+        ..ProptestConfig::default()
+    })]
+
+    /// AJU-13: the variant verifies, respects Dadda's targets and never beats the bound.
+    #[test]
+    fn aju13_parhami_solutions_verify(
+        a in 1u32..=4, b in 1u32..=4, c in 1u32..=3, d in 1u32..=3, coef in 1u64..=7,
+    ) {
+        let m = matrix(&format!("A*B + {coef}C*D + C"), &[('A', a), ('B', b), ('C', c), ('D', d)]);
+        let r = parhami_solution(&m);
+        prop_assert!(r.is_complete());
+        assert_respects_targets(&r, m.output_width);
         prop_assert!(verifies(&m, &r));
         let dropped = r.levels().iter().flat_map(|l| &l.cells).filter(|c| c.carry.is_none()).count();
         prop_assert!(r.metrics().fa + dropped >= lower_bound(&m).value);

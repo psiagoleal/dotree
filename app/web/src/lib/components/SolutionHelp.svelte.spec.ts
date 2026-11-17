@@ -28,11 +28,11 @@ async function open(readOnly = false) {
 	return { session, onhelp, onapply, container };
 }
 
-const useIt = () => page.getByRole('button', { name: 'Usar a solução de Dadda' });
+const useIt = () => page.getByRole('button', { name: 'Usar a solução de Dadda', exact: true });
 const replace = () => page.getByRole('dialog').getByRole('button', { name: 'Substituir' });
 
 async function revealPath() {
-	await page.getByRole('button', { name: 'Solução de Dadda' }).click();
+	await page.getByRole('button', { name: 'Solução de Dadda', exact: true }).click();
 	await show().click();
 	await page.getByRole('button', { name: 'Ver a solução de Dadda nível a nível' }).click();
 	await show().click();
@@ -69,7 +69,7 @@ describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06, AJU-10)', () => {
 		const { session, container } = await open();
 		const before = JSON.stringify(session.snapshot());
 
-		await page.getByRole('button', { name: 'Solução de Dadda' }).click();
+		await page.getByRole('button', { name: 'Solução de Dadda', exact: true }).click();
 		await show().click();
 		await expect
 			.element(page.getByTestId('solution-summary'))
@@ -119,7 +119,7 @@ describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06, AJU-10)', () => {
 	it('using the solution: offered only after the levels, asked first, then replaces the circuit (AJU-09)', async () => {
 		const { session, onapply } = await open();
 		await expect.element(useIt()).not.toBeInTheDocument();
-		await page.getByRole('button', { name: 'Solução de Dadda' }).click();
+		await page.getByRole('button', { name: 'Solução de Dadda', exact: true }).click();
 		await show().click();
 		await expect.element(useIt()).not.toBeInTheDocument();
 		await page.getByRole('button', { name: 'Ver a solução de Dadda nível a nível' }).click();
@@ -180,6 +180,41 @@ describe('SolutionHelp (GER-03, AJU-03, AJU-05, AJU-06, AJU-10)', () => {
 			wallacePath: 1,
 			solution: 0,
 			solutionPath: 0
+		});
+	});
+
+	it('Dadda (Parhami): its own two steps and rule, applied apart from Dadda (AJU-13)', async () => {
+		const { session, onapply } = await open();
+		const before = JSON.stringify(session.snapshot());
+		await page.getByRole('button', { name: 'Solução de Dadda (Parhami)', exact: true }).click();
+		await expect.element(keepTrying()).toHaveFocus();
+		await show().click();
+		await expect
+			.element(page.getByTestId('parhami-summary'))
+			.toHaveTextContent(
+				/^Solução de Dadda \(Parhami\): 4 níveis e o CPA; 13 FA, 5 HA; área 15,5 A_FA; atraso 7 T_FA/
+			);
+		await expect.element(page.getByTestId('solution-summary')).not.toBeInTheDocument();
+
+		await page
+			.getByRole('button', { name: 'Ver a solução de Dadda (Parhami) nível a nível' })
+			.click();
+		await show().click();
+		await expect
+			.element(page.getByTestId('parhami-rule'))
+			.toHaveTextContent(/^Dadda \(Parhami\) usa as alturas-alvo de Dadda/);
+		expect(JSON.stringify(session.snapshot())).toBe(before);
+
+		await page.getByRole('button', { name: 'Usar a solução de Dadda (Parhami)' }).click();
+		await replace().click();
+		expect(onapply).toHaveBeenCalledWith('parhami');
+		expect(session.snapshot().metrics).toMatchObject({ fa: 13, ha: 5 });
+		expect(session.helpLog()).toMatchObject({
+			parhami: 1,
+			parhamiPath: 1,
+			parhamiApplied: 1,
+			solution: 0,
+			solutionApplied: 0
 		});
 	});
 

@@ -218,6 +218,8 @@ impl Exercise {
             || (h.solution_applied > 0 && h.solution_path == 0)
             || (h.wallace_path > 0 && h.wallace == 0)
             || (h.wallace_applied > 0 && h.wallace_path == 0)
+            || (h.parhami_path > 0 && h.parhami == 0)
+            || (h.parhami_applied > 0 && h.parhami_path == 0)
             || (h.optimal_path > 0 && h.optimal == 0)
             || (h.optimal_applied > 0 && h.optimal_path == 0)
         {

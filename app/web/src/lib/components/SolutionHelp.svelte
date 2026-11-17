@@ -37,7 +37,9 @@
 
 	// The optimal solution exists only for a height profile (AJU-12).
 	const METHODS: Method[] = untrack(() =>
-		session.snapshot().profile ? ['dadda', 'wallace', 'optimal'] : ['dadda', 'wallace']
+		session.snapshot().profile
+			? ['dadda', 'parhami', 'wallace', 'optimal']
+			: ['dadda', 'parhami', 'wallace']
 	);
 
 	async function askBound() {

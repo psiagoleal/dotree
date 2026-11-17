@@ -70,6 +70,9 @@ describe('helpLogItems (AJU-07)', () => {
 		wallace: 0,
 		wallacePath: 0,
 		wallaceApplied: 0,
+		parhami: 0,
+		parhamiPath: 0,
+		parhamiApplied: 0,
 		optimal: 0,
 		optimalPath: 0,
 		optimalApplied: 0,
@@ -98,6 +101,20 @@ describe('helpLogItems (AJU-07)', () => {
 		expect(
 			helpLogItems({ ...none, solution: 1, solutionPath: 1, solutionApplied: 2 }, 'en')
 		).toEqual(["Dadda's solution: 1 (level by level: 1)", "Dadda's solution applied: 2 times"]);
+	});
+
+	it('counts Dadda (Parhami) apart, between Dadda and Wallace (AJU-13)', () => {
+		expect(
+			helpLogItems(
+				{ ...none, solution: 1, parhami: 1, parhamiPath: 1, parhamiApplied: 1, wallace: 1 },
+				'pt-br'
+			)
+		).toEqual([
+			'solução de Dadda: 1 (nível a nível: 0)',
+			'solução de Dadda (Parhami): 1 (nível a nível: 1)',
+			'solução de Dadda (Parhami) aplicada: 1 vez',
+			'solução de Wallace: 1 (nível a nível: 0)'
+		]);
 	});
 
 	it("counts Wallace's solution apart, after Dadda's (AJU-10)", () => {

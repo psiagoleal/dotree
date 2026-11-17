@@ -2,7 +2,7 @@
 // Words the help the core returns (spec 03): hints, the next move and the help log. Only
 // wording here; what to show and when is decided by the core and the confirmation.
 import { m } from '#lib/paraglide/messages.js';
-import type { HelpLog, Hint, LevelPoint, NextMove } from '#lib/core.ts';
+import { METHOD_NAME, type HelpLog, type Hint, type LevelPoint, type NextMove } from '#lib/core.ts';
 
 type Locale = 'pt-br' | 'en';
 
@@ -52,8 +52,9 @@ export function helpLogItems(log: HelpLog, locale?: Locale): string[] {
 	if (log.lowerBound + log.lowerBoundPath > 0)
 		items.push(m.help_log_lower_bound({ result: log.lowerBound, path: log.lowerBoundPath }, o));
 	const methods = [
-		['Dadda', log.solution, log.solutionPath, log.solutionApplied],
-		['Wallace', log.wallace, log.wallacePath, log.wallaceApplied]
+		[METHOD_NAME.dadda, log.solution, log.solutionPath, log.solutionApplied],
+		[METHOD_NAME.parhami, log.parhami, log.parhamiPath, log.parhamiApplied],
+		[METHOD_NAME.wallace, log.wallace, log.wallacePath, log.wallaceApplied]
 	] as const;
 	for (const [method, result, path, applied] of methods) {
 		if (result + path > 0) items.push(m.help_log_solution({ method, result, path }, o));

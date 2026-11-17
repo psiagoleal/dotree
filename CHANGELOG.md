@@ -8,6 +8,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+### Adicionado
+- Solução **Dadda (Parhami)**, ao lado de Dadda e Wallace, em expressões e perfis de
+  alturas: as alturas-alvo de Dadda com um FA sempre que a coluna acima do alvo tem 3
+  pontos livres, a variante da fig. 8.14 do Parhami. Mesmo fluxo das outras soluções
+  (duas etapas, regra numa frase, "Usar a solução de Dadda (Parhami)"), contagem própria
+  no registro de ajudas e no arquivo (`help.parhami`, `help.parhamiPath`,
+  `help.parhamiApplied`, opcionais; esquema 1 mantido) e uma coluna na comparação. Em R1:
+  13 FA, 5 HA, 15,5 $A_{FA}$ e 7 $T_{FA}$, contra 17 $A_{FA}$ do Dadda clássico. A
+  próxima jogada e as dicas continuam sendo as do Dadda clássico (AJU-13, MT-44).
+
 ## [0.2.0] - 2026-11-12
 
 Segunda versão: ao exercício da v0.1 somam-se a constante aditiva, as soluções de Dadda e

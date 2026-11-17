@@ -25,7 +25,7 @@
 	const id = $props.id();
 	// The optimal solution exists only for a height profile (AJU-12).
 	const METHODS: Method[] = $derived(
-		snap.profile ? ['dadda', 'wallace', 'optimal'] : ['dadda', 'wallace']
+		snap.profile ? ['dadda', 'parhami', 'wallace', 'optimal'] : ['dadda', 'parhami', 'wallace']
 	);
 
 	interface Shown {

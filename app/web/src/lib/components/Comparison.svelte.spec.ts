@@ -122,6 +122,29 @@ describe('Comparison (MT-38, GER-01)', () => {
 		expect(session.helpLog()).toEqual(log);
 	});
 
+	it('R1: Dadda (Parhami) gets its own column, computed by hand (AJU-13)', async () => {
+		const session = r2(core);
+		session.solution(false, 'parhami').free();
+		session.solution(false, 'wallace').free();
+		const { container } = await show(session);
+		const rows = cells(container, 'comparison-table');
+		expect(rows[0]).toEqual(['Medida', 'Seu circuito', 'Dadda (Parhami)', 'Wallace']);
+		expect(rows.map((r) => r[2])).toEqual([
+			'Dadda (Parhami)',
+			'15,5',
+			'7',
+			'13',
+			'5',
+			'13',
+			'4',
+			'5',
+			expect.any(String),
+			'108,5',
+			'759,5',
+			'não'
+		]);
+	});
+
 	it('a solution whose levels were revealed brings its height table; the other is missing', async () => {
 		const session = r2Levels(core, 2);
 		session.solution(false, 'wallace').free();

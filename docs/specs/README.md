@@ -48,6 +48,7 @@ são a spec em forma executável: cada critério tem uma prova associada.
 | D-5 | Confirmação a cada pedido de ajuda | AJU-02 |
 | D-6 | Compartilhar por link fica fora do escopo | 08 |
 | — | Solução de Wallace na v0.2 (AJU-10, MT-29); exportação CSV fora do escopo | 00, 03, 05 |
+| — | Solução Dadda (Parhami) ao lado do Dadda clássico, que segue na próxima jogada (AJU-13, MT-44) | 03, 08 |
 | — | Cores por termo; alternância pontos ↔ variáveis indexadas | COR, VIS |
 | — | Revelação em duas etapas: resultado, depois caminho | GER-03 |
 | — | Exemplos próprios do projeto; só referências públicas (ADR 0004) | 00 |
