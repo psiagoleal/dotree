@@ -121,8 +121,8 @@ fn aju05_r4_dadda_matches_the_hand_computation() {
     // Level 0: 2 HA; level 1: 3 FA + 1 HA; CPA: 5 FA + 1 HA.
     assert_eq!(cells_per_level(&r), [(0, 2), (3, 1), (5, 1)]);
     let mt = r.metrics();
-    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (8, 4, 20));
-    assert_eq!(mt.delay, Time(11)); // 5.5 T_FA
+    assert_eq!((mt.fa, mt.ha, mt.area), (8, 4, 1000));
+    assert_eq!(mt.delay, Time(550)); // 5.5 T_FA
     assert_respects_targets(&r, m.output_width);
     assert!(verifies(&m, &r));
 }
@@ -136,7 +136,7 @@ fn aju05_r1_dadda_matches_the_hand_computation() {
         [(0, 1), (3, 2), (3, 1), (3, 2), (4, 2)]
     );
     let mt = r.metrics();
-    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (13, 8, 34));
+    assert_eq!((mt.fa, mt.ha, mt.area), (13, 8, 1700));
     assert!(mt.fa >= lower_bound(&m).value);
     assert_respects_targets(&r, m.output_width);
     assert!(verifies(&m, &r));
@@ -491,8 +491,8 @@ fn aju10_r4_wallace_matches_the_hand_computation() {
     // CPA over 1 2 1 1 2 2 2: HA, HA, HA, FA, FA, FA.
     assert_eq!(cells_per_level(&r), [(3, 0), (2, 1), (3, 3)]);
     let mt = r.metrics();
-    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (8, 4, 20));
-    assert_eq!(mt.delay, Time(11)); // 5.5 T_FA, as Dadda's
+    assert_eq!((mt.fa, mt.ha, mt.area), (8, 4, 1000));
+    assert_eq!(mt.delay, Time(550)); // 5.5 T_FA, as Dadda's
     assert_respects_wallace_targets(&r, m.output_width);
     assert!(verifies(&m, &r));
 }
@@ -509,8 +509,8 @@ fn aju10_r1_wallace_matches_the_hand_computation() {
     let mt = r.metrics();
     // 13 FA and 3 HA, 14.5 A_FA, like the other solution of spec 00, but 6 T_FA instead of
     // 6.5; Dadda's solution has 17 A_FA and 7 T_FA.
-    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (13, 3, 29));
-    assert_eq!(mt.delay, Time(12));
+    assert_eq!((mt.fa, mt.ha, mt.area), (13, 3, 1450));
+    assert_eq!(mt.delay, Time(600));
     assert!(mt.fa >= lower_bound(&m).value);
     assert_respects_wallace_targets(&r, m.output_width);
     assert!(verifies(&m, &r));
@@ -555,8 +555,8 @@ fn aju05_classic_dadda_on_seven_operands() {
         [(5, 1), (10, 1), (5, 2), (6, 1), (7, 1)]
     );
     let mt = r.metrics();
-    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (33, 6, 72));
-    assert_eq!(mt.delay, Time(20)); // 10 T_FA
+    assert_eq!((mt.fa, mt.ha, mt.area), (33, 6, 3600));
+    assert_eq!(mt.delay, Time(1000)); // 10 T_FA
     assert_respects_targets(&r, m.output_width);
     assert!(verifies(&m, &r));
 }
@@ -651,7 +651,7 @@ fn aju13_parhami_on_seven_operands_has_the_totals_of_fig_8_14() {
         [(6, 0), (11, 0), (5, 0), (5, 2), (6, 1)]
     );
     let mt = r.metrics();
-    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (33, 3, 69));
+    assert_eq!((mt.fa, mt.ha, mt.area), (33, 3, 3450));
     assert_respects_targets(&r, m.output_width);
     assert!(verifies(&m, &r));
 }
@@ -662,9 +662,9 @@ fn aju13_parhami_on_five_operands_saves_two_ha() {
     let r = parhami_solution(&m);
     assert_eq!(cells_per_level(&r), [(6, 0), (5, 0), (5, 2), (5, 2)]);
     let mt = r.metrics();
-    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (21, 4, 46));
+    assert_eq!((mt.fa, mt.ha, mt.area), (21, 4, 2300));
     let classic = dadda_solution(&m).metrics();
-    assert_eq!((classic.fa, classic.ha, classic.area_halves()), (21, 6, 48));
+    assert_eq!((classic.fa, classic.ha, classic.area), (21, 6, 2400));
     assert_respects_targets(&r, m.output_width);
     assert!(verifies(&m, &r));
 }
@@ -679,8 +679,8 @@ fn aju13_parhami_on_r1() {
         [(1, 0), (4, 0), (3, 0), (2, 3), (3, 2)]
     );
     let mt = r.metrics();
-    assert_eq!((mt.fa, mt.ha, mt.area_halves()), (13, 5, 31));
-    assert_eq!(mt.delay, Time(14));
+    assert_eq!((mt.fa, mt.ha, mt.area), (13, 5, 1550));
+    assert_eq!(mt.delay, Time(700));
     assert_respects_targets(&r, m.output_width);
     assert!(verifies(&m, &r));
 }

@@ -42,9 +42,10 @@ export function visibleTop(s: Pick<Snapshot, 'levels' | 'current'>, width: numbe
 	return Math.max(0, (width ?? 0) - 1, ...columns);
 }
 
-/** A time or area in half units (FA = 2, HA = 1), written in the locale: 5 -> "2,5". */
-export function formatHalves(n: number, locale: string): string {
+/** A time or area in hundredths (FA = 100 by default), written in the locale:
+ *  250 -> "2,5", 125 -> "1,25". */
+export function formatHundredths(n: number, locale: string): string {
 	return new Intl.NumberFormat(locale === 'pt-br' ? 'pt-BR' : 'en', {
-		maximumFractionDigits: 1
-	}).format(n / 2);
+		maximumFractionDigits: 2
+	}).format(n / 100);
 }

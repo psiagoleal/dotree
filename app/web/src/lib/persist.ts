@@ -51,7 +51,8 @@ const CHANGES = new Set<string>([
 	'solution',
 	'applySolution',
 	'revealWidth',
-	'revealWidthPath'
+	'revealWidthPath',
+	'setCosts'
 ]);
 
 /** The same session, calling `save` with the exercise file after every change. */

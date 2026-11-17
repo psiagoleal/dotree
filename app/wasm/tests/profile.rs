@@ -109,9 +109,9 @@ fn aju12_the_optimum_is_a_solution_counted_apart() {
     let mut s = open("{5,5; 1,1,1,1}");
     assert!(s.shown_solution(OPTIMAL).is_none());
     let best = parse(s.solution(false, OPTIMAL).snapshot());
-    // d) of the reference set: 6 A_FA and 4 T_FA, in halves.
-    assert_eq!(best["metrics"]["area"], 12);
-    assert_eq!(best["metrics"]["delay"], 8);
+    // d) of the reference set: 6 A_FA and 4 T_FA, in hundredths.
+    assert_eq!(best["metrics"]["area"], 600);
+    assert_eq!(best["metrics"]["delay"], 400);
     assert_eq!(best["profile"]["reached"], true);
     assert!(!s.apply_solution(OPTIMAL), "not before the path");
     let _ = s.solution(true, OPTIMAL);

@@ -8,8 +8,8 @@
 ## Último turno
 
 - **Branch:** `main`
-- **Data:** 2026-11-12
-- **Commit:** `4dd6493` (MT-43, #51), *tag* `v0.2.0`.
+- **Data:** 2026-11-17
+- **Commit:** `a6eaf5f` (MT-44, #58); última *tag* `v0.2.0`.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -195,7 +195,14 @@
       (Dadda Parhami), MT-45 (custos em centésimos), MT-32a/b (contadores 7:3 e 15:4),
       MT-25a (64 bits de entrada, 1024 pontos), MT-42, MT-46 (otimizador), MT-47
       (v0.3.0) e MT-48 (vídeos pelo Playwright).
-- [ ] Próximo: MT-44. O MT-41 fica para depois da entrega.
+- [x] MT-44 mesclado (#58): solução Dadda (Parhami) ao lado de Dadda e Wallace (AJU-13).
+- [x] MT-45 preparado: custos de FA e HA configuráveis em múltiplos de 0,01 (GER-12),
+      núcleo em centésimos, busca ótima e arquivo com os custos, painel "Custos das
+      células". 297 testes Rust, 192 de unidade/componente, 59 e2e; 12 mutações: 9 pegas
+      de primeira, 2 sobreviventes que viraram testes (vai-um do CPA por último, desempate
+      da busca pelo atraso do FA) e 1 que apontou uma dependência redundante, removida.
+- [ ] Próximo: MT-32a (contadores 7:3 e 15:4 no núcleo, com ADR). O MT-41 fica para depois
+      da entrega.
 - Mensagens de commit antigas (a do MT-31a, `90df97e`, e outras) citam material não
   público; ficam no histórico, porque reescrevê-lo pede *force push* no `main` (ADR 0003).
 
@@ -238,6 +245,8 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-17 | `a6eaf5f` | Dadda (Parhami) (#58); custos configuráveis | MT-44, MT-45 |
+| 2026-11-13 | `dde1251` | plano da v0.3 (#55); Dadda (Parhami) | MT-44 |
 | 2026-11-12 | `4dd6493` | v0.2.0 publicada (#51) | MT-43 |
 | 2026-11-10 | `fc928bf` | "Como usar" no app (#50); preparação da v0.2.0 | MT-43 |
 | 2026-11-10 | `35b13e2` | Documentação pública, ADR 0004 (#49); "Como usar" no app | MT-40b |

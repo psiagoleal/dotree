@@ -9,8 +9,6 @@
 
 ## Em aberto: v0.3 (entrega em 03/12/2026; decidido em 2026-11-13)
 
-- [ ] [MT-44](plano-pos-v0.1.md#mt-44-solução-dadda-parhami) — Terceiro método para expressões: "Dadda (Parhami)", a variante da fig. 8.14.
-- [ ] [MT-45](plano-pos-v0.1.md#mt-45-custos-configuráveis) — Área e atraso configuráveis por componente, em múltiplos de 0,01.
 - [ ] [MT-32a](plano-pos-v0.1.md#mt-32a-contadores-no-núcleo) — Contadores 7:3 e 15:4 no núcleo, com ADR, verificação e VHDL.
 - [ ] [MT-32b](plano-pos-v0.1.md#mt-32b-contadores-na-interface) — Contadores na interface, no diagrama e nas tabelas.
 - [ ] [MT-25a](plano-pos-v0.1.md#mt-25a-limites-até-64-bits-de-entrada-p1-degrau-1) — Limites: 32 bits por variável, 64 de entrada, até 1024 pontos; matriz com zoom e rolagem.
@@ -37,6 +35,8 @@
 
 ## Concluídos
 
+- [x] [MT-45](plano-pos-v0.1.md#mt-45-custos-configuráveis) — Área e atraso configuráveis por componente, em múltiplos de 0,01.
+- [x] [MT-44](plano-pos-v0.1.md#mt-44-solução-dadda-parhami) — Terceiro método para expressões: "Dadda (Parhami)", a variante da fig. 8.14.
 - [x] [MT-43](plano-pos-v0.1.md#mt-43-publicar-a-v020) — v0.2.0 publicada: release, imagem pública no GHCR e site no ar.
 - [x] [MT-40b](plano-pos-v0.1.md#mt-40b-ajuda-dentro-do-app) — "Como usar" no cabeçalho, nos dois idiomas, sem contar ajuda (GER-11).
 - [x] [MT-40a](plano-pos-v0.1.md#mt-40a-documentação-pública-e-referências) — README da v0.2, limitações, metodologia e referências públicas; spec viva (ADR 0004); varredura das referências não públicas.

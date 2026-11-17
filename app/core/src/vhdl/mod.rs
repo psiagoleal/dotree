@@ -16,7 +16,7 @@ use crate::board::{self, DE2_PINS, DISPLAYS, LEDS, MAX_INPUT_BITS, SEGMENTS};
 use crate::expr::Polynomial;
 use crate::matrix::DotMatrix;
 use crate::netlist::{Netlist, Wire};
-use crate::reduce::{CellKind, Time};
+use crate::reduce::{CellKind, Costs, Time};
 use crate::verify::sample_vectors;
 
 /// `to_bin` of the testbenches: a vector as a string of 0s and 1s for the reports.
@@ -312,8 +312,8 @@ impl Gen<'_> {
         }
     }
 
-    /// A value in half units (`Time` or area) as text: "6", "14.5" ("14,5" in Portuguese).
-    fn halves(&self, h: u32) -> String {
+    /// A value in hundredths (`Time` or area) as text: "6", "14.5" ("14,5" in Portuguese).
+    fn hundredths(&self, h: u32) -> String {
         let text = Time(h).to_string();
         if self.lang == Language::PtBr {
             text.replace('.', ",")
@@ -460,7 +460,6 @@ impl Gen<'_> {
         let w = n.output_width;
         let mut o = String::new();
         let (fa, ha) = n.cell_counts();
-        let area = (2 * fa + ha) as u32;
 
         // ---- header (VHD-03)
         let _ = writeln!(
@@ -504,10 +503,24 @@ impl Gen<'_> {
             self.t("Metricas", "Metrics"),
             n.and_gates(),
             self.t("area", "area"),
-            self.halves(area),
+            self.hundredths(n.area()),
             self.t("atraso", "delay"),
-            self.halves(n.delay().0),
+            self.hundredths(n.delay().0),
         );
+        // Other costs than the convention of spec 00 are stated, so the metrics can be
+        // checked (GER-12).
+        let c = n.costs;
+        if c != Costs::default() {
+            let _ = writeln!(
+                o,
+                "-- {}: FA {} A_FA, {} T_FA; HA {} A_FA, {} T_FA",
+                self.t("Custos", "Costs"),
+                self.hundredths(c.fa_area),
+                self.hundredths(c.fa_delay),
+                self.hundredths(c.ha_area),
+                self.hundredths(c.ha_delay),
+            );
+        }
         // `use work.all` makes full_adder and half_adder directly visible, which VHDL-93
         // requires for the default binding of their components (GHDL follows it strictly).
         o.push_str("\nlibrary ieee;\nuse ieee.std_logic_1164.all;\nuse work.all;\n\n");

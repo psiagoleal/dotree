@@ -10,27 +10,79 @@ use std::fmt;
 
 use crate::matrix::DotMatrix;
 
-/// Readiness time in **half** `T_FA` units, so 0.5 `T_FA` steps stay exact.
+/// Readiness time in hundredths of `T_FA`, so any configured delay stays exact (MT-45).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Time(pub u32);
 
 impl Time {
-    pub const FA_DELAY: Time = Time(2);
-    pub const HA_DELAY: Time = Time(1);
-
-    /// Value in `T_FA`, e.g. `Time(3).t_fa() == 1.5`.
+    /// Value in `T_FA`, e.g. `Time(150).t_fa() == 1.5`.
     pub fn t_fa(self) -> f64 {
-        f64::from(self.0) / 2.0
+        f64::from(self.0) / 100.0
     }
 }
 
 impl fmt::Display for Time {
+    /// "6", "1.5", "1.25": hundredths without trailing zeros.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.0 % 2 == 0 {
-            write!(f, "{}", self.0 / 2)
+        let (whole, part) = (self.0 / 100, self.0 % 100);
+        if part == 0 {
+            write!(f, "{whole}")
+        } else if part % 10 == 0 {
+            write!(f, "{whole}.{}", part / 10)
         } else {
-            write!(f, "{}.5", self.0 / 2)
+            write!(f, "{whole}.{part:02}")
         }
+    }
+}
+
+/// Area and delay of each cell in hundredths of `A_FA` and `T_FA` (GER-04, GER-12). The
+/// default is the convention of spec 00: FA 1 and 1, HA 0.5 and 0.5.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct Costs {
+    pub fa_area: u32,
+    pub fa_delay: u32,
+    pub ha_area: u32,
+    pub ha_delay: u32,
+}
+
+impl Default for Costs {
+    fn default() -> Costs {
+        Costs {
+            fa_area: 100,
+            fa_delay: 100,
+            ha_area: 50,
+            ha_delay: 50,
+        }
+    }
+}
+
+impl Costs {
+    /// Least value of a cost: 0.01. A zero delay would make an output as early as its
+    /// inputs, and a zero area would make cells free.
+    pub const MIN: u32 = 1;
+    /// Greatest value of a cost: 100.
+    pub const MAX: u32 = 10_000;
+
+    /// Every cost within [`Costs::MIN`] and [`Costs::MAX`].
+    pub fn is_valid(&self) -> bool {
+        [self.fa_area, self.fa_delay, self.ha_area, self.ha_delay]
+            .iter()
+            .all(|v| (Costs::MIN..=Costs::MAX).contains(v))
+    }
+
+    pub fn area(&self, kind: CellKind) -> u32 {
+        match kind {
+            CellKind::Fa => self.fa_area,
+            CellKind::Ha => self.ha_area,
+        }
+    }
+
+    pub fn delay(&self, kind: CellKind) -> Time {
+        Time(match kind {
+            CellKind::Fa => self.fa_delay,
+            CellKind::Ha => self.ha_delay,
+        })
     }
 }
 
@@ -114,19 +166,16 @@ pub struct Metrics {
     pub fa: usize,
     pub ha: usize,
     pub and_gates: usize,
+    /// Area of the FA and HA in hundredths of `A_FA`, under the reduction's costs.
+    pub area: u32,
     /// Latest readiness among the current points and the pending cells.
     pub delay: Time,
 }
 
 impl Metrics {
-    /// Area in half `A_FA` units (FA = 2, HA = 1), exact.
-    pub fn area_halves(&self) -> u32 {
-        (2 * self.fa + self.ha) as u32
-    }
-
     /// Area in `A_FA`.
     pub fn area_a_fa(&self) -> f64 {
-        f64::from(self.area_halves()) / 2.0
+        f64::from(self.area) / 100.0
     }
 }
 
@@ -189,12 +238,20 @@ pub struct Reduction {
     output_width: u32,
     and_gates: usize,
     input_signals: Vec<String>,
+    costs: Costs,
     history: Vec<State>,
     cursor: usize,
 }
 
 impl Reduction {
+    /// A reduction under the default costs.
     pub fn new(matrix: &DotMatrix) -> Reduction {
+        Reduction::with_costs(matrix, Costs::default())
+    }
+
+    /// A reduction under `costs`, which must be valid.
+    pub fn with_costs(matrix: &DotMatrix, costs: Costs) -> Reduction {
+        debug_assert!(costs.is_valid());
         // Dots come in canonical generation order, which is the canonical order at t = 0.
         let points: Vec<Point> = matrix
             .dots
@@ -221,8 +278,25 @@ impl Reduction {
             output_width: matrix.output_width,
             and_gates: matrix.and_gates(),
             input_signals,
+            costs,
             history: vec![initial],
             cursor: 0,
+        }
+    }
+
+    /// The costs readiness and area are computed with.
+    pub fn costs(&self) -> Costs {
+        self.costs
+    }
+
+    /// Recomputes readiness under new `costs` at every step of the history, and puts each
+    /// level's points and each cell's inputs back in canonical order (GER-12). The circuit,
+    /// the point ids and the cell numbers do not change, nor does the undo position.
+    pub fn set_costs(&mut self, costs: Costs) {
+        debug_assert!(costs.is_valid());
+        self.costs = costs;
+        for st in &mut self.history {
+            recost(st, costs);
         }
     }
 
@@ -306,12 +380,8 @@ impl Reduction {
             return Err(Rejection::MixedColumns);
         }
         inputs.sort_by(canonical);
-        let delay = if kind == CellKind::Fa {
-            Time::FA_DELAY
-        } else {
-            Time::HA_DELAY
-        };
-        let ready = Time(inputs.iter().map(|p| p.ready.0).max().unwrap_or(0) + delay.0);
+        let ready =
+            Time(inputs.iter().map(|p| p.ready.0).max().unwrap_or(0) + self.costs.delay(kind).0);
 
         let mut next = st.clone();
         next.pending.push(PendingCell {
@@ -487,12 +557,9 @@ impl Reduction {
                 _ => CellKind::Fa, // 3: CMP-10 guarantees no more
             };
             number += 1;
-            let delay = if kind == CellKind::Fa {
-                Time::FA_DELAY
-            } else {
-                Time::HA_DELAY
-            };
-            let ready = Time(inputs.iter().map(|p| p.ready.0).max().unwrap_or(0) + delay.0);
+            let ready = Time(
+                inputs.iter().map(|p| p.ready.0).max().unwrap_or(0) + self.costs.delay(kind).0,
+            );
             let sum = next.new_point(column, ready, Origin::Sum { cell: number });
             result.push(sum);
             carry = (column + 1 < self.output_width)
@@ -541,12 +608,13 @@ impl Reduction {
             .iter()
             .flat_map(|l| l.cells.iter().map(|c| c.kind))
             .chain(self.pending().iter().map(|c| c.kind));
-        let (mut fa, mut ha) = (0, 0);
+        let (mut fa, mut ha, mut area) = (0, 0, 0);
         for k in kinds {
             match k {
                 CellKind::Fa => fa += 1,
                 CellKind::Ha => ha += 1,
             }
+            area += self.costs.area(k);
         }
         let delay = self
             .points()
@@ -559,6 +627,7 @@ impl Reduction {
             fa,
             ha,
             and_gates: self.and_gates,
+            area,
             delay,
         }
     }
@@ -570,13 +639,7 @@ impl Reduction {
         if delay == Time(0) {
             return out;
         }
-        let delay_of = |k: CellKind| {
-            if k == CellKind::Fa {
-                Time::FA_DELAY.0
-            } else {
-                Time::HA_DELAY.0
-            }
-        };
+        let delay_of = |k: CellKind| self.costs.delay(k).0;
         // Walk back from every point (or pending cell) that finishes at the maximum delay:
         // a cell is critical when it produces a critical point; its critical inputs are those
         // ready exactly one cell delay before it.
@@ -662,6 +725,61 @@ impl Reduction {
         }
         self.cursor += 1;
         true
+    }
+}
+
+/// Readiness of every point and cell of `st` under `costs`, and the canonical order again.
+/// Cells are visited by number, so each cell's inputs are ready before it: they are inputs,
+/// outputs of earlier levels or, in the CPA, the carry of the cell just before. Points left
+/// in the registry by cells undone with "go back" belong to no cell and keep their time.
+fn recost(st: &mut State, costs: Costs) {
+    let mut ready: Vec<Time> = st.registry.iter().map(|p| p.ready).collect();
+    for p in &st.registry {
+        if let Origin::Input { .. } = p.origin {
+            ready[p.id] = Time(0);
+        }
+    }
+    let latest =
+        |ready: &[Time], inputs: &[PointId]| inputs.iter().map(|&i| ready[i].0).max().unwrap_or(0);
+    for level in &mut st.levels {
+        for c in &mut level.cells {
+            c.ready = Time(latest(&ready, &c.inputs) + costs.delay(c.kind).0);
+            ready[c.sum] = c.ready;
+            if let Some(k) = c.carry {
+                ready[k] = c.ready;
+            }
+        }
+    }
+    for c in &mut st.pending {
+        c.ready = Time(latest(&ready, &c.inputs) + costs.delay(c.kind).0);
+    }
+    for p in &mut st.registry {
+        p.ready = ready[p.id];
+    }
+    let registry = &st.registry;
+    let order = |ids: &mut [PointId]| ids.sort_by(|&a, &b| canonical(&registry[a], &registry[b]));
+    for level in &mut st.levels {
+        for p in &mut level.points {
+            p.ready = ready[p.id];
+        }
+        level.points.sort_by(canonical);
+        let first = level.cells.first().map_or(0, |c| c.number);
+        for c in &mut level.cells {
+            // A CPA cell takes the carry of the cell before it last (spec 02).
+            let chained = level.cpa
+                && c.inputs.last().is_some_and(
+                    |&i| matches!(registry[i].origin, Origin::Carry { cell } if cell >= first),
+                );
+            let n = c.inputs.len() - usize::from(chained);
+            order(&mut c.inputs[..n]);
+        }
+    }
+    for p in &mut st.points {
+        p.ready = ready[p.id];
+    }
+    st.points.sort_by(canonical);
+    for c in &mut st.pending {
+        order(&mut c.inputs);
     }
 }
 

@@ -9,7 +9,7 @@
 //! anything (AJU-02).
 
 use crate::matrix::DotMatrix;
-use crate::reduce::{CellKind, PointId, Reduction, Time};
+use crate::reduce::{CellKind, Costs, PointId, Reduction, Time};
 
 /// Largest number of Dadda's sequence 2, 3, 4, 6, 9, 13, … below `height`
 /// (`d_{j+1} = floor(3 d_j / 2)`); `None` when `height <= 2`.
@@ -192,34 +192,40 @@ pub enum Method {
 
 /// The solution of `method` from the initial matrix, as a complete reduction.
 pub fn solution(matrix: &DotMatrix, method: Method) -> Reduction {
-    match method {
-        Method::Dadda => dadda_solution(matrix),
-        Method::Wallace => wallace_solution(matrix),
-        Method::DaddaParhami => parhami_solution(matrix),
-    }
+    solution_with_costs(matrix, method, Costs::default())
+}
+
+/// The solution of `method` under `costs` (GER-12): the method picks the earliest points,
+/// so the circuit, and not only its metrics, can depend on the delays.
+pub fn solution_with_costs(matrix: &DotMatrix, method: Method, costs: Costs) -> Reduction {
+    let step = match method {
+        Method::Dadda => next_move,
+        Method::Wallace => wallace_move,
+        Method::DaddaParhami => parhami_move,
+    };
+    follow(Reduction::with_costs(matrix, costs), step)
 }
 
 /// The variant of Dadda's method drawn by Parhami, as a complete reduction (AJU-13).
 pub fn parhami_solution(matrix: &DotMatrix) -> Reduction {
-    follow(matrix, parhami_move)
+    solution(matrix, Method::DaddaParhami)
 }
 
 /// Wallace's solution from the initial matrix, as a complete reduction (AJU-10).
 pub fn wallace_solution(matrix: &DotMatrix) -> Reduction {
-    follow(matrix, wallace_move)
+    solution(matrix, Method::Wallace)
 }
 
 /// Dadda's solution from the initial matrix, as a complete reduction (AJU-05).
 pub fn dadda_solution(matrix: &DotMatrix) -> Reduction {
-    follow(matrix, next_move)
+    solution(matrix, Method::Dadda)
 }
 
-/// Follows `step` from the initial matrix until the circuit is complete.
-fn follow(matrix: &DotMatrix, step: fn(&Reduction) -> NextMove) -> Reduction {
-    let mut r = Reduction::new(matrix);
+/// Follows `step` from the initial matrix of `r` until the circuit is complete.
+fn follow(mut r: Reduction, step: fn(&Reduction) -> NextMove) -> Reduction {
     // Each step forms a cell or closes a level, and every FA/HA lowers
     // sum(height x (W - column)); this bound only guards against a bug turning into a hang.
-    let limit = 4 * matrix.dots.len() * (matrix.output_width as usize + 1) + 16;
+    let limit = 4 * r.points().len() * (r.heights().len() + 1) + 16;
     for _ in 0..limit {
         let ok = match step(&r) {
             NextMove::FormCell { points, .. } => r.form_cell(&points).is_ok(),

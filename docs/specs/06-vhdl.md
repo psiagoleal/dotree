@@ -38,7 +38,8 @@ válido.
   *Prova:* teste do núcleo (mesmo conjunto de identificadores de DIA-03) e `2A` com $A$ de
   2 bits.
 - **VHD-03** — O topo DEVE trazer no cabeçalho, em comentário, a expressão, as larguras, a
-  matriz de pontos em texto e as métricas (FA, HA, AND, área, atraso).
+  matriz de pontos em texto e as métricas (FA, HA, AND, área, atraso). Com custos
+  diferentes do padrão (GER-12), uma linha a mais diz quais são.
   *Prova:* teste de unidade do gerador (cabeçalho de R2 fixado).
 - **VHD-04** — O testbench DEVE calcular o valor esperado com aritmética `unsigned` de
   `numeric_std`, redimensionada para $W$ bits, e percorrer os vetores de `04-verificacao.md`

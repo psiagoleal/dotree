@@ -6,7 +6,7 @@
 use dotree_core::expr::{self, Monomial};
 use dotree_core::matrix::{Factor, Signal};
 use dotree_core::netlist::{NetCell, Netlist, Wire};
-use dotree_core::reduce::CellKind;
+use dotree_core::reduce::{CellKind, Costs};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -158,6 +158,8 @@ pub fn decode(json: &str) -> Result<Netlist, String> {
             .collect::<Result<_, _>>()?,
         output_width: j.output_width,
         complete: j.complete,
+        // The verifier only evaluates the cells: their area and delay play no part.
+        costs: Costs::default(),
     };
     check(&n)?;
     Ok(n)

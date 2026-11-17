@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 
 use common::{Lcg, form, r1, reduce_at_random, replay_r2_tree};
 use dotree_core::help::{HelpLog, HelpStep};
-use dotree_core::reduce::Reduction;
+use dotree_core::reduce::{Costs, Reduction};
 use dotree_core::state::{Exercise, SCHEMA, StateError, WidthReveal};
 use serde_json::{Value, json};
 
@@ -535,4 +535,68 @@ fn exp17_a_bad_profile_is_a_bad_expression() {
     v["expression"] = "{7; 1,1}".into();
     v["levels"] = json!([]);
     assert_eq!(open(&v), Err(StateError::BadExpression));
+}
+
+// ------------------------------------------------------------------ GER-12: costs
+
+fn odd_costs() -> Costs {
+    // A fast FA puts sums and carries of FA before those of HA in the canonical order, so
+    // the positions saved in the file differ from those under the default costs.
+    Costs {
+        fa_area: 120,
+        fa_delay: 40,
+        ha_area: 70,
+        ha_delay: 50,
+    }
+}
+
+#[test]
+fn ger12_default_costs_leave_the_file_as_before() {
+    let v = r2_file();
+    assert!(v.get("costs").is_none(), "a v0.2 reader sees the same file");
+}
+
+#[test]
+fn ger12_files_without_costs_open_with_the_default() {
+    let (_, r) = Exercise::parse(&r2_file().to_string())
+        .unwrap()
+        .restore()
+        .unwrap();
+    assert_eq!(r.costs(), Costs::default());
+    assert_eq!(r.metrics().area, 1500);
+}
+
+#[test]
+fn ger12_costs_round_trip_and_replay_under_them() {
+    for seed in 0..32 {
+        let mut r = r1();
+        r.set_costs(odd_costs());
+        reduce_at_random(&mut r, &mut Lcg(seed));
+        let ex = capture(&r, None, HelpLog::default());
+        let v: Value = serde_json::from_str(&ex.to_json()).unwrap();
+        assert_eq!(
+            v["costs"],
+            json!({"faArea": 120, "faDelay": 40, "haArea": 70, "haDelay": 50})
+        );
+        let (back, restored) = round_trip(&ex);
+        assert_eq!(back, ex, "seed {seed}");
+        assert_eq!(restored.costs(), odd_costs());
+        same_reduction(&r, &restored);
+    }
+}
+
+#[test]
+fn ger12_costs_out_of_range_or_incomplete_are_refused() {
+    for costs in [
+        json!({"faArea": 0, "faDelay": 100, "haArea": 50, "haDelay": 50}),
+        json!({"faArea": 100, "faDelay": 100, "haArea": 50, "haDelay": 10001}),
+        json!({"faArea": 100, "faDelay": 100, "haArea": 50}),
+        json!({"faArea": 100, "faDelay": 100, "haArea": 50, "haDelay": 0.5}),
+        json!({"faArea": 100, "faDelay": 100, "haArea": 50, "haDelay": 50, "and": 1}),
+        json!("default"),
+    ] {
+        let mut v = r2_file();
+        v["costs"] = costs.clone();
+        assert!(matches!(open(&v), Err(StateError::Malformed(_))), "{costs}");
+    }
 }

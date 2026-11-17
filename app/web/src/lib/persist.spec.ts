@@ -81,8 +81,9 @@ describe('autosaving', () => {
 		s.revealWidth(7);
 		s.revealWidthPath();
 		s.applySolution('dadda');
-		expect(save).toHaveBeenCalledTimes(13);
-		expect(save).toHaveBeenLastCalledWith('state 13');
+		s.setCosts({ faArea: 100, faDelay: 100, haArea: 30, haDelay: 30 });
+		expect(save).toHaveBeenCalledTimes(14);
+		expect(save).toHaveBeenLastCalledWith('state 14');
 	});
 
 	it('does not save on reads', () => {

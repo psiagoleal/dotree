@@ -3,7 +3,7 @@
 //! target output profile, and its optimal circuit (MT-31a).
 
 use dotree_core::profile::{Block, Profile, ProfileError, SearchError, parse};
-use dotree_core::reduce::{CellKind, Time};
+use dotree_core::reduce::{CellKind, Costs, Time};
 
 fn profile(src: &str) -> Profile {
     parse(src).unwrap().unwrap()
@@ -203,7 +203,71 @@ fn aju12_the_optimum_is_minimal_in_area_then_delay() {
             (2, CellKind::Ha, 1)
         ]
     );
-    assert_eq!(r.metrics().delay, Time(5));
+    assert_eq!(r.metrics().delay, Time(250));
+}
+
+/// e) {2,2; 1,1,1} by hand: column 0 needs an HA; then column 1 holds 3 points, closed by
+/// an FA (F + H in all), or by HA after HA with a last HA in the top column, whose carry is
+/// dropped (4 H). Under FA 1 / 1 and HA 0.3 / 0.3, 4 HA cost 1.2 < 1.3, and their path is
+/// three HA long: 0.9 T_FA (GER-12).
+#[test]
+fn ger12_the_optimum_follows_the_costs() {
+    let p = profile("{2,2; 1,1,1}");
+    let m = p.optimal().unwrap().metrics();
+    assert_eq!((m.fa, m.ha, m.area, m.delay), (1, 1, 150, Time(150)));
+
+    let cheap_ha = Costs {
+        fa_area: 100,
+        fa_delay: 100,
+        ha_area: 30,
+        ha_delay: 30,
+    };
+    let r = p.optimal_with_costs(cheap_ha).unwrap();
+    assert!(p.reached(&r));
+    assert_eq!(r.costs(), cheap_ha);
+    let m = r.metrics();
+    assert_eq!((m.fa, m.ha, m.area, m.delay), (0, 4, 120, Time(90)));
+
+    // The turning point: HA at 0.33 gives 4 x 0.33 = 1.32 < 1.33, still 4 HA; at 0.34,
+    // 1.36 > 1.34 and the FA comes back.
+    let third = Costs {
+        ha_area: 33,
+        ..cheap_ha
+    };
+    let m = p.optimal_with_costs(third).unwrap().metrics();
+    assert_eq!((m.fa, m.ha, m.area), (0, 4, 132));
+    let m = p
+        .optimal_with_costs(Costs {
+            ha_area: 34,
+            ..cheap_ha
+        })
+        .unwrap()
+        .metrics();
+    assert_eq!((m.fa, m.ha, m.area), (1, 1, 134));
+}
+
+/// e) again, with FA area 0.99 and HA area 0.33: 4 HA and 1 FA + 1 HA both cost 1.32, so
+/// the delay decides. With HA delay 0.3, 4 HA end at 3 x 0.3 = 0.9; the FA after the HA ends
+/// at 0.3 + F: 1.3 with F = 1 (4 HA win), 0.7 with F = 0.4 (the FA wins).
+#[test]
+fn ger12_on_equal_area_the_optimum_takes_the_faster_circuit() {
+    let p = profile("{2,2; 1,1,1}");
+    let tie = Costs {
+        fa_area: 99,
+        fa_delay: 100,
+        ha_area: 33,
+        ha_delay: 30,
+    };
+    let m = p.optimal_with_costs(tie).unwrap().metrics();
+    assert_eq!((m.fa, m.ha, m.area, m.delay), (0, 4, 132, Time(90)));
+    let m = p
+        .optimal_with_costs(Costs {
+            fa_delay: 40,
+            ..tie
+        })
+        .unwrap()
+        .metrics();
+    assert_eq!((m.fa, m.ha, m.area, m.delay), (1, 1, 132, Time(70)));
 }
 
 #[test]
@@ -211,7 +275,7 @@ fn aju12_a_profile_already_met_needs_no_cell() {
     let p = profile("{2; 2}");
     let r = p.optimal().unwrap();
     assert!(r.levels().is_empty());
-    assert_eq!(r.metrics().area_halves(), 0);
+    assert_eq!(r.metrics().area, 0);
     assert!(p.reached(&r));
 }
 
@@ -244,10 +308,10 @@ fn aju12_known_blocks_of_problem_8_3() {
     assert_eq!(block("{0,3; 0,1,1}"), Block::FullAdder);
 }
 
-/// (area, delay) in halves, compared in that order.
+/// (area, delay) in hundredths, compared in that order.
 fn cost(r: &dotree_core::reduce::Reduction) -> (u32, u32) {
     let m = r.metrics();
-    (m.area_halves(), m.delay.0)
+    (m.area, m.delay.0)
 }
 
 proptest::proptest! {

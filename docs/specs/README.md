@@ -42,7 +42,7 @@ são a spec em forma executável: cada critério tem uma prova associada.
 | Id | Decisão | Onde |
 |---|---|---|
 | D-1 | O app pergunta a largura $W$ antes de revelá-la | EXP-09, EXP-10 |
-| D-2 | Custo fixo: FA = 1 $A_{FA}$/1 $T_{FA}$; HA = 0,5/0,5; AND fora da área | 00, GER-04 |
+| D-2 | Custo padrão: FA = 1 $A_{FA}$/1 $T_{FA}$; HA = 0,5/0,5; AND fora da área. Desde a v0.3, os quatro custos são configuráveis em múltiplos de 0,01 (MT-45) | 00, GER-04, GER-12 |
 | D-3 | Área e atraso do próprio circuito sempre visíveis | CMP-15 |
 | D-4 | Alvo ≥ 768 px; abaixo disso, só leitura | GER-10 |
 | D-5 | Confirmação a cada pedido de ajuda | AJU-02 |

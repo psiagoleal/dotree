@@ -15,7 +15,7 @@ use dotree_core::matrix::{DotMatrix, MatrixError};
 use dotree_core::netlist::Netlist;
 use dotree_core::profile::{self, Block, InputError, Profile, ProfileError, SearchError};
 use dotree_core::reduce::{
-    CellKind, CpaBlock, Origin, PendingCell, Point, PointId, Reduction, Rejection,
+    CellKind, Costs, CpaBlock, Origin, PendingCell, Point, PointId, Reduction, Rejection,
 };
 use dotree_core::state::{Exercise, StateError, WidthReveal};
 use dotree_core::verify::{Coverage, Progress, Verifier};
@@ -361,7 +361,8 @@ impl SolutionMethod {
 }
 
 /// A compression in progress (MT-12a). Every action returns JSON; `snapshot` returns the
-/// whole state the interface draws. Times and areas are in half units (FA = 2, HA = 1).
+/// whole state the interface draws. Times and areas are in hundredths of `T_FA` and `A_FA`,
+/// under the session's costs (GER-12).
 #[wasm_bindgen]
 pub struct Session {
     reduction: Reduction,
@@ -378,7 +379,7 @@ pub struct Session {
     width: Option<WidthReveal>,
     /// The height profile the exercise was opened with (EXP-16), if any.
     profile: Option<Profile>,
-    /// Its optimal circuit, searched once on first need (AJU-12).
+    /// Its optimal circuit under the current costs, searched once on first need (AJU-12).
     optimal: OnceCell<Result<Reduction, SearchError>>,
 }
 
@@ -406,16 +407,19 @@ impl Session {
     /// The optimal circuit of the profile, searched once; `None` without a profile.
     fn optimal(&self) -> Option<&Result<Reduction, SearchError>> {
         let p = self.profile.as_ref()?;
-        Some(self.optimal.get_or_init(|| p.optimal()))
+        let costs = self.reduction.costs();
+        Some(self.optimal.get_or_init(|| p.optimal_with_costs(costs)))
     }
 
     /// The circuit of `method` from level 0; `None` for the optimum when there is no
     /// profile or the search found nothing.
     fn solution_reduction(&self, method: SolutionMethod) -> Option<Reduction> {
+        let costs = self.reduction.costs();
+        let solve = |m: Method| Some(help::solution_with_costs(&self.matrix, m, costs));
         match method {
-            SolutionMethod::Dadda => Some(help::solution(&self.matrix, Method::Dadda)),
-            SolutionMethod::Wallace => Some(help::solution(&self.matrix, Method::Wallace)),
-            SolutionMethod::Parhami => Some(help::solution(&self.matrix, Method::DaddaParhami)),
+            SolutionMethod::Dadda => solve(Method::Dadda),
+            SolutionMethod::Wallace => solve(Method::Wallace),
+            SolutionMethod::Parhami => solve(Method::DaddaParhami),
             SolutionMethod::Optimal => self.optimal()?.as_ref().ok().cloned(),
         }
     }
@@ -431,7 +435,7 @@ impl Session {
     fn solution_session(&self, method: SolutionMethod) -> Session {
         Session::with(
             self.solution_reduction(method)
-                .unwrap_or_else(|| Reduction::new(&self.matrix)),
+                .unwrap_or_else(|| Reduction::with_costs(&self.matrix, self.reduction.costs())),
             self.matrix.clone(),
             &self.expression,
             &self.widths,
@@ -452,6 +456,10 @@ impl Session {
     fn points(&self, ps: &[Point]) -> Vec<Value> {
         ps.iter().map(|p| self.point(p)).collect()
     }
+}
+
+fn costs_json(c: Costs) -> Value {
+    serde_json::to_value(c).expect("plain data always serializes")
 }
 
 fn state_error(e: &StateError) -> Value {
@@ -514,6 +522,31 @@ impl Session {
             Ok(s)
         };
         open().map_err(|e: StateError| state_error(&e).to_string())
+    }
+
+    // ------------------------------------------------------------ costs (GER-12, MT-45)
+
+    /// Area and delay of FA and HA, in hundredths: `{faArea, faDelay, haArea, haDelay}`.
+    pub fn costs(&self) -> String {
+        costs_json(self.reduction.costs()).to_string()
+    }
+
+    /// Sets new costs (the same JSON as `costs`) and recomputes readiness, metrics and the
+    /// solutions under them. False, with nothing changed, for anything else than four whole
+    /// numbers from 1 to 10 000. Not a step of the undo history, and not a help.
+    #[wasm_bindgen(js_name = setCosts)]
+    pub fn set_costs(&mut self, costs_json: &str) -> bool {
+        let Ok(costs) = serde_json::from_str::<Costs>(costs_json) else {
+            return false;
+        };
+        if !costs.is_valid() {
+            return false;
+        }
+        if costs != self.reduction.costs() {
+            self.reduction.set_costs(costs);
+            self.optimal = OnceCell::new();
+        }
+        true
     }
 
     pub fn expression(&self) -> String {
@@ -593,7 +626,8 @@ impl Session {
             },
             "heights": r.heights(),
             "metrics": {"fa": m.fa, "ha": m.ha, "andGates": m.and_gates,
-                        "area": m.area_halves(), "delay": m.delay.0},
+                        "area": m.area, "delay": m.delay.0},
+            "costs": costs_json(r.costs()),
             "canUndo": r.can_undo(),
             "canRedo": r.can_redo(),
             // Why "close with CPA" is disabled, or null when it is available (CMP-10).

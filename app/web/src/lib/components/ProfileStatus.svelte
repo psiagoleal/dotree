@@ -5,7 +5,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { Block, CompressionSession, Snapshot } from '#lib/core.ts';
-	import { formatHalves } from '#lib/levels.ts';
+	import { formatHundredths } from '#lib/levels.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import ConfirmDialog from './ConfirmDialog.svelte';
@@ -25,7 +25,7 @@
 	let blockDialog: ConfirmDialog;
 	let block = $state.raw<Block | null>(untrack(() => session.shownBlock()));
 
-	const halves = (n: number) => formatHalves(n, getLocale());
+	const hundredths = (n: number) => formatHundredths(n, getLocale());
 	/** The profile as typed: most significant column first. */
 	const asked = $derived(`{${[...profile.output].reverse().join(', ')}}`);
 	const target = (column: number) => profile.output[column] ?? 0;
@@ -69,8 +69,8 @@
 	{#if profile.reached}
 		<p class="reached" role="status" data-testid="profile-reached">
 			{m.profile_reached({
-				area: halves(snap.metrics.area),
-				delay: halves(snap.metrics.delay)
+				area: hundredths(snap.metrics.area),
+				delay: hundredths(snap.metrics.delay)
 			})}
 		</p>
 	{:else if over.length > 0}

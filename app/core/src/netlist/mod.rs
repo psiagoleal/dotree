@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 
 use crate::expr::Monomial;
 use crate::matrix::{DotMatrix, Signal};
-use crate::reduce::{CellKind, Origin, Reduction, Time};
+use crate::reduce::{CellKind, Costs, Origin, Reduction, Time};
 
 /// A wire of the circuit. Its identifier is the one used by every artifact (spec 05).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -56,6 +56,8 @@ pub struct Netlist {
     pub output_width: u32,
     /// Every column ends with at most one point (CMP-12).
     pub complete: bool,
+    /// The costs of the reduction it came from: readiness, delay and area use them.
+    pub costs: Costs,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -116,6 +118,7 @@ impl Netlist {
                 .collect(),
             output_width: matrix.output_width,
             complete: reduction.is_complete(),
+            costs: reduction.costs(),
         }
     }
 
@@ -169,7 +172,7 @@ impl Netlist {
                 })
                 .max()
                 .unwrap_or(0);
-            ready[c.number] = Time(latest + cell_delay(c.kind).0);
+            ready[c.number] = Time(latest + self.costs.delay(c.kind).0);
         }
         ready
     }
@@ -177,6 +180,11 @@ impl Netlist {
     /// Delay of the circuit: the latest cell output (0 without cells).
     pub fn delay(&self) -> Time {
         self.ready().into_iter().max().unwrap_or_default()
+    }
+
+    /// Area of the FA and HA in hundredths of `A_FA`.
+    pub fn area(&self) -> u32 {
+        self.cells.iter().map(|c| self.costs.area(c.kind)).sum()
     }
 
     /// Number of FA and HA cells.
@@ -200,13 +208,5 @@ impl Netlist {
                     .fold(u128::from(t.coefficient), |acc, x| acc * u128::from(v[x]))
             })
             .sum()
-    }
-}
-
-/// Delay of one cell kind (spec 00, "Convenção de custo").
-pub fn cell_delay(kind: CellKind) -> Time {
-    match kind {
-        CellKind::Fa => Time::FA_DELAY,
-        CellKind::Ha => Time::HA_DELAY,
     }
 }

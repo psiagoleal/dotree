@@ -54,6 +54,13 @@ arquivo.
 - **Solução Dadda (Parhami) (AJU-13, MT-44).** `help.parhami`, `help.parhamiPath` e
   `help.parhamiApplied`, com as mesmas regras das de Wallace; opcionais (valem 0 em
   arquivos da v0.2), então o esquema continua 1.
+- **Custos (GER-12, MT-45).** `costs` guarda `faArea`, `faDelay`, `haArea` e `haDelay` em
+  centésimos de $A_{FA}$ e $T_{FA}$ (inteiros de 1 a 10 000). É opcional e só é escrito
+  quando difere do padrão, então os arquivos da v0.2 abrem com o padrão e um exercício com
+  o padrão gera o mesmo arquivo de antes; o esquema continua 1. As posições das entradas
+  são as da ordem canônica sob esses custos, por isso o núcleo refaz o arquivo com eles.
+  Custo fora da faixa, campo a mais ou a menos e número não inteiro tornam o arquivo
+  malformado.
 - **Perfil de alturas (EXP-16, AJU-12, MT-31).** Um exercício aberto com um perfil guarda
   o texto do perfil em `expression` e nenhuma largura. `help.optimal`,
   `help.optimalPath`, `help.optimalApplied` e `help.block` contam as etapas e as

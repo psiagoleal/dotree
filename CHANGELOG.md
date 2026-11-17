@@ -17,6 +17,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   `help.parhamiApplied`, opcionais; esquema 1 mantido) e uma coluna na comparação. Em R1:
   13 FA, 5 HA, 15,5 $A_{FA}$ e 7 $T_{FA}$, contra 17 $A_{FA}$ do Dadda clássico. A
   próxima jogada e as dicas continuam sendo as do Dadda clássico (AJU-13, MT-44).
+- **Custos das células** configuráveis: área e atraso do FA e do HA, cada um de 0,01 a
+  100 em múltiplos de 0,01, num painel abaixo das métricas, com "Restaurar o padrão" (FA 1
+  e 1, HA 0,5 e 0,5). Prontidão, métricas, caminho crítico, ordem dos pontos, soluções,
+  solução ótima (refeita com os custos novos), comparação e cabeçalho do VHDL seguem os
+  custos. Trocar não conta como ajuda nem entra no desfazer; os custos vão no arquivo
+  (`costs`, opcional e só escrito quando difere do padrão; esquema 1 mantido) e passam
+  para a próxima matriz (GER-12, MT-45).
+
+### Alterado
+- O núcleo mede tempos e áreas em centésimos de $T_{FA}$ e $A_{FA}$, e não mais em meias
+  unidades; com o padrão, todos os números continuam os mesmos (GER-04, MT-45).
+- Decisão D-2: o custo deixa de ser fixo; a convenção da spec 00 vira o padrão (MT-45).
 
 ## [0.2.0] - 2026-11-12
 

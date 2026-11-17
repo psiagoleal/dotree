@@ -10,7 +10,14 @@
 	import TermLegend from '#lib/components/TermLegend.svelte';
 	import ViewToggle from '#lib/components/ViewToggle.svelte';
 	import WidthChallenge from '#lib/components/WidthChallenge.svelte';
-	import { loadCore, type BuildResult, type CompressionSession, type Core } from '#lib/core.ts';
+	import {
+		DEFAULT_COSTS,
+		loadCore,
+		type BuildResult,
+		type CompressionSession,
+		type Core,
+		type Costs
+	} from '#lib/core.ts';
 	import { download } from '#lib/download.ts';
 	import { errorMessage, fileErrorMessage, warningMessage } from '#lib/errors.ts';
 	import { keyAction } from '#lib/keys.ts';
@@ -54,8 +61,12 @@
 		if (!saveExercise(browserStorage(), text)) storageFailed = true;
 	}
 
+	// The costs of the last exercise on screen: a new matrix keeps them (GER-12).
+	let lastCosts: Costs = DEFAULT_COSTS;
+
 	/** Makes `next` the exercise on screen, saving it now and after every change. */
 	function adopt(next: CompressionSession | null) {
+		if (session) lastCosts = session.costs();
 		session?.free();
 		session = next && autosaving(next, save);
 		if (next) save(next.exercise());
@@ -113,7 +124,10 @@
 		fileStatus = null;
 		result = core.buildMatrix(expression, widths);
 		widthRevealed = false;
-		adopt(result.ok ? core.openSession(expression, widths) : null);
+		const costs = session?.costs() ?? lastCosts;
+		const next = result.ok ? core.openSession(expression, widths) : null;
+		next?.setCosts(costs);
+		adopt(next);
 	}
 
 	function exportExercise() {

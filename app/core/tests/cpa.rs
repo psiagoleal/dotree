@@ -174,9 +174,9 @@ fn after_the_cpa_nothing_else_can_be_formed_but_undo_works() {
 fn ger04_r2_metrics() {
     let m = r2().metrics();
     assert_eq!((m.fa, m.ha, m.and_gates), (13, 4, 13));
-    assert_eq!(m.area_halves(), 30);
+    assert_eq!(m.area, 1500);
     assert_eq!(m.area_a_fa(), 15.0);
-    assert_eq!(m.delay, Time(12)); // 6 T_FA
+    assert_eq!(m.delay, Time(600)); // 6 T_FA
 }
 
 #[test]
@@ -186,9 +186,9 @@ fn cmp14_metrics_follow_every_formed_cell() {
     assert_eq!(r.metrics().delay, Time(0));
     form(&mut r, 2, &["a0_b2", "a1_b1"]);
     let m = r.metrics();
-    assert_eq!((m.fa, m.ha, m.delay), (0, 1, Time(1)));
+    assert_eq!((m.fa, m.ha, m.delay), (0, 1, Time(50)));
     form(&mut r, 1, &["a0_b1", "a1_b0", "c0_d1"]);
-    assert_eq!((r.metrics().fa, r.metrics().delay), (1, Time(2)));
+    assert_eq!((r.metrics().fa, r.metrics().delay), (1, Time(100)));
 }
 
 #[test]

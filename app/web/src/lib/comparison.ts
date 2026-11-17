@@ -1,7 +1,7 @@
 // Caminho relativo: app/web/src/lib/comparison.ts
 // MT-38: the figures of a solution for the side-by-side comparison, read from its snapshot,
 // and the frontier of the non-dominated ones in area and delay. Areas and delays are in
-// A_FA and T_FA here (the core gives halves).
+// A_FA and T_FA here (the core gives hundredths).
 import type { Snapshot } from '#lib/core.ts';
 
 export interface Figures {
@@ -23,8 +23,8 @@ export interface Figures {
 }
 
 export function figures(s: Snapshot): Figures {
-	const area = s.metrics.area / 2;
-	const delay = s.metrics.delay / 2;
+	const area = s.metrics.area / 100;
+	const delay = s.metrics.delay / 100;
 	const cpa = s.levels.find((l) => l.cpa);
 	return {
 		// With a height profile, reaching it is what completes the circuit (AJU-12).

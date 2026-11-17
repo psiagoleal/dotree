@@ -37,24 +37,24 @@ fn cmp01_fa_puts_sum_and_carry_in_the_next_level() {
     let mut r = r1();
     assert_eq!(form(&mut r, 1, &["a0_b1", "a1_b0", "c0_d1"]), CellKind::Fa);
     assert_eq!(r.pending().len(), 1);
-    assert_eq!(r.pending()[0].ready, Time(2));
+    assert_eq!(r.pending()[0].ready, Time(100));
     r.conclude_level().unwrap();
     assert_eq!(r.level(), 1);
     // column 1 loses 3 and gains the sum; column 2 gains the carry.
     assert_eq!(r.heights(), vec![5, 5, 6, 2, 1, 0, 0]);
     let s1 = r.points().iter().find(|p| r.signal(p) == "s1").unwrap();
     let k1 = r.points().iter().find(|p| r.signal(p) == "k1").unwrap();
-    assert_eq!((s1.column, s1.ready), (1, Time(2)));
-    assert_eq!((k1.column, k1.ready), (2, Time(2)));
+    assert_eq!((s1.column, s1.ready), (1, Time(100)));
+    assert_eq!((k1.column, k1.ready), (2, Time(100)));
 }
 
 #[test]
 fn cmp02_ha_takes_half_a_t_fa() {
     let mut r = r1();
     assert_eq!(form(&mut r, 2, &["a0_b2", "a1_b1"]), CellKind::Ha);
-    assert_eq!(r.pending()[0].ready, Time(1));
-    assert_eq!(Time(1).t_fa(), 0.5);
-    assert_eq!(Time(3).to_string(), "1.5");
+    assert_eq!(r.pending()[0].ready, Time(50));
+    assert_eq!(Time(50).t_fa(), 0.5);
+    assert_eq!(Time(150).to_string(), "1.5");
     r.conclude_level().unwrap();
     assert_eq!(r.heights(), vec![5, 7, 4, 3, 1, 0, 0]);
 }
@@ -88,17 +88,17 @@ fn r2_tree_matches_the_reference_wiring_table() {
     use CellKind::{Fa, Ha};
     let s = |v: &[&str]| v.iter().map(|x| x.to_string()).collect::<Vec<_>>();
     let expected = vec![
-        (1, Fa, 0, 1, s(&["a0_b1", "a1_b0", "c0_d1"]), Time(2)),
-        (2, Fa, 0, 1, s(&["c1_d0", "e1", "e0"]), Time(2)),
-        (3, Ha, 0, 2, s(&["a0_b2", "a1_b1"]), Time(1)),
-        (4, Fa, 1, 1, s(&["f0", "s1", "s2"]), Time(4)),
-        (5, Fa, 1, 2, s(&["a2_b0", "c1_d1", "e1"]), Time(2)),
-        (6, Fa, 1, 2, s(&["s3", "k1", "k2"]), Time(4)),
-        (7, Fa, 1, 3, s(&["a1_b2", "a2_b1", "k3"]), Time(3)),
-        (8, Fa, 2, 0, s(&["a0_b0", "c0_d0", "e0"]), Time(2)),
-        (9, Fa, 2, 2, s(&["s5", "k4", "s6"]), Time(6)),
-        (10, Fa, 2, 3, s(&["k5", "s7", "k6"]), Time(6)),
-        (11, Ha, 2, 4, s(&["a2_b2", "k7"]), Time(4)),
+        (1, Fa, 0, 1, s(&["a0_b1", "a1_b0", "c0_d1"]), Time(100)),
+        (2, Fa, 0, 1, s(&["c1_d0", "e1", "e0"]), Time(100)),
+        (3, Ha, 0, 2, s(&["a0_b2", "a1_b1"]), Time(50)),
+        (4, Fa, 1, 1, s(&["f0", "s1", "s2"]), Time(200)),
+        (5, Fa, 1, 2, s(&["a2_b0", "c1_d1", "e1"]), Time(100)),
+        (6, Fa, 1, 2, s(&["s3", "k1", "k2"]), Time(200)),
+        (7, Fa, 1, 3, s(&["a1_b2", "a2_b1", "k3"]), Time(150)),
+        (8, Fa, 2, 0, s(&["a0_b0", "c0_d0", "e0"]), Time(100)),
+        (9, Fa, 2, 2, s(&["s5", "k4", "s6"]), Time(300)),
+        (10, Fa, 2, 3, s(&["k5", "s7", "k6"]), Time(300)),
+        (11, Ha, 2, 4, s(&["a2_b2", "k7"]), Time(200)),
     ];
     assert_eq!(table, expected);
 }

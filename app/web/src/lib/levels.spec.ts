@@ -1,6 +1,6 @@
 // Caminho relativo: app/web/src/lib/levels.spec.ts
 import { describe, expect, it } from 'vitest';
-import { columnLayout, formatHalves, visibleTop } from './levels';
+import { columnLayout, formatHundredths, visibleTop } from './levels';
 import type { LevelPoint, Snapshot } from './core';
 
 const pt = (id: number, column: number, signal = `p${id}`): LevelPoint => ({
@@ -51,11 +51,13 @@ describe('visibleTop (EXP-09)', () => {
 	});
 });
 
-describe('formatHalves', () => {
-	it('writes half units in the locale', () => {
-		expect(formatHalves(0, 'pt-br')).toBe('0');
-		expect(formatHalves(5, 'pt-br')).toBe('2,5');
-		expect(formatHalves(5, 'en')).toBe('2.5');
-		expect(formatHalves(12, 'en')).toBe('6');
+describe('formatHundredths', () => {
+	it('writes hundredths in the locale, without trailing zeros', () => {
+		expect(formatHundredths(0, 'pt-br')).toBe('0');
+		expect(formatHundredths(250, 'pt-br')).toBe('2,5');
+		expect(formatHundredths(250, 'en')).toBe('2.5');
+		expect(formatHundredths(600, 'en')).toBe('6');
+		expect(formatHundredths(125, 'pt-br')).toBe('1,25');
+		expect(formatHundredths(1, 'en')).toBe('0.01');
 	});
 });
