@@ -36,7 +36,8 @@ impl fmt::Display for Time {
 }
 
 /// Area and delay of each cell in hundredths of `A_FA` and `T_FA` (GER-04, GER-12). The
-/// default is the convention of spec 00: FA 1 and 1, HA 0.5 and 0.5.
+/// default is the convention of spec 00: FA 1 and 1, HA 0.5 and 0.5. A counter without a
+/// cost of its own costs what its internal FA network costs (ADR 0005).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Costs {
@@ -44,6 +45,14 @@ pub struct Costs {
     pub fa_delay: u32,
     pub ha_area: u32,
     pub ha_delay: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub c73_area: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub c73_delay: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub c154_area: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub c154_delay: Option<u32>,
 }
 
 impl Default for Costs {
@@ -53,6 +62,10 @@ impl Default for Costs {
             fa_delay: 100,
             ha_area: 50,
             ha_delay: 50,
+            c73_area: None,
+            c73_delay: None,
+            c154_area: None,
+            c154_delay: None,
         }
     }
 }
@@ -64,24 +77,41 @@ impl Costs {
     /// Greatest value of a cost: 100.
     pub const MAX: u32 = 10_000;
 
-    /// Every cost within [`Costs::MIN`] and [`Costs::MAX`].
+    /// Every cost given within [`Costs::MIN`] and [`Costs::MAX`].
     pub fn is_valid(&self) -> bool {
         [self.fa_area, self.fa_delay, self.ha_area, self.ha_delay]
-            .iter()
-            .all(|v| (Costs::MIN..=Costs::MAX).contains(v))
+            .into_iter()
+            .chain(
+                [
+                    self.c73_area,
+                    self.c73_delay,
+                    self.c154_area,
+                    self.c154_delay,
+                ]
+                .into_iter()
+                .flatten(),
+            )
+            .all(|v| (Costs::MIN..=Costs::MAX).contains(&v))
     }
 
+    /// Area of a cell. A 7:3 is 4 FA and a 15:4 is 11 FA unless given its own (ADR 0005).
     pub fn area(&self, kind: CellKind) -> u32 {
         match kind {
             CellKind::Fa => self.fa_area,
             CellKind::Ha => self.ha_area,
+            CellKind::C73 => self.c73_area.unwrap_or(4 * self.fa_area),
+            CellKind::C154 => self.c154_area.unwrap_or(11 * self.fa_area),
         }
     }
 
+    /// Delay of a cell, the same for all its outputs. The internal network of a 7:3 is 3 FA
+    /// deep and that of a 15:4 is 5 FA deep (ADR 0005).
     pub fn delay(&self, kind: CellKind) -> Time {
         Time(match kind {
             CellKind::Fa => self.fa_delay,
             CellKind::Ha => self.ha_delay,
+            CellKind::C73 => self.c73_delay.unwrap_or(3 * self.fa_delay),
+            CellKind::C154 => self.c154_delay.unwrap_or(5 * self.fa_delay),
         })
     }
 }
@@ -97,6 +127,8 @@ pub enum Origin {
     Sum { cell: usize },
     /// Carry output of cell `cell`.
     Carry { cell: usize },
+    /// Output of weight `2^bit` of counter `cell`, `bit` 2 or 3 (ADR 0005).
+    Upper { cell: usize, bit: u8 },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -107,10 +139,56 @@ pub struct Point {
     pub origin: Origin,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum CellKind {
     Fa,
     Ha,
+    /// One-column counter, 7 inputs and 3 outputs (ADR 0005).
+    C73,
+    /// One-column counter, 15 inputs and 4 outputs.
+    C154,
+}
+
+impl CellKind {
+    /// The kind formed by `count` points of one column, if any.
+    pub fn with_inputs(count: usize) -> Option<CellKind> {
+        match count {
+            2 => Some(CellKind::Ha),
+            3 => Some(CellKind::Fa),
+            7 => Some(CellKind::C73),
+            15 => Some(CellKind::C154),
+            _ => None,
+        }
+    }
+
+    pub fn inputs(self) -> usize {
+        match self {
+            CellKind::Ha => 2,
+            CellKind::Fa => 3,
+            CellKind::C73 => 7,
+            CellKind::C154 => 15,
+        }
+    }
+
+    /// Name of cell `n` in the diagram, the tables and the VHDL: `FA3`, `HA3`, `C73_3`,
+    /// `C154_3` (spec 05).
+    pub fn instance(self, n: usize) -> String {
+        match self {
+            CellKind::Fa => format!("FA{n}"),
+            CellKind::Ha => format!("HA{n}"),
+            CellKind::C73 => format!("C73_{n}"),
+            CellKind::C154 => format!("C154_{n}"),
+        }
+    }
+
+    /// Output bits; bit `i` goes to column `j + i`.
+    pub fn outputs(self) -> u32 {
+        match self {
+            CellKind::Fa | CellKind::Ha => 2,
+            CellKind::C73 => 3,
+            CellKind::C154 => 4,
+        }
+    }
 }
 
 /// A cell formed over the current level, not numbered yet.
@@ -135,6 +213,9 @@ pub struct Cell {
     pub sum: PointId,
     /// `None` when the carry fell at or beyond column `W` and was dropped (CMP-09).
     pub carry: Option<PointId>,
+    /// Outputs of weight 2 and 3 of a counter, those below `W` (ADR 0005); empty for FA
+    /// and HA.
+    pub upper: Vec<PointId>,
     pub ready: Time,
 }
 
@@ -165,6 +246,8 @@ pub enum CpaBlock {
 pub struct Metrics {
     pub fa: usize,
     pub ha: usize,
+    pub c73: usize,
+    pub c154: usize,
     pub and_gates: usize,
     /// Area of the FA and HA in hundredths of `A_FA`, under the reduction's costs.
     pub area: u32,
@@ -341,22 +424,22 @@ impl Reduction {
         h
     }
 
-    /// Identifier of the signal a point carries: `a1_b0`, `e0`, `s3`, `k3`.
+    /// Identifier of the signal a point carries: `a1_b0`, `e0`, `s3`, `k3`, `k3_2`.
     pub fn signal(&self, point: &Point) -> String {
         match point.origin {
             Origin::Input { dot } => self.input_signals[dot].clone(),
             Origin::Sum { cell } => format!("s{cell}"),
             Origin::Carry { cell } => format!("k{cell}"),
+            Origin::Upper { cell, bit } => format!("k{cell}_{bit}"),
         }
     }
 
-    /// Forms an FA (3 points) or an HA (2 points) over the current level (CMP-01, CMP-02).
+    /// Forms an FA (3 points), an HA (2), a 7:3 counter (7) or a 15:4 counter (15) over the
+    /// current level (CMP-01, CMP-02, CMP-18).
     pub fn form_cell(&mut self, selection: &[PointId]) -> Result<CellKind, Rejection> {
-        let kind = match selection.len() {
-            3 => CellKind::Fa,
-            2 => CellKind::Ha,
-            count => return Err(Rejection::WrongCount { count }),
-        };
+        let kind = CellKind::with_inputs(selection.len()).ok_or(Rejection::WrongCount {
+            count: selection.len(),
+        })?;
         for (i, id) in selection.iter().enumerate() {
             if selection[..i].contains(id) {
                 return Err(Rejection::DuplicateSelection { point: *id });
@@ -421,6 +504,19 @@ impl Reduction {
             } else {
                 None // always 0: the total never reaches 2^W (CMP-09)
             };
+            // A counter's bits 2 and 3, dropped like the carry at or beyond W (ADR 0005).
+            let upper: Vec<PointId> = (2..pc.kind.outputs())
+                .filter(|&bit| pc.column + bit < self.output_width)
+                .map(|bit| {
+                    let origin = Origin::Upper {
+                        cell: number,
+                        bit: bit as u8,
+                    };
+                    let p = next.new_point(pc.column + bit, pc.ready, origin);
+                    outputs.push(p);
+                    p.id
+                })
+                .collect();
             cells.push(Cell {
                 number,
                 kind: pc.kind,
@@ -429,6 +525,7 @@ impl Reduction {
                 inputs: pc.inputs.clone(),
                 sum: sum.id,
                 carry,
+                upper,
                 ready: pc.ready,
             });
         }
@@ -572,6 +669,7 @@ impl Reduction {
                 inputs: inputs.iter().map(|p| p.id).collect(),
                 sum: sum.id,
                 carry: carry.map(|k| k.id),
+                upper: Vec::new(),
                 ready,
             });
         }
@@ -608,11 +706,13 @@ impl Reduction {
             .iter()
             .flat_map(|l| l.cells.iter().map(|c| c.kind))
             .chain(self.pending().iter().map(|c| c.kind));
-        let (mut fa, mut ha, mut area) = (0, 0, 0);
+        let (mut fa, mut ha, mut c73, mut c154, mut area) = (0, 0, 0, 0, 0);
         for k in kinds {
             match k {
                 CellKind::Fa => fa += 1,
                 CellKind::Ha => ha += 1,
+                CellKind::C73 => c73 += 1,
+                CellKind::C154 => c154 += 1,
             }
             area += self.costs.area(k);
         }
@@ -626,6 +726,8 @@ impl Reduction {
         Metrics {
             fa,
             ha,
+            c73,
+            c154,
             and_gates: self.and_gates,
             area,
             delay,
@@ -665,7 +767,7 @@ impl Reduction {
         while let Some(id) = stack.pop() {
             let number = match self.state().registry[id].origin {
                 Origin::Input { .. } => continue,
-                Origin::Sum { cell } | Origin::Carry { cell } => cell,
+                Origin::Sum { cell } | Origin::Carry { cell } | Origin::Upper { cell, .. } => cell,
             };
             if out.cells.contains(&number) {
                 continue;
@@ -745,8 +847,8 @@ fn recost(st: &mut State, costs: Costs) {
         for c in &mut level.cells {
             c.ready = Time(latest(&ready, &c.inputs) + costs.delay(c.kind).0);
             ready[c.sum] = c.ready;
-            if let Some(k) = c.carry {
-                ready[k] = c.ready;
+            for k in c.carry.iter().chain(&c.upper) {
+                ready[*k] = c.ready;
             }
         }
     }
@@ -784,13 +886,14 @@ fn recost(st: &mut State, costs: Costs) {
 }
 
 /// Canonical order of points (spec 02): readiness, then inputs before outputs; inputs by
-/// generation order, outputs by cell number with the sum before the carry.
+/// generation order, outputs by cell number and then by bit: sum, carry, bits 2 and 3.
 pub fn canonical(a: &Point, b: &Point) -> Ordering {
     fn key(p: &Point) -> (Time, u8, usize, u8) {
         match p.origin {
             Origin::Input { dot } => (p.ready, 0, dot, 0),
             Origin::Sum { cell } => (p.ready, 1, cell, 0),
             Origin::Carry { cell } => (p.ready, 1, cell, 1),
+            Origin::Upper { cell, bit } => (p.ready, 1, cell, bit),
         }
     }
     key(a).cmp(&key(b))

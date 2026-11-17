@@ -38,6 +38,7 @@ fn ger12_each_cost_goes_from_0_01_to_100() {
             fa_delay,
             ha_area,
             ha_delay,
+            ..Costs::default()
         };
         assert_eq!(c.is_valid(), ok, "{c:?}");
     }
@@ -106,6 +107,7 @@ fn ger12_custom_costs_move_the_critical_path_to_another_branch() {
         fa_delay: 40,
         ha_area: 70,
         ha_delay: 50,
+        ..Costs::default()
     };
     let r = branch_case(costs);
     let m = r.metrics();
@@ -131,6 +133,7 @@ fn ger12_changing_costs_recomputes_readiness_of_every_state() {
         fa_delay: 40,
         ha_area: 50,
         ha_delay: 50,
+        ..Costs::default()
     };
     r.set_costs(fast_fa);
     assert_eq!(r.metrics().delay, Time(150));
@@ -156,6 +159,7 @@ fn costs_strategy() -> impl Strategy<Value = Costs> {
         fa_delay: b,
         ha_area: c,
         ha_delay: d,
+        ..Costs::default()
     })
 }
 
@@ -226,6 +230,7 @@ fn ger12_the_cpa_keeps_its_incoming_carry_last() {
         fa_delay: 40,
         ha_area: 50,
         ha_delay: 50,
+        ..Costs::default()
     };
     let build = |costs: Costs| {
         let mut r = reduction(

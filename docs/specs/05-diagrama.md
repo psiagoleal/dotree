@@ -15,8 +15,10 @@ dois artefatos que o estudante copia para a folha de resposta.
 | Produto parcial | $a_1 b_0$ | `a1_b0` |
 | Ponto fixo em 1 (constante, EXP-15) | $1$ | `one` |
 | Saídas da célula $n$ | $s_n$, $k_n$ | `s<n>`, `k<n>` |
+| Bits 2 e 3 do contador $n$ (ADR 0005) | $k_{n,2}$, $k_{n,3}$ | `k<n>_2`, `k<n>_3` |
 | Bit $j$ do resultado | $R_j$ | `R(j)` |
 | Célula $n$ | FA$n$ / HA$n$ | `FA<n>` / `HA<n>` |
+| Contador $n$ | 7:3 / 15:4 | `C73_<n>` / `C154_<n>` |
 
 O identificador é o mesmo em todos os artefatos gerados e é um identificador VHDL válido.
 

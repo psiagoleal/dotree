@@ -64,7 +64,7 @@ pub struct Exercise {
     pub pending: Vec<SavedCell>,
     pub reveals: Reveals,
     pub help: HelpLog,
-    /// Area and delay of FA and HA (GER-12). Optional, so files of v0.2 open with the
+    /// Area and delay of the cells (GER-12). Optional, so files of v0.2 open with the
     /// default; left out when it is the default, so their files do not change either.
     #[serde(default, skip_serializing_if = "is_default")]
     pub costs: Costs,
@@ -110,6 +110,8 @@ mod kind_code {
         s.serialize_str(match k {
             CellKind::Fa => "fa",
             CellKind::Ha => "ha",
+            CellKind::C73 => "c73",
+            CellKind::C154 => "c154",
         })
     }
 
@@ -117,6 +119,8 @@ mod kind_code {
         match String::deserialize(d)?.as_str() {
             "fa" => Ok(CellKind::Fa),
             "ha" => Ok(CellKind::Ha),
+            "c73" => Ok(CellKind::C73),
+            "c154" => Ok(CellKind::C154),
             k => Err(D::Error::custom(format!("unknown cell kind {k:?}"))),
         }
     }

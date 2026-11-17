@@ -1,7 +1,8 @@
 // Caminho relativo: app/core/src/vhdl/mod.rs
 //! Structural VHDL-93 template of the circuit (spec 06; MT-10).
 //!
-//! Generates `full_adder.vhd`, `half_adder.vhd` (only when there are HAs), the structural
+//! Generates `full_adder.vhd`, `half_adder.vhd` (only when there are HAs), the counters
+//! `counter_7_3.vhd` and `counter_15_4.vhd` (only when used, ADR 0005), the structural
 //! top, a behavioral twin with the same ports (`<name>_comportamental`, MT-21) and an
 //! exhaustive (or sampled) testbench that checks both. Identifiers are those of the diagram and
 //! the wiring table (spec 05). Comments and testbench messages follow the interface language:
@@ -20,15 +21,17 @@ use crate::reduce::{CellKind, Costs, Time};
 use crate::verify::sample_vectors;
 
 /// `to_bin` of the testbenches: a vector as a string of 0s and 1s for the reports.
-const TO_BIN: &str = "    function to_bin(v : std_logic_vector) return string is\n\
-             \x20       variable s : string(1 to v'length);\n\
-             \x20       variable j : integer := 1;\n\
+/// Its names, like every local of the testbenches, are longer than one letter: VHDL ignores
+/// case, so a local `n` or `v` would hide the port of a variable `N` or `V`.
+const TO_BIN: &str = "    function to_bin(bits : std_logic_vector) return string is\n\
+             \x20       variable str : string(1 to bits'length);\n\
+             \x20       variable pos : integer := 1;\n\
              \x20   begin\n\
-             \x20       for i in v'range loop\n\
-             \x20           if v(i) = '1' then s(j) := '1'; else s(j) := '0'; end if;\n\
-             \x20           j := j + 1;\n\
+             \x20       for idx in bits'range loop\n\
+             \x20           if bits(idx) = '1' then str(pos) := '1'; else str(pos) := '0'; end if;\n\
+             \x20           pos := pos + 1;\n\
              \x20       end loop;\n\
-             \x20       return s;\n\
+             \x20       return str;\n\
              \x20   end function to_bin;\n";
 
 /// Language of comments and testbench messages (VHD-06).
@@ -95,20 +98,38 @@ pub fn generate(
         name,
         lang: language,
     };
-    let has_ha = netlist.cells.iter().any(|c| c.kind == CellKind::Ha);
+    let used = |k: CellKind| netlist.cells.iter().any(|c| c.kind == k);
+    let parts = Parts {
+        ha: used(CellKind::Ha),
+        // The 15:4 is built of two 7:3.
+        c73: used(CellKind::C73) || used(CellKind::C154),
+        c154: used(CellKind::C154),
+    };
     let mut files = vec![VhdlFile {
         name: "full_adder.vhd".into(),
         contents: g.full_adder(),
     }];
-    if has_ha {
+    if parts.ha {
         files.push(VhdlFile {
             name: "half_adder.vhd".into(),
             contents: g.half_adder(),
         });
     }
+    if parts.c73 {
+        files.push(VhdlFile {
+            name: "counter_7_3.vhd".into(),
+            contents: g.counter_7_3(),
+        });
+    }
+    if parts.c154 {
+        files.push(VhdlFile {
+            name: "counter_15_4.vhd".into(),
+            contents: g.counter_15_4(),
+        });
+    }
     files.push(VhdlFile {
         name: format!("{name}.vhd"),
-        contents: g.top(has_ha),
+        contents: g.top(parts),
     });
     files.push(VhdlFile {
         name: format!("{name}{BEHAVIORAL_SUFFIX}.vhd"),
@@ -263,6 +284,8 @@ fn is_valid_name(name: &str, n: &Netlist) -> bool {
         "r",
         "full_adder",
         "half_adder",
+        "counter_7_3",
+        "counter_15_4",
         "dut",
         "seg7",
         "sw",
@@ -286,16 +309,22 @@ fn is_valid_name(name: &str, n: &Netlist) -> bool {
     );
     taken.extend(n.signals.iter().map(|s| s.ident()));
     for c in &n.cells {
-        taken.insert(format!("s{}", c.number));
-        taken.insert(format!("k{}", c.number));
-        taken.insert(format!(
-            "{}{}",
-            if c.kind == CellKind::Fa { "fa" } else { "ha" },
-            c.number
-        ));
+        taken.extend(c.outputs().into_iter().map(|w| n.ident(w)));
+        taken.insert(c.kind.instance(c.number).to_ascii_lowercase());
     }
     !RESERVED.contains(&lower.as_str()) && !taken.contains(&lower)
 }
+
+/// Components the top declares besides `full_adder`.
+#[derive(Debug, Clone, Copy)]
+struct Parts {
+    ha: bool,
+    c73: bool,
+    c154: bool,
+}
+
+const FA_COMPONENT: &str = "    component full_adder is\n        port (x, y, z : in std_logic; s, k : out std_logic);\n    end component full_adder;\n";
+const C73_COMPONENT: &str = "    component counter_7_3 is\n        port (x0, x1, x2, x3, x4, x5, x6 : in std_logic; y0, y1, y2 : out std_logic);\n    end component counter_7_3;\n";
 
 struct Gen<'a> {
     m: &'a DotMatrix,
@@ -331,6 +360,79 @@ impl Gen<'_> {
             self.t("somador completo (FA)", "full adder (FA)"),
             self.t("maioria", "majority"),
         )
+    }
+
+    /// The 7:3 counter of ADR 0005: two FA over six inputs, one over the two sums and the
+    /// seventh input, one over the three carries. 4 FA, 3 FA deep.
+    fn counter_7_3(&self) -> String {
+        let mut o = format!(
+            "-- counter_7_3 - {}\n-- {}\n",
+            self.t(
+                "contador 7:3: y2 y1 y0 = numero de entradas x em 1",
+                "7:3 counter: y2 y1 y0 = number of inputs x at 1"
+            ),
+            self.t(
+                "4 full_adder, 3 em serie (ADR 0005 do dotree)",
+                "4 full_adder, 3 in series (dotree ADR 0005)"
+            )
+        );
+        o.push_str(
+            "library ieee;\nuse ieee.std_logic_1164.all;\nuse work.all;\n\n\
+             entity counter_7_3 is\n    port (\n        x0, x1, x2, x3, x4, x5, x6 : in  std_logic;\n        y0, y1, y2                 : out std_logic\n    );\nend counter_7_3;\n\n\
+             architecture structural of counter_7_3 is\n",
+        );
+        o.push_str(FA_COMPONENT);
+        o.push_str(
+            "    signal s1, k1, s2, k2, k3 : std_logic;\nbegin\n\
+             \x20   FA1 : full_adder port map (x => x0, y => x1, z => x2, s => s1, k => k1);\n\
+             \x20   FA2 : full_adder port map (x => x3, y => x4, z => x5, s => s2, k => k2);\n\
+             \x20   FA3 : full_adder port map (x => s1, y => s2, z => x6, s => y0, k => k3);\n\
+             \x20   FA4 : full_adder port map (x => k1, y => k2, z => k3, s => y1, k => y2);\n\
+             end architecture structural;\n",
+        );
+        o
+    }
+
+    /// The 15:4 counter of ADR 0005: two 7:3 over fourteen inputs, then a 3-bit ripple
+    /// adder of their counts with the fifteenth input as the incoming carry. 11 FA, 5 deep.
+    fn counter_15_4(&self) -> String {
+        let mut o = format!(
+            "-- counter_15_4 - {}\n-- {}\n",
+            self.t(
+                "contador 15:4: y3 y2 y1 y0 = numero de entradas x em 1",
+                "15:4 counter: y3 y2 y1 y0 = number of inputs x at 1"
+            ),
+            self.t(
+                "2 counter_7_3 e 3 full_adder em serie (ADR 0005 do dotree)",
+                "2 counter_7_3 and 3 full_adder in series (dotree ADR 0005)"
+            )
+        );
+        let xs: Vec<String> = (0..15).map(|i| format!("x{i}")).collect();
+        let _ = write!(
+            o,
+            "library ieee;\nuse ieee.std_logic_1164.all;\nuse work.all;\n\n\
+             entity counter_15_4 is\n    port (\n        {} : in  std_logic;\n        y0, y1, y2, y3 : out std_logic\n    );\nend counter_15_4;\n\n\
+             architecture structural of counter_15_4 is\n",
+            xs.join(", ")
+        );
+        o.push_str(FA_COMPONENT);
+        o.push_str(C73_COMPONENT);
+        o.push_str("    signal a0, a1, a2, b0, b1, b2, c1, c2 : std_logic;\nbegin\n");
+        for (label, from, out) in [("CA", 0, "a"), ("CB", 7, "b")] {
+            let ins: Vec<String> = (0..7).map(|i| format!("x{i} => x{}", from + i)).collect();
+            let _ = writeln!(
+                o,
+                "    {label} : counter_7_3 port map ({}, y0 => {out}0, y1 => {out}1, y2 => {out}2);",
+                ins.join(", ")
+            );
+        }
+        o.push_str(
+            "    FA1 : full_adder port map (x => a0, y => b0, z => x14, s => y0, k => c1);\n\
+             \x20   FA2 : full_adder port map (x => a1, y => b1, z => c1, s => y1, k => c2);\n\
+             \x20   FA3 : full_adder port map (x => a2, y => b2, z => c2, s => y2, k => y3);\n\
+             end architecture structural;\n",
+        );
+        o
     }
 
     fn half_adder(&self) -> String {
@@ -384,7 +486,7 @@ impl Gen<'_> {
         let w = self.n.output_width as usize;
         let c = if w >= 64 { c } else { c & ((1u64 << w) - 1) };
         if c <= MAX_INTEGER {
-            format!("to_unsigned({c}, W)")
+            format!("to_unsigned({c}, R_WIDTH)")
         } else {
             format!("unsigned'(\"{c:0w$b}\")")
         }
@@ -432,7 +534,8 @@ impl Gen<'_> {
         o.push_str("\nlibrary ieee;\nuse ieee.std_logic_1164.all;\nuse ieee.numeric_std.all;\n\n");
         o.push_str(&self.entity(&entity));
         let _ = writeln!(o, "architecture comportamental of {entity} is");
-        let _ = writeln!(o, "    constant W : natural := {};", n.output_width);
+        // Not `W`: VHDL ignores case, and a variable `W` is a port of the same name.
+        let _ = writeln!(o, "    constant R_WIDTH : natural := {};", n.output_width);
         o.push_str("begin\n    R <= std_logic_vector(\n");
         for (i, t) in n.terms.iter().enumerate() {
             let mut factors: Vec<String> = Vec::new();
@@ -442,11 +545,11 @@ impl Gen<'_> {
             factors.extend(
                 t.vars
                     .iter()
-                    .map(|&v| format!("resize(unsigned({}), W)", port_name(v))),
+                    .map(|&v| format!("resize(unsigned({}), R_WIDTH)", port_name(v))),
             );
             let mut term = factors[0].clone();
             for f in &factors[1..] {
-                term = format!("resize({term} * {f}, W)");
+                term = format!("resize({term} * {f}, R_WIDTH)");
             }
             let lead = if i == 0 { "      " } else { "    + " };
             let _ = writeln!(o, "        {lead}{term}");
@@ -455,11 +558,17 @@ impl Gen<'_> {
         o
     }
 
-    fn top(&self, has_ha: bool) -> String {
+    fn top(&self, parts: Parts) -> String {
         let n = self.n;
         let w = n.output_width;
         let mut o = String::new();
         let (fa, ha) = n.cell_counts();
+        // Counters are listed only when used, so headers without them do not change.
+        let counters: String = [(CellKind::C73, "7:3"), (CellKind::C154, "15:4")]
+            .into_iter()
+            .filter(|&(k, _)| n.count(k) > 0)
+            .map(|(k, name)| format!(", {} {name}", n.count(k)))
+            .collect();
 
         // ---- header (VHD-03)
         let _ = writeln!(
@@ -499,7 +608,7 @@ impl Gen<'_> {
         }
         let _ = writeln!(
             o,
-            "-- {}: {fa} FA, {ha} HA, {} AND; {} {} A_FA; {} {} T_FA",
+            "-- {}: {fa} FA, {ha} HA{counters}, {} AND; {} {} A_FA; {} {} T_FA",
             self.t("Metricas", "Metrics"),
             n.and_gates(),
             self.t("area", "area"),
@@ -511,8 +620,7 @@ impl Gen<'_> {
         // checked (GER-12).
         let c = n.costs;
         if c != Costs::default() {
-            let _ = writeln!(
-                o,
+            let mut line = format!(
                 "-- {}: FA {} A_FA, {} T_FA; HA {} A_FA, {} T_FA",
                 self.t("Custos", "Costs"),
                 self.hundredths(c.fa_area),
@@ -520,6 +628,17 @@ impl Gen<'_> {
                 self.hundredths(c.ha_area),
                 self.hundredths(c.ha_delay),
             );
+            for (k, name) in [(CellKind::C73, "7:3"), (CellKind::C154, "15:4")] {
+                if n.count(k) > 0 {
+                    let _ = write!(
+                        line,
+                        "; {name} {} A_FA, {} T_FA",
+                        self.hundredths(c.area(k)),
+                        self.hundredths(c.delay(k).0)
+                    );
+                }
+            }
+            let _ = writeln!(o, "{line}");
         }
         // `use work.all` makes full_adder and half_adder directly visible, which VHDL-93
         // requires for the default binding of their components (GHDL follows it strictly).
@@ -530,9 +649,20 @@ impl Gen<'_> {
 
         // ---- architecture
         let _ = writeln!(o, "architecture structural of {} is", self.name);
-        o.push_str("    component full_adder is\n        port (x, y, z : in std_logic; s, k : out std_logic);\n    end component full_adder;\n");
-        if has_ha {
+        o.push_str(FA_COMPONENT);
+        if parts.ha {
             o.push_str("    component half_adder is\n        port (x, y : in std_logic; s, k : out std_logic);\n    end component half_adder;\n");
+        }
+        if n.count(CellKind::C73) > 0 {
+            o.push_str(C73_COMPONENT);
+        }
+        if parts.c154 {
+            let xs: Vec<String> = (0..15).map(|i| format!("x{i}")).collect();
+            let _ = writeln!(
+                o,
+                "    component counter_15_4 is\n        port ({} : in std_logic; y0, y1, y2, y3 : out std_logic);\n    end component counter_15_4;",
+                xs.join(", ")
+            );
         }
         let _ = writeln!(
             o,
@@ -554,9 +684,8 @@ impl Gen<'_> {
             )
         );
         for c in &n.cells {
-            let _ = writeln!(o, "    signal s{} : std_logic;", c.number);
-            if c.has_carry {
-                let _ = writeln!(o, "    signal k{} : std_logic;", c.number);
+            for w in c.outputs() {
+                let _ = writeln!(o, "    signal {} : std_logic;", n.ident(w));
             }
         }
         o.push_str("begin\n");
@@ -597,26 +726,28 @@ impl Gen<'_> {
                     ),
                 };
             }
-            let (label, comp, names): (&str, &str, &[&str]) = match c.kind {
-                CellKind::Fa => ("FA", "full_adder", &["x", "y", "z"]),
-                CellKind::Ha => ("HA", "half_adder", &["x", "y"]),
+            let (comp, ins, outs): (&str, Vec<String>, Vec<String>) = match c.kind {
+                CellKind::Fa => ("full_adder", names(&["x", "y", "z"]), names(&["s", "k"])),
+                CellKind::Ha => ("half_adder", names(&["x", "y"]), names(&["s", "k"])),
+                CellKind::C73 => ("counter_7_3", numbered("x", 7), numbered("y", 3)),
+                CellKind::C154 => ("counter_15_4", numbered("x", 15), numbered("y", 4)),
             };
-            let ins: Vec<String> = names
+            let mut map: Vec<String> = ins
                 .iter()
                 .zip(&c.inputs)
                 .map(|(f, &wire)| format!("{f} => {}", n.ident(wire)))
                 .collect();
-            let k = if c.has_carry {
-                format!("k{}", c.number)
-            } else {
-                "open".into()
-            };
+            // Outputs dropped at or beyond W (CMP-09) are left open.
+            let driven = c.outputs();
+            map.extend(outs.iter().enumerate().map(|(i, f)| {
+                let to = driven.get(i).map_or("open".into(), |&w| n.ident(w));
+                format!("{f} => {to}")
+            }));
             let _ = writeln!(
                 o,
-                "    {label}{} : {comp} port map ({}, s => s{}, k => {k});  -- 2^{}",
-                c.number,
-                ins.join(", "),
-                c.number,
+                "    {} : {comp} port map ({});  -- 2^{}",
+                c.kind.instance(c.number),
+                map.join(", "),
                 c.column
             );
         }
@@ -919,7 +1050,7 @@ impl Gen<'_> {
         o.push_str("    stimulus : process\n");
         let _ = writeln!(
             o,
-            "        variable v        : std_logic_vector({} downto 0);",
+            "        variable vec      : std_logic_vector({} downto 0);",
             bits - 1
         );
         let _ = writeln!(
@@ -935,18 +1066,18 @@ impl Gen<'_> {
         o.push_str("        variable wide     : unsigned(31 downto 0);\n");
         o.push_str("        variable ok       : boolean;\n");
         o.push_str("        variable errors   : natural := 0;\n    begin\n");
-        let _ = writeln!(o, "        for n in 0 to {} loop", total - 1);
+        let _ = writeln!(o, "        for idx in 0 to {} loop", total - 1);
         let _ = writeln!(
             o,
-            "            v := std_logic_vector(to_unsigned(n, {bits}));"
+            "            vec := std_logic_vector(to_unsigned(idx, {bits}));"
         );
-        let _ = writeln!(o, "            SW({} downto 0) <= v;", bits - 1);
+        let _ = writeln!(o, "            SW({} downto 0) <= vec;", bits - 1);
         let offsets = n.offsets();
         for &(v, width) in &n.variables {
             let lo = offsets[&v];
             let _ = writeln!(
                 o,
-                "            {} <= v({} downto {lo});",
+                "            {} <= vec({} downto {lo});",
                 port_name(v),
                 lo + width - 1
             );
@@ -974,7 +1105,7 @@ impl Gen<'_> {
         o.push_str("            if not ok then\n                errors := errors + 1;\n                if errors <= 10 then\n");
         let _ = writeln!(
             o,
-            "                    report \"{label}: {}\" & integer'image(n) & \": LEDR = \" & to_bin(LEDR) & \", {} \" & to_bin(std_logic_vector(expected)) & \", HEX0 = \" & to_bin(HEX0) severity error;",
+            "                    report \"{label}: {}\" & integer'image(idx) & \": LEDR = \" & to_bin(LEDR) & \", {} \" & to_bin(std_logic_vector(expected)) & \", HEX0 = \" & to_bin(HEX0) severity error;",
             self.t("ERRO no vetor ", "ERROR at vector "),
             self.t("esperado R =", "expected R ="),
         );
@@ -1145,7 +1276,7 @@ impl Gen<'_> {
         o.push_str("    stimulus : process\n");
         let _ = writeln!(
             o,
-            "        variable v           : std_logic_vector({} downto 0);",
+            "        variable vec         : std_logic_vector({} downto 0);",
             bits - 1
         );
         let _ = writeln!(
@@ -1160,20 +1291,20 @@ impl Gen<'_> {
         );
         o.push_str("        variable errors      : natural := 0;\n        variable errors_comp : natural := 0;\n    begin\n");
         if exhaustive {
-            let _ = writeln!(o, "        for n in 0 to {} loop", total - 1);
+            let _ = writeln!(o, "        for idx in 0 to {} loop", total - 1);
             let _ = writeln!(
                 o,
-                "            v := std_logic_vector(to_unsigned(n, {bits}));"
+                "            vec := std_logic_vector(to_unsigned(idx, {bits}));"
             );
         } else {
-            o.push_str("        for n in VECTORS'range loop\n            v := VECTORS(n);\n");
+            o.push_str("        for idx in VECTORS'range loop\n            vec := VECTORS(idx);\n");
         }
         let offsets = n.offsets();
         for &(v, width) in &n.variables {
             let lo = offsets[&v];
             let _ = writeln!(
                 o,
-                "            {} <= v({} downto {lo});",
+                "            {} <= vec({} downto {lo});",
                 port_name(v),
                 lo + width - 1
             );
@@ -1189,7 +1320,7 @@ impl Gen<'_> {
             );
             let _ = writeln!(
                 o,
-                "                    report \"{label}: {}\" & integer'image(n) & \": R = \" & to_bin({out}) & \", {} \" & to_bin(std_logic_vector(expected)) severity error;",
+                "                    report \"{label}: {}\" & integer'image(idx) & \": R = \" & to_bin({out}) & \", {} \" & to_bin(std_logic_vector(expected)) severity error;",
                 self.t("ERRO no vetor ", "ERROR at vector "),
                 self.t("esperado", "expected"),
             );
@@ -1213,4 +1344,13 @@ impl Gen<'_> {
         o.push_str("        wait;\n    end process stimulus;\nend architecture test;\n");
         o
     }
+}
+
+fn names(list: &[&str]) -> Vec<String> {
+    list.iter().map(|s| s.to_string()).collect()
+}
+
+/// `x0, x1, …` for the ports of a counter.
+fn numbered(prefix: &str, count: usize) -> Vec<String> {
+    (0..count).map(|i| format!("{prefix}{i}")).collect()
 }

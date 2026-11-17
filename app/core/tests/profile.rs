@@ -221,6 +221,7 @@ fn ger12_the_optimum_follows_the_costs() {
         fa_delay: 100,
         ha_area: 30,
         ha_delay: 30,
+        ..Costs::default()
     };
     let r = p.optimal_with_costs(cheap_ha).unwrap();
     assert!(p.reached(&r));
@@ -257,6 +258,7 @@ fn ger12_on_equal_area_the_optimum_takes_the_faster_circuit() {
         fa_delay: 100,
         ha_area: 33,
         ha_delay: 30,
+        ..Costs::default()
     };
     let m = p.optimal_with_costs(tie).unwrap().metrics();
     assert_eq!((m.fa, m.ha, m.area, m.delay), (0, 4, 132, Time(90)));

@@ -36,6 +36,8 @@ fn row(level: usize, kind: RowKind, msb_first: &[u32], fa: usize, ha: usize) -> 
         heights: msb_first.iter().rev().copied().collect(),
         fa,
         ha,
+        c73: 0,
+        c154: 0,
     }
 }
 

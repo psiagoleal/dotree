@@ -229,33 +229,32 @@ impl Verifier {
             .collect();
 
         let n = &self.netlist;
-        let mut sums = vec![0u64; n.cells.len() + 1];
-        let mut carries = vec![0u64; n.cells.len() + 1];
-        let value = |w: Wire, sums: &[u64], carries: &[u64]| match w {
+        // Output bits of each cell, bit 0 (sum) first.
+        let mut outs = vec![[0u64; 4]; n.cells.len() + 1];
+        let value = |w: Wire, outs: &[[u64; 4]]| match w {
             Wire::Input(i) => inputs[i],
-            Wire::Sum(c) => sums[c],
-            Wire::Carry(c) => carries[c],
+            Wire::Sum(c) => outs[c][0],
+            Wire::Carry(c) => outs[c][1],
+            Wire::Upper(c, bit) => outs[c][bit as usize],
         };
         for cell in &n.cells {
-            let x: Vec<u64> = cell
-                .inputs
-                .iter()
-                .map(|&w| value(w, &sums, &carries))
-                .collect();
-            let (s, k) = match cell.kind {
-                CellKind::Fa => (
+            let x: Vec<u64> = cell.inputs.iter().map(|&w| value(w, &outs)).collect();
+            outs[cell.number] = match cell.kind {
+                CellKind::Fa => [
                     x[0] ^ x[1] ^ x[2],
                     (x[0] & x[1]) | (x[0] & x[2]) | (x[1] & x[2]),
-                ),
-                CellKind::Ha => (x[0] ^ x[1], x[0] & x[1]),
+                    0,
+                    0,
+                ],
+                CellKind::Ha => [x[0] ^ x[1], x[0] & x[1], 0, 0],
+                // A counter is the number of its inputs at 1, not its internal network.
+                CellKind::C73 | CellKind::C154 => count_ones(&x),
             };
-            sums[cell.number] = s;
-            carries[cell.number] = k;
         }
         let result: Vec<u64> = n
             .result
             .iter()
-            .map(|w| w.map_or(0, |w| value(w, &sums, &carries)))
+            .map(|w| w.map_or(0, |w| value(w, &outs)))
             .collect();
 
         vectors.iter().enumerate().find_map(|(lane, &v)| {
@@ -275,4 +274,18 @@ impl Verifier {
             })
         })
     }
+}
+
+/// Bit-sliced count of the inputs at 1, lane by lane: up to 15 inputs in 4 bits.
+fn count_ones(x: &[u64]) -> [u64; 4] {
+    let mut acc = [0u64; 4];
+    for &v in x {
+        let mut carry = v;
+        for bit in &mut acc {
+            let next = *bit & carry;
+            *bit ^= carry;
+            carry = next;
+        }
+    }
+    acc
 }

@@ -262,6 +262,8 @@ fn kind_code(k: CellKind) -> &'static str {
     match k {
         CellKind::Fa => "fa",
         CellKind::Ha => "ha",
+        CellKind::C73 => "c73",
+        CellKind::C154 => "c154",
     }
 }
 
@@ -448,6 +450,7 @@ impl Session {
             Origin::Input { dot } => ("input", Some(self.dot_terms[dot])),
             Origin::Sum { .. } => ("sum", None),
             Origin::Carry { .. } => ("carry", None),
+            Origin::Upper { .. } => ("upper", None),
         };
         json!({"id": p.id, "column": p.column, "ready": p.ready.0,
                "signal": self.reduction.signal(p), "origin": origin, "term": term})
@@ -460,6 +463,21 @@ impl Session {
 
 fn costs_json(c: Costs) -> Value {
     serde_json::to_value(c).expect("plain data always serializes")
+}
+
+/// The first counter of a file, as the cell the interface cannot show yet (ADR 0005: the
+/// counters reach the interface in MT-32b).
+fn first_counter(ex: &Exercise) -> Option<StateError> {
+    let levels = ex.levels.iter().map(|l| &l.cells).chain([&ex.pending]);
+    levels.enumerate().find_map(|(level, cells)| {
+        let i = cells
+            .iter()
+            .position(|c| !matches!(c.kind, CellKind::Fa | CellKind::Ha))?;
+        Some(StateError::InconsistentCell {
+            level,
+            position: i + 1,
+        })
+    })
 }
 
 fn state_error(e: &StateError) -> Value {
@@ -516,6 +534,9 @@ impl Session {
         let open = || {
             let ex = Exercise::parse(file)?;
             let (m, r) = ex.restore()?;
+            if let Some(e) = first_counter(&ex) {
+                return Err(e);
+            }
             let mut s = Session::with(r, m, &ex.expression, &ex.widths, ex.profile());
             s.log = ex.help;
             s.width = ex.reveals.width;
@@ -649,6 +670,11 @@ impl Session {
         let Ok(selection) = serde_json::from_str::<Vec<PointId>>(selection_json) else {
             return json!({"ok": false, "rejection": {"code": "badSelection"}}).to_string();
         };
+        // Counters reach the interface in MT-32b (ADR 0005); until then, only FA and HA.
+        if selection.len() > 3 {
+            let count = selection.len();
+            return outcome(Err(Rejection::WrongCount { count }));
+        }
         outcome(
             self.reduction
                 .form_cell(&selection)

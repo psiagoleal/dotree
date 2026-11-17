@@ -65,10 +65,7 @@ impl Layout {
     /// Lays out a (possibly partial) netlist (DIA-01 to DIA-03, DIA-05, DIA-07).
     pub fn new(netlist: &Netlist) -> Layout {
         let n = netlist;
-        let source = |w: Wire| match w {
-            Wire::Input(_) => Endpoint::Inputs,
-            Wire::Sum(c) | Wire::Carry(c) => Endpoint::Cell(c),
-        };
+        let source = |w: Wire| w.cell().map_or(Endpoint::Inputs, Endpoint::Cell);
 
         let mut blocks: Vec<Block> = Vec::with_capacity(n.cells.len());
         let mut edges = Vec::new();
@@ -153,11 +150,10 @@ pub fn wiring_table(netlist: &Netlist) -> Vec<WiringRow> {
     n.cells
         .iter()
         .map(|c| {
-            let prefix = if c.kind == CellKind::Fa { "FA" } else { "HA" };
             let input = |i: usize| c.inputs.get(i).map(|&w| n.ident(w));
             let carry = c.has_carry.then_some(Wire::Carry(c.number));
             WiringRow {
-                cell: format!("{prefix}{}", c.number),
+                cell: c.kind.instance(c.number),
                 level: (!c.cpa).then_some(c.level),
                 column: c.column,
                 inputs: [input(0), input(1), input(2)],
@@ -192,10 +188,8 @@ fn critical_cells(n: &Netlist) -> Vec<usize> {
         let c = &n.cells[number - 1];
         let want = ready[number] - n.costs.delay(c.kind).0;
         for &w in &c.inputs {
-            if let Wire::Sum(p) | Wire::Carry(p) = w {
-                if ready[p] == want {
-                    stack.push(p);
-                }
+            if let Some(p) = w.cell().filter(|&p| ready[p] == want) {
+                stack.push(p);
             }
         }
     }

@@ -23,8 +23,8 @@ nível, um painel por nível.
 - **Ordem das entradas** de uma célula (x, y, z), usada no diagrama e no VHDL: ordem
   canônica dos pontos, que é: menor prontidão primeiro; empatando, pontos de entrada antes
   de saídas de célula; entre entradas, a ordem de geração (EXP-01); entre saídas, o número
-  da célula, soma antes do vai-um. No CPA, o vai-um da coluna anterior é sempre a última
-  entrada.
+  da célula, soma antes do vai-um, e depois os bits 2 e 3 de um contador. No CPA, o
+  vai-um da coluna anterior é sempre a última entrada.
 
 ## Critérios — células e níveis
 
@@ -37,6 +37,18 @@ nível, um painel por nível.
   criar um HA do mesmo modo, com prontidão $\max(t_{entradas})$ mais o atraso do HA
   ($0{,}5\,T_{FA}$ no padrão).
   *Prova:* teste do núcleo.
+- **CMP-20** — QUANDO o núcleo receber 7 ou 15 pontos da coluna $j$, ele DEVE formar um
+  contador 7:3 ou 15:4 (ADR 0005), que no nível seguinte põe o bit $i$ da contagem na
+  coluna $j+i$ (`s<n>`, `k<n>`, `k<n>_2` e, no 15:4, `k<n>_3`), todos com prontidão
+  $\max(t_{entradas})$ mais o atraso do contador (padrão: 3 e 5 $T_{FA}$). Uma saída em
+  coluna $\ge W$ é descartada como em CMP-09. Até o MT-32b, a interface não forma
+  contadores: 7 ou 15 pontos são recusados como em CMP-07, e um arquivo com contador é
+  recusado como célula inconsistente (SAL-03).
+  *Prova:* testes do núcleo (`tests/counters.rs`): 7:3 e 15:4 isolados, conferidos em
+  todas as entradas (128 e 32 768 vetores); um 7:3 na coluna 1 de R1, que tem 7 pontos,
+  completado com FA e conferido nos 16 384 vetores; descarte acima de $W$; contagens 4 a
+  6 e 8 a 14 recusadas; reduções aleatórias com contadores (proptest); a ponte recusa 7
+  pontos e o arquivo com contador.
 - **CMP-03** — O sistema DEVE permitir desfazer e refazer qualquer formação de célula,
   conclusão de nível e volta de nível, até o início do exercício. Uma ação nova depois de
   desfazer apaga o que poderia ser refeito.
