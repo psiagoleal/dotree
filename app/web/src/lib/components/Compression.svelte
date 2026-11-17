@@ -5,15 +5,10 @@
      it returns (ADR 0001). -->
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import {
-		type Cell,
-		type CellKind,
-		type CompressionSession,
-		type Costs,
-		type Snapshot
-	} from '#lib/core.ts';
+	import { type Cell, type CompressionSession, type Costs, type Snapshot } from '#lib/core.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
+	import { cellName, kindText } from '#lib/cells.ts';
 	import { cpaBlockMessage, rejectionMessage } from '#lib/errors.ts';
 	import { keyAction } from '#lib/keys.ts';
 	import { formatHundredths, visibleTop } from '#lib/levels.ts';
@@ -93,9 +88,8 @@
 	const top = $derived(visibleTop(snap, widthRevealed || complete ? outputWidth : null));
 	const critical = $derived(new Set(snap.critical.cells));
 	const dropped = $derived(snap.levels.flatMap((l) => l.cells).filter((c) => c.carry === null));
-	const KIND: Record<CellKind, string> = { fa: 'FA', ha: 'HA' };
 	const hundredths = (n: number) => formatHundredths(n, getLocale());
-	const name = (c: Cell) => m.cell_concluded({ kind: KIND[c.kind], number: c.number });
+	const name = (c: Cell) => cellName(c);
 
 	/** A box's accessible name says what its border and mark show. */
 	function label(base: string, isCritical: boolean, isDropped = false): string {
@@ -125,13 +119,13 @@
 
 	function form() {
 		const r = session.formCell(selected);
-		if (r.ok) refresh(m.formed_cell({ kind: KIND[r.kind ?? 'fa'] }));
+		if (r.ok) refresh(m.formed_cell({ kind: kindText(r.kind ?? 'fa') }));
 		else refusal = rejectionMessage(r.rejection);
 	}
 
 	function formSuggested(ids: number[]) {
 		const r = session.formCell(ids);
-		if (r.ok) refresh(m.formed_cell({ kind: KIND[r.kind ?? 'fa'] }));
+		if (r.ok) refresh(m.formed_cell({ kind: kindText(r.kind ?? 'fa') }));
 		else refusal = rejectionMessage(r.rejection);
 	}
 
@@ -201,6 +195,9 @@
 		<p class="metrics" data-testid="metrics" aria-label={m.metrics_title()}>
 			<span>FA <b>{snap.metrics.fa}</b></span>
 			<span>HA <b>{snap.metrics.ha}</b></span>
+			<!-- Counters only once used (CMP-20), so the usual exercise reads as before. -->
+			{#if snap.metrics.c73 > 0}<span>7:3 <b>{snap.metrics.c73}</b></span>{/if}
+			{#if snap.metrics.c154 > 0}<span>15:4 <b>{snap.metrics.c154}</b></span>{/if}
 			<span>AND <b>{snap.metrics.andGates}</b></span>
 			<span>{m.metric_area()} <b>{hundredths(snap.metrics.area)}</b> A<sub>FA</sub></span>
 			<span>{m.metric_delay()} <b>{hundredths(snap.metrics.delay)}</b> T<sub>FA</sub></span>
@@ -253,7 +250,7 @@
 			...c,
 			critical: showCritical && snap.critical.pending.includes(i),
 			label: label(
-				m.cell_pending({ kind: KIND[c.kind] }),
+				m.cell_pending({ kind: kindText(c.kind) }),
 				showCritical && snap.critical.pending.includes(i)
 			)
 		}))}

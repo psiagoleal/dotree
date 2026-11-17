@@ -546,6 +546,13 @@ Depois da entrega: MT-41 e a fila de "Depois da v0.2".
   vai-um, e precisa mostrar 7 ou 15 entradas e as saídas `k<n>_2` e `k<n>_3`; a origem
   `upper` dos pontos no snapshot.
 - **Depende de:** MT-32a
+- **Feito (2026-11-17):** a escolha é pela quantidade selecionada, como no FA e no HA: 7
+  ou 15 pontos (mouse ou teclado) formam o contador, e a recusa de contagem cita os
+  contadores (CMP-07). Borda dupla nos painéis; métricas, tabela de alturas e comparação
+  com 7:3 e 15:4 só quando usados; tabela de ligações com "Entradas" e "Bits 2 e 3" num
+  circuito com contador (DIA-04); bloco largo no diagrama (DIA-01); campos de custo dos
+  contadores, em branco = rede de FA (GER-12); regra e "Como usar". Travas do MT-32a
+  retiradas.
 
 ### MT-25a: Limites até 64 bits de entrada (P1, degrau 1)
 - **Objetivo:** 32 bits por variável, 64 bits de entrada no total e até 1024 pontos, com a

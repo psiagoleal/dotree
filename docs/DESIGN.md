@@ -48,6 +48,7 @@ ou métrica fica em segundo plano.
 | Visão indexada | o sinal em fonte monoespaçada com índices subscritos ($a_1 b_0$), na mesma posição do ponto |
 | FA | retângulo de borda contínua (1,5 px) em volta dos 3 pontos consumidos |
 | HA | retângulo de borda tracejada em volta dos 2 pontos |
+| Contador 7:3 / 15:4 | retângulo de borda dupla (4 px) em volta dos 7 ou 15 pontos (CMP-20) |
 | Caminho crítico | borda de 3 px na cor de destaque nas células críticas (CMP-15, DIA-05) |
 | Painel de nível | cabeçalho com $2^j$ por coluna, colunas alinhadas entre painéis, seta para o painel seguinte |
 | Diagrama de blocos | blocos FA/HA como retângulos com o nome (`FA12`); ligações rotuladas com o sinal |

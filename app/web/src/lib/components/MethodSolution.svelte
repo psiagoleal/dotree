@@ -9,6 +9,7 @@
 	import { untrack } from 'svelte';
 	import type { CompressionSession, Method, Snapshot } from '#lib/core.ts';
 	import { STAGE_KEY, methodTexts } from '#lib/methods.ts';
+	import { cellName } from '#lib/cells.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import { formatHundredths } from '#lib/levels.ts';
@@ -53,7 +54,6 @@
 	);
 	let solutionPath = $state(stage === 'path');
 
-	const KIND = { fa: 'FA', ha: 'HA' } as const;
 	const hundredths = (n: number) => formatHundredths(n, getLocale());
 
 	/** Reads the solution's snapshot and frees the WASM session right away. */
@@ -131,7 +131,7 @@
 					points={level.points}
 					groups={level.cells.map((c) => ({
 						...c,
-						label: m.cell_concluded({ kind: KIND[c.kind], number: c.number })
+						label: cellName(c)
 					}))}
 					{top}
 					{view}

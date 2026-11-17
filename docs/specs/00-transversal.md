@@ -84,7 +84,7 @@ Os mesmos nomes valem na interface, no núcleo, nos testes e no VHDL gerado.
 | **Produto parcial** | Sinal de entrada formado pelo AND dos bits de um monômio com 2 ou mais variáveis. Cada produto parcial distinto é **uma** porta AND de $n$ entradas. |
 | **FA** | Somador completo: consome 3 pontos da coluna $j$, produz soma em $j$ e vai-um em $j+1$. Elimina 1 ponto no total. |
 | **HA** | Meio-somador: consome 2 pontos da coluna $j$, produz soma em $j$ e vai-um em $j+1$. Não elimina pontos; desloca um para a coluna seguinte. |
-| **Contador 7:3 e 15:4** | Célula de uma coluna (ADR 0005): consome 7 (ou 15) pontos da coluna $j$ e produz a contagem dos que valem 1 em 3 (ou 4) bits, o bit $i$ na coluna $j+i$. Elimina 4 (ou 11) pontos. No núcleo desde o MT-32a; na interface, no MT-32b. |
+| **Contador 7:3 e 15:4** | Célula de uma coluna (ADR 0005): consome 7 (ou 15) pontos da coluna $j$ e produz a contagem dos que valem 1 em 3 (ou 4) bits, o bit $i$ na coluna $j+i$. Elimina 4 (ou 11) pontos. (CMP-20) |
 | **Vai-um descartado** | Vai-um que cairia numa coluna $\ge W$. Vale sempre 0 (CMP-09) e não vira ponto; elimina 1 ponto. |
 | **CPA** | Somador de propagação de vai-um (*ripple*) que fecha a compressão. Aceita colunas com no máximo 2 pontos, exceto a primeira coluna do CPA, que pode ter 3 (o terceiro faz o papel de *carry-in*). É formado por células FA e HA encadeadas (CMP-11). |
 | **Largura da saída $W$** | $W = \lceil \log_2(v_{max}+1) \rceil$, com $v_{max}$ o valor da expressão com todas as entradas no máximo. |
@@ -119,16 +119,18 @@ soluções de exemplo são todos com o padrão.
   desfazer; o desfazer continua percorrendo as células, já com os custos novos. Os custos
   vão no arquivo do exercício (SAL-02) e passam para a próxima matriz montada. SE um custo
   estiver fora da faixa ou tiver mais de duas casas decimais, ENTÃO o sistema DEVE
-  recusá-lo nomeando o campo, sem mudar nada. A AND continua fora da área. No núcleo, os
-  contadores aceitam área e atraso próprios na mesma faixa (`c73Area`, `c73Delay`,
-  `c154Area`, `c154Delay`, opcionais); o painel os ganha no MT-32b.
+  recusá-lo nomeando o campo, sem mudar nada. A AND continua fora da área. Os contadores
+  aceitam área e atraso próprios na mesma faixa (`c73Area`, `c73Delay`, `c154Area`,
+  `c154Delay`, opcionais); em branco, o contador custa a sua rede de FA, que o campo mostra
+  como dica.
   *Prova:* teste do núcleo com um caso calculado à mão em que o caminho crítico muda de
   ramo (`A+B+C+2(D+E)`, larguras 1: com o padrão, 2 $T_{FA}$ pelas células 1, 3 e 4; com
   FA de atraso 0,4, 1,5 $T_{FA}$ pelas células 2, 3 e 4; com FA 1,2 e HA 0,7 de área,
   3,3 $A_{FA}$); proptest: montar com uns custos é igual a montar com o padrão e trocar
   depois, em todo passo do desfazer; teste da busca ótima com custos (ver AJU-12); testes
   do arquivo (sem custos abre com o padrão; com custos, ida e volta); testes de componente
-  e de ponta a ponta de mudar, recarregar, passar para outra matriz e restaurar.
+  e de ponta a ponta de mudar, recarregar, passar para outra matriz e restaurar; testes
+  de componente do custo próprio do contador (aplicar, resumo, restaurar, recusa).
 
 ## Requisitos não-funcionais
 
@@ -213,9 +215,8 @@ A lista acompanha o `main` (ADR 0004): o que sai dela vira critério numa spec e
 [`plano-pos-v0.1.md`](../plano-pos-v0.1.md).
 
 - Números com sinal (complemento de dois, Baugh-Wooley), subtração e Booth (MT-33, MT-34).
-- Contadores 7:3 e 15:4 na interface (MT-32b; o núcleo já os tem, CMP-20). Outras
-  células compostas: compressor 4:2, blocos AMM e multiplicadores hierárquicos (MT-32,
-  MT-27). Na entrada por alturas, o nome do bloco
+- Células compostas além dos contadores 7:3 e 15:4: compressor 4:2, blocos AMM e
+  multiplicadores hierárquicos (MT-32, MT-27). Contadores nas soluções automáticas. Na entrada por alturas, o nome do bloco
   conhecido aparece só como ajuda (AJU-12).
 - CPA que não seja *ripple* (MT-36).
 - Mais de 16 bits por variável, 32 bits de entrada ou 256 pontos (MT-24, MT-25); fatias de

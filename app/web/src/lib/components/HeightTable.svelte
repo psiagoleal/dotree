@@ -28,6 +28,8 @@
 	const id = $props.id();
 	/** Highest column first, as in the level panels. */
 	const columns = $derived(rows.length === 0 ? [] : [...rows[0].heights.keys()].reverse());
+	// The counter columns only once a level has a counter (CMP-18, CMP-20), as in the Markdown.
+	const counters = $derived(rows.some((r) => r.c73 + r.c154 > 0));
 
 	function label(r: HeightRow): string {
 		switch (r.kind) {
@@ -69,6 +71,10 @@
 					{/each}
 					<th scope="col">FA</th>
 					<th scope="col">HA</th>
+					{#if counters}
+						<th scope="col">7:3</th>
+						<th scope="col">15:4</th>
+					{/if}
 				</tr>
 			</thead>
 			<tbody>
@@ -80,6 +86,10 @@
 						{/each}
 						<td>{r.kind === 'result' ? '—' : r.fa}</td>
 						<td>{r.kind === 'result' ? '—' : r.ha}</td>
+						{#if counters}
+							<td>{r.kind === 'result' ? '—' : r.c73}</td>
+							<td>{r.kind === 'result' ? '—' : r.c154}</td>
+						{/if}
 					</tr>
 				{/each}
 			</tbody>

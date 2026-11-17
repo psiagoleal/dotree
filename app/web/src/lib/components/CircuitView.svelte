@@ -55,8 +55,14 @@
 		level: m.table_level(),
 		column: m.table_column(),
 		sum: m.table_sum(),
-		carry: m.table_carry()
+		carry: m.table_carry(),
+		inputs: m.table_inputs(),
+		upper: m.table_upper()
 	});
+	// With a counter, every row lists its inputs in one column and its bits 2 and 3 in
+	// another, as the Markdown does (DIA-04, CMP-20).
+	const SEP = ', ';
+	const wide = $derived(rows.some((r) => r.inputs.length > 3));
 
 	function exportSvg() {
 		download('dotree-diagrama.svg', svg, 'image/svg+xml');
@@ -128,11 +134,16 @@
 						<th scope="col">{headers.cell}</th>
 						<th scope="col">{headers.level}</th>
 						<th scope="col">{headers.column}</th>
-						<th scope="col">x</th>
-						<th scope="col">y</th>
-						<th scope="col">z</th>
+						{#if wide}
+							<th scope="col">{headers.inputs}</th>
+						{:else}
+							<th scope="col">x</th>
+							<th scope="col">y</th>
+							<th scope="col">z</th>
+						{/if}
 						<th scope="col">{headers.sum}</th>
 						<th scope="col">{headers.carry}</th>
+						{#if wide}<th scope="col">{headers.upper}</th>{/if}
 					</tr>
 				</thead>
 				<tbody>
@@ -141,11 +152,27 @@
 							<td>{r.cell}</td>
 							<td>{r.level ?? 'CPA'}</td>
 							<td>2<sup>{r.column}</sup></td>
-							{#each r.inputs as input, i (i)}
-								<td>{@render wire(input, null)}</td>
-							{/each}
+							{#if wide}
+								<td class="inputs">
+									{#each r.inputs.filter((x) => x !== null) as input, i (i)}{#if i > 0}{SEP}{/if}<code
+											>{input}</code
+										>{/each}
+								</td>
+							{:else}
+								{#each r.inputs as input, i (i)}
+									<td>{@render wire(input, null)}</td>
+								{/each}
+							{/if}
 							<td>{@render wire(r.sum, r.sumResult)}</td>
 							<td>{@render wire(r.carry, r.carryResult)}</td>
+							{#if wide}
+								<td>
+									{#each r.upper as o, i (o.name)}{#if i > 0}{SEP}{/if}{@render wire(
+											o.name,
+											o.result
+										)}{:else}—{/each}
+								</td>
+							{/if}
 						</tr>
 					{/each}
 				</tbody>

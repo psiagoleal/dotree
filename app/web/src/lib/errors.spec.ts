@@ -116,7 +116,7 @@ describe('rejectionMessage (GER-02)', () => {
 			'Uma célula soma bits do mesmo peso.'
 		);
 		expect(rejectionMessage({ code: 'wrongCount', count: 4 }, 'pt-br')).toBe(
-			'Um FA usa 3 pontos; um HA usa 2. A seleção tem 4.'
+			'Um FA usa 3 pontos; um HA, 2; um contador 7:3, 7; e um contador 15:4, 15. A seleção tem 4.'
 		);
 		expect(rejectionMessage({ code: 'alreadyInCell', point: 3 }, 'pt-br')).toBe(
 			'Cada ponto entra em uma célula só por nível.'

@@ -65,7 +65,9 @@ describe('Compression (CMP-01, CMP-02, CMP-05, CMP-13 to CMP-15, GER-02)', () =>
 		await page.getByRole('button', { name: 'Formar célula' }).click();
 		await expect
 			.element(page.getByRole('alert'))
-			.toHaveTextContent('Um FA usa 3 pontos; um HA usa 2. A seleção tem 1.');
+			.toHaveTextContent(
+				'Um FA usa 3 pontos; um HA, 2; um contador 7:3, 7; e um contador 15:4, 15. A seleção tem 1.'
+			);
 		await expect.element(point('a0_b0', 0)).toHaveAttribute('aria-pressed', 'true');
 		expect(
 			page

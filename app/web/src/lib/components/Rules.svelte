@@ -10,6 +10,7 @@
 	<ul>
 		<li>{m.rules_fa()}</li>
 		<li>{m.rules_ha()}</li>
+		<li>{m.rules_counter()}</li>
 		<li>{m.rules_level()}</li>
 		<li>{m.rules_cpa()}</li>
 		<li>{m.rules_done()}</li>

@@ -24,6 +24,8 @@ const PT_HEADERS: TableHeaders = TableHeaders {
     column: "Coluna",
     sum: "Soma",
     carry: "Vai-um",
+    inputs: "Entradas",
+    upper: "Bits 2 e 3",
 };
 
 fn r1_matrix() -> DotMatrix {

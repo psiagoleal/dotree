@@ -79,8 +79,9 @@ modelo, porém, tem de servir aos outros tipos sem refazer a redução.
 - **Impacto negativo:** o tempo de um contador é o mesmo para todas as saídas, mais lento
   que a rede interna nos bits baixos. As soluções automáticas (Dadda, Wallace, ótima)
   continuam só com FA e HA.
-- **Trade-offs aceitos:** a interface só passa a formar contadores no MT-32b. Até lá, o
-  módulo WebAssembly recusa seleções de 7 ou 15 pontos com a mesma mensagem de hoje.
+- **Trade-offs aceitos:** a interface só passou a formar contadores no MT-32b. Entre os
+  dois tickets, o módulo WebAssembly recusava seleções de 7 ou 15 pontos e arquivos com
+  contador; o MT-32b tirou as duas travas.
 
 ## Diretriz de Conformidade de Código
 

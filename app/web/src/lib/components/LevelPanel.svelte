@@ -216,6 +216,12 @@
 	.cell.ha {
 		border-style: dashed;
 	}
+	/* Counters (CMP-20): a double border, so a 7:3 or 15:4 is told apart from an FA. */
+	.cell.c73,
+	.cell.c154 {
+		border-style: double;
+		border-width: 4px;
+	}
 	/* CMP-15, DESIGN.md: 3 px in the accent colour on every critical cell. */
 	.cell.critical {
 		border-width: 3px;
