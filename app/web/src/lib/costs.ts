@@ -5,9 +5,23 @@
 import { COST_MAX, COST_MIN, DEFAULT_COSTS, type Costs } from '#lib/core.ts';
 import { formatHundredths } from '#lib/levels.ts';
 
-/** The four fields, in the panel's order. */
+/** The four fields every exercise has, in the panel's order. */
 export const COST_KEYS = ['faArea', 'faDelay', 'haArea', 'haDelay'] as const;
 export type CostKey = (typeof COST_KEYS)[number];
+/** The counters' fields (ADR 0005): blank means the cost of the counter's FA network. */
+export const COUNTER_KEYS = ['c73Area', 'c73Delay', 'c154Area', 'c154Delay'] as const;
+export type CounterKey = (typeof COUNTER_KEYS)[number];
+
+/** What a counter costs without a cost of its own: 4 FA, 3 deep; 11 FA, 5 deep. */
+export function networkCost(c: Costs, k: CounterKey): number {
+	const times = { c73Area: 4, c73Delay: 3, c154Area: 11, c154Delay: 5 }[k];
+	return times * (k.endsWith('Area') ? c.faArea : c.faDelay);
+}
+
+/** The cost in force for a counter field: its own, or its network's. */
+export function counterCost(c: Costs, k: CounterKey): number {
+	return c[k] ?? networkCost(c, k);
+}
 
 /** A decimal typed by the user, in whole hundredths; null when it is not a number with at
  *  most two decimals from 0.01 to 100. */
@@ -24,5 +38,8 @@ export function costText(n: number, locale: string): string {
 }
 
 export function isDefaultCosts(c: Costs): boolean {
-	return COST_KEYS.every((k) => c[k] === DEFAULT_COSTS[k]);
+	return (
+		COST_KEYS.every((k) => c[k] === DEFAULT_COSTS[k]) &&
+		COUNTER_KEYS.every((k) => c[k] === undefined)
+	);
 }

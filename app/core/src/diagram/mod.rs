@@ -123,19 +123,29 @@ impl Layout {
 /// One row of the wiring table (DIA-04).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WiringRow {
-    /// `FA1`, `HA3`.
+    /// `FA1`, `HA3`, `C73_4`.
     pub cell: String,
     /// Level the cell consumed; `None` for the CPA.
     pub level: Option<usize>,
     pub column: u32,
-    /// x, y, z; `z` is `None` for an HA.
-    pub inputs: [Option<String>; 3],
+    /// x, y, z (`z` is `None` for an HA), or the 7 or 15 inputs of a counter, in canonical
+    /// order.
+    pub inputs: Vec<Option<String>>,
     pub sum: String,
     /// Result bit the sum drives, if any.
     pub sum_result: Option<u32>,
     /// `None` when the carry was dropped (CMP-09).
     pub carry: Option<String>,
     pub carry_result: Option<u32>,
+    /// Bits 2 and 3 of a counter that were not dropped; empty for FA and HA.
+    pub upper: Vec<Output>,
+}
+
+/// An output wire and the result bit it drives, if any.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Output {
+    pub name: String,
+    pub result: Option<u32>,
 }
 
 /// Rows of the wiring table, in cell-number order.
@@ -152,15 +162,25 @@ pub fn wiring_table(netlist: &Netlist) -> Vec<WiringRow> {
         .map(|c| {
             let input = |i: usize| c.inputs.get(i).map(|&w| n.ident(w));
             let carry = c.has_carry.then_some(Wire::Carry(c.number));
+            let upper = c
+                .outputs()
+                .into_iter()
+                .filter(|w| matches!(w, Wire::Upper(..)))
+                .map(|w| Output {
+                    name: n.ident(w),
+                    result: result_of.get(&w).copied(),
+                })
+                .collect();
             WiringRow {
                 cell: c.kind.instance(c.number),
                 level: (!c.cpa).then_some(c.level),
                 column: c.column,
-                inputs: [input(0), input(1), input(2)],
+                inputs: (0..c.inputs.len().max(3)).map(input).collect(),
                 sum: n.ident(Wire::Sum(c.number)),
                 sum_result: result_of.get(&Wire::Sum(c.number)).copied(),
                 carry: carry.map(|w| n.ident(w)),
                 carry_result: carry.and_then(|w| result_of.get(&w).copied()),
+                upper,
             }
         })
         .collect()
@@ -204,38 +224,61 @@ pub struct TableHeaders<'a> {
     pub column: &'a str,
     pub sum: &'a str,
     pub carry: &'a str,
+    /// Used only when the table has a counter: one column with every input, and one with
+    /// the bits 2 and 3.
+    pub inputs: &'a str,
+    pub upper: &'a str,
 }
 
-/// The wiring table as Markdown (DIA-06), in the format of spec 05.
+/// The wiring table as Markdown (DIA-06), in the format of spec 05. A table with a counter
+/// lists all the inputs of each row in one column, and the bits 2 and 3 in another.
 pub fn wiring_table_markdown(rows: &[WiringRow], headers: TableHeaders) -> String {
     let code = |s: &str| format!("`{s}`");
     let driving = |name: &str, result: Option<u32>| match result {
         Some(j) => format!("{} → `R({j})`", code(name)),
         None => code(name),
     };
+    let wide = rows.iter().any(|r| r.inputs.len() > 3);
     let h = headers;
-    let mut out = format!(
-        "| {} | {} | {} | x | y | z | {} | {} |\n|---|---|---|---|---|---|---|---|\n",
-        h.cell, h.level, h.column, h.sum, h.carry
-    );
+    let mut out = if wide {
+        format!(
+            "| {} | {} | {} | {} | {} | {} | {} |\n|---|---|---|---|---|---|---|\n",
+            h.cell, h.level, h.column, h.inputs, h.sum, h.carry, h.upper
+        )
+    } else {
+        format!(
+            "| {} | {} | {} | x | y | z | {} | {} |\n|---|---|---|---|---|---|---|---|\n",
+            h.cell, h.level, h.column, h.sum, h.carry
+        )
+    };
     for r in rows {
-        let input = |i: usize| r.inputs[i].as_deref().map_or("—".to_string(), code);
         let level = r.level.map_or("CPA".to_string(), |l| l.to_string());
         let carry = r
             .carry
             .as_deref()
             .map_or("—".to_string(), |k| driving(k, r.carry_result));
-        out.push_str(&format!(
-            "| {} | {} | $2^{}$ | {} | {} | {} | {} | {} |\n",
-            r.cell,
-            level,
-            r.column,
-            input(0),
-            input(1),
-            input(2),
-            driving(&r.sum, r.sum_result),
-            carry
-        ));
+        let inputs: Vec<String> = if wide {
+            let all: Vec<String> = r.inputs.iter().flatten().map(|s| code(s)).collect();
+            vec![all.join(", ")]
+        } else {
+            r.inputs
+                .iter()
+                .map(|i| i.as_deref().map_or("—".to_string(), code))
+                .collect()
+        };
+        let mut cells = vec![r.cell.clone(), level, format!("$2^{}$", r.column)];
+        cells.extend(inputs);
+        cells.push(driving(&r.sum, r.sum_result));
+        cells.push(carry);
+        if wide {
+            let upper: Vec<String> = r.upper.iter().map(|o| driving(&o.name, o.result)).collect();
+            cells.push(if upper.is_empty() {
+                "—".to_string()
+            } else {
+                upper.join(", ")
+            });
+        }
+        out.push_str(&format!("| {} |\n", cells.join(" | ")));
     }
     out
 }

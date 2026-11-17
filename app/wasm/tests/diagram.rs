@@ -61,12 +61,12 @@ fn wiring_rows_follow_spec_05() {
     assert_eq!(
         rows[0],
         json!({"cell": "FA1", "level": 0, "column": 1, "inputs": ["a0_b1", "a1_b0", "c0_d1"],
-               "sum": "s1", "sumResult": null, "carry": "k1", "carryResult": null})
+               "sum": "s1", "sumResult": null, "carry": "k1", "carryResult": null, "upper": []})
     );
     assert_eq!(
         rows[16],
         json!({"cell": "HA17", "level": null, "column": 5, "inputs": ["k11", "k16", null],
-               "sum": "s17", "sumResult": 5, "carry": "k17", "carryResult": 6})
+               "sum": "s17", "sumResult": 5, "carry": "k17", "carryResult": 6, "upper": []})
     );
 }
 
@@ -96,12 +96,14 @@ fn height_rows_go_from_level_0_to_the_result() {
     assert_eq!(rows.len(), 5);
     assert_eq!(
         rows[0],
-        json!({"level": 0, "kind": "level", "heights": [5, 7, 5, 2, 1, 0, 0], "fa": 2, "ha": 1})
+        json!({"level": 0, "kind": "level", "heights": [5, 7, 5, 2, 1, 0, 0], "fa": 2, "ha": 1,
+               "c73": 0, "c154": 0})
     );
     assert_eq!(rows[3]["kind"], "cpa");
     assert_eq!(
         rows[4],
-        json!({"level": 4, "kind": "result", "heights": [1, 1, 1, 1, 1, 1, 1], "fa": 0, "ha": 0})
+        json!({"level": 4, "kind": "result", "heights": [1, 1, 1, 1, 1, 1, 1], "fa": 0, "ha": 0,
+               "c73": 0, "c154": 0})
     );
     assert_eq!(parse(r1().height_table())[0]["kind"], "current");
 }

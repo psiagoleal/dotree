@@ -11,6 +11,9 @@ export interface Figures {
 	delay: number;
 	fa: number;
 	ha: number;
+	/** Counters 7:3 and 15:4 (CMP-20); only the student's circuit can have them. */
+	c73: number;
+	c154: number;
 	andGates: number;
 	/** Concluded levels before the CPA. */
 	levels: number;
@@ -33,6 +36,8 @@ export function figures(s: Snapshot): Figures {
 		delay,
 		fa: s.metrics.fa,
 		ha: s.metrics.ha,
+		c73: s.metrics.c73,
+		c154: s.metrics.c154,
 		andGates: s.metrics.andGates,
 		levels: s.levels.filter((l) => !l.cpa).length,
 		cpaWidth: cpa ? cpa.cells.length : null,

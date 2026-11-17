@@ -88,12 +88,18 @@ export type BuildResult = { ok: true; matrix: Matrix } | { ok: false; error: Cor
 // Times (`ready`, `delay`) and `area` are in hundredths of T_FA and A_FA, under the
 // session's costs (GER-12): by default FA = 100 and HA = 50.
 
-/** Area and delay of each cell, in hundredths of A_FA and T_FA (GER-12). */
+/** Area and delay of each cell, in hundredths of A_FA and T_FA (GER-12). A counter without
+ *  a cost of its own costs its FA network: 7:3 is 4 FA, 3 deep; 15:4 is 11 FA, 5 deep
+ *  (ADR 0005). */
 export interface Costs {
 	faArea: number;
 	faDelay: number;
 	haArea: number;
 	haDelay: number;
+	c73Area?: number;
+	c73Delay?: number;
+	c154Area?: number;
+	c154Delay?: number;
 }
 
 /** The convention of spec 00: FA 1 A_FA and 1 T_FA, HA 0.5 and 0.5. */
@@ -102,14 +108,16 @@ export const DEFAULT_COSTS: Costs = { faArea: 100, faDelay: 100, haArea: 50, haD
 export const COST_MIN = 1;
 export const COST_MAX = 10_000;
 
-export type CellKind = 'fa' | 'ha';
+/** FA, HA and the one-column counters 7:3 and 15:4 (ADR 0005, CMP-20). */
+export type CellKind = 'fa' | 'ha' | 'c73' | 'c154';
 
 export interface LevelPoint {
 	id: number;
 	column: number;
 	ready: number;
 	signal: string;
-	origin: 'input' | 'sum' | 'carry';
+	/** `upper` is bit 2 or 3 of a counter (`k<n>_2`, `k<n>_3`). */
+	origin: 'input' | 'sum' | 'carry' | 'upper';
 	/** Term of an input point (its colour); null for cell outputs. */
 	term: number | null;
 }
@@ -127,6 +135,8 @@ export interface Cell extends PendingCell {
 	sum: number;
 	/** Null when the carry fell beyond the output and was dropped (CMP-09). */
 	carry: number | null;
+	/** Bits 2 and 3 of a counter, those below W; empty for FA and HA. */
+	upper: number[];
 }
 
 export interface Level {
@@ -142,7 +152,15 @@ export interface Snapshot {
 	levels: Level[];
 	current: { points: LevelPoint[]; pending: PendingCell[] };
 	heights: number[];
-	metrics: { fa: number; ha: number; andGates: number; area: number; delay: number };
+	metrics: {
+		fa: number;
+		ha: number;
+		c73: number;
+		c154: number;
+		andGates: number;
+		area: number;
+		delay: number;
+	};
 	/** The costs the metrics and readiness were computed with (GER-12). */
 	costs: Costs;
 	canUndo: boolean;
@@ -321,11 +339,14 @@ export interface WiringRow {
 	/** Null for the CPA. */
 	level: number | null;
 	column: number;
+	/** x, y, z (z null for an HA), or the 7 or 15 inputs of a counter. */
 	inputs: (string | null)[];
 	sum: string;
 	sumResult: number | null;
 	carry: string | null;
 	carryResult: number | null;
+	/** Bits 2 and 3 of a counter and the result bit each drives. */
+	upper: { name: string; result: number | null }[];
 }
 
 /** One row of the height table (CMP-18): `heights[j]` is the height of column 2^j. */
@@ -335,6 +356,8 @@ export interface HeightRow {
 	heights: number[];
 	fa: number;
 	ha: number;
+	c73: number;
+	c154: number;
 }
 
 /** Words of the height table's Markdown, in the interface's language. */
@@ -350,6 +373,9 @@ export interface TableHeaders {
 	column: string;
 	sum: string;
 	carry: string;
+	/** Used when the table has a counter: all inputs in one column, bits 2 and 3 in another. */
+	inputs: string;
+	upper: string;
 }
 
 // ------------------------------------------------- verification and VHDL (MT-14b)

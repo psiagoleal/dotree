@@ -67,18 +67,26 @@
 	const number = $derived(
 		new Intl.NumberFormat(getLocale() === 'pt-br' ? 'pt-BR' : 'en', { maximumFractionDigits: 2 })
 	);
-	const ROWS: [() => string, (f: Figures) => number | null][] = [
+	// The counter rows appear only when a column used counters (CMP-20).
+	const counters = $derived(columns.some((c) => c.f.c73 + c.f.c154 > 0));
+	const ROWS = $derived<[() => string, (f: Figures) => number | null][]>([
 		[m.comparison_area, (f) => f.area],
 		[m.comparison_delay, (f) => f.delay],
 		[() => 'FA', (f) => f.fa],
 		[() => 'HA', (f) => f.ha],
+		...(counters
+			? ([
+					[() => '7:3', (f) => f.c73],
+					[() => '15:4', (f) => f.c154]
+				] as [() => string, (f: Figures) => number | null][])
+			: []),
 		[() => 'AND', (f) => f.andGates],
 		[m.comparison_levels, (f) => f.levels],
 		[m.comparison_cpa_width, (f) => f.cpaWidth],
 		[m.comparison_critical, (f) => f.critical],
 		[m.comparison_area_delay, (f) => f.areaDelay],
 		[m.comparison_area_delay2, (f) => f.areaDelay2]
-	];
+	]);
 	const show = (v: number | null) => (v === null ? '—' : number.format(v));
 	const yesNo = (v: boolean | null) =>
 		v === null ? '—' : v ? m.comparison_yes() : m.comparison_no();

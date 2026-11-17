@@ -1,7 +1,6 @@
 // Caminho relativo: app/wasm/tests/counters.rs
-//! MT-32a (ADR 0005): the core has the 7:3 and 15:4 counters, but the interface only gets
-//! them in MT-32b. Until then the bridge refuses 7 or 15 points with the count rejection
-//! the interface already explains, and refuses files with counters.
+//! MT-32b (ADR 0005, CMP-20): the 7:3 and 15:4 counters through the bridge. Seven or fifteen
+//! points form a counter; the snapshot, the tables, the file and the costs carry it.
 
 use dotree_wasm::Session;
 use serde_json::{Value, json};
@@ -14,8 +13,12 @@ fn seven() -> Session {
     .expect("opens")
 }
 
+fn json(s: &str) -> Value {
+    serde_json::from_str(s).unwrap()
+}
+
 fn all_points(s: &Session) -> String {
-    let v: Value = serde_json::from_str(&s.snapshot()).unwrap();
+    let v = json(&s.snapshot());
     let ids: Vec<u64> = v["current"]["points"]
         .as_array()
         .unwrap()
@@ -25,29 +28,81 @@ fn all_points(s: &Session) -> String {
     json!(ids).to_string()
 }
 
-#[test]
-fn seven_points_are_refused_until_mt_32b() {
+fn counted() -> Session {
     let mut s = seven();
-    let out: Value = serde_json::from_str(&s.form_cell(&all_points(&s))).unwrap();
-    assert_eq!(
-        out,
-        json!({"ok": false, "rejection": {"code": "wrongCount", "count": 7}})
-    );
-    let v: Value = serde_json::from_str(&s.snapshot()).unwrap();
-    assert_eq!(v["current"]["pending"], json!([]));
+    let out = json(&s.form_cell(&all_points(&s)));
+    assert_eq!(out, json!({"ok": true, "kind": "c73"}));
+    s.conclude_level();
+    s
 }
 
 #[test]
-fn a_file_with_a_counter_is_refused_until_mt_32b() {
-    let s = seven();
-    let mut file: Value = serde_json::from_str(&s.exercise()).unwrap();
-    file["pending"] = json!([{"kind": "c73", "column": 0, "inputs": [0, 1, 2, 3, 4, 5, 6]}]);
-    let err: Value = match Session::restore(&file.to_string()) {
-        Ok(_) => panic!("accepted"),
-        Err(e) => serde_json::from_str(&e).unwrap(),
-    };
+fn seven_points_form_a_7_3_counter() {
+    let s = counted();
+    let v = json(&s.snapshot());
     assert_eq!(
-        err,
-        json!({"code": "inconsistentCell", "level": 0, "position": 1})
+        v["metrics"],
+        json!({"fa": 0, "ha": 0, "c73": 1, "c154": 0, "andGates": 0, "area": 400, "delay": 300})
     );
+    let cell = &v["levels"][0]["cells"][0];
+    assert_eq!(cell["kind"], "c73");
+    let upper = cell["upper"].as_array().unwrap();
+    assert_eq!(upper.len(), 1);
+    let top = v["current"]["points"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|p| p["id"] == upper[0])
+        .unwrap();
+    assert_eq!(
+        (&top["signal"], &top["origin"], &top["column"]),
+        (&json!("k1_2"), &json!("upper"), &json!(2))
+    );
+    assert!(v["result"].is_array(), "complete: one point per column");
+}
+
+#[test]
+fn the_tables_carry_the_counter() {
+    let s = counted();
+    let rows = json(&s.wiring_table());
+    assert_eq!(rows[0]["cell"], "C73_1");
+    assert_eq!(rows[0]["inputs"].as_array().unwrap().len(), 7);
+    assert_eq!(rows[0]["upper"], json!([{"name": "k1_2", "result": 2}]));
+    let md = s.wiring_table_markdown(
+        r#"{"cell":"Célula","level":"Nível","column":"Coluna","sum":"Soma","carry":"Vai-um","inputs":"Entradas","upper":"Bits 2 e 3"}"#,
+    );
+    assert!(
+        md.starts_with("| Célula | Nível | Coluna | Entradas | Soma | Vai-um | Bits 2 e 3 |\n"),
+        "{md}"
+    );
+    let heights = json(&s.height_table());
+    assert_eq!(
+        (&heights[0]["c73"], &heights[0]["c154"]),
+        (&json!(1), &json!(0))
+    );
+}
+
+#[test]
+fn a_file_with_a_counter_opens_again() {
+    let s = counted();
+    let back = Session::restore(&s.exercise()).expect("opens");
+    assert_eq!(
+        json(&back.snapshot())["levels"],
+        json(&s.snapshot())["levels"]
+    );
+}
+
+#[test]
+fn counters_take_costs_of_their_own() {
+    let mut s = counted();
+    let costs =
+        r#"{"faArea":100,"faDelay":100,"haArea":50,"haDelay":50,"c73Area":250,"c73Delay":150}"#;
+    assert!(s.set_costs(costs));
+    assert_eq!(json(&s.costs()), json(costs));
+    let m = &json(&s.snapshot())["metrics"];
+    assert_eq!((&m["area"], &m["delay"]), (&json!(250), &json!(150)));
+    // Without them, the counter follows the FA again.
+    assert!(s.set_costs(r#"{"faArea":120,"faDelay":100,"haArea":50,"haDelay":50}"#));
+    assert_eq!(json(&s.snapshot())["metrics"]["area"], 480);
+    assert!(!s.set_costs(r#"{"faArea":100,"faDelay":100,"haArea":50,"haDelay":50,"c154Area":0}"#));
 }

@@ -465,21 +465,6 @@ fn costs_json(c: Costs) -> Value {
     serde_json::to_value(c).expect("plain data always serializes")
 }
 
-/// The first counter of a file, as the cell the interface cannot show yet (ADR 0005: the
-/// counters reach the interface in MT-32b).
-fn first_counter(ex: &Exercise) -> Option<StateError> {
-    let levels = ex.levels.iter().map(|l| &l.cells).chain([&ex.pending]);
-    levels.enumerate().find_map(|(level, cells)| {
-        let i = cells
-            .iter()
-            .position(|c| !matches!(c.kind, CellKind::Fa | CellKind::Ha))?;
-        Some(StateError::InconsistentCell {
-            level,
-            position: i + 1,
-        })
-    })
-}
-
 fn state_error(e: &StateError) -> Value {
     match e {
         StateError::Malformed(detail) => json!({"code": "malformed", "detail": detail}),
@@ -534,9 +519,6 @@ impl Session {
         let open = || {
             let ex = Exercise::parse(file)?;
             let (m, r) = ex.restore()?;
-            if let Some(e) = first_counter(&ex) {
-                return Err(e);
-            }
             let mut s = Session::with(r, m, &ex.expression, &ex.widths, ex.profile());
             s.log = ex.help;
             s.width = ex.reveals.width;
@@ -547,13 +529,14 @@ impl Session {
 
     // ------------------------------------------------------------ costs (GER-12, MT-45)
 
-    /// Area and delay of FA and HA, in hundredths: `{faArea, faDelay, haArea, haDelay}`.
+    /// Area and delay of the cells, in hundredths: `{faArea, faDelay, haArea, haDelay}` and,
+    /// when given, `c73Area`, `c73Delay`, `c154Area` and `c154Delay` (ADR 0005).
     pub fn costs(&self) -> String {
         costs_json(self.reduction.costs()).to_string()
     }
 
     /// Sets new costs (the same JSON as `costs`) and recomputes readiness, metrics and the
-    /// solutions under them. False, with nothing changed, for anything else than four whole
+    /// solutions under them. False, with nothing changed, for anything else than whole
     /// numbers from 1 to 10 000. Not a step of the undo history, and not a help.
     #[wasm_bindgen(js_name = setCosts)]
     pub fn set_costs(&mut self, costs_json: &str) -> bool {
@@ -630,7 +613,7 @@ impl Session {
                     .map(|c| {
                         json!({"number": c.number, "kind": kind_code(c.kind), "column": c.column,
                                "inputs": c.inputs, "sum": c.sum, "carry": c.carry,
-                               "ready": c.ready.0})
+                               "upper": c.upper, "ready": c.ready.0})
                     })
                     .collect();
                 json!({"points": self.points(&l.points), "cells": cells, "cpa": l.cpa})
@@ -646,7 +629,8 @@ impl Session {
                 "pending": r.pending().iter().map(pending).collect::<Vec<_>>(),
             },
             "heights": r.heights(),
-            "metrics": {"fa": m.fa, "ha": m.ha, "andGates": m.and_gates,
+            "metrics": {"fa": m.fa, "ha": m.ha, "c73": m.c73, "c154": m.c154,
+                        "andGates": m.and_gates,
                         "area": m.area, "delay": m.delay.0},
             "costs": costs_json(r.costs()),
             "canUndo": r.can_undo(),
@@ -670,11 +654,6 @@ impl Session {
         let Ok(selection) = serde_json::from_str::<Vec<PointId>>(selection_json) else {
             return json!({"ok": false, "rejection": {"code": "badSelection"}}).to_string();
         };
-        // Counters reach the interface in MT-32b (ADR 0005); until then, only FA and HA.
-        if selection.len() > 3 {
-            let count = selection.len();
-            return outcome(Err(Rejection::WrongCount { count }));
-        }
         outcome(
             self.reduction
                 .form_cell(&selection)
@@ -882,7 +861,10 @@ impl Session {
             .map(|r| {
                 json!({"cell": r.cell, "level": r.level, "column": r.column,
                        "inputs": r.inputs, "sum": r.sum, "sumResult": r.sum_result,
-                       "carry": r.carry, "carryResult": r.carry_result})
+                       "carry": r.carry, "carryResult": r.carry_result,
+                       "upper": r.upper.iter()
+                           .map(|o| json!({"name": o.name, "result": o.result}))
+                           .collect::<Vec<_>>()})
             })
             .collect();
         Value::from(rows).to_string()
@@ -902,7 +884,7 @@ impl Session {
                     RowKind::Result => "result",
                 };
                 json!({"level": r.level, "kind": kind, "heights": r.heights,
-                       "fa": r.fa, "ha": r.ha})
+                       "fa": r.fa, "ha": r.ha, "c73": r.c73, "c154": r.c154})
             })
             .collect();
         Value::from(rows).to_string()
@@ -931,12 +913,14 @@ impl Session {
     pub fn wiring_table_markdown(&self, headers_json: &str) -> String {
         let h: Value = serde_json::from_str(headers_json).unwrap_or_default();
         let get = |k: &str| h[k].as_str().unwrap_or(k).to_owned();
-        let (cell, level, column, sum, carry) = (
+        let (cell, level, column, sum, carry, inputs, upper) = (
             get("cell"),
             get("level"),
             get("column"),
             get("sum"),
             get("carry"),
+            get("inputs"),
+            get("upper"),
         );
         let netlist = Netlist::partial(&self.matrix, &self.reduction);
         diagram::wiring_table_markdown(
@@ -947,6 +931,8 @@ impl Session {
                 column: &column,
                 sum: &sum,
                 carry: &carry,
+                inputs: &inputs,
+                upper: &upper,
             },
         )
     }

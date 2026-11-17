@@ -76,8 +76,9 @@ O contrato é uma spec só, viva ([`docs/specs/`](docs/specs/README.md), ADR
 Cada uma aponta para o critério da spec ou o ticket que a trataria.
 
 - **Sem sinal:** nada de complemento de dois, subtração ou Booth (MT-33, MT-34).
-- **Só FA e HA** como células; contadores maiores, compressor 4:2 e blocos AMM não entram
-  no exercício (MT-32). Na entrada por alturas, o nome do bloco é só uma ajuda (AJU-12).
+- **Células:** FA, HA e os contadores 7:3 e 15:4; o compressor 4:2 e os blocos AMM não
+  entram no exercício (MT-32), e as soluções automáticas usam só FA e HA. Na entrada por
+  alturas, o nome do bloco é só uma ajuda (AJU-12).
 - **CPA só *ripple*** (MT-36).
 - **Tamanho:** até 16 bits por variável, 32 bits de entrada e 256 pontos (MT-24, MT-25);
   perfil até 26 pontos e 16 colunas (EXP-16).

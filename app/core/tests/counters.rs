@@ -592,3 +592,98 @@ fn cmp18_the_height_table_counts_the_counters() {
     let rows = height_table(&r);
     assert_eq!((rows[0].fa, rows[0].c73), (1, 1));
 }
+
+// ---------------------------------------------------------------- tables (MT-32b)
+
+use dotree_core::diagram::{TableHeaders, wiring_table, wiring_table_markdown};
+use dotree_core::heights::{HeightHeaders, height_table_markdown};
+
+const HEADERS: TableHeaders = TableHeaders {
+    cell: "Célula",
+    level: "Nível",
+    column: "Coluna",
+    sum: "Soma",
+    carry: "Vai-um",
+    inputs: "Entradas",
+    upper: "Bits 2 e 3",
+};
+
+#[test]
+fn dia04_a_counter_row_lists_every_input_and_its_bits_2_and_3() {
+    let (m, r) = one_counter(15);
+    let n = Netlist::from_reduction(&m, &r).unwrap();
+    let rows = wiring_table(&n);
+    assert_eq!(rows[0].cell, "C154_1");
+    assert_eq!(rows[0].inputs.len(), 15);
+    assert_eq!(rows[0].inputs[14].as_deref(), Some("o0"));
+    let upper: Vec<(&str, Option<u32>)> = rows[0]
+        .upper
+        .iter()
+        .map(|o| (o.name.as_str(), o.result))
+        .collect();
+    assert_eq!(upper, [("k1_2", Some(2)), ("k1_3", Some(3))]);
+    assert_eq!(
+        wiring_table_markdown(&rows, HEADERS),
+        "| Célula | Nível | Coluna | Entradas | Soma | Vai-um | Bits 2 e 3 |\n\
+         |---|---|---|---|---|---|---|\n\
+         | C154_1 | 0 | $2^0$ | `a0`, `b0`, `c0`, `d0`, `e0`, `f0`, `g0`, `h0`, `i0`, `j0`, `k0`, \
+         `l0`, `m0`, `n0`, `o0` | `s1` → `R(0)` | `k1` → `R(1)` | `k1_2` → `R(2)`, `k1_3` → `R(3)` |\n"
+    );
+}
+
+#[test]
+fn dia04_with_a_counter_the_fa_rows_take_the_same_columns() {
+    let mut r = r1();
+    r.form_cell(&column(&r, 1)).unwrap();
+    r.conclude_level().unwrap();
+    finish_with_fa(&mut r);
+    let m = matrix(
+        "A*B + C*D + 3(E+F) + G",
+        &[
+            ('A', 3),
+            ('B', 3),
+            ('C', 2),
+            ('D', 2),
+            ('E', 2),
+            ('F', 1),
+            ('G', 1),
+        ],
+    );
+    let rows = wiring_table(&Netlist::from_reduction(&m, &r).unwrap());
+    // An FA keeps x, y, z, and an HA a missing z.
+    let fa = rows.iter().find(|r| r.cell.starts_with("FA")).unwrap();
+    assert_eq!(fa.inputs.len(), 3);
+    assert!(fa.upper.is_empty());
+    let md = wiring_table_markdown(&rows, HEADERS);
+    let fa_line = md
+        .lines()
+        .find(|l| l.starts_with(&format!("| {} |", fa.cell)))
+        .unwrap();
+    assert_eq!(fa_line.matches(" | ").count(), 6, "{fa_line}");
+    assert!(fa_line.ends_with(" | — |"), "{fa_line}");
+}
+
+#[test]
+fn cmp18_the_height_table_shows_counter_columns_only_when_used() {
+    let pt = HeightHeaders {
+        level: "Nível",
+        current: "atual",
+        result: "Resultado",
+    };
+    let (_, r) = one_counter(7);
+    let md = height_table_markdown(&dotree_core::heights::height_table(&r), pt);
+    assert_eq!(
+        md,
+        "| Nível | $2^2$ | $2^1$ | $2^0$ | FA | HA | 7:3 | 15:4 |\n\
+         |---|---|---|---|---|---|---|---|\n\
+         | 0 | 0 | 0 | 7 | 0 | 0 | 1 | 0 |\n\
+         | Resultado | 1 | 1 | 1 | — | — | — | — |\n"
+    );
+    let plain = height_table_markdown(&dotree_core::heights::height_table(&r1()), pt);
+    assert!(
+        plain.starts_with(
+            "| Nível | $2^6$ | $2^5$ | $2^4$ | $2^3$ | $2^2$ | $2^1$ | $2^0$ | FA | HA |\n"
+        ),
+        "{plain}"
+    );
+}

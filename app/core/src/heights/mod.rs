@@ -110,12 +110,15 @@ pub struct HeightHeaders<'a> {
 pub fn height_table_markdown(rows: &[HeightRow], headers: HeightHeaders) -> String {
     let width = rows.first().map_or(0, |r| r.heights.len());
     let columns: Vec<String> = (0..width).rev().map(|j| format!("$2^{j}$")).collect();
+    // The counter columns appear only when some level has a counter (ADR 0005).
+    let counters = rows.iter().any(|r| r.c73 + r.c154 > 0);
+    let extra = if counters { " 7:3 | 15:4 |" } else { "" };
     let mut out = format!(
-        "| {} | {} | FA | HA |\n",
+        "| {} | {} | FA | HA |{extra}\n",
         headers.level,
         columns.join(" | ")
     );
-    out.push_str(&"|---".repeat(width + 3));
+    out.push_str(&"|---".repeat(width + 3 + if counters { 2 } else { 0 }));
     out.push_str("|\n");
     for r in rows {
         let label = match r.kind {
@@ -125,13 +128,21 @@ pub fn height_table_markdown(rows: &[HeightRow], headers: HeightHeaders) -> Stri
             RowKind::Result => headers.result.to_string(),
         };
         let cells: Vec<String> = r.heights.iter().rev().map(u32::to_string).collect();
-        let (fa, ha) = match r.kind {
-            RowKind::Result => ("—".to_string(), "—".to_string()),
-            _ => (r.fa.to_string(), r.ha.to_string()),
-        };
+        let mut counts = vec![r.fa, r.ha];
+        if counters {
+            counts.extend([r.c73, r.c154]);
+        }
+        let counts: Vec<String> = counts
+            .into_iter()
+            .map(|n| match r.kind {
+                RowKind::Result => "—".to_string(),
+                _ => n.to_string(),
+            })
+            .collect();
         out.push_str(&format!(
-            "| {label} | {} | {fa} | {ha} |\n",
-            cells.join(" | ")
+            "| {label} | {} | {} |\n",
+            cells.join(" | "),
+            counts.join(" | ")
         ));
     }
     out

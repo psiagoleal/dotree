@@ -102,3 +102,53 @@ describe('diagramSvg (DIA-02, DIA-03, DIA-05, DIA-06)', () => {
 		expect(svg).toContain('>a1·b0</text>');
 	});
 });
+
+describe('counters in the diagram (CMP-20)', () => {
+	// C73_1 over seven inputs in 2^0, then FA2 in 2^1 next to an FA3 over k1_2 in 2^2.
+	const c: Diagram = {
+		complete: false,
+		outputWidth: 3,
+		rows: 3,
+		andGates: 0,
+		blocks: [
+			{ cell: 1, kind: 'c73', row: 1, column: 0, slot: 0 },
+			{ cell: 2, kind: 'fa', row: 1, column: 1, slot: 0 },
+			{ cell: 3, kind: 'ha', row: 2, column: 2, slot: 0 }
+		],
+		edges: [
+			...['a0', 'b0', 'c0', 'd0', 'e0', 'f0', 'g0'].map((label) => ({
+				from: 'inputs' as const,
+				to: 1,
+				label
+			})),
+			{ from: 1, to: 3, label: 'k1_2' },
+			{ from: 2, to: 3, label: 'k2' }
+		],
+		outputs: [],
+		critical: [],
+		ands: []
+	};
+	const g = geometry(c, o);
+	const box = (n: number) => g.blocks.find((b) => b.cell === n)!;
+
+	it('draws a counter as wide as its seven inputs, still in its column', () => {
+		expect(box(1).w).toBe(7 * 34);
+		expect(box(2).w).toBe(96);
+		// 2^1 is to the left of the wide 2^0 and does not overlap it.
+		expect(box(2).x + box(2).w).toBeLessThanOrEqual(box(1).x);
+	});
+
+	it('names the block as the core does and spreads its input ports', () => {
+		const svg = diagramSvg(c, o);
+		expect(svg).toContain('<title>C73_1</title>');
+		expect(svg).toContain('>C73_1</text>');
+		// Seven different input positions along the top edge of the counter.
+		const xs = new Set(
+			[...svg.matchAll(/<path class="line" d="M([\d.]+) [\d.]+V/g)].map((m) => m[1])
+		);
+		expect(xs.size).toBe(7);
+		// Bit 2 leaves from the left part of the counter, left of its middle.
+		const k = /d="M([\d.]+) ([\d.]+)C[^"]*"\/>/.exec(svg)!;
+		expect(Number(k[1])).toBeLessThan(box(1).x + box(1).w / 2);
+	});
+});

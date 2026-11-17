@@ -32,8 +32,10 @@ O identificador é o mesmo em todos os artefatos gerados e é um identificador V
 ## Critérios
 
 - **DIA-01** — QUANDO houver ao menos um nível concluído, o sistema DEVE desenhar o diagrama
-  de blocos com cada célula (FA, HA) como um bloco posicionado pelo leiaute acima, e com as
-  ligações entre blocos.
+  de blocos com cada célula (FA, HA, contador) como um bloco posicionado pelo leiaute acima,
+  e com as ligações entre blocos. Um contador é tão largo quanto as suas 7 ou 15 entradas
+  pedem, com uma porta por entrada e as saídas da mais significativa (à esquerda) para a
+  soma (à direita).
   *Prova:* teste do núcleo do leiaute: posição (linha, coluna, ordem) de cada uma das 17
   células de R2 fixada no teste.
 - **DIA-02** — O sistema DEVE representar os produtos parciais como um bloco de portas AND
@@ -44,9 +46,13 @@ O identificador é o mesmo em todos os artefatos gerados e é um identificador V
   sinais declarados ou usados no VHDL gerado.
 - **DIA-04** — O sistema DEVE gerar a tabela de ligações com uma linha por célula: nome,
   nível, coluna, entradas x, y, z (na ordem canônica de `02-compressao.md`), soma e vai-um
-  (`—` quando descartado ou inexistente).
+  (`—` quando descartado ou inexistente). Num circuito com contador, as colunas x, y, z
+  dão lugar a uma coluna "Entradas", com todas as entradas da linha separadas por vírgula,
+  e uma coluna "Bits 2 e 3" vem depois do vai-um (CMP-20); sem contador, a tabela é a de
+  sempre.
   *Prova:* R2 → igual, caractere a caractere, à tabela de referência abaixo: o teste do núcleo
   lê este arquivo. Mudar a tabela daqui sem mudar o código (ou o contrário) quebra o teste.
+  Com contador: teste do núcleo do formato com 15 entradas, teste de componente e e2e.
 - **DIA-05** — QUANDO o usuário pedir, o sistema DEVE destacar no diagrama todas as células
   em algum caminho crítico (CMP-15).
   *Prova:* teste do núcleo: o diagrama recalcula as células críticas a partir da netlist, de

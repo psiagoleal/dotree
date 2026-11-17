@@ -24,13 +24,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   custos. Trocar não conta como ajuda nem entra no desfazer; os custos vão no arquivo
   (`costs`, opcional e só escrito quando difere do padrão; esquema 1 mantido) e passam
   para a próxima matriz (GER-12, MT-45).
-- **Contadores 7:3 e 15:4 no núcleo** (ADR 0005): 7 ou 15 pontos de uma coluna viram um
-  contador que põe a contagem em 3 ou 4 colunas (`s<n>`, `k<n>`, `k<n>_2`, `k<n>_3`).
-  Custo padrão tirado da rede de FA do VHDL (7:3: 4 $A_{FA}$ e 3 $T_{FA}$; 15:4: 11 e 5),
-  ou próprio (`costs.c73Area` etc., opcionais). Verificação, netlist, tabela de alturas,
-  arquivo (`c73`, `c154`) e VHDL (`counter_7_3.vhd`, `counter_15_4.vhd`, conferidos no
-  GHDL). A interface só forma contadores no MT-32b; até lá, 7 ou 15 pontos continuam
-  recusados (CMP-20, VHD-11, MT-32a).
+- **Contadores 7:3 e 15:4** (ADR 0005): selecionar 7 ou 15 pontos de uma coluna (pelo
+  mouse ou pelo teclado) forma um contador, que põe a contagem em 3 ou 4 colunas (`s<n>`,
+  `k<n>`, `k<n>_2`, `k<n>_3`). Custo padrão tirado da rede de FA do VHDL (7:3: 4 $A_{FA}$
+  e 3 $T_{FA}$; 15:4: 11 e 5), que segue o custo do FA, ou próprio, nos campos novos do
+  painel de custos (em branco, a rede; `costs.c73Area` etc. no arquivo, opcionais). O
+  contador aparece com borda dupla nos painéis, nas métricas, na tabela de alturas
+  (colunas 7:3 e 15:4), na tabela de ligações (coluna "Entradas" e "Bits 2 e 3"), no
+  diagrama (bloco `C73_<n>`), na comparação, na verificação e no VHDL
+  (`counter_7_3.vhd`, `counter_15_4.vhd`, conferidos no GHDL). A recusa de contagem passa
+  a citar os contadores. As soluções automáticas continuam com FA e HA (CMP-20, VHD-11,
+  MT-32a, MT-32b).
 
 ### Corrigido
 - VHDL de expressões com as variáveis `N`, `V`, `I`, `J` ou `W`: o VHDL não distingue

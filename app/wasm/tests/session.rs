@@ -59,7 +59,7 @@ fn opening_r1_gives_level_0() {
     assert_eq!(v["heights"], json!([5, 7, 5, 2, 1, 0, 0]));
     assert_eq!(
         v["metrics"],
-        json!({"fa": 0, "ha": 0, "andGates": 13, "area": 0, "delay": 0})
+        json!({"fa": 0, "ha": 0, "c73": 0, "c154": 0, "andGates": 13, "area": 0, "delay": 0})
     );
     assert_eq!(v["canUndo"], false);
     assert_eq!(v["canRedo"], false);
@@ -199,7 +199,7 @@ fn r2_tree_through_the_session() {
     assert_eq!(v["heights"], json!([3, 2, 1, 2, 2, 1, 0])); // CPA: FA, FA, HA, FA, FA, HA
     assert_eq!(
         v["metrics"],
-        json!({"fa": 9, "ha": 2, "andGates": 13, "area": 1000, "delay": 300})
+        json!({"fa": 9, "ha": 2, "c73": 0, "c154": 0, "andGates": 13, "area": 1000, "delay": 300})
     );
 }
 
@@ -294,7 +294,7 @@ fn r2_closed_with_the_cpa_is_complete() {
     // GER-04 / CMP-15: 13 FA, 4 HA, 15 A_FA, 6 T_FA; critical cells counted by hand.
     assert_eq!(
         v["metrics"],
-        json!({"fa": 13, "ha": 4, "andGates": 13, "area": 1500, "delay": 600})
+        json!({"fa": 13, "ha": 4, "c73": 0, "c154": 0, "andGates": 13, "area": 1500, "delay": 600})
     );
     assert_eq!(
         v["critical"],

@@ -37,18 +37,21 @@ nível, um painel por nível.
   criar um HA do mesmo modo, com prontidão $\max(t_{entradas})$ mais o atraso do HA
   ($0{,}5\,T_{FA}$ no padrão).
   *Prova:* teste do núcleo.
-- **CMP-20** — QUANDO o núcleo receber 7 ou 15 pontos da coluna $j$, ele DEVE formar um
-  contador 7:3 ou 15:4 (ADR 0005), que no nível seguinte põe o bit $i$ da contagem na
-  coluna $j+i$ (`s<n>`, `k<n>`, `k<n>_2` e, no 15:4, `k<n>_3`), todos com prontidão
-  $\max(t_{entradas})$ mais o atraso do contador (padrão: 3 e 5 $T_{FA}$). Uma saída em
-  coluna $\ge W$ é descartada como em CMP-09. Até o MT-32b, a interface não forma
-  contadores: 7 ou 15 pontos são recusados como em CMP-07, e um arquivo com contador é
-  recusado como célula inconsistente (SAL-03).
+- **CMP-20** — QUANDO o usuário formar uma célula com 7 ou 15 pontos da coluna $j$ (pelo
+  mouse ou pelo teclado, como as outras), o sistema DEVE criar um contador 7:3 ou 15:4
+  (ADR 0005), que no nível seguinte põe o bit $i$ da contagem na coluna $j+i$ (`s<n>`,
+  `k<n>`, `k<n>_2` e, no 15:4, `k<n>_3`), todos com prontidão $\max(t_{entradas})$ mais o
+  atraso do contador (padrão: 3 e 5 $T_{FA}$). Uma saída em coluna $\ge W$ é descartada
+  como em CMP-09. O contador aparece com borda dupla nos painéis, conta nas métricas
+  (7:3 e 15:4, só quando usados), nas tabelas, na comparação e no diagrama. As soluções
+  automáticas e as ajudas continuam só com FA e HA.
   *Prova:* testes do núcleo (`tests/counters.rs`): 7:3 e 15:4 isolados, conferidos em
   todas as entradas (128 e 32 768 vetores); um 7:3 na coluna 1 de R1, que tem 7 pontos,
   completado com FA e conferido nos 16 384 vetores; descarte acima de $W$; contagens 4 a
-  6 e 8 a 14 recusadas; reduções aleatórias com contadores (proptest); a ponte recusa 7
-  pontos e o arquivo com contador.
+  6 e 8 a 14 recusadas; reduções aleatórias com contadores (proptest); contrato da ponte
+  (`app/wasm/tests/counters.rs`); teste de componente com R1 (formar, concluir, tabelas,
+  custos); teste de ponta a ponta que forma um 7:3 pelo teclado, verifica os 128 casos e
+  confere o VHDL e a comparação, e auditoria de acessibilidade com o contador na tela.
 - **CMP-03** — O sistema DEVE permitir desfazer e refazer qualquer formação de célula,
   conclusão de nível e volta de nível, até o início do exercício. Uma ação nova depois de
   desfazer apaga o que poderia ser refeito.
@@ -74,8 +77,8 @@ nível, um painel por nível.
 
 - **CMP-06** — SE os pontos selecionados estiverem em colunas diferentes, ENTÃO o sistema
   DEVE recusar: "uma célula soma bits do mesmo peso".
-- **CMP-07** — SE a seleção tiver 0, 1 ou mais de 3 pontos, ENTÃO o sistema DEVE recusar:
-  "FA usa 3 pontos; HA usa 2".
+- **CMP-07** — SE a seleção não tiver 2, 3, 7 ou 15 pontos, ENTÃO o sistema DEVE recusar:
+  "FA usa 3 pontos; HA, 2; contador 7:3, 7; contador 15:4, 15".
 - **CMP-08** — SE um ponto selecionado já pertencer a outra célula do mesmo nível, ENTÃO o
   sistema DEVE recusar: "cada ponto entra em uma célula só por nível".
 - **CMP-16** — SE o usuário pedir para concluir um nível sem nenhuma célula formada nele,
@@ -150,7 +153,8 @@ uma nota abaixo dos painéis oferece "Por quê?" (CMP-09).
 
 - **CMP-18** — O sistema DEVE mostrar a **tabela de alturas**: uma linha por nível
   concluído, com a altura de cada coluna ($2^{W-1}$ à esquerda, como nos painéis) e
-  quantos FA e HA foram formados sobre ele; uma linha para o nível atual, com as células já
+  quantos FA e HA (e, quando houver, contadores 7:3 e 15:4, em duas colunas que só
+  aparecem então) foram formados sobre ele; uma linha para o nível atual, com as células já
   formadas nele; e, com o circuito completo, a linha do resultado no lugar da do nível
   atual. O sistema DEVE exportá-la em Markdown a qualquer momento, porque ela só mostra o
   circuito do próprio usuário. É a forma tabular da fig. 8.11 do Parhami

@@ -2,7 +2,8 @@
 // The block diagram as SVG (spec 05). The core gives a grid (row, column, slot); this turns it
 // into pixels and markup. One string serves the page and the exported file: colours come from
 // the page's CSS variables, with fixed fallbacks for the standalone file (DIA-06).
-import type { Diagram, DiagramEnd } from './core';
+import type { CellKind, Diagram, DiagramEnd } from './core';
+import { KIND_INPUTS, instanceName, isCounter } from './cells';
 
 export interface DiagramOptions {
 	/** Highest column drawn, so the diagram lines up with the level panels. */
@@ -21,7 +22,7 @@ export interface DiagramOptions {
 
 export interface BlockBox {
 	cell: number;
-	kind: 'fa' | 'ha';
+	kind: CellKind;
 	x: number;
 	y: number;
 	w: number;
@@ -45,6 +46,10 @@ const LABEL = 30; // room for the labels above a row of blocks
 const GATE_W = 72;
 const GATE_H = 26;
 const OUT = 56; // result row
+const PORT = 34; // room for one input label on a counter
+
+/** FA and HA keep 96 px; a counter is as wide as its inputs need (7:3, 15:4). */
+const blockWidth = (k: CellKind) => (isCounter(k) ? KIND_INPUTS[k] * PORT : BW);
 
 export function geometry(d: Diagram, o: DiagramOptions): Geometry {
 	return layout(d, o).g;
@@ -53,14 +58,26 @@ export function geometry(d: Diagram, o: DiagramOptions): Geometry {
 /** Where everything goes; `diagramSvg` only writes it out. */
 function layout(d: Diagram, o: DiagramOptions) {
 	const top = Math.max(o.top, ...d.blocks.map((b) => b.column), d.outputs.length - 1, 0);
-	const slots = (c: number) =>
-		Math.max(1, ...d.blocks.filter((b) => b.column === c).map((b) => b.slot + 1));
+	// Offset of each block within its column and row, and the widest row of each column.
+	const offset = new Map<number, number>();
+	const span = new Map<number, number>();
+	const sorted = [...d.blocks].sort(
+		(a, b) => a.row - b.row || a.column - b.column || a.slot - b.slot
+	);
+	const used = new Map<string, number>();
+	for (const b of sorted) {
+		const key = `${b.row}:${b.column}`;
+		const at = used.get(key) ?? 0;
+		offset.set(b.cell, at);
+		used.set(key, at + blockWidth(b.kind) + GAP);
+		span.set(b.column, Math.max(span.get(b.column) ?? 0, at + blockWidth(b.kind) + GAP));
+	}
 	// Left edge of each column, highest weight first.
 	const colX = new Map<number, number>();
 	let x = M;
 	for (let c = top; c >= 0; c--) {
 		colX.set(c, x);
-		x += slots(c) * (BW + GAP);
+		x += span.get(c) ?? BW + GAP;
 	}
 	const width = Math.max(x - GAP + M, 2 * M + 320);
 
@@ -81,9 +98,9 @@ function layout(d: Diagram, o: DiagramOptions) {
 	const blocks: BlockBox[] = d.blocks.map((b) => ({
 		cell: b.cell,
 		kind: b.kind,
-		x: colX.get(b.column)! + b.slot * (BW + GAP),
+		x: colX.get(b.column)! + offset.get(b.cell)!,
 		y: rowY(b.row),
-		w: BW,
+		w: blockWidth(b.kind),
 		h: BH
 	}));
 	const outY = rowY(Math.max(2, d.rows)) - LABEL + 12;
@@ -108,8 +125,18 @@ text{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;fill:var(-
 .out{fill:var(--dot-result,#6b2fb3);stroke:none}
 `;
 
-/** Port offsets along a block's top edge: x, y, z for an FA; x, y for an HA. */
-const ports = (kind: 'fa' | 'ha') => (kind === 'fa' ? [1 / 6, 3 / 6, 5 / 6] : [1 / 4, 3 / 4]);
+/** Port offsets along a block's top edge: x, y, z for an FA; x, y for an HA; one per input,
+ *  evenly spaced, for a counter. */
+const ports = (kind: CellKind) => {
+	const n = KIND_INPUTS[kind];
+	return Array.from({ length: n }, (_, i) => (2 * i + 1) / (2 * n));
+};
+
+/** The bit an output wire carries: s<n> 0, k<n> 1, k<n>_2 and k<n>_3 2 and 3. */
+const bitOf = (label: string) => {
+	const upper = /^k\d+_(\d)$/.exec(label);
+	return upper ? Number(upper[1]) : label.startsWith('k') ? 1 : 0;
+};
 
 export function diagramSvg(d: Diagram, o: DiagramOptions): string {
 	const { g, top, centre, headY, inputsH, gates, outY } = layout(d, o);
@@ -142,13 +169,16 @@ export function diagramSvg(d: Diagram, o: DiagramOptions): string {
 		);
 	}
 
-	// Where each wire leaves its source: sum from the right half, carry from the left half.
+	// Where each wire leaves its source: sum from the right, the higher bits to its left
+	// (an FA or HA: carry at a third, sum at two thirds; a counter: one slot per bit).
 	const source = (from: DiagramEnd, label: string): [number, number] | null => {
 		if (typeof from !== 'number') return null;
 		const b = box.get(from);
 		if (!b) return null;
-		const carry = label.startsWith('k');
-		return [b.x + (carry ? b.w / 3 : (2 * b.w) / 3), b.y + b.h];
+		const bit = bitOf(label);
+		if (!isCounter(b.kind)) return [b.x + (bit === 1 ? b.w / 3 : (2 * b.w) / 3), b.y + b.h];
+		const outs = b.kind === 'c73' ? 3 : 4;
+		return [b.x + (b.w * (2 * (outs - bit) - 1)) / (2 * outs), b.y + b.h];
 	};
 	const used = new Map<number, number>(); // next free input port per block
 	const wires: string[] = [];
@@ -195,7 +225,7 @@ export function diagramSvg(d: Diagram, o: DiagramOptions): string {
 	out.push(...wires);
 
 	for (const b of g.blocks) {
-		const name = `${b.kind.toUpperCase()}${b.cell}`;
+		const name = instanceName(b.kind, b.cell);
 		out.push(
 			`<g class="block ${b.kind}${critical.has(b.cell) ? ' critical' : ''}" data-cell="${b.cell}"><title>${name}</title>`,
 			`<rect class="box" x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="3"/>`,
