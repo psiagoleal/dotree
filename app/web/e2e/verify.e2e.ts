@@ -42,7 +42,7 @@ test('a long verification shows progress, keeps the page alive and can be cancel
 	await show.click();
 	await page.getByRole('button', { name: 'Ver a solução de Dadda nível a nível' }).click();
 	await show.click();
-	await page.getByRole('button', { name: 'Usar a solução de Dadda' }).click();
+	await page.getByRole('button', { name: 'Usar a solução de Dadda', exact: true }).click();
 	await page.getByRole('dialog').getByRole('button', { name: 'Substituir' }).click();
 	await expect(page.getByTestId('complete')).toBeVisible();
 

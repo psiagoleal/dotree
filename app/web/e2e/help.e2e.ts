@@ -27,6 +27,8 @@ async function expectNoAnswer(page: Page) {
 		'solution',
 		'wallace-summary',
 		'wallace',
+		'parhami-summary',
+		'parhami',
 		'width-result',
 		'width-path'
 	]) {
@@ -37,7 +39,7 @@ async function expectNoAnswer(page: Page) {
 	expect(text).not.toMatch(/W = \d/);
 	// The buttons name the methods; only an answer has the colon.
 	expect(text).not.toMatch(
-		/v_?max|Limite inferior:|Solução de (Dadda|Wallace):|Próxima jogada do método/
+		/v_?max|Limite inferior:|Solução de (Dadda|Dadda \(Parhami\)|Wallace):|Próxima jogada do método/
 	);
 	expect(text).not.toMatch(/faltam no mínimo|é a mais alta|pontos prontos|já pode ser fechado/);
 }
@@ -62,6 +64,7 @@ test('ajuda-nao-aparece-sem-pedido (GER-01, AJU-02)', async ({ page }) => {
 		['Próxima jogada', 'next-move'],
 		['Limite inferior', 'lower-bound'],
 		['Solução de Dadda', 'solution-summary'],
+		['Solução de Dadda (Parhami)', 'parhami-summary'],
 		['Solução de Wallace', 'wallace-summary']
 	];
 	for (const [button] of steps) {
@@ -103,7 +106,7 @@ test('solution in two steps, without touching the circuit (GER-03, AJU-03, AJU-0
 	await page.getByRole('button', { name: 'Formar célula' }).click();
 	const metrics = await page.getByTestId('metrics').innerText();
 
-	await page.getByRole('button', { name: 'Solução de Dadda' }).click();
+	await page.getByRole('button', { name: 'Solução de Dadda', exact: true }).click();
 	await show(page).click();
 	await expect(page.getByTestId('solution-summary')).toContainText(
 		'4 níveis e o CPA; 13 FA, 8 HA; área 17 A_FA'
@@ -132,7 +135,7 @@ test('using the solution replaces the circuit in one undo step and is logged (AJ
 	await page.getByRole('button', { name: 'Formar célula' }).click();
 	await expect(current(page).locator('.cell')).toHaveCount(1);
 
-	const useIt = page.getByRole('button', { name: 'Usar a solução de Dadda' });
+	const useIt = page.getByRole('button', { name: 'Usar a solução de Dadda', exact: true });
 	await page.getByRole('button', { name: 'Solução de Dadda', exact: true }).click();
 	await show(page).click();
 	await expect(useIt).toHaveCount(0);
@@ -190,6 +193,36 @@ test("Wallace's solution, applied, verifies and is logged apart (AJU-10)", async
 	await expect(log).toContainText('solução de Wallace: 1 (nível a nível: 1)');
 	await expect(log).toContainText('solução de Wallace aplicada: 1 vez');
 	await expect(log).not.toContainText('solução de Dadda');
+});
+
+test('Dadda (Parhami), applied, verifies and is logged apart (AJU-13)', async ({ page }) => {
+	await page.goto('./');
+	await page.getByRole('button', { name: 'Soma de produtos' }).click();
+
+	await page.getByRole('button', { name: 'Solução de Dadda (Parhami)', exact: true }).click();
+	await show(page).click();
+	await expect(page.getByTestId('parhami-summary')).toContainText(
+		'4 níveis e o CPA; 13 FA, 5 HA; área 15,5 A_FA'
+	);
+	await page
+		.getByRole('button', { name: 'Ver a solução de Dadda (Parhami) nível a nível' })
+		.click();
+	await show(page).click();
+	// R1 by hand (MT-44): 1 FA, 4 FA, 3 FA, 2 FA + 3 HA, and the CPA with 3 FA + 2 HA.
+	for (const [level, cells] of [1, 4, 3, 5, 5].entries()) {
+		await expect(page.getByTestId(`parhami-level-${level}`).locator('.cell')).toHaveCount(cells);
+	}
+
+	await page.getByRole('button', { name: 'Usar a solução de Dadda (Parhami)' }).click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Substituir' }).click();
+	await expect(page.getByTestId('complete')).toBeVisible();
+	await expect(page.getByTestId('metrics')).toContainText(/HA\s*5/);
+	await page.getByRole('button', { name: 'Verificar circuito' }).click();
+	await expect(page.getByTestId('verify-result')).toHaveText('16.384 casos, exaustivo, 0 erros.');
+	const log = page.getByTestId('help-log');
+	await expect(log).toContainText('solução de Dadda (Parhami): 1 (nível a nível: 1)');
+	await expect(log).toContainText('solução de Dadda (Parhami) aplicada: 1 vez');
+	await expect(log).not.toContainText('solução de Dadda:');
 });
 
 test('comparing R2 with Dadda and Wallace: only what was revealed, nothing counted (MT-38)', async ({

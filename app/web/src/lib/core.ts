@@ -196,6 +196,10 @@ export interface HelpLog {
 	wallace: number;
 	wallacePath: number;
 	wallaceApplied: number;
+	/** The same three counts for Dadda (Parhami) (AJU-13). */
+	parhami: number;
+	parhamiPath: number;
+	parhamiApplied: number;
 	/** The same three counts for the optimal circuit of a profile, and the block name (AJU-12). */
 	optimal: number;
 	optimalPath: number;
@@ -203,16 +207,21 @@ export interface HelpLog {
 	block: number;
 }
 
-/** The method of an automatic solution (AJU-05, AJU-10), and the optimal circuit of a
- *  height profile (AJU-12). */
-export type Method = 'dadda' | 'wallace' | 'optimal';
+/** The method of an automatic solution (AJU-05, AJU-10, AJU-13), and the optimal circuit
+ *  of a height profile (AJU-12). */
+export type Method = 'dadda' | 'parhami' | 'wallace' | 'optimal';
 
 /** The methods named after their authors: the same name in every language. */
 export type NamedMethod = Exclude<Method, 'optimal'>;
-export const METHOD_NAME: Record<NamedMethod, string> = { dadda: 'Dadda', wallace: 'Wallace' };
+export const METHOD_NAME: Record<NamedMethod, string> = {
+	dadda: 'Dadda',
+	parhami: 'Dadda (Parhami)',
+	wallace: 'Wallace'
+};
 
 const WASM_METHOD: Record<Method, SolutionMethod> = {
 	dadda: SolutionMethod.Dadda,
+	parhami: SolutionMethod.Parhami,
 	wallace: SolutionMethod.Wallace,
 	optimal: SolutionMethod.Optimal
 };
@@ -241,6 +250,7 @@ export interface Revealed {
 	lowerBound: RevealStage;
 	solution: RevealStage;
 	wallace: RevealStage;
+	parhami: RevealStage;
 	optimal: RevealStage;
 	block: boolean;
 }

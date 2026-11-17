@@ -19,7 +19,7 @@ Do mais leve ao mais completo. Cada degrau é pedido separadamente.
 | **Dica** | Um fato sobre o estado atual, do catálogo abaixo, sem citar pontos | sim | não |
 | **Próxima jogada** | Destaca os pontos de uma célula que a solução Dadda formaria agora | sim | não |
 | **Limite inferior** | O menor número possível de FA | sim | sim |
-| **Solução automática** | A solução de Dadda ou a de Wallace (AJU-10), cada uma pedida à parte, a partir da matriz inicial, num painel à parte | sim | sim |
+| **Solução automática** | A solução de Dadda, a de Dadda (Parhami) (AJU-13) ou a de Wallace (AJU-10), cada uma pedida à parte, a partir da matriz inicial, num painel à parte | sim | sim |
 
 ### Catálogo de dicas (v0.1)
 
@@ -87,8 +87,9 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   escolha que nenhuma regra coluna a coluna reproduz. O total de FA é o mesmo (33), mas a
   figura usa 3 HA e o método clássico, 6 (34,5 contra 36 $A_{FA}$; 9,5 contra
   10 $T_{FA}$). A variante "FA sempre que a coluna passa do alvo" iguala os totais da
-  figura, mas não os níveis 2 e 3; foi avaliada no MT-29b e não adotada: o app fica com o
-  algoritmo publicado, que é o que a próxima jogada ensina.
+  figura, mas não os níveis 2 e 3; no MT-29b ela não substituiu o método clássico, que é o
+  algoritmo publicado e o que a próxima jogada ensina. Desde o MT-44 ela é oferecida **ao
+  lado**, como a solução Dadda (Parhami) (AJU-13).
   *Prova:* teste do núcleo: para R1 e R4, a solução está correta (VER-01), cada nível
   respeita a altura-alvo, e o número de FA mais vai-uns descartados é pelo menos o limite
   inferior (AJU-06). Contagens calculadas à mão antes do código: R4 → 8 FA, 4 HA,
@@ -183,6 +184,30 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   contar); testes de componente (duas etapas, saída redundante, perfil grande demais,
   nada para uma expressão, comparação); teste de ponta a ponta com `{5; 2,1}` (bloco,
   ótimo aplicado, registro e retomada depois de recarregar).
+- **AJU-13** — O sistema DEVE oferecer, ao lado de Dadda e Wallace, a solução
+  **Dadda (Parhami)**, com o mesmo fluxo de AJU-10: duas etapas confirmadas, painel à
+  parte, "Usar a solução de Dadda (Parhami)" só depois da etapa 2 dela, contagem própria no
+  registro de ajudas e no arquivo (`help.parhami`, `help.parhamiPath`,
+  `help.parhamiApplied`, opcionais) e uma coluna na comparação (AJU-11). A etapa 2 mostra a
+  regra numa frase. Vale para expressões e perfis de alturas.
+  **Regra:** as alturas-alvo de Dadda (AJU-05); em cada coluna acima do alvo, da menor
+  para a maior, contando os vai-uns que chegam, um FA sempre que há 3 pontos livres, mesmo
+  quando falta reduzir só 1, e um HA só quando restam 2. No fim, o CPA de CMP-11. É a
+  variante da fig. 8.14 do Parhami (*Computer Arithmetic*): iguala os totais da figura
+  (33 FA, 3 HA), mas não cada nível dela. A próxima jogada (AJU-04) e as dicas continuam
+  sendo as do Dadda clássico.
+  *Prova:* contagens calculadas antes do código por um script à parte da regra, que
+  reproduz também o Dadda clássico do núcleo: sete operandos de 6 bits → 6 FA; 11 FA;
+  5 FA; 5 FA + 2 HA; CPA com 6 FA + 1 HA (33 FA, 3 HA, 34,5 $A_{FA}$, contra 36 do
+  clássico); cinco operandos de 6 bits → 6 FA; 5 FA; 5 FA + 2 HA; CPA com 5 FA + 2 HA
+  (21 FA, 4 HA, 23 $A_{FA}$, contra 24); R1 → 1 FA; 4 FA; 3 FA; 2 FA + 3 HA; CPA com
+  3 FA + 2 HA (13 FA, 5 HA, 15,5 $A_{FA}$, 7 $T_{FA}$, os números medidos no MT-29b);
+  propriedade com expressões aleatórias (verifica, respeita os alvos de Dadda e o limite
+  inferior); arquivo sem os campos abre, contagens vão e voltam, revelação inconsistente
+  recusada; teste da ponte (sessão à parte, aplicada só depois da própria etapa 2); testes
+  de componente (duas etapas, regra, aplicação, coluna da comparação com os números de
+  R1); teste de ponta a ponta: R1 → Dadda (Parhami) nível a nível → usar → "0 erros" e o
+  registro.
 
 ## Fora de escopo
 

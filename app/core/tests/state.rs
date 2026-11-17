@@ -392,6 +392,65 @@ fn aju10_inconsistent_wallace_reveals_are_refused() {
     }
 }
 
+// ------------------------------------------------ AJU-13: Dadda (Parhami) (MT-44)
+
+#[test]
+fn aju13_files_without_parhami_still_open() {
+    let mut v: Value =
+        serde_json::from_str(&capture(&r2(), None, HelpLog::default()).to_json()).unwrap();
+    for key in ["parhami", "parhamiPath", "parhamiApplied"] {
+        assert_eq!(v["help"][key], 0, "{key}");
+        v["help"].as_object_mut().unwrap().remove(key);
+    }
+    let back = Exercise::parse(&v.to_string()).expect("a schema-1 file from v0.2 opens");
+    assert_eq!(
+        (
+            back.help.parhami,
+            back.help.parhami_path,
+            back.help.parhami_applied
+        ),
+        (0, 0, 0)
+    );
+}
+
+#[test]
+fn aju13_the_parhami_counts_round_trip() {
+    let mut help = HelpLog::default();
+    for step in [
+        HelpStep::Parhami,
+        HelpStep::ParhamiPath,
+        HelpStep::ParhamiApplied,
+    ] {
+        help.record(step);
+    }
+    let (back, _) = round_trip(&capture(&r2(), None, help));
+    assert_eq!(
+        (
+            back.help.parhami,
+            back.help.parhami_path,
+            back.help.parhami_applied
+        ),
+        (1, 1, 1)
+    );
+}
+
+#[test]
+fn aju13_inconsistent_parhami_reveals_are_refused() {
+    for (set, why) in [
+        (&[("parhamiPath", 1)][..], "the path without the result"),
+        (
+            &[("parhami", 1), ("parhamiApplied", 1)][..],
+            "applied without the path",
+        ),
+    ] {
+        let mut v = r2_file();
+        for &(key, n) in set {
+            v["help"][key] = n.into();
+        }
+        assert_eq!(open(&v), Err(StateError::InconsistentReveals), "{why}");
+    }
+}
+
 // ------------------------------------------------- AJU-12: height profiles (MT-31b)
 
 /// `{5; 2,1}` with the two FA of its optimum, as the student would build it.

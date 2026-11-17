@@ -7,6 +7,7 @@ use dotree_wasm::{Session, SolutionMethod};
 
 const DADDA: SolutionMethod = SolutionMethod::Dadda;
 const WALLACE: SolutionMethod = SolutionMethod::Wallace;
+const PARHAMI: SolutionMethod = SolutionMethod::Parhami;
 use serde_json::{Value, json};
 
 const R1: &str = "A*B + C*D + 3(E+F) + G";
@@ -38,6 +39,7 @@ fn nothing_is_counted_before_a_request() {
         json!({"hints": 0, "nextMoves": 0, "lowerBound": 0, "lowerBoundPath": 0,
                "solution": 0, "solutionPath": 0, "solutionApplied": 0,
                "wallace": 0, "wallacePath": 0, "wallaceApplied": 0,
+               "parhami": 0, "parhamiPath": 0, "parhamiApplied": 0,
                "optimal": 0, "optimalPath": 0, "optimalApplied": 0, "block": 0})
     );
 }
@@ -222,4 +224,42 @@ fn each_method_is_applied_only_after_its_own_path() {
     assert_eq!(parse(s.help_log())["solutionApplied"], 1);
     assert!(s.undo());
     assert_eq!(parse(s.snapshot())["levels"], wallace["levels"]);
+}
+
+// ---------------------------------------------- AJU-13: Dadda (Parhami) (MT-44)
+
+#[test]
+fn parhami_is_a_separate_session_counted_and_applied_apart() {
+    let mut s = r1();
+    let before = s.snapshot();
+    let v = parse(s.solution(false, PARHAMI).snapshot());
+    // The hand computation of MT-44: 13 FA, 5 HA, 4 levels and the CPA.
+    assert_eq!(
+        (v["metrics"]["fa"].clone(), v["metrics"]["ha"].clone()),
+        (json!(13), json!(5))
+    );
+    assert_eq!(v["levels"].as_array().unwrap().len(), 5);
+    assert_eq!(s.snapshot(), before, "the student's circuit is untouched");
+    assert_eq!(parse(s.revealed())["parhami"], "result");
+    assert!(!s.apply_solution(PARHAMI), "only the result");
+    s.solution(true, DADDA);
+    assert!(
+        !s.apply_solution(PARHAMI),
+        "Dadda's path does not unlock it"
+    );
+
+    let parhami = parse(s.solution(true, PARHAMI).snapshot());
+    assert_eq!(parse(s.revealed())["parhami"], "path");
+    assert!(s.apply_solution(PARHAMI));
+    assert_eq!(parse(s.snapshot())["levels"], parhami["levels"]);
+    let log = parse(s.help_log());
+    assert_eq!(
+        (
+            log["parhami"].clone(),
+            log["parhamiPath"].clone(),
+            log["parhamiApplied"].clone(),
+            log["solutionApplied"].clone()
+        ),
+        (json!(1), json!(1), json!(1), json!(0))
+    );
 }

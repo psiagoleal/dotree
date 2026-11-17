@@ -1,6 +1,7 @@
 // Caminho relativo: app/core/src/help/mod.rs
 //! On-demand help (spec 03; MT-8): Dadda's method, the next move, hints and the lower bound;
-//! Wallace's method as a second solution (AJU-10, MT-29).
+//! Wallace's method as a second solution (AJU-10, MT-29); the variant of Dadda's method drawn
+//! by Parhami as a third (AJU-13, MT-44).
 //!
 //! Dadda's solution is literally "follow the next move until done", so the suggestion the
 //! student gets and the solution in the side panel can never disagree. Everything here
@@ -36,6 +37,13 @@ pub enum NextMove {
 }
 
 pub fn next_move(reduction: &Reduction) -> NextMove {
+    dadda_move(reduction, false)
+}
+
+/// The next cell of Dadda's targets, in classic form (AJU-05: an HA when only 1 is left to
+/// remove) or in the variant of Parhami, fig. 8.14 (AJU-13: an FA whenever the column is
+/// over the target and has 3 free points).
+fn dadda_move(reduction: &Reduction, parhami: bool) -> NextMove {
     let r = reduction;
     if r.is_complete() {
         return NextMove::Complete;
@@ -54,7 +62,7 @@ pub fn next_move(reduction: &Reduction) -> NextMove {
         // Dadda: an FA removes 2 from this column's next height, an HA removes 1. The first
         // column over its target gets the next cell, on its earliest points (canonical order).
         let excess = next_height - target;
-        if excess >= 2 && free.len() >= 3 {
+        if (excess >= 2 || parhami) && free.len() >= 3 {
             return form(CellKind::Fa, &free[..3]);
         }
         if free.len() >= 2 {
@@ -75,6 +83,10 @@ pub fn wallace_target(height: u32) -> Option<u32> {
 /// as the free points allow, at the earliest opportunity; then an HA only if the column
 /// would still be over the level's target, counting the carries that come in. The rule of
 /// Parhami, fig. 8.10, not the HA on every leftover pair.
+fn parhami_move(r: &Reduction) -> NextMove {
+    dadda_move(r, true)
+}
+
 fn wallace_move(r: &Reduction) -> NextMove {
     if r.is_complete() {
         return NextMove::Complete;
@@ -169,11 +181,13 @@ fn level_done(r: &Reduction) -> NextMove {
     }
 }
 
-/// The method of an automatic solution (AJU-05, AJU-10).
+/// The method of an automatic solution (AJU-05, AJU-10, AJU-13).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Method {
     Dadda,
     Wallace,
+    /// Dadda's targets with an FA wherever 3 points are free (Parhami, fig. 8.14).
+    DaddaParhami,
 }
 
 /// The solution of `method` from the initial matrix, as a complete reduction.
@@ -181,7 +195,13 @@ pub fn solution(matrix: &DotMatrix, method: Method) -> Reduction {
     match method {
         Method::Dadda => dadda_solution(matrix),
         Method::Wallace => wallace_solution(matrix),
+        Method::DaddaParhami => parhami_solution(matrix),
     }
+}
+
+/// The variant of Dadda's method drawn by Parhami, as a complete reduction (AJU-13).
+pub fn parhami_solution(matrix: &DotMatrix) -> Reduction {
+    follow(matrix, parhami_move)
 }
 
 /// Wallace's solution from the initial matrix, as a complete reduction (AJU-10).
@@ -304,6 +324,10 @@ pub enum HelpStep {
     Wallace,
     WallacePath,
     WallaceApplied,
+    /// The same three steps for Dadda (Parhami) (AJU-13).
+    Parhami,
+    ParhamiPath,
+    ParhamiApplied,
     /// The same three steps for the optimal circuit of a height profile (AJU-12).
     Optimal,
     OptimalPath,
@@ -333,6 +357,13 @@ pub struct HelpLog {
     pub wallace_path: u32,
     #[serde(default)]
     pub wallace_applied: u32,
+    /// Dadda (Parhami) (AJU-13). Absent in files before v0.3: 0, schema still 1.
+    #[serde(default)]
+    pub parhami: u32,
+    #[serde(default)]
+    pub parhami_path: u32,
+    #[serde(default)]
+    pub parhami_applied: u32,
     /// The optimal circuit of a height profile and the name of its block (AJU-12). Absent
     /// in files before MT-31b: 0, schema still 1.
     #[serde(default)]
@@ -358,6 +389,9 @@ impl HelpLog {
             HelpStep::Wallace => &mut self.wallace,
             HelpStep::WallacePath => &mut self.wallace_path,
             HelpStep::WallaceApplied => &mut self.wallace_applied,
+            HelpStep::Parhami => &mut self.parhami,
+            HelpStep::ParhamiPath => &mut self.parhami_path,
+            HelpStep::ParhamiApplied => &mut self.parhami_applied,
             HelpStep::Optimal => &mut self.optimal,
             HelpStep::OptimalPath => &mut self.optimal_path,
             HelpStep::OptimalApplied => &mut self.optimal_applied,

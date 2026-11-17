@@ -98,6 +98,9 @@ describe('Optimal solution (AJU-12)', () => {
 	it('comes with the other methods only for a profile, in two steps', async () => {
 		const session = core.openSession('{5,5; 1,1,1,1}', {});
 		await render(SolutionHelp, { session, view: 'dots', onhelp: vi.fn(), onapply: vi.fn() });
+		// Every method of an expression is offered for a profile too (AJU-13).
+		for (const name of ['Solução de Dadda', 'Solução de Dadda (Parhami)', 'Solução de Wallace'])
+			await expect.element(page.getByRole('button', { name, exact: true })).toBeVisible();
 		await page.getByRole('button', { name: 'Solução ótima', exact: true }).click();
 		await show().click();
 		// d) of the reference set: 6 A_FA and 4 T_FA.

@@ -309,7 +309,7 @@ fn outcome(r: Result<Value, Rejection>) -> String {
     .to_string()
 }
 
-/// The method of an automatic solution (AJU-05, AJU-10).
+/// The method of an automatic solution (AJU-05, AJU-10, AJU-13).
 #[wasm_bindgen]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SolutionMethod {
@@ -317,6 +317,9 @@ pub enum SolutionMethod {
     Wallace,
     /// The optimal circuit of a height profile (AJU-12).
     Optimal,
+    /// Dadda's targets with an FA wherever 3 points are free (AJU-13). Last, so the numbers
+    /// of the others do not change.
+    Parhami,
 }
 
 impl SolutionMethod {
@@ -338,6 +341,11 @@ impl SolutionMethod {
                 HelpStep::OptimalPath,
                 HelpStep::OptimalApplied,
             ],
+            SolutionMethod::Parhami => [
+                HelpStep::Parhami,
+                HelpStep::ParhamiPath,
+                HelpStep::ParhamiApplied,
+            ],
         }
     }
 
@@ -347,6 +355,7 @@ impl SolutionMethod {
             SolutionMethod::Dadda => [l.solution, l.solution_path, l.solution_applied],
             SolutionMethod::Wallace => [l.wallace, l.wallace_path, l.wallace_applied],
             SolutionMethod::Optimal => [l.optimal, l.optimal_path, l.optimal_applied],
+            SolutionMethod::Parhami => [l.parhami, l.parhami_path, l.parhami_applied],
         }
     }
 }
@@ -406,6 +415,7 @@ impl Session {
         match method {
             SolutionMethod::Dadda => Some(help::solution(&self.matrix, Method::Dadda)),
             SolutionMethod::Wallace => Some(help::solution(&self.matrix, Method::Wallace)),
+            SolutionMethod::Parhami => Some(help::solution(&self.matrix, Method::DaddaParhami)),
             SolutionMethod::Optimal => self.optimal()?.as_ref().ok().cloned(),
         }
     }
@@ -548,6 +558,7 @@ impl Session {
                "lowerBound": stage(l.lower_bound, l.lower_bound_path),
                "solution": stage(l.solution, l.solution_path),
                "wallace": stage(l.wallace, l.wallace_path),
+               "parhami": stage(l.parhami, l.parhami_path),
                "optimal": stage(l.optimal, l.optimal_path),
                "block": l.block > 0})
         .to_string()
@@ -933,7 +944,9 @@ impl Session {
                "lowerBoundPath": l.lower_bound_path, "solution": l.solution,
                "solutionPath": l.solution_path, "solutionApplied": l.solution_applied,
                "wallace": l.wallace, "wallacePath": l.wallace_path,
-               "wallaceApplied": l.wallace_applied, "optimal": l.optimal,
+               "wallaceApplied": l.wallace_applied, "parhami": l.parhami,
+               "parhamiPath": l.parhami_path, "parhamiApplied": l.parhami_applied,
+               "optimal": l.optimal,
                "optimalPath": l.optimal_path, "optimalApplied": l.optimal_applied,
                "block": l.block})
         .to_string()

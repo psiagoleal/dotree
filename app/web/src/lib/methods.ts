@@ -1,7 +1,8 @@
 // Caminho relativo: app/web/src/lib/methods.ts
-// The words of each automatic solution (spec 03). Dadda and Wallace are named after their
-// authors and share sentences with the name in them; the optimal solution of a height
-// profile (AJU-12) has sentences of its own, so no language has to bend around a name.
+// The words of each automatic solution (spec 03). Dadda, Dadda (Parhami) and Wallace are
+// named after their authors and share sentences with the name in them; the optimal solution
+// of a height profile (AJU-12) has sentences of its own, so no language has to bend around a
+// name.
 import { METHOD_NAME, type Method } from '#lib/core.ts';
 import { m } from '#lib/paraglide/messages.js';
 
@@ -70,14 +71,22 @@ export function methodTexts(method: Method): MethodTexts {
 		confirmUseTitle: m.confirm_use_solution_title(p),
 		confirmUseBody: m.confirm_use_solution_body(p),
 		title: m.solution_title(p),
-		rule: method === 'dadda' ? m.solution_rule_dadda() : m.solution_rule_wallace(),
+		rule: {
+			dadda: m.solution_rule_dadda,
+			parhami: m.solution_rule_parhami,
+			wallace: m.solution_rule_wallace
+		}[method](),
 		level: (level) => m.solution_level({ ...p, level }),
 		cpa: (level) => m.solution_cpa({ ...p, level }),
 		last: m.solution_result(p),
 		summary: (args, cpa) =>
 			cpa ? m.solution_summary_cpa({ ...p, ...args }) : m.solution_summary({ ...p, ...args }),
 		applied: m.solution_applied(p),
-		comparison: method === 'dadda' ? m.comparison_dadda() : m.comparison_wallace(),
+		comparison: {
+			dadda: m.comparison_dadda,
+			parhami: m.comparison_parhami,
+			wallace: m.comparison_wallace
+		}[method](),
 		missing: m.comparison_missing(p),
 		heightsTitle: m.comparison_heights_title(p),
 		heightsExport: m.comparison_heights_export(p)
@@ -85,4 +94,9 @@ export function methodTexts(method: Method): MethodTexts {
 }
 
 /** The stage key of each method in `Session.revealed()`. */
-export const STAGE_KEY = { dadda: 'solution', wallace: 'wallace', optimal: 'optimal' } as const;
+export const STAGE_KEY = {
+	dadda: 'solution',
+	parhami: 'parhami',
+	wallace: 'wallace',
+	optimal: 'optimal'
+} as const;
