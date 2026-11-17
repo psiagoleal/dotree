@@ -13,7 +13,7 @@ use std::collections::{BTreeMap, HashMap};
 
 use crate::expr::{Analysis, ExprError, analyze};
 use crate::matrix::DotMatrix;
-use crate::reduce::{CellKind, PointId, Reduction};
+use crate::reduce::{CellKind, Costs, PointId, Reduction};
 
 /// One variable per dot, named `A` to `Z`.
 pub const MAX_DOTS: u32 = 26;
@@ -269,6 +269,12 @@ impl Profile {
     /// forms, always over the earliest points of the column. Points are told apart only by
     /// column and readiness, so equal states found by different paths are searched once.
     pub fn optimal(&self) -> Result<Reduction, SearchError> {
+        self.optimal_with_costs(Costs::default())
+    }
+
+    /// The optimum under `costs` (GER-12): least area, then least delay, then fewest levels,
+    /// all measured with these costs.
+    pub fn optimal_with_costs(&self, costs: Costs) -> Result<Reduction, SearchError> {
         let matrix = self.matrix();
         let width = matrix.output_width as usize;
         let mut start: State = vec![Vec::new(); width];
@@ -276,10 +282,12 @@ impl Profile {
             start[c] = vec![0; h as usize];
         }
         let targets: Vec<u32> = (0..width).map(|c| self.target(c)).collect();
-        // Every useful circuit is far below this: each FA lowers the number of points by 1
-        // and each HA moves one up a column.
-        let bound = 4 * matrix.dots.len() * (width + 1) + 4;
+        // Every useful circuit has far fewer cells than this: each FA lowers the number of
+        // points by 1 and each HA moves one up a column.
+        let cells = 4 * matrix.dots.len() * (width + 1) + 4;
+        let bound = cells * costs.fa_area.max(costs.ha_area) as usize;
         let mut search = Search {
+            costs,
             targets: &targets,
             room: targets.iter().map(|&t| t as usize).sum(),
             tried: 0,
@@ -288,13 +296,16 @@ impl Profile {
             path: Vec::new(),
             budget: 0,
         };
-        for budget in 0..=bound {
+        // The budget runs through the areas some count of FA and HA adds up to, ascending.
+        let mut budget = 0;
+        while budget <= bound {
             search.budget = budget;
             search.seen.clear();
             search.dfs(&start, 0)?;
             if let Some((_, plan)) = search.best.take() {
-                return Ok(replay(&matrix, &plan));
+                return Ok(replay(&matrix, &plan, costs));
             }
+            budget = next_area(budget, &costs);
         }
         Err(SearchError::NoCircuit)
     }
@@ -334,12 +345,29 @@ impl Profile {
     }
 }
 
-/// Readiness times (half `T_FA`) of the points of each column, ascending.
+/// The least area above `after` that some count of FA and HA adds up to.
+fn next_area(after: usize, costs: &Costs) -> usize {
+    let (fa, ha) = (costs.fa_area as usize, costs.ha_area as usize);
+    (0..=after / fa + 1)
+        .map(|f| {
+            let used = f * fa;
+            if used > after {
+                used
+            } else {
+                used + ((after - used) / ha + 1) * ha
+            }
+        })
+        .min()
+        .expect("the range is never empty")
+}
+
+/// Readiness times (hundredths of `T_FA`) of the points of each column, ascending.
 type State = Vec<Vec<u32>>;
 /// FA and HA per column on one level.
 type Choice = Vec<(u32, u32)>;
 
 struct Search<'a> {
+    costs: Costs,
     targets: &'a [u32],
     /// Sum of the targets: points the profile can hold.
     room: usize,
@@ -371,10 +399,11 @@ impl Search<'_> {
             }
             return Ok(());
         }
-        // Each half of area removes at most one point: an FA removes 1 for 2 halves, or 2 in
-        // the top column, whose carry is dropped (CMP-09); an HA removes 1 only there.
+        // Removing a point costs at least half an FA or a whole HA: an FA removes 1 point,
+        // or 2 in the top column, whose carry is dropped (CMP-09); an HA removes 1 only there.
         let points: usize = state.iter().map(Vec::len).sum();
-        if area + points.saturating_sub(self.room) > self.budget {
+        let per_two = self.costs.fa_area.min(2 * self.costs.ha_area) as usize;
+        if 2 * area + points.saturating_sub(self.room) * per_two > 2 * self.budget {
             return Ok(());
         }
         let depth = self.path.len();
@@ -420,14 +449,14 @@ impl Search<'_> {
             if self.tried > SEARCH_LIMIT {
                 return Err(SearchError::TooLarge);
             }
-            let next = step(state, choice);
+            let next = step(state, choice, &self.costs);
             self.path.push(choice.clone());
             let out = self.dfs(&next, area + added);
             self.path.pop();
             return out;
         }
         for &(f, h) in &options[column] {
-            let cost = (2 * f + h) as usize;
+            let cost = (f * self.costs.fa_area + h * self.costs.ha_area) as usize;
             if area + added + cost > self.budget {
                 continue;
             }
@@ -440,13 +469,15 @@ impl Search<'_> {
 }
 
 /// The next level: FA first, then HA, over the earliest points of each column.
-fn step(state: &State, choice: &Choice) -> State {
+fn step(state: &State, choice: &Choice, costs: &Costs) -> State {
     let width = state.len();
     let mut next: State = vec![Vec::new(); width];
     for (c, col) in state.iter().enumerate() {
         let (f, h) = choice[c];
         let mut i = 0;
-        let groups = (0..f).map(|_| (3, 2)).chain((0..h).map(|_| (2, 1)));
+        let groups = (0..f)
+            .map(|_| (3, costs.fa_delay))
+            .chain((0..h).map(|_| (2, costs.ha_delay)));
         for (size, delay) in groups {
             let ready = col[i..i + size].iter().copied().max().unwrap_or(0) + delay;
             i += size;
@@ -465,8 +496,8 @@ fn step(state: &State, choice: &Choice) -> State {
 
 /// Builds the plan as a reduction: in each column, the same cells over the earliest points
 /// in canonical order, which are the earliest ready.
-fn replay(matrix: &DotMatrix, plan: &[Choice]) -> Reduction {
-    let mut r = Reduction::new(matrix);
+fn replay(matrix: &DotMatrix, plan: &[Choice], costs: Costs) -> Reduction {
+    let mut r = Reduction::with_costs(matrix, costs);
     for choice in plan {
         for (c, &(f, h)) in choice.iter().enumerate() {
             let free: Vec<PointId> = r

@@ -1,6 +1,7 @@
 // Caminho relativo: app/wasm/tests/session.rs
 //! Contract of the stateful `Session` the interface drives during compression (MT-12a).
-//! Times and areas travel in half units (FA = 2, HA = 1), as integers.
+//! Times and areas travel in hundredths of `T_FA` and `A_FA` (FA = 100, HA = 50 by default),
+//! as integers.
 
 use dotree_wasm::Session;
 use serde_json::{Value, json};
@@ -83,11 +84,11 @@ fn forming_a_cell_makes_it_pending_and_counts_it() {
     let expected = ids(&s, 1, &["a0_b1", "a1_b0", "c0_d1"]);
     assert_eq!(
         v["current"]["pending"],
-        json!([{"kind": "fa", "column": 1, "inputs": expected, "ready": 2}])
+        json!([{"kind": "fa", "column": 1, "inputs": expected, "ready": 100}])
     );
     assert_eq!(v["metrics"]["fa"], 1);
-    assert_eq!(v["metrics"]["area"], 2);
-    assert_eq!(v["metrics"]["delay"], 2);
+    assert_eq!(v["metrics"]["area"], 100);
+    assert_eq!(v["metrics"]["delay"], 100);
     assert_eq!(v["canUndo"], true);
     assert_eq!(form(&mut s, 2, &["a0_b2", "a1_b1"])["kind"], "ha");
 }
@@ -183,7 +184,7 @@ fn r2_tree_through_the_session() {
     let ha3 = &levels[0]["cells"][2];
     assert_eq!(ha3["kind"], "ha");
     assert_eq!(ha3["column"], 2);
-    assert_eq!(ha3["ready"], 1);
+    assert_eq!(ha3["ready"], 50);
     // Outputs are generated points: no term, origin sum or carry.
     let s1 = v["levels"][1]["points"]
         .as_array()
@@ -194,11 +195,11 @@ fn r2_tree_through_the_session() {
         .clone();
     assert_eq!(s1["origin"], "sum");
     assert_eq!(s1["term"], Value::Null);
-    assert_eq!(s1["ready"], 2);
+    assert_eq!(s1["ready"], 100);
     assert_eq!(v["heights"], json!([3, 2, 1, 2, 2, 1, 0])); // CPA: FA, FA, HA, FA, FA, HA
     assert_eq!(
         v["metrics"],
-        json!({"fa": 9, "ha": 2, "andGates": 13, "area": 20, "delay": 6})
+        json!({"fa": 9, "ha": 2, "andGates": 13, "area": 1000, "delay": 300})
     );
 }
 
@@ -293,7 +294,7 @@ fn r2_closed_with_the_cpa_is_complete() {
     // GER-04 / CMP-15: 13 FA, 4 HA, 15 A_FA, 6 T_FA; critical cells counted by hand.
     assert_eq!(
         v["metrics"],
-        json!({"fa": 13, "ha": 4, "andGates": 13, "area": 30, "delay": 12})
+        json!({"fa": 13, "ha": 4, "andGates": 13, "area": 1500, "delay": 600})
     );
     assert_eq!(
         v["critical"],

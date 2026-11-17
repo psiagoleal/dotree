@@ -11,7 +11,7 @@
 	import { STAGE_KEY, methodTexts } from '#lib/methods.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
-	import { formatHalves } from '#lib/levels.ts';
+	import { formatHundredths } from '#lib/levels.ts';
 	import type { ViewMode } from '#lib/view.ts';
 	import ConfirmDialog from './ConfirmDialog.svelte';
 	import LevelPanel from './LevelPanel.svelte';
@@ -54,7 +54,7 @@
 	let solutionPath = $state(stage === 'path');
 
 	const KIND = { fa: 'FA', ha: 'HA' } as const;
-	const halves = (n: number) => formatHalves(n, getLocale());
+	const hundredths = (n: number) => formatHundredths(n, getLocale());
 
 	/** Reads the solution's snapshot and frees the WASM session right away. */
 	function read(s: CompressionSession): Snapshot {
@@ -90,8 +90,8 @@
 			levels: s.levels.filter((l) => !l.cpa).length,
 			fa: s.metrics.fa,
 			ha: s.metrics.ha,
-			area: halves(s.metrics.area),
-			delay: halves(s.metrics.delay)
+			area: hundredths(s.metrics.area),
+			delay: hundredths(s.metrics.delay)
 		};
 		return t.summary(
 			args,

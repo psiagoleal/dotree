@@ -163,7 +163,8 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
 - **AJU-12** — ONDE a matriz vier de um perfil de alturas (EXP-16), o sistema DEVE
   oferecer, ao lado de Dadda e Wallace, a **solução ótima** que atinge o perfil (CMP-19):
   a menor área e, entre as de menor área, o menor atraso e depois o menor número de níveis,
-  com FA e HA sobre os pontos mais cedo prontos de cada coluna. Ela segue o fluxo das
+  com FA e HA sobre os pontos mais cedo prontos de cada coluna, tudo medido com os custos
+  em vigor (GER-12): trocar os custos refaz a busca. Ela segue o fluxo das
   outras soluções: etapa 1 (métricas), etapa 2 (níveis, com a regra numa frase) e "Usar a
   solução ótima" num passo de desfazer, cada um confirmado e contado à parte. Como a
   solução para no perfil, o último painel é a saída no perfil, que pode ser redundante. Ela entra
@@ -183,7 +184,12 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   Testes da ponte (contagens, `optimalSearch` sem contar, nome revelado de novo sem
   contar); testes de componente (duas etapas, saída redundante, perfil grande demais,
   nada para uma expressão, comparação); teste de ponta a ponta com `{5; 2,1}` (bloco,
-  ótimo aplicado, registro e retomada depois de recarregar).
+  ótimo aplicado, registro e retomada depois de recarregar). Com custos (GER-12), à mão,
+  no perfil e) `{2,2; 1,1,1}`: as saídas são 1 FA + 1 HA ($F+H$) ou 4 HA ($4H$); com HA
+  de área 0,3, o ótimo vira 4 HA (1,2 contra 1,3; atraso $3H$ = 0,9), com 0,33 ainda 4 HA
+  (1,32 contra 1,33) e com 0,34 volta o FA; com FA 0,99 e HA 0,33 as áreas empatam em
+  1,32 e decide o atraso (4 HA com FA de atraso 1; FA + HA com atraso 0,4). Teste de
+  ponta a ponta: o ótimo revelado é refeito ao trocar os custos, sem contar de novo.
 - **AJU-13** — O sistema DEVE oferecer, ao lado de Dadda e Wallace, a solução
   **Dadda (Parhami)**, com o mesmo fluxo de AJU-10: duas etapas confirmadas, painel à
   parte, "Usar a solução de Dadda (Parhami)" só depois da etapa 2 dela, contagem própria no

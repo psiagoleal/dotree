@@ -99,10 +99,29 @@ Os mesmos nomes valem na interface, no núcleo, nos testes e no VHDL gerado.
 
 A prontidão de cada saída é a maior prontidão entre as entradas mais o atraso da célula.
 Todo ponto de entrada nasce em $t = 0$. O atraso do circuito é a maior prontidão entre os
-bits do resultado. A convenção é fixa (D-2).
+bits do resultado. A tabela acima é o **padrão**; desde a v0.3 o usuário pode trocar os
+quatro custos de FA e HA (D-2, GER-12). Os números da spec, dos casos de referência e das
+soluções de exemplo são todos com o padrão.
 
-- **GER-04** — O sistema DEVE calcular área e atraso pela convenção acima.
-  *Prova:* casos de referência R2, R3 e R4 no núcleo.
+- **GER-04** — O sistema DEVE calcular área e atraso pela convenção acima, com os custos em
+  vigor.
+  *Prova:* casos de referência R2, R3 e R4 no núcleo, com o padrão.
+- **GER-12** — O sistema DEVE permitir trocar a área e o atraso do FA e do HA, cada um em
+  múltiplos de 0,01 de 0,01 a 100 (em $A_{FA}$ e $T_{FA}$), e restaurar o padrão com um
+  botão. Com os custos novos, o sistema DEVE recalcular a prontidão de todos os pontos, as
+  métricas, o caminho crítico, a ordem canônica dos pontos, as soluções automáticas, a
+  solução ótima e a comparação. Trocar os custos NÃO DEVE contar como ajuda nem entrar no
+  desfazer; o desfazer continua percorrendo as células, já com os custos novos. Os custos
+  vão no arquivo do exercício (SAL-02) e passam para a próxima matriz montada. SE um custo
+  estiver fora da faixa ou tiver mais de duas casas decimais, ENTÃO o sistema DEVE
+  recusá-lo nomeando o campo, sem mudar nada. A AND continua fora da área.
+  *Prova:* teste do núcleo com um caso calculado à mão em que o caminho crítico muda de
+  ramo (`A+B+C+2(D+E)`, larguras 1: com o padrão, 2 $T_{FA}$ pelas células 1, 3 e 4; com
+  FA de atraso 0,4, 1,5 $T_{FA}$ pelas células 2, 3 e 4; com FA 1,2 e HA 0,7 de área,
+  3,3 $A_{FA}$); proptest: montar com uns custos é igual a montar com o padrão e trocar
+  depois, em todo passo do desfazer; teste da busca ótima com custos (ver AJU-12); testes
+  do arquivo (sem custos abre com o padrão; com custos, ida e volta); testes de componente
+  e de ponta a ponta de mudar, recarregar, passar para outra matriz e restaurar.
 
 ## Requisitos não-funcionais
 

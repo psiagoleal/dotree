@@ -85,7 +85,22 @@ export type CoreError =
 export type BuildResult = { ok: true; matrix: Matrix } | { ok: false; error: CoreError };
 
 // ---------------------------------------------------------------- compression (MT-12a)
-// Times (`ready`, `delay`) and `area` are in half units: FA = 2, HA = 1.
+// Times (`ready`, `delay`) and `area` are in hundredths of T_FA and A_FA, under the
+// session's costs (GER-12): by default FA = 100 and HA = 50.
+
+/** Area and delay of each cell, in hundredths of A_FA and T_FA (GER-12). */
+export interface Costs {
+	faArea: number;
+	faDelay: number;
+	haArea: number;
+	haDelay: number;
+}
+
+/** The convention of spec 00: FA 1 A_FA and 1 T_FA, HA 0.5 and 0.5. */
+export const DEFAULT_COSTS: Costs = { faArea: 100, faDelay: 100, haArea: 50, haDelay: 50 };
+/** Each cost goes from 0.01 to 100, in hundredths. */
+export const COST_MIN = 1;
+export const COST_MAX = 10_000;
 
 export type CellKind = 'fa' | 'ha';
 
@@ -128,6 +143,8 @@ export interface Snapshot {
 	current: { points: LevelPoint[]; pending: PendingCell[] };
 	heights: number[];
 	metrics: { fa: number; ha: number; andGates: number; area: number; delay: number };
+	/** The costs the metrics and readiness were computed with (GER-12). */
+	costs: Costs;
 	canUndo: boolean;
 	canRedo: boolean;
 	/** Why "close with CPA" is disabled, or null when it is available (CMP-10). */
@@ -420,6 +437,11 @@ export interface CompressionSession {
 	block(): Block | null;
 	/** The block again, uncounted, once revealed; null before that. */
 	shownBlock(): Block | null;
+	/** Area and delay of FA and HA, in hundredths (GER-12). */
+	costs(): Costs;
+	/** Recomputes readiness, metrics and solutions under new costs; false, with nothing
+	 *  changed, when a cost is not a whole number from 1 to 10 000. Not an undo step. */
+	setCosts(costs: Costs): boolean;
 	/** Releases the WASM memory; the session is unusable afterwards. */
 	free(): void;
 }
@@ -475,6 +497,8 @@ function wrap(s: Session): CompressionSession {
 			const b = s.shownBlock();
 			return b === undefined ? null : JSON.parse(b);
 		},
+		costs: () => JSON.parse(s.costs()),
+		setCosts: (costs) => s.setCosts(JSON.stringify(costs)),
 		free: () => s.free()
 	};
 }

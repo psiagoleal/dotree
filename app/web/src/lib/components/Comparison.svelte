@@ -34,7 +34,8 @@
 		heights: ReturnType<CompressionSession['heightTable']> | null;
 	}
 
-	/** The solutions already revealed, read again uncounted; they depend only on the matrix. */
+	/** The solutions already revealed, read again uncounted. They depend on the matrix and
+	 *  the costs (GER-12); METHODS reads the snapshot, so they are read again with each. */
 	const shown = $derived.by((): Shown[] => {
 		void helps;
 		const revealed = session.revealed();

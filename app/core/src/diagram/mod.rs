@@ -8,7 +8,7 @@
 
 use std::collections::{BTreeSet, HashMap};
 
-use crate::netlist::{Netlist, Wire, cell_delay};
+use crate::netlist::{Netlist, Wire};
 use crate::reduce::CellKind;
 
 /// A cell drawn as a block.
@@ -190,7 +190,7 @@ fn critical_cells(n: &Netlist) -> Vec<usize> {
             continue;
         }
         let c = &n.cells[number - 1];
-        let want = ready[number] - cell_delay(c.kind).0;
+        let want = ready[number] - n.costs.delay(c.kind).0;
         for &w in &c.inputs {
             if let Wire::Sum(p) | Wire::Carry(p) = w {
                 if ready[p] == want {

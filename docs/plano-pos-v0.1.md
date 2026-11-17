@@ -495,6 +495,9 @@ Depois da entrega: MT-41 e a fila de "Depois da v0.2".
   6 bits → 6 FA, 11 FA, 5 FA e 5 FA + 2 HA por nível, CPA 6 FA + 1 HA, 33 FA e 3 HA, 34,5 $A_{FA}$;
   cinco operandos de 6 bits → 21 FA e 4 HA, 23 $A_{FA}$ (contra 24 do clássico); circuito
   verificado (VER-01); e2e de revelar e aplicar.
+- **Feito (2026-11-13, #58):** AJU-13 na spec 03. `Method::DaddaParhami` no núcleo, terceira
+  coluna da comparação, contagens próprias no registro e no arquivo; as contagens acima
+  conferidas por teste. A próxima jogada segue no Dadda clássico (MT-29b).
 
 ### MT-45: Custos configuráveis
 - **Objetivo:** painel com área e atraso de cada componente (FA, HA e, com o MT-32, os
@@ -506,6 +509,14 @@ Depois da entrega: MT-41 e a fila de "Depois da v0.2".
 - **Critério de aceite:** teste do núcleo com custos não padrão calculados à mão (o
   caminho crítico pode mudar de ramo); arquivo antigo abre com o padrão; e2e de mudar e
   restaurar.
+- **Feito (2026-11-17):** GER-12 na spec 00 (D-2 revista), notas nas specs 02, 03, 06 e 08.
+  `Costs` e `Time` em centésimos; a redução recalcula prontidão e ordem canônica de todo o
+  histórico ao trocar os custos (proptest: montar com os custos = montar com o padrão e
+  trocar). Caso à mão `A+B+C+2(D+E)`: o caminho crítico passa do FA para o HA com FA de
+  atraso 0,4. A busca ótima percorre as áreas atingíveis em ordem; no perfil e) a ótima vira
+  4 HA com HA de área 0,3. Arquivo: `costs` opcional, escrito só fora do padrão. Painel
+  "Custos das células" abaixo das métricas; os custos passam para a próxima matriz. Os
+  contadores do MT-32a entram no mesmo painel.
 
 ### MT-32a: Contadores no núcleo
 - **Objetivo:** ADR do modelo de célula composta (vale para o MT-27); contadores de uma

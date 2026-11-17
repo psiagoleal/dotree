@@ -15,7 +15,7 @@ use serde_json::Value;
 use crate::help::HelpLog;
 use crate::matrix::DotMatrix;
 use crate::profile::{self, Profile};
-use crate::reduce::{CellKind, PointId, Reduction};
+use crate::reduce::{CellKind, Costs, PointId, Reduction};
 
 /// Tag that tells an exercise file from any other JSON.
 pub const FORMAT: &str = "dotree-exercise";
@@ -64,6 +64,14 @@ pub struct Exercise {
     pub pending: Vec<SavedCell>,
     pub reveals: Reveals,
     pub help: HelpLog,
+    /// Area and delay of FA and HA (GER-12). Optional, so files of v0.2 open with the
+    /// default; left out when it is the default, so their files do not change either.
+    #[serde(default, skip_serializing_if = "is_default")]
+    pub costs: Costs,
+}
+
+fn is_default(c: &Costs) -> bool {
+    *c == Costs::default()
 }
 
 /// Why a file cannot be opened (SAL-03).
@@ -172,6 +180,7 @@ impl Exercise {
                 .collect(),
             reveals: Reveals { width },
             help,
+            costs: reduction.costs(),
         }
     }
 
@@ -197,7 +206,15 @@ impl Exercise {
             std::cmp::Ordering::Greater => return Err(StateError::FutureSchema { found }),
             std::cmp::Ordering::Equal => {}
         }
-        serde_json::from_value(v).map_err(malformed)
+        let ex: Exercise = serde_json::from_value(v).map_err(malformed)?;
+        if !ex.costs.is_valid() {
+            return Err(StateError::Malformed(format!(
+                "costs out of range: each goes from {} to {} hundredths",
+                Costs::MIN,
+                Costs::MAX
+            )));
+        }
+        Ok(ex)
     }
 
     /// The height profile of the exercise, when it was opened with one (EXP-16).
@@ -232,7 +249,8 @@ impl Exercise {
             return Err(StateError::InconsistentReveals);
         }
         let matrix = DotMatrix::build(&input.analysis).map_err(|_| StateError::BadExpression)?;
-        let mut r = Reduction::new(&matrix);
+        // Positions in the file are in the canonical order under these costs.
+        let mut r = Reduction::with_costs(&matrix, self.costs);
 
         for (level, saved) in self.levels.iter().enumerate() {
             let bad_level = StateError::InconsistentLevel { level };

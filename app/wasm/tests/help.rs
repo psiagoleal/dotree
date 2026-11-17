@@ -99,7 +99,7 @@ fn the_solution_is_a_separate_session_from_level_0() {
     let v = parse(solution.snapshot());
     assert_eq!(v["metrics"]["fa"], 13);
     assert_eq!(v["metrics"]["ha"], 8);
-    assert_eq!(v["metrics"]["area"], 34);
+    assert_eq!(v["metrics"]["area"], 1700);
     let levels = v["levels"].as_array().unwrap();
     assert_eq!(levels.len(), 5);
     assert_eq!(levels[4]["cpa"], true);

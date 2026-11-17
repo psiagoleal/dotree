@@ -5,12 +5,18 @@
      it returns (ADR 0001). -->
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { type Cell, type CellKind, type CompressionSession, type Snapshot } from '#lib/core.ts';
+	import {
+		type Cell,
+		type CellKind,
+		type CompressionSession,
+		type Costs,
+		type Snapshot
+	} from '#lib/core.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import { cpaBlockMessage, rejectionMessage } from '#lib/errors.ts';
 	import { keyAction } from '#lib/keys.ts';
-	import { formatHalves, visibleTop } from '#lib/levels.ts';
+	import { formatHundredths, visibleTop } from '#lib/levels.ts';
 	import { helpLogItems } from '#lib/help.ts';
 	import { methodTexts } from '#lib/methods.ts';
 	import type { ViewMode } from '#lib/view.ts';
@@ -18,6 +24,7 @@
 	import Comparison from './Comparison.svelte';
 	import HeightTable from './HeightTable.svelte';
 	import Coach from './Coach.svelte';
+	import CostSettings from './CostSettings.svelte';
 	import ConfirmDialog from './ConfirmDialog.svelte';
 	import LevelPanel from './LevelPanel.svelte';
 	import ProfileStatus from './ProfileStatus.svelte';
@@ -78,13 +85,16 @@
 	let backDialog: ConfirmDialog;
 	let whyDialog: ConfirmDialog;
 
+	// Solutions are measured with the costs in force, so their panels are read again when the
+	// costs change (GER-12).
+	const costsKey = $derived(JSON.stringify(snap.costs));
 	const complete = $derived(snap.result !== null);
 	// A complete circuit names R_0..R_{W-1} (CMP-12), so W is no longer hidden.
 	const top = $derived(visibleTop(snap, widthRevealed || complete ? outputWidth : null));
 	const critical = $derived(new Set(snap.critical.cells));
 	const dropped = $derived(snap.levels.flatMap((l) => l.cells).filter((c) => c.carry === null));
 	const KIND: Record<CellKind, string> = { fa: 'FA', ha: 'HA' };
-	const halves = (n: number) => formatHalves(n, getLocale());
+	const hundredths = (n: number) => formatHundredths(n, getLocale());
 	const name = (c: Cell) => m.cell_concluded({ kind: KIND[c.kind], number: c.number });
 
 	/** A box's accessible name says what its border and mark show. */
@@ -99,6 +109,13 @@
 		suggested = [];
 		refusal = null;
 		status = message;
+	}
+
+	/** GER-12: new costs recompute the circuit's times; not an undo step, not a help. */
+	function applyCosts(costs: Costs): boolean {
+		if (!session.setCosts(costs)) return false;
+		refresh(m.costs_applied());
+		return true;
 	}
 
 	function toggle(id: number) {
@@ -185,8 +202,8 @@
 			<span>FA <b>{snap.metrics.fa}</b></span>
 			<span>HA <b>{snap.metrics.ha}</b></span>
 			<span>AND <b>{snap.metrics.andGates}</b></span>
-			<span>{m.metric_area()} <b>{halves(snap.metrics.area)}</b> A<sub>FA</sub></span>
-			<span>{m.metric_delay()} <b>{halves(snap.metrics.delay)}</b> T<sub>FA</sub></span>
+			<span>{m.metric_area()} <b>{hundredths(snap.metrics.area)}</b> A<sub>FA</sub></span>
+			<span>{m.metric_delay()} <b>{hundredths(snap.metrics.delay)}</b> T<sub>FA</sub></span>
 		</p>
 		<button
 			type="button"
@@ -195,6 +212,8 @@
 			onclick={() => (showCritical = !showCritical)}>{m.action_critical()}</button
 		>
 	</div>
+
+	<CostSettings costs={snap.costs} onchange={applyCosts} readOnly={narrow} />
 
 	{#if snap.profile}
 		<ProfileStatus
@@ -334,16 +353,18 @@
 				/>
 			{/key}
 		{/if}
-		<SolutionHelp
-			{session}
-			{view}
-			readOnly={narrow}
-			onhelp={() => (helps = session.helpLog())}
-			onapply={(method) => {
-				helps = session.helpLog();
-				refresh(methodTexts(method).applied);
-			}}
-		/>
+		{#key costsKey}
+			<SolutionHelp
+				{session}
+				{view}
+				readOnly={narrow}
+				onhelp={() => (helps = session.helpLog())}
+				onapply={(method) => {
+					helps = session.helpLog();
+					refresh(methodTexts(method).applied);
+				}}
+			/>
+		{/key}
 		<Comparison {session} {snap} {helps} />
 	</section>
 

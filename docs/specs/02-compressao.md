@@ -30,10 +30,12 @@ nível, um painel por nível.
 
 - **CMP-01** — QUANDO o usuário formar uma célula com 3 pontos da coluna $j$, o sistema DEVE
   criar um FA: remover os pontos do nível atual e criar no nível seguinte a soma na coluna
-  $j$ e o vai-um na coluna $j+1$, ambos com prontidão $\max(t_{entradas}) + 1\,T_{FA}$.
+  $j$ e o vai-um na coluna $j+1$, ambos com prontidão $\max(t_{entradas})$ mais o atraso
+  do FA ($1\,T_{FA}$ no padrão, GER-12).
   *Prova:* teste do núcleo.
 - **CMP-02** — QUANDO o usuário formar uma célula com 2 pontos da coluna $j$, o sistema DEVE
-  criar um HA do mesmo modo, com prontidão $\max(t_{entradas}) + 0{,}5\,T_{FA}$.
+  criar um HA do mesmo modo, com prontidão $\max(t_{entradas})$ mais o atraso do HA
+  ($0{,}5\,T_{FA}$ no padrão).
   *Prova:* teste do núcleo.
 - **CMP-03** — O sistema DEVE permitir desfazer e refazer qualquer formação de célula,
   conclusão de nível e volta de nível, até o início do exercício. Uma ação nova depois de
@@ -127,7 +129,7 @@ uma nota abaixo dos painéis oferece "Por quê?" (CMP-09).
 - **CMP-14** — O sistema DEVE exibir a contagem de FA, HA e AND do circuito montado até o
   momento.
 - **CMP-15** — O sistema DEVE exibir a área em $A_{FA}$ e o atraso em $T_{FA}$ do circuito
-  montado até o momento (D-3) e, quando o usuário pedir, destacar **todos** os caminhos
+  montado até o momento, com os custos em vigor (D-3, GER-12) e, quando o usuário pedir, destacar **todos** os caminhos
   críticos (todas as células que estão em algum caminho de atraso máximo).
   As métricas contam também as células pendentes do nível atual, para que formar uma célula
   já mostre o efeito.

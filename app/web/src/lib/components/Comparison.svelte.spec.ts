@@ -122,6 +122,19 @@ describe('Comparison (MT-38, GER-01)', () => {
 		expect(session.helpLog()).toEqual(log);
 	});
 
+	it('follows new costs: with an HA as large as an FA, area = FA + HA (GER-12)', async () => {
+		const session = r2(core);
+		session.solution(false, 'dadda').free();
+		session.solution(false, 'wallace').free();
+		const { container, rerender } = await show(session);
+		expect(session.setCosts({ faArea: 100, faDelay: 100, haArea: 100, haDelay: 50 })).toBe(true);
+		await rerender({ snap: session.snapshot() });
+		// Student 13 + 4, Dadda 13 + 8, Wallace 13 + 3; delays keep HA 0,5.
+		const rows = cells(container, 'comparison-table');
+		expect(rows[1]).toEqual(['Área (A_FA)', '17', '21', '16']);
+		expect(rows[2]).toEqual(['Atraso (T_FA)', '6', '7', '6']);
+	});
+
 	it('R1: Dadda (Parhami) gets its own column, computed by hand (AJU-13)', async () => {
 		const session = r2(core);
 		session.solution(false, 'parhami').free();
