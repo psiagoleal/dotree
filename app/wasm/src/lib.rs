@@ -3,7 +3,6 @@
 //! crate only converts core results into JSON for the interface. Errors and warnings travel
 //! as codes with parameters; the interface words them (IDI-05).
 
-use std::cell::OnceCell;
 use std::collections::BTreeMap;
 
 use dotree_core::board::{self, BoardLimit};
@@ -25,6 +24,41 @@ use serde_json::{Value, json};
 use wasm_bindgen::prelude::*;
 
 mod netcodec;
+
+fn search_status(found: &Result<Reduction, SearchError>) -> &'static str {
+    match found {
+        Ok(_) => "ok",
+        Err(SearchError::TooLarge) => "tooLarge",
+        Err(SearchError::NoCircuit) => "noCircuit",
+    }
+}
+
+/// The optimal circuit of a height profile, searched where it is called: the page calls it
+/// in a worker (MT-42). `request` comes from `Session.optimalRequest`; the answer, for
+/// `Session.adoptOptimal`, carries the request back with a status and, when found, the
+/// circuit in the form of an exercise file. A request that is not a profile has status
+/// "noCircuit".
+#[wasm_bindgen(js_name = searchOptimal)]
+pub fn search_optimal(request: &str) -> String {
+    let v: Value = serde_json::from_str(request).unwrap_or(Value::Null);
+    let expression = v["expression"].as_str().unwrap_or_default();
+    let widths: BTreeMap<char, u32> =
+        serde_json::from_value(v["widths"].clone()).unwrap_or_default();
+    let costs: Option<Costs> = serde_json::from_value(v["costs"].clone()).ok();
+    let found = match (profile::parse(expression).ok().flatten(), costs) {
+        (Some(p), Some(c)) if c.is_valid() => p.optimal_with_costs(c),
+        _ => Err(SearchError::NoCircuit),
+    };
+    let circuit = found.as_ref().ok().map(|r| {
+        serde_json::from_str::<Value>(
+            &Exercise::capture(expression, &widths, r, None, HelpLog::default()).to_json(),
+        )
+        .expect("an exercise file is JSON")
+    });
+    json!({"expression": expression, "costs": v["costs"], "status": search_status(&found),
+           "circuit": circuit})
+    .to_string()
+}
 
 /// Core version, used by the interface to prove the WASM module loaded.
 #[wasm_bindgen(js_name = coreVersion)]
@@ -381,8 +415,9 @@ pub struct Session {
     width: Option<WidthReveal>,
     /// The height profile the exercise was opened with (EXP-16), if any.
     profile: Option<Profile>,
-    /// Its optimal circuit under the current costs, searched once on first need (AJU-12).
-    optimal: OnceCell<Result<Reduction, SearchError>>,
+    /// Its optimal circuit under the current costs (AJU-12): `None` until a search ends.
+    /// The page runs the search in a worker and hands the result over (MT-42).
+    optimal: Option<Result<Reduction, SearchError>>,
 }
 
 impl Session {
@@ -402,15 +437,15 @@ impl Session {
             widths: widths.clone(),
             width: None,
             profile,
-            optimal: OnceCell::new(),
+            optimal: None,
         }
     }
 
-    /// The optimal circuit of the profile, searched once; `None` without a profile.
+    /// The optimal circuit of the profile once a search ended; `None` without a profile or
+    /// while the search runs.
     fn optimal(&self) -> Option<&Result<Reduction, SearchError>> {
-        let p = self.profile.as_ref()?;
-        let costs = self.reduction.costs();
-        Some(self.optimal.get_or_init(|| p.optimal_with_costs(costs)))
+        self.profile.as_ref()?;
+        self.optimal.as_ref()
     }
 
     /// The circuit of `method` from level 0; `None` for the optimum when there is no
@@ -548,7 +583,7 @@ impl Session {
         }
         if costs != self.reduction.costs() {
             self.reduction.set_costs(costs);
-            self.optimal = OnceCell::new();
+            self.optimal = None;
         }
         true
     }
@@ -746,6 +781,10 @@ impl Session {
     /// The solution again, uncounted, once it was revealed; `None` before that (GER-01).
     #[wasm_bindgen(js_name = shownSolution)]
     pub fn shown_solution(&self, method: SolutionMethod) -> Option<Session> {
+        // While the optimum is searched again, there is nothing to show in its place.
+        if method == SolutionMethod::Optimal && self.solution_reduction(method).is_none() {
+            return None;
+        }
         (method.counts(&self.log)[0] > 0).then(|| self.solution_session(method))
     }
 
@@ -767,19 +806,74 @@ impl Session {
         applied
     }
 
-    /// Whether the optimal circuit of the profile can be shown: "ok", "tooLarge" or
-    /// "noCircuit"; `None` without a profile. Reveals and counts nothing (AJU-12): it may
-    /// take a moment the first time, as it runs the search.
+    /// Whether the optimal circuit of the profile can be shown: "ok", "tooLarge",
+    /// "noCircuit", or "pending" while no search has ended under the current costs; `None`
+    /// without a profile. Reveals and counts nothing, and searches nothing (AJU-12, MT-42).
     #[wasm_bindgen(js_name = optimalSearch)]
     pub fn optimal_search(&self) -> Option<String> {
+        self.profile.as_ref()?;
         Some(
-            match self.optimal()? {
-                Ok(_) => "ok",
-                Err(SearchError::TooLarge) => "tooLarge",
-                Err(SearchError::NoCircuit) => "noCircuit",
-            }
-            .into(),
+            self.optimal
+                .as_ref()
+                .map_or("pending", search_status)
+                .into(),
         )
+    }
+
+    /// What a worker needs to search the optimum (`searchOptimal`): the profile and the
+    /// costs in force, as JSON; `None` without a profile (MT-42).
+    #[wasm_bindgen(js_name = optimalRequest)]
+    pub fn optimal_request(&self) -> Option<String> {
+        self.profile.as_ref()?;
+        Some(
+            json!({"expression": self.expression, "widths": self.widths,
+                   "costs": self.reduction.costs()})
+            .to_string(),
+        )
+    }
+
+    /// Takes the result of `searchOptimal` and returns its status, or `None`, keeping
+    /// nothing, when it was searched for other costs or another profile, or its circuit
+    /// breaks a rule or misses the profile: the circuit is replayed through the rules, as a
+    /// saved exercise is (SAL-03). Reveals and counts nothing (MT-42).
+    #[wasm_bindgen(js_name = adoptOptimal)]
+    pub fn adopt_optimal(&mut self, result_json: &str) -> Option<String> {
+        let profile = self.profile.as_ref()?;
+        let v: Value = serde_json::from_str(result_json).ok()?;
+        let costs: Costs = serde_json::from_value(v.get("costs")?.clone()).ok()?;
+        if v.get("expression")?.as_str()? != self.expression || costs != self.reduction.costs() {
+            return None;
+        }
+        let found = match v.get("status")?.as_str()? {
+            "tooLarge" => Err(SearchError::TooLarge),
+            "noCircuit" => Err(SearchError::NoCircuit),
+            "ok" => {
+                let file = Exercise::parse(&v.get("circuit")?.to_string()).ok()?;
+                if file.expression != self.expression || file.costs != costs {
+                    return None;
+                }
+                let (_, r) = file.restore().ok()?;
+                if !profile.reached(&r) {
+                    return None;
+                }
+                Ok(r)
+            }
+            _ => return None,
+        };
+        let status = search_status(&found);
+        self.optimal = Some(found);
+        Some(status.into())
+    }
+
+    /// Searches the optimum here, on the calling thread: the fallback when the worker is
+    /// gone (MT-42). Same answer as `optimalSearch` afterwards.
+    #[wasm_bindgen(js_name = searchOptimal)]
+    pub fn search_optimal(&mut self) -> Option<String> {
+        let p = self.profile.as_ref()?;
+        if self.optimal.is_none() {
+            self.optimal = Some(p.optimal_with_costs(self.reduction.costs()));
+        }
+        self.optimal_search()
     }
 
     /// The known block the profile describes, as a counted reveal (AJU-12); `null` without

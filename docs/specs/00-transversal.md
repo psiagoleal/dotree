@@ -141,7 +141,9 @@ soluções de exemplo são todos com o padrão.
 - **GER-06** — QUANDO o usuário formar ou desfizer uma célula numa matriz de até 1024
   pontos, o sistema DEVE atualizar matriz e métricas em menos de 100 ms (percentil 95).
   *Prova:* teste de ponta a ponta no Chromium do CI, com 50 operações sobre a matriz de
-  32 × 32 bits (medido no MT-25a: mediana 15,6 ms, p95 18 ms).
+  32 × 32 bits (medido no MT-25a: mediana 15,6 ms, p95 18 ms); e, com o maior perfil
+  aceito (26 pontos, `{6,7,7,6; 1,1,1,1,1,1,1}`), durante a busca da solução ótima no
+  *worker* (MT-42: montar o perfil 56 ms, contra cerca de 770 ms antes; p95 15 ms).
   *Nota (MT-25a):* aplicar, desfazer e refazer uma solução inteira não é formar uma célula
   e fica fora do GER-06. No 32 × 32 com o Dadda (930 células antes do CPA), aplicar levou
   cerca de 850 ms, desfazer 270 ms e refazer 700 ms; o tempo vai quase todo para o

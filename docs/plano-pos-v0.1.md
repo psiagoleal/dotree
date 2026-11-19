@@ -423,6 +423,13 @@ A animação de *shift-add* (P19) fica sem ticket até haver espaço depois da v
 - **Critério de aceite:** e2e que interage com a página durante a busca; GER-06 (100 ms no
   p95) medido com o maior perfil aceito.
 - **Passa a ser pré-requisito do MT-46** (otimizador), decidido em 2026-11-13.
+- **Feito (2026-11-19):** medido antes, no navegador: montar `{6,7,7,6; 1,1,1,1,1,1,1}`
+  levava 767 ms, quase tudo a busca. Ela foi para o *worker* da verificação; a sessão
+  espera a resposta (`pending`), aceita só a que vale para os custos e o perfil em vigor e
+  refaz o circuito pelas regras do arquivo do exercício. Montar passou a 56 ms, e 50
+  operações de formar e desfazer, 6 rodadas delas durante a busca, deram p95 de 15 ms. A
+  busca não tem etapas, então o progresso é indeterminado; o otimizador (MT-46) usa o
+  mesmo caminho.
 
 ## v0.3: até a entrega de 03/12/2026
 

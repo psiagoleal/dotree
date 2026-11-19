@@ -1,6 +1,6 @@
 // Caminho relativo: app/web/src/lib/verification.ts
 // Starts verifications in one shared worker and lets the page follow and cancel them
-// (VER-04). The worker is created when the page loads (`prewarm`), so a verification needs
+// (VER-04). The same worker searches a profile's optimal circuit (MT-42). The worker is created when the page loads (`prewarm`), so a verification needs
 // no network afterwards (GER-05). If the worker dies, the runs in progress fail and the next
 // one starts a new worker.
 import type { VerificationProgress } from '#lib/core.ts';
@@ -36,10 +36,15 @@ function defaultWorker(): WorkerLike {
 	return new Worker(new URL('./verify.worker.ts', import.meta.url), { type: 'module' });
 }
 
+/** Searches the optimum of `request` (`CompressionSession.optimalRequest`) and resolves
+ *  with the answer for `adoptOptimal`; rejects if the worker fails. */
+export type SearchOptimal = (request: string) => Promise<string>;
+
 export class Verifier {
 	#worker: WorkerLike | null = null;
 	#next = 1;
 	#runs = new Map<number, Pending>();
+	#searches = new Map<number, { finish: (r: string) => void; fail: (e: Error) => void }>();
 
 	readonly #create: () => WorkerLike;
 
@@ -67,6 +72,13 @@ export class Verifier {
 				loaded();
 				return;
 			}
+			if ('search' in m) {
+				const s = this.#searches.get(m.search);
+				this.#searches.delete(m.search);
+				if ('error' in m) s?.fail(new Error(m.error));
+				else s?.finish(m.result);
+				return;
+			}
 			const run = this.#runs.get(m.run);
 			if (!run) return; // cancelled or finished: nothing it sends counts
 			if ('error' in m) {
@@ -81,8 +93,9 @@ export class Verifier {
 			}
 		};
 		w.onerror = (e) => {
-			const failed = [...this.#runs.values()];
+			const failed = [...this.#runs.values(), ...this.#searches.values()];
 			this.#runs.clear();
+			this.#searches.clear();
 			w.terminate();
 			if (this.#worker === w) this.#worker = null;
 			loaded();
@@ -91,6 +104,14 @@ export class Verifier {
 		this.#worker = w;
 		return w;
 	}
+
+	search: SearchOptimal = (request) => {
+		const worker = this.#connect();
+		const id = this.#next++;
+		const done = new Promise<string>((finish, fail) => this.#searches.set(id, { finish, fail }));
+		worker.postMessage({ search: id, request });
+		return done;
+	};
 
 	start: StartVerification = (netlist, onprogress) => {
 		const worker = this.#connect();
@@ -118,3 +139,5 @@ export const startVerification: StartVerification = (netlist, onprogress) =>
 	shared.start(netlist, onprogress);
 
 export const prewarmVerification = (): Promise<void> => shared.prewarm();
+
+export const searchOptimalInWorker: SearchOptimal = (request) => shared.search(request);

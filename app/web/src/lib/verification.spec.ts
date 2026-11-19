@@ -112,4 +112,29 @@ describe('Verifier', () => {
 		start();
 		expect(workers).toHaveLength(2);
 	});
+
+	it('searches the optimum in the same worker and settles each search by its id (MT-42)', async () => {
+		const { verifier, workers, start } = setup();
+		const a = verifier.search('{"expression":"{3; 1,1}"}');
+		start();
+		const b = verifier.search('{"expression":"{5; 2,1}"}');
+		expect(workers).toHaveLength(1);
+		expect(workers[0].sent).toEqual([
+			{ search: 1, request: '{"expression":"{3; 1,1}"}' },
+			{ run: 2, netlist: '{"net":1}' },
+			{ search: 3, request: '{"expression":"{5; 2,1}"}' }
+		]);
+		workers[0].emit({ search: 3, result: 'B' });
+		workers[0].emit({ search: 1, error: 'boom' });
+		await expect(b).resolves.toBe('B');
+		await expect(a).rejects.toThrow('boom');
+	});
+
+	it('a dead worker fails the searches in progress too (MT-42)', async () => {
+		const { verifier, workers } = setup();
+		const a = verifier.search('{}');
+		workers[0].onerror?.({ message: 'gone' } as ErrorEvent);
+		await expect(a).rejects.toThrow('gone');
+		expect(workers[0].terminated).toBe(true);
+	});
 });

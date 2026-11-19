@@ -97,6 +97,7 @@ describe('ProfileStatus (CMP-19, AJU-12)', () => {
 describe('Optimal solution (AJU-12)', () => {
 	it('comes with the other methods only for a profile, in two steps', async () => {
 		const session = core.openSession('{5,5; 1,1,1,1}', {});
+		session.searchOptimal();
 		await render(SolutionHelp, { session, view: 'dots', onhelp: vi.fn(), onapply: vi.fn() });
 		// Every method of an expression is offered for a profile too (AJU-13).
 		for (const name of ['Solução de Dadda', 'Solução de Dadda (Parhami)', 'Solução de Wallace'])
@@ -120,6 +121,7 @@ describe('Optimal solution (AJU-12)', () => {
 
 	it('a redundant output still shows its levels: the optimum stops at the profile', async () => {
 		const session = core.openSession('{5; 2,1}', {});
+		session.searchOptimal();
 		session.solution(false, 'optimal').free();
 		session.solution(true, 'optimal').free();
 		await render(SolutionHelp, { session, view: 'dots', onhelp: vi.fn(), onapply: vi.fn() });
@@ -131,6 +133,7 @@ describe('Optimal solution (AJU-12)', () => {
 
 	it('a profile too large for the search says so instead of offering it', async () => {
 		const session = core.openSession('{6,7,7,6; 1,1,1,1,1,1,1}', {});
+		session.searchOptimal();
 		await render(SolutionHelp, { session, view: 'dots', onhelp: vi.fn(), onapply: vi.fn() });
 		await expect
 			.element(page.getByTestId('optimal-unavailable'))
@@ -151,6 +154,7 @@ describe('Optimal solution (AJU-12)', () => {
 
 	it('enters the comparison; reaching the profile counts as complete', async () => {
 		const session = core.openSession('{5; 2,1}', {});
+		session.searchOptimal();
 		session.solution(false, 'optimal').free();
 		const { container } = await render(Comparison, {
 			session,

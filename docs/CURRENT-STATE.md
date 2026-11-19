@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-19
-- **Commit:** `daa45aa` (MT-49, #62); última *tag* `v0.2.0`.
+- **Commit:** `86a94c5` (MT-25a, #63); última *tag* `v0.2.0`.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -219,11 +219,16 @@
       sem colidir com as saídas `s<n>` e `k<n>`. 326 testes Rust; GHDL com os 17 casos de
       antes e o novo `nomes_s_k` no veredito esperado; 3 mutações pegas (sem a correção,
       o GHDL recusa `nomes_s_k`).
-- [x] MT-25a preparado: 32 bits por variável, 64 de entrada, 1024 pontos (EXP-06, EXP-08);
+- [x] MT-25a mesclado (#63): 32 bits por variável, 64 de entrada, 1024 pontos (EXP-06, EXP-08);
       zoom da matriz (VIS-05) e do diagrama, tabela de ligações com rolagem própria
       (DIA-08). GER-06 no 32 × 32: p95 18 ms. Aplicar/desfazer/refazer o Dadda do 32 × 32:
       ~850/270/700 ms (anotado no GER-06). GHDL com `mult32`.
-- [ ] Próximo: MT-42. O MT-41 fica para depois da entrega.
+- [x] MT-42 preparado: a busca do ótimo de um perfil roda no *worker* da verificação
+      (`optimalRequest` → `searchOptimal` → `adoptOptimal`, reserva síncrona
+      `searchOptimal` na sessão); "Buscando a solução ótima…" enquanto roda. Montar o perfil
+      de 26 pontos: 767 → 56 ms; GER-06 durante a busca p95 15 ms. 336 testes Rust, 213 de
+      unidade/componente, 65 e2e; 10 mutações pegas (uma depois de um teste novo).
+- [ ] Próximo: MT-46 (otimizador). O MT-41 fica para depois da entrega.
 - Mensagens de commit antigas (a do MT-31a, `90df97e`, e outras) citam material não
   público; ficam no histórico, porque reescrevê-lo pede *force push* no `main` (ADR 0003).
 
@@ -270,6 +275,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-19 | `86a94c5` | limites e zoom (#63); busca do ótimo no *worker* | MT-25a, MT-42 |
 | 2026-11-19 | `daa45aa` | nomes de `S` e `K` (#62); limites e zoom | MT-49, MT-25a |
 | 2026-11-19 | `615bc97` | contadores na interface (#61); nomes de `S` e `K` | MT-32b, MT-49 |
 | 2026-11-17 | `396d373` | contadores no núcleo (#60); contadores na interface | MT-32a, MT-32b |

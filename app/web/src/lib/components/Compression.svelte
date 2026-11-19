@@ -14,6 +14,7 @@
 	import { formatHundredths, visibleTop } from '#lib/levels.ts';
 	import { helpLogItems } from '#lib/help.ts';
 	import { methodTexts } from '#lib/methods.ts';
+	import { searchOptimalInWorker, type SearchOptimal } from '#lib/verification.ts';
 	import type { ViewMode } from '#lib/view.ts';
 	import CircuitView from './CircuitView.svelte';
 	import Comparison from './Comparison.svelte';
@@ -33,7 +34,8 @@
 		view,
 		outputWidth,
 		vMax,
-		widthRevealed
+		widthRevealed,
+		searchOptimal = searchOptimalInWorker
 	}: {
 		session: CompressionSession;
 		view: ViewMode;
@@ -41,6 +43,8 @@
 		outputWidth: number;
 		vMax: string;
 		widthRevealed: boolean;
+		/** Runs the search of a profile's optimum off the main thread (MT-42). */
+		searchOptimal?: SearchOptimal;
 	} = $props();
 
 	const id = $props.id();
@@ -83,6 +87,34 @@
 	// Solutions are measured with the costs in force, so their panels are read again when the
 	// costs change (GER-12).
 	const costsKey = $derived(JSON.stringify(snap.costs));
+
+	// MT-42: a profile's optimum is searched in the worker when the exercise opens and again
+	// after new costs; the solution panels and the comparison are read again once it ends.
+	// A result that comes after this session is gone, or after newer costs, is dropped.
+	let optimal = $state(untrack(() => session.optimalSearch()));
+	let searchGen = 0;
+	$effect(() => {
+		void costsKey;
+		const gen = ++searchGen;
+		untrack(() => {
+			optimal = session.optimalSearch();
+			const request = session.optimalRequest();
+			if (optimal !== 'pending' || request === null) return;
+			const settle = (found: () => ReturnType<CompressionSession['optimalSearch']>) => {
+				if (gen !== searchGen) return;
+				optimal = found();
+				helps = session.helpLog();
+			};
+			searchOptimal(request).then(
+				(result) => settle(() => session.adoptOptimal(result) ?? session.searchOptimal()),
+				// Without the worker, the search runs here, as before MT-42.
+				() => settle(() => session.searchOptimal())
+			);
+		});
+		return () => {
+			searchGen++;
+		};
+	});
 	const complete = $derived(snap.result !== null);
 	// A complete circuit names R_0..R_{W-1} (CMP-12), so W is no longer hidden.
 	const top = $derived(visibleTop(snap, widthRevealed || complete ? outputWidth : null));
@@ -350,7 +382,7 @@
 				/>
 			{/key}
 		{/if}
-		{#key costsKey}
+		{#key `${costsKey} ${optimal}`}
 			<SolutionHelp
 				{session}
 				{view}
