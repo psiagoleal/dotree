@@ -611,6 +611,13 @@ Depois da entrega: MT-41 e a fila de "Depois da v0.2".
 - **Objetivo:** como o MT-43: versões, seção do CHANGELOG, ModelSim à mão (agora com os
   contadores), *tag* pelo autor, release, imagem e site conferidos.
 - **Depende de:** MT-46
+- **Preparado (2026-11-19):** versões em 0.3.0 (`Cargo.toml`, `package.json`, badge,
+  "última versão" e imagem do README), README com Dadda (Parhami), contadores, custos,
+  limites e otimizador, e as limitações revistas; seção `[0.3.0]` do CHANGELOG (as notas
+  da release saem dela, conferido com o `awk` do `release.yml`). ModelSim ASE 10.1d: os 18
+  casos de `vhdl_referencia` compilaram sem avisos e deram o veredito esperado (14
+  corretos, 4 estragados acusados só na versão estragada). No ModelSim, `report` de
+  severidade `error` não muda o código de saída do `vsim`; o veredito sai das mensagens.
 
 ### MT-48: Vídeos automatizados
 - **Objetivo:** um vídeo por funcionalidade e um vídeo completo, gravados pelo Playwright
