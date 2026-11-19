@@ -9,7 +9,6 @@
 
 ## Em aberto: v0.3 (entrega em 03/12/2026; decidido em 2026-11-13)
 
-- [ ] [MT-25a](plano-pos-v0.1.md#mt-25a-limites-até-64-bits-de-entrada-p1-degrau-1) — Limites: 32 bits por variável, 64 de entrada, até 1024 pontos; matriz com zoom e rolagem.
 - [ ] [MT-42](plano-pos-v0.1.md#mt-42-busca-do-ótimo-fora-da-linha-principal) — Busca do ótimo num *worker*, sem travar a página.
 - [ ] [MT-46](plano-pos-v0.1.md#mt-46-otimizador) — Otimizador: opções não dominadas ao lado do circuito do aluno (busca exata nas pequenas, heurística nas grandes).
 - [ ] [MT-47](plano-pos-v0.1.md#mt-47-publicar-a-v030) — Publicar a v0.3.0.
@@ -33,6 +32,7 @@
 
 ## Concluídos
 
+- [x] [MT-25a](plano-pos-v0.1.md#mt-25a-limites-até-64-bits-de-entrada-p1-degrau-1) — Limites: 32 bits por variável, 64 de entrada, até 1024 pontos; matriz e diagrama com zoom e rolagem.
 - [x] [MT-49](plano-pos-v0.1.md#mt-49-nomes-das-variáveis-s-e-k-no-vhdl) — Bits sozinhos de `S` e `K` com o sufixo `_in`, sem colidir com `s<n>` e `k<n>`.
 
 - [x] [MT-32b](plano-pos-v0.1.md#mt-32b-contadores-na-interface) — Contadores na interface: formar pelo mouse e pelo teclado, tabelas, diagrama, custos e comparação.

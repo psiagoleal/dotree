@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- **Limites maiores:** até 32 bits por variável, 64 bits de entrada e 1024 pontos, o
+  bastante para um multiplicador 32 × 32 (saída até 128 bits, sem inteiro largo). O
+  Dadda do 32 × 32 (899 FA e 31 HA antes do CPA) é verificado pela amostra de $2^{20}$
+  vetores, e o VHDL dele passa no GHDL. Formar e desfazer na matriz de 1024 pontos levam
+  18 ms no percentil 95 (GER-06, EXP-06, EXP-08, MT-25a).
+- **Zoom da matriz e do diagrama:** diminuir, aumentar e "Ajustar à largura" (25% a 150%),
+  um para todos os níveis e soluções e outro para o diagrama; o que não cabe rola de lado.
+  A tabela de ligações rola na própria caixa, com o cabeçalho à vista (VIS-05, DIA-08,
+  MT-25a).
 - Solução **Dadda (Parhami)**, ao lado de Dadda e Wallace, em expressões e perfis de
   alturas: as alturas-alvo de Dadda com um FA sempre que a coluna acima do alvo tem 3
   pontos livres, a variante da fig. 8.14 do Parhami. Mesmo fluxo das outras soluções

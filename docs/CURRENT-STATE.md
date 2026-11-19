@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-19
-- **Commit:** `615bc97` (MT-32b, #61); última *tag* `v0.2.0`.
+- **Commit:** `daa45aa` (MT-49, #62); última *tag* `v0.2.0`.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -215,12 +215,15 @@
       MT-32a retiradas. 324 testes Rust, 199 de unidade/componente, 62 e2e (um 7:3 pelo
       teclado até a verificação e o VHDL; auditoria de acessibilidade nos dois temas);
       14 mutações pegas (uma depois de um teste da borda dupla).
-- [x] MT-49 preparado: o bit sozinho de `S` e `K` se chama `s1_in` e `k1_in` (spec 05),
+- [x] MT-49 mesclado (#62): o bit sozinho de `S` e `K` se chama `s1_in` e `k1_in` (spec 05),
       sem colidir com as saídas `s<n>` e `k<n>`. 326 testes Rust; GHDL com os 17 casos de
       antes e o novo `nomes_s_k` no veredito esperado; 3 mutações pegas (sem a correção,
       o GHDL recusa `nomes_s_k`).
-- [ ] Próximo: MT-25a (limites: 64 bits de entrada, 1024 pontos, matriz com zoom). O MT-41
-      fica para depois da entrega.
+- [x] MT-25a preparado: 32 bits por variável, 64 de entrada, 1024 pontos (EXP-06, EXP-08);
+      zoom da matriz (VIS-05) e do diagrama, tabela de ligações com rolagem própria
+      (DIA-08). GER-06 no 32 × 32: p95 18 ms. Aplicar/desfazer/refazer o Dadda do 32 × 32:
+      ~850/270/700 ms (anotado no GER-06). GHDL com `mult32`.
+- [ ] Próximo: MT-42. O MT-41 fica para depois da entrega.
 - Mensagens de commit antigas (a do MT-31a, `90df97e`, e outras) citam material não
   público; ficam no histórico, porque reescrevê-lo pede *force push* no `main` (ADR 0003).
 
@@ -267,6 +270,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-19 | `daa45aa` | nomes de `S` e `K` (#62); limites e zoom | MT-49, MT-25a |
 | 2026-11-19 | `615bc97` | contadores na interface (#61); nomes de `S` e `K` | MT-32b, MT-49 |
 | 2026-11-17 | `396d373` | contadores no núcleo (#60); contadores na interface | MT-32a, MT-32b |
 | 2026-11-17 | `76ae246` | custos configuráveis (#59); contadores no núcleo | MT-45, MT-32a |

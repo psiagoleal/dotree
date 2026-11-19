@@ -138,10 +138,15 @@ soluções de exemplo são todos com o padrão.
   aplicação e sem enviar a expressão ou o circuito para fora do dispositivo.
   *Prova:* o artefato de produção é um site estático; teste de ponta a ponta que bloqueia a
   rede após o carregamento e completa R2.
-- **GER-06** — QUANDO o usuário formar ou desfizer uma célula numa matriz de até 256 pontos,
-  o sistema DEVE atualizar matriz e métricas em menos de 100 ms (percentil 95).
+- **GER-06** — QUANDO o usuário formar ou desfizer uma célula numa matriz de até 1024
+  pontos, o sistema DEVE atualizar matriz e métricas em menos de 100 ms (percentil 95).
   *Prova:* teste de ponta a ponta no Chromium do CI, com 50 operações sobre a matriz de
-  16 × 16 bits.
+  32 × 32 bits (medido no MT-25a: mediana 15,6 ms, p95 18 ms).
+  *Nota (MT-25a):* aplicar, desfazer e refazer uma solução inteira não é formar uma célula
+  e fica fora do GER-06. No 32 × 32 com o Dadda (930 células antes do CPA), aplicar levou
+  cerca de 850 ms, desfazer 270 ms e refazer 700 ms; o tempo vai quase todo para o
+  navegador desenhar cerca de 44 mil elementos (níveis, diagrama e tabela de ligações),
+  não para o núcleo.
 - **GER-07** — O sistema DEVE permitir selecionar pontos e formar células pelo teclado, e a
   visão de variáveis indexadas (VIS-01) DEVE distinguir os termos sem depender de cor.
   *Prova:* teste de ponta a ponta só com teclado completando R2; auditoria automática de
@@ -219,7 +224,7 @@ A lista acompanha o `main` (ADR 0004): o que sai dela vira critério numa spec e
   multiplicadores hierárquicos (MT-32, MT-27). Contadores nas soluções automáticas. Na entrada por alturas, o nome do bloco
   conhecido aparece só como ajuda (AJU-12).
 - CPA que não seja *ripple* (MT-36).
-- Mais de 16 bits por variável, 32 bits de entrada ou 256 pontos (MT-24, MT-25); fatias de
+- Mais de 32 bits por variável, 64 bits de entrada ou 1024 pontos (MT-24, MT-25); fatias de
   variáveis (MT-26); múltiplos pré-computados e multiplicação por constantes (MT-37,
   MT-39).
 - Matriz módulo $2^n \pm 1$ (MT-35).

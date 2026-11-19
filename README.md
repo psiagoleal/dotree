@@ -30,7 +30,7 @@ O contrato é uma spec só, viva ([`docs/specs/`](docs/specs/README.md), ADR
 ## O que o dotree faz
 
 1. **Expressão → pontos.** Você digita uma soma de produtos sem sinal, como
-   `A*B + C*D + 3(E+F) + G` ou `3(A + 1) + B`, e a largura de cada variável (até 16 bits).
+   `A*B + C*D + 3(E+F) + G` ou `3(A + 1) + B`, e a largura de cada variável (até 32 bits).
    O app mostra a matriz de pontos, uma cor por termo, e alterna a qualquer momento para as
    variáveis indexadas ($a_1 b_0$, tecla V). Constantes viram pontos fixos em 1.
 2. **Ou um perfil de alturas.** `{2,2,3; 1,1,1,1}` dá as alturas das colunas de entrada e,
@@ -80,7 +80,7 @@ Cada uma aponta para o critério da spec ou o ticket que a trataria.
   entram no exercício (MT-32), e as soluções automáticas usam só FA e HA. Na entrada por
   alturas, o nome do bloco é só uma ajuda (AJU-12).
 - **CPA só *ripple*** (MT-36).
-- **Tamanho:** até 16 bits por variável, 32 bits de entrada e 256 pontos (MT-24, MT-25);
+- **Tamanho:** até 32 bits por variável, 64 bits de entrada e 1024 pontos (MT-24, MT-25);
   perfil até 26 pontos e 16 colunas (EXP-16).
 - **Custo é modelo, não síntese:** FA = 1 $A_{FA}$ e 1 $T_{FA}$, HA = 0,5 e 0,5, AND fora
   da área (GER-04, decisão D-2). Os números do Quartus podem ordenar as soluções de outro

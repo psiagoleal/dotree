@@ -57,7 +57,8 @@ mascarada para a largura total. A mesma codificação vale para o testbench VHDL
   $A + B$ fechado direto com o CPA; num *runner* do CI essa verificação terminou antes de o
   teste ver a barra, e o teste passou a registrar os valores da barra desde o clique. $A \times B$ de 16 × 16 bits
   passa de 24 bits e cai na amostra de $2^{20}$ vetores, que termina em cerca de 0,3 s, antes
-  de o progresso aparecer.
+  de o progresso aparecer. O 32 × 32 com o Dadda (MT-25a) verifica a mesma amostra em
+  poucos segundos.
   *Implementação (MT-14b):* a netlist vai em JSON para um *worker* com o próprio núcleo, que
   verifica em blocos de $2^{16}$ vetores e manda o progresso a cada bloco; cancelar encerra
   o *worker*.
