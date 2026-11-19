@@ -17,7 +17,6 @@
 
 ## Depois da v0.2 (ordem por dependências)
 
-- [ ] [MT-49](plano-pos-v0.1.md#mt-49-nomes-das-variáveis-s-e-k-no-vhdl) — Variáveis `S` e `K` colidem com `s<n>` e `k<n>` no VHDL.
 - [ ] [MT-41](plano-pos-v0.1.md#mt-41-dica-e-próxima-jogada-que-respeitam-o-perfil-de-saída) — Dica e próxima jogada que param no perfil de saída.
 - [ ] [MT-35](plano-pos-v0.1.md#mt-35-matriz-módulo-2n-1-e-2n1-p16) — Matriz módulo $2^n-1$ e $2^n+1$.
 - [ ] [MT-32](plano-pos-v0.1.md#mt-32-célula-composta-p13) — Célula composta de várias colunas: compressor 4:2 e AMM 2×2 (os contadores de uma coluna estão na v0.3).
@@ -33,6 +32,8 @@
 - [ ] [MT-39](plano-pos-v0.1.md#mt-39-multiplicação-por-constantes-mcm-p21) — Multiplicação por constantes (Hcub, reimplementado a partir do artigo).
 
 ## Concluídos
+
+- [x] [MT-49](plano-pos-v0.1.md#mt-49-nomes-das-variáveis-s-e-k-no-vhdl) — Bits sozinhos de `S` e `K` com o sufixo `_in`, sem colidir com `s<n>` e `k<n>`.
 
 - [x] [MT-32b](plano-pos-v0.1.md#mt-32b-contadores-na-interface) — Contadores na interface: formar pelo mouse e pelo teclado, tabelas, diagrama, custos e comparação.
 - [x] [MT-32a](plano-pos-v0.1.md#mt-32a-contadores-no-núcleo) — Contadores 7:3 e 15:4 no núcleo, com ADR 0005, verificação e VHDL conferido no GHDL.

@@ -609,3 +609,7 @@ Depois da entrega: MT-41 e a fila de "Depois da v0.2".
   não colidem, nos mesmos identificadores do diagrama, da tabela e do VHDL (spec 05).
 - **Critério de aceite:** caso do GHDL com `S` e `K` de 2 bits verde; teste do núcleo
   de que nenhum identificador de entrada coincide com o de uma saída de célula.
+- **Feito (2026-11-19):** o bit sozinho de `S` e `K` ganhou o sufixo `_in` (`s1_in`,
+  `k1_in`), como a porta `R_IN`; as saídas das células e os produtos parciais não mudam.
+  O GHDL simula `nomes_s_k` (`S + K + 2S + A`, 64 casos corretos) e acusa o caso quando a
+  correção é desfeita.

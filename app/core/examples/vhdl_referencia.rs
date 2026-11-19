@@ -252,8 +252,7 @@ fn main() {
     write_files(dir, "placa_larga", &files, (&tb, "ok", 1), &mut list);
 
     // Variables named like the testbench locals of before (`n`, `v`, `i`, `j`) and like the
-    // behavioral constant (`W`): VHDL ignores case, so each name must stay distinct. (`S` and
-    // `K` still clash with the cell outputs `s<n>` and `k<n>`: MT-49.)
+    // behavioral constant (`W`): VHDL ignores case, so each name must stay distinct.
     let vars: Vec<(char, u32)> = ['I', 'J', 'N', 'V', 'W'].map(|v| (v, 2)).to_vec();
     let mn = matrix("I*J + N + V*W", &vars);
     write(
@@ -262,6 +261,18 @@ fn main() {
         &mn,
         &dadda(&mn),
         Language::PtBr,
+        "ok",
+        &mut list,
+    );
+
+    // MT-49: lone bits of S and K beside the outputs s1 and k1 of FA1 (`s1_in`, `k1_in`).
+    let msk = matrix("S + K + 2S + A", &[('S', 2), ('K', 2), ('A', 2)]);
+    write(
+        dir,
+        "nomes_s_k",
+        &msk,
+        &dadda(&msk),
+        Language::En,
         "ok",
         &mut list,
     );

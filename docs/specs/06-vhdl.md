@@ -32,7 +32,7 @@ válido.
   componentes do VHDL-93 exige). Os arquivos DEVEM ser ASCII puro: o português dos
   comentários vai sem acento.
   *Prova:* em CI (job `vhdl`), o GHDL 6 em `--std=93` analisa, elabora e simula R2, R3, a
-  solução Dadda de R4, um caso de 21 bits, as variáveis `I`, `J`, `N`, `V` e `W` e os
+  solução Dadda de R4, um caso de 21 bits, as variáveis `I`, `J`, `N`, `V` e `W`, as variáveis `S` e `K` e os
   contadores de VHD-11; teste do núcleo exige ASCII e o `use work.all`.
 - **VHD-02** — O topo DEVE usar os mesmos identificadores de sinal e de instância do
   diagrama e da tabela de ligações; um bit de resultado constante é atribuído com
@@ -123,8 +123,10 @@ Duas lições do primeiro contato com simuladores reais, que viraram critério:
 - o VHDL não distingue maiúsculas: o laço `for n` e a variável `v` do testbench escondiam
   as portas de variáveis `N` e `V`, e a constante `W` da versão comportamental escondia a
   porta `W` (achado com o 15:4 do MT-32a, que usa as variáveis `A` a `O`). Os nomes locais
-  agora têm mais de uma letra, e a constante se chama `R_WIDTH`. As variáveis `S` e `K`
-  ainda colidem com as saídas `s<n>` e `k<n>` das células (MT-49).
+  agora têm mais de uma letra, e a constante se chama `R_WIDTH`;
+- o bit 1 de uma variável `S` se chamava `s1`, o mesmo nome da soma do FA1, e o topo
+  declarava o sinal duas vezes (o mesmo com `K` e `k<n>`). O bit sozinho de `S` e `K` agora
+  é `s1_in` e `k1_in` (spec 05, MT-49), e o GHDL simula o caso `nomes_s_k`.
 
 ## Fora de escopo
 

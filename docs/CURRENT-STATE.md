@@ -8,8 +8,8 @@
 ## Último turno
 
 - **Branch:** `main`
-- **Data:** 2026-11-17
-- **Commit:** `396d373` (MT-32a, #60); última *tag* `v0.2.0`.
+- **Data:** 2026-11-19
+- **Commit:** `615bc97` (MT-32b, #61); última *tag* `v0.2.0`.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -209,15 +209,18 @@
       com `s<n>`/`k<n>` (MT-49, aberto). 319 testes Rust; web sem mudança (192 e 59 e2e);
       16 mutações pegas (uma depois de um teste novo da tabela de alturas). A interface
       recusa contadores até o MT-32b.
-- [x] MT-32b preparado: contadores na interface (7 ou 15 pontos pelo mouse ou teclado),
+- [x] MT-32b mesclado (#61): contadores na interface (7 ou 15 pontos pelo mouse ou teclado),
       borda dupla, métricas, tabela de alturas, tabela de ligações com "Entradas" e "Bits
       2 e 3", bloco largo no diagrama, custos próprios no painel, comparação; travas do
       MT-32a retiradas. 324 testes Rust, 199 de unidade/componente, 62 e2e (um 7:3 pelo
       teclado até a verificação e o VHDL; auditoria de acessibilidade nos dois temas);
       14 mutações pegas (uma depois de um teste da borda dupla).
-- [ ] Próximo: MT-25a (limites: 64 bits de entrada, 1024 pontos, matriz com zoom). MT-49
-      (nomes `S` e `K` no VHDL) aguarda decisão de entrar ou não na v0.3. O MT-41 fica para
-      depois da entrega.
+- [x] MT-49 preparado: o bit sozinho de `S` e `K` se chama `s1_in` e `k1_in` (spec 05),
+      sem colidir com as saídas `s<n>` e `k<n>`. 326 testes Rust; GHDL com os 17 casos de
+      antes e o novo `nomes_s_k` no veredito esperado; 3 mutações pegas (sem a correção,
+      o GHDL recusa `nomes_s_k`).
+- [ ] Próximo: MT-25a (limites: 64 bits de entrada, 1024 pontos, matriz com zoom). O MT-41
+      fica para depois da entrega.
 - Mensagens de commit antigas (a do MT-31a, `90df97e`, e outras) citam material não
   público; ficam no histórico, porque reescrevê-lo pede *force push* no `main` (ADR 0003).
 
@@ -264,6 +267,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-19 | `615bc97` | contadores na interface (#61); nomes de `S` e `K` | MT-32b, MT-49 |
 | 2026-11-17 | `396d373` | contadores no núcleo (#60); contadores na interface | MT-32a, MT-32b |
 | 2026-11-17 | `76ae246` | custos configuráveis (#59); contadores no núcleo | MT-45, MT-32a |
 | 2026-11-17 | `a6eaf5f` | Dadda (Parhami) (#58); custos configuráveis | MT-44, MT-45 |
