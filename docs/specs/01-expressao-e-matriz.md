@@ -14,7 +14,7 @@ os pontos pelas variáveis indexadas que eles representam ($a_1 b_0$).
 | Elemento | Forma aceita | Exemplo |
 |---|---|---|
 | Variável | uma letra maiúscula, `A`–`Z` | `A`, `G` |
-| Largura | inteiro de 1 a 16 bits, informado à parte para cada variável | `A: 3` |
+| Largura | inteiro de 1 a 32 bits, informado à parte para cada variável | `A: 3` |
 | Soma | `+` | `A + B` |
 | Produto | `*`, `×`, `·` ou justaposição | `A*B`, `A×B`, `AB`, `3(E+F)` |
 | Coeficiente | inteiro decimal de 1 a 4 294 967 295; por justaposição só **antes** de variável ou parêntese (`A2` é erro; `A*2` vale) | `3(E+F)`, `2A` |
@@ -109,6 +109,15 @@ consumiram.
 - **VIS-04** — O sistema DEVE mostrar o sinal de um ponto, na visão de pontos, ao passar o
   cursor ou focá-lo pelo teclado.
   *Prova:* teste de componente.
+- **VIS-05** — O sistema DEVE oferecer zoom da matriz, em passos de 25%, 50%, 75%, 100% e
+  150% e com "Ajustar à largura", que põe todas as colunas do nível mais largo na tela
+  (de 25% a 100%). O zoom vale para todos os níveis, o resultado e as soluções
+  automáticas; os pontos continuam botões e a seleção não muda. Uma matriz mais larga que
+  a tela rola de lado em cada nível (MT-25a).
+  *Prova:* teste de unidade dos passos, teste de componente do controle e teste de ponta a
+  ponta com $A \times B$ de 32 × 32 bits: a 100% a coluna $2^0$ fica fora da vista; ajustada
+  (33%), as 64 colunas cabem e o ponto de $2^0$ ainda é selecionado; de volta a 100%, focar
+  o ponto rola o nível até ele.
 
 ## Desafio da largura de saída (D-1)
 
@@ -134,15 +143,19 @@ consumiram.
   *Prova:* testes do analisador com `A+`, `A**B`, `3(E+F`, `a*b`, `A2`, `0A` e expressão
   vazia.
 - **EXP-06** — SE uma variável usada não tiver largura informada, ou tiver largura fora de
-  1–16, ENTÃO o sistema DEVE recusar a expressão nomeando a variável.
+  1–32, ENTÃO o sistema DEVE recusar a expressão nomeando a variável.
   *Prova:* teste do núcleo.
 - **EXP-07** — SE uma variável aparecer mais de uma vez no mesmo monômio (`A*A`, `AA`,
   `A(A+B)`), ENTÃO o sistema DEVE recusar a expressão: potências estão fora da v0.1.
   *Prova:* teste do núcleo.
-- **EXP-08** — SE a matriz resultante passar de 256 pontos ou a soma das larguras passar de
-  32 bits, ENTÃO o sistema DEVE recusar a expressão informando o limite.
-  *Prova:* teste do núcleo com $A \times B$ de 16 × 16 bits (256 pontos: aceita) e um caso
-  de 257 pontos (recusa).
+- **EXP-08** — SE a matriz resultante passar de 1024 pontos ou a soma das larguras passar de
+  64 bits, ENTÃO o sistema DEVE recusar a expressão informando o limite. Com esses limites
+  as entradas cabem em 64 bits e $v_{max}$ fica abaixo de $2^{128}$, então $W \le 128$: um
+  coeficiente fica abaixo de $2^{64}$, um termo usa no máximo os 64 bits de entrada, e dois
+  termos perto de $2^{127}$ precisariam de 2 × 1024 pontos (MT-25a).
+  *Prova:* teste do núcleo com $A \times B$ de 32 × 32 bits (1024 pontos: aceita), $2^{31}AB$
+  ($W = 95$) e um caso
+  de 1025 pontos (recusa).
 - **EXP-11** — ONDE houver largura informada para uma variável que a expressão não usa, o
   sistema DEVE ignorá-la e avisar.
   *Prova:* teste do núcleo (aviso `UnusedWidth`) e teste de componente (o aviso aparece).

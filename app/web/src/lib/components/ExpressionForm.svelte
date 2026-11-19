@@ -74,7 +74,7 @@
 					<input
 						type="number"
 						min="1"
-						max="16"
+						max="32"
 						name={`width-${v}`}
 						value={widths[v] ?? DEFAULT_WIDTH}
 						oninput={(e) => (widths[v] = Number(e.currentTarget.value))}

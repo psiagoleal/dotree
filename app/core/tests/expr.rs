@@ -192,13 +192,13 @@ fn exp06_width_out_of_range() {
         Err(ExprError::WidthOutOfRange { var: 'A', width: 0 })
     );
     assert_eq!(
-        analyze("A", &widths(&[('A', 17)])),
+        analyze("A", &widths(&[('A', 33)])),
         Err(ExprError::WidthOutOfRange {
             var: 'A',
-            width: 17
+            width: 33
         })
     );
-    assert!(analyze("A", &widths(&[('A', 16)])).is_ok());
+    assert!(analyze("A", &widths(&[('A', 32)])).is_ok());
     assert!(analyze("A", &widths(&[('A', 1)])).is_ok());
 }
 
@@ -227,13 +227,13 @@ fn exp07_repeated_variable_in_a_monomial() {
 
 #[test]
 fn exp08_input_bits_limit() {
-    assert_eq!(MAX_INPUT_BITS, 32);
-    assert!(analyze("A*B", &widths(&[('A', 16), ('B', 16)])).is_ok());
+    assert_eq!(MAX_INPUT_BITS, 64);
+    assert!(analyze("A*B", &widths(&[('A', 32), ('B', 32)])).is_ok());
     assert_eq!(
-        analyze("A*B + C", &widths(&[('A', 16), ('B', 16), ('C', 1)])),
+        analyze("A*B + C", &widths(&[('A', 32), ('B', 32), ('C', 1)])),
         Err(ExprError::TooManyInputBits {
-            total: 33,
-            limit: 32
+            total: 65,
+            limit: 64
         })
     );
 }

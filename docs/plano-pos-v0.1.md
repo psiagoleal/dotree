@@ -566,6 +566,14 @@ Depois da entrega: MT-41 e a fila de "Depois da v0.2".
   amostra, VHDL analisado pelo GHDL); e2e que monta o 32 × 32, aplica a solução e navega
   pela matriz; GER-06 medido.
 - **Depende de:** MT-32b (a tela já com contadores)
+- **Feito (2026-11-19):** a medição veio primeiro. No 32 × 32, formar e desfazer deram p95
+  de 18 ms, então o limite de 1024 pontos ficou. Aplicar o Dadda leva cerca de 850 ms,
+  desfazê-lo 270 ms e refazê-lo 700 ms, quase tudo para o navegador desenhar 44 mil
+  elementos; isso ficou anotado no GER-06, fora do requisito. A matriz de 64 colunas era
+  cortada em 21 colunas visíveis sem barra aparente: o zoom (VIS-05) e o do diagrama
+  (DIA-08), que tinha 36 mil px de largura, resolvem a navegação, e a tabela de ligações
+  (29 mil px de altura) rola na própria caixa. O núcleo já guardava valores em `u128`; só
+  os limites mudaram. GHDL com o `mult32` (4096 casos).
 
 ### MT-46: Otimizador
 - **Objetivo:** dado o exercício (expressão ou perfil), procurar circuitos com FA, HA e

@@ -32,7 +32,7 @@ válido.
   componentes do VHDL-93 exige). Os arquivos DEVEM ser ASCII puro: o português dos
   comentários vai sem acento.
   *Prova:* em CI (job `vhdl`), o GHDL 6 em `--std=93` analisa, elabora e simula R2, R3, a
-  solução Dadda de R4, um caso de 21 bits, as variáveis `I`, `J`, `N`, `V` e `W`, as variáveis `S` e `K` e os
+  solução Dadda de R4, um caso de 21 bits, o multiplicador 32 × 32 com o Dadda (MT-25a), as variáveis `I`, `J`, `N`, `V` e `W`, as variáveis `S` e `K` e os
   contadores de VHD-11; teste do núcleo exige ASCII e o `use work.all`.
 - **VHD-02** — O topo DEVE usar os mesmos identificadores de sinal e de instância do
   diagrama e da tabela de ligações; um bit de resultado constante é atribuído com

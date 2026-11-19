@@ -9,7 +9,8 @@
      In the current level the points are toggle buttons for selection (GER-07). The result
      panel (`result`) draws the bits R_j in the result colour, an empty column as a constant 0
      (CMP-12, COR-02). Critical cells get a thicker accent border (CMP-15); a cell whose carry
-     was dropped is marked k=0 (CMP-09). -->
+     was dropped is marked k=0 (CMP-09). Wide matrices scroll sideways and follow the zoom of
+     the page (VIS-05). -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { LevelPoint } from '#lib/core.ts';
@@ -118,36 +119,39 @@
 		<h3>{title}</h3>
 		{@render children?.()}
 	</div>
-	<div class="matrix">
-		{#each columns as col (col.column)}
-			<div class="column" role="group" aria-label={columnLabel(col.column, col.height)}>
-				<div class="weight">2<sup>{col.column}</sup></div>
-				<div class="dots">
-					{#each col.layout.groups as g (g.index)}
-						{@const group = groups[g.index]}
-						<div
-							class="cell {g.kind}"
-							class:critical={group.critical}
-							role="group"
-							aria-label={group.label}
-						>
-							{#each g.points as p (p.id)}{@render dot(p)}{/each}
-							{#if group.dropped}<span class="dropped" aria-hidden="true">k=0</span>{/if}
-						</div>
-					{/each}
-					{#each col.layout.loose as p (p.id)}{@render dot(p)}{/each}
-					{#if result !== null && col.height === 0}
-						<span class="zero" aria-hidden="true">0</span>
+	<!-- VIS-05: the page sets --matrix-zoom; the box scrolls, the columns inside it zoom. -->
+	<div class="matrix" data-zoom-area>
+		<div class="columns" data-zoom-content>
+			{#each columns as col (col.column)}
+				<div class="column" role="group" aria-label={columnLabel(col.column, col.height)}>
+					<div class="weight">2<sup>{col.column}</sup></div>
+					<div class="dots">
+						{#each col.layout.groups as g (g.index)}
+							{@const group = groups[g.index]}
+							<div
+								class="cell {g.kind}"
+								class:critical={group.critical}
+								role="group"
+								aria-label={group.label}
+							>
+								{#each g.points as p (p.id)}{@render dot(p)}{/each}
+								{#if group.dropped}<span class="dropped" aria-hidden="true">k=0</span>{/if}
+							</div>
+						{/each}
+						{#each col.layout.loose as p (p.id)}{@render dot(p)}{/each}
+						{#if result !== null && col.height === 0}
+							<span class="zero" aria-hidden="true">0</span>
+						{/if}
+					</div>
+					{#if result !== null}
+						<div class="bit" aria-hidden="true">R<sub>{col.column}</sub></div>
+					{/if}
+					{#if heights}
+						<div class="height" aria-hidden="true">{col.height}</div>
 					{/if}
 				</div>
-				{#if result !== null}
-					<div class="bit" aria-hidden="true">R<sub>{col.column}</sub></div>
-				{/if}
-				{#if heights}
-					<div class="height" aria-hidden="true">{col.height}</div>
-				{/if}
-			</div>
-		{/each}
+			{/each}
+		</div>
 	</div>
 </section>
 
@@ -167,11 +171,15 @@
 		font-size: 1rem;
 	}
 	.matrix {
+		overflow-x: auto;
+		padding: var(--space-2) var(--space-1);
+	}
+	.columns {
 		display: flex;
 		gap: var(--space-2);
 		align-items: flex-start;
-		overflow-x: auto;
-		padding: var(--space-2) var(--space-1);
+		width: max-content;
+		zoom: var(--matrix-zoom, 1);
 	}
 	.column {
 		display: flex;

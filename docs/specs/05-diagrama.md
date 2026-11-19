@@ -71,6 +71,13 @@ uma saída de célula, sem distinguir maiúsculas) e o caso `nomes_s_k` no GHDL.
   o último nível concluído e sinalizar que está incompleto; as exportações ficam
   desabilitadas.
   *Prova:* teste de componente.
+- **DIA-08** — O sistema DEVE oferecer zoom do diagrama, com os mesmos passos e o mesmo
+  "Ajustar à largura" de VIS-05, e rolar de lado o que não couber; a tabela de ligações
+  DEVE rolar dentro de uma caixa de até 70% da altura da janela, com o cabeçalho sempre à
+  vista. O SVG exportado não muda com o zoom (MT-25a).
+  *Prova:* teste de ponta a ponta com o Dadda do 32 × 32 (930 células antes do CPA): o
+  diagrama ajustado para em 25% e ainda rola; a tabela rolada mantém o cabeçalho no topo
+  da caixa.
 
 ## Tabela de ligações de referência (R2)
 

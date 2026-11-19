@@ -9,6 +9,7 @@
 	import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
 	import TermLegend from '#lib/components/TermLegend.svelte';
 	import ViewToggle from '#lib/components/ViewToggle.svelte';
+	import Zoom from '#lib/components/Zoom.svelte';
 	import WidthChallenge from '#lib/components/WidthChallenge.svelte';
 	import {
 		DEFAULT_COSTS,
@@ -39,6 +40,27 @@
 	let session = $state.raw<CompressionSession | null>(null);
 	// Dots or indexed variables, remembered across visits (VIS-01, VIS-03).
 	let view = $state<ViewMode>(readView(browserStorage()));
+	// VIS-05: one zoom for every level panel and solution of the matrix.
+	let matrixZoom = $state(1);
+	let resultSection = $state<HTMLElement>();
+
+	/** Room of the narrowest level box and width of the widest level at 100%. */
+	function measureMatrix() {
+		const areas = [...(resultSection?.querySelectorAll<HTMLElement>('[data-zoom-area]') ?? [])];
+		if (areas.length === 0) return null;
+		const natural = Math.max(
+			...areas.map((a) => {
+				const c = a.querySelector<HTMLElement>('[data-zoom-content]');
+				return c ? c.getBoundingClientRect().width / matrixZoom : 0;
+			})
+		);
+		const inner = (a: HTMLElement) => {
+			const st = getComputedStyle(a);
+			return a.clientWidth - parseFloat(st.paddingLeft) - parseFloat(st.paddingRight);
+		};
+		const available = Math.min(...areas.map(inner));
+		return { available, natural };
+	}
 	// W shows only after the width challenge is answered or revealed (EXP-09, GER-01).
 	let widthRevealed = $state(false);
 	// Mounted only once the core is ready, hence state.
@@ -260,10 +282,21 @@
 			<p role="alert" class="error" data-testid="build-error">{errorMessage(result.error)}</p>
 		{:else if result && result.ok}
 			{@const mx = result.matrix}
-			<section class="result" aria-labelledby="matrix-title">
+			<section
+				class="result"
+				aria-labelledby="matrix-title"
+				bind:this={resultSection}
+				style:--matrix-zoom={matrixZoom}
+			>
 				<div class="result-head">
 					<h2 id="matrix-title">{m.matrix_title()}</h2>
 					<ViewToggle mode={view} onchange={setView} />
+					<Zoom
+						zoom={matrixZoom}
+						onchange={(z) => (matrixZoom = z)}
+						label={m.zoom_matrix()}
+						measure={measureMatrix}
+					/>
 				</div>
 				{#each mx.warnings as w, i (i)}
 					<p class="warning" role="status">{warningMessage(w)}</p>

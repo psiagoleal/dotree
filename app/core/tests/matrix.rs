@@ -224,22 +224,33 @@ fn exp03_copies_do_not_duplicate_and_gates() {
 
 #[test]
 fn exp08_dot_limit() {
-    assert_eq!(MAX_DOTS, 256);
-    // 16 x 16 = 256 dots, exactly at the limit.
-    let m = matrix("A*B", &[('A', 16), ('B', 16)]);
-    assert_eq!(m.dots.len(), 256);
-    assert_eq!(m.output_width, 32);
+    assert_eq!(MAX_DOTS, 1024);
+    // 32 x 32 = 1024 dots, exactly at the limit (MT-25a).
+    let m = matrix("A*B", &[('A', 32), ('B', 32)]);
+    assert_eq!(m.dots.len(), 1024);
+    assert_eq!(m.output_width, 64);
 
-    // 3AB with 16 x 8 bits = 2 x 128 dots, plus C: 257.
-    let w: BTreeMap<char, u32> = [('A', 16), ('B', 8), ('C', 1)].into_iter().collect();
+    // 3AB with 32 x 16 bits = 2 x 512 dots, plus C: 1025.
+    let w: BTreeMap<char, u32> = [('A', 32), ('B', 16), ('C', 1)].into_iter().collect();
     let analysis = analyze("3AB + C", &w).unwrap();
     assert_eq!(
         DotMatrix::build(&analysis),
         Err(MatrixError::TooManyDots {
-            count: 257,
-            limit: 256
+            count: 1025,
+            limit: 1024
         })
     );
+}
+
+#[test]
+fn exp08_the_widest_output_fits_in_128_bits() {
+    // 2^31 AB with 32 x 32 bits: 1024 dots and every input bit. A coefficient stays below
+    // 2^64 and a term uses at most the 64 input bits, so a term is below 2^128; two terms
+    // near that would need 2 x 1024 dots. So W <= 128 (spec 01).
+    let m = matrix("2147483648AB", &[('A', 32), ('B', 32)]);
+    let max = (1u128 << 32) - 1;
+    assert_eq!(m.v_max, (1u128 << 31) * max * max);
+    assert_eq!(m.output_width, 95);
 }
 
 // ---------------------------------------------------------------- signals

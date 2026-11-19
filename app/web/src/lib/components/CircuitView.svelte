@@ -7,6 +7,7 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import { diagramSvg } from '#lib/diagram.ts';
 	import { download } from '#lib/download.ts';
+	import Zoom from './Zoom.svelte';
 
 	let {
 		session,
@@ -27,6 +28,13 @@
 	// Kept in a constant: Svelte trims literal spaces at the edge of inline markup.
 	const ARROW = ' → ';
 	let expandAnds = $state(false);
+	// DIA-08: a thousand cells make a drawing tens of thousands of pixels wide.
+	let zoom = $state(1);
+	let drawing = $state<HTMLElement>();
+	function measure() {
+		const width = Number(drawing?.querySelector('svg')?.getAttribute('width'));
+		return drawing && width > 0 ? { available: drawing.clientWidth, natural: width } : null;
+	}
 
 	const diagram = $derived.by(() => {
 		void snap;
@@ -104,6 +112,7 @@
 				aria-describedby={diagram.complete ? undefined : `${id}-incomplete`}
 				>{m.export_markdown()}</button
 			>
+			<Zoom {zoom} onchange={(z) => (zoom = z)} label={m.zoom_diagram()} {measure} />
 		</div>
 		{#if !diagram.complete}
 			<p id={`${id}-incomplete`} class="note" role="status">
@@ -119,10 +128,13 @@
 			role="region"
 			aria-label={m.diagram_title()}
 			tabindex="0"
+			bind:this={drawing}
 		>
-			<!-- Generated from the core's layout; every text in it is escaped by diagram.ts. -->
-			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-			{@html svg}
+			<div class="zoomed" style:zoom>
+				<!-- Generated from the core's layout; every text in it is escaped by diagram.ts. -->
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html svg}
+			</div>
 		</div>
 
 		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -223,6 +235,19 @@
 	.drawing,
 	.table-wrap {
 		overflow-x: auto;
+	}
+	.zoomed {
+		width: max-content;
+	}
+	/* DIA-08: a long table scrolls in its own box, with the header kept in view. */
+	.table-wrap {
+		max-height: 70vh;
+		overflow-y: auto;
+	}
+	thead th {
+		position: sticky;
+		top: 0;
+		background: var(--color-bg);
 	}
 	table {
 		border-collapse: collapse;

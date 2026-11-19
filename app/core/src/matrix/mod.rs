@@ -11,7 +11,7 @@ use std::collections::{BTreeMap, HashMap};
 use crate::expr::{Analysis, Monomial};
 
 /// Largest accepted number of dots in the initial matrix (EXP-08).
-pub const MAX_DOTS: usize = 256;
+pub const MAX_DOTS: usize = 1024;
 
 /// One bit of one variable, e.g. `a1` = bit 1 of `A`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

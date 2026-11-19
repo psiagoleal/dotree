@@ -82,8 +82,8 @@ fn warnings_and_errors_are_codes() {
         json!({"code": "missingWidth", "var": "B"})
     );
     assert_eq!(
-        call("A", json!({"A": 17}))["error"],
-        json!({"code": "widthOutOfRange", "var": "A", "width": 17, "min": 1, "max": 16})
+        call("A", json!({"A": 33}))["error"],
+        json!({"code": "widthOutOfRange", "var": "A", "width": 33, "min": 1, "max": 32})
     );
     assert_eq!(
         call("A*A", json!({"A": 1}))["error"],
@@ -94,12 +94,12 @@ fn warnings_and_errors_are_codes() {
         json!({"code": "noVariables"})
     );
     assert_eq!(
-        call("A*B + C", json!({"A": 16, "B": 16, "C": 1}))["error"],
-        json!({"code": "tooManyInputBits", "total": 33, "limit": 32})
+        call("A*B + C", json!({"A": 32, "B": 32, "C": 1}))["error"],
+        json!({"code": "tooManyInputBits", "total": 65, "limit": 64})
     );
     assert_eq!(
-        call("3AB + C", json!({"A": 16, "B": 8, "C": 1}))["error"],
-        json!({"code": "tooManyDots", "count": 257, "limit": 256})
+        call("3AB + C", json!({"A": 32, "B": 16, "C": 1}))["error"],
+        json!({"code": "tooManyDots", "count": 1025, "limit": 1024})
     );
     assert_eq!(
         call("A", json!("not an object"))["error"],

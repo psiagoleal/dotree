@@ -33,8 +33,9 @@ describe('CircuitView (DIA-01, DIA-02, DIA-04, DIA-05, DIA-07)', () => {
 	it('an incomplete circuit is drawn up to the last concluded level; exports wait (DIA-07)', async () => {
 		const { container } = await show(r2Levels(core, 2));
 		expect(blocks(container)).toHaveLength(7);
+		// The zoom readout is a status too (DIA-08): pick the notice by its text.
 		await expect
-			.element(page.getByRole('status'))
+			.element(page.getByRole('status').filter({ hasText: 'Circuito incompleto' }))
 			.toHaveTextContent(/^Circuito incompleto: o diagrama vai até o nível 1\./);
 		await expect.element(svgButton()).toBeDisabled();
 		await expect.element(mdButton()).toBeDisabled();

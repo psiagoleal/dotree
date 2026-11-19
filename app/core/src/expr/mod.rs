@@ -12,9 +12,9 @@ use std::fmt;
 
 /// Narrowest and widest accepted variable width, in bits (EXP-06).
 pub const MIN_WIDTH: u32 = 1;
-pub const MAX_WIDTH: u32 = 16;
+pub const MAX_WIDTH: u32 = 32;
 /// Largest accepted sum of the widths of the variables in use (EXP-08).
-pub const MAX_INPUT_BITS: u32 = 32;
+pub const MAX_INPUT_BITS: u32 = 64;
 
 /// A product of distinct variables times a positive integer coefficient.
 /// `vars` is sorted and has no repetitions; it is empty for the additive constant (EXP-15),

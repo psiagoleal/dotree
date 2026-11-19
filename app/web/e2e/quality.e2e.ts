@@ -64,19 +64,19 @@ async function timed(page: Page, act: 'form' | 'undo'): Promise<number> {
 	}, act);
 }
 
-test('forming and undoing on a 16 x 16 matrix stay under 100 ms at the 95th percentile (GER-06)', async ({
+test('forming and undoing on the 32 x 32 matrix stay under 100 ms at the 95th percentile (GER-06)', async ({
 	page
 }) => {
 	test.setTimeout(120_000);
 	await page.goto('./');
 	await page.getByLabel('Expressão').fill('A*B');
-	for (const v of ['A', 'B']) await page.locator(`input[name="width-${v}"]`).fill('16');
+	for (const v of ['A', 'B']) await page.locator(`input[name="width-${v}"]`).fill('32');
 	await page.getByRole('button', { name: 'Montar a matriz' }).click();
-	await expect(page.getByTestId('matrix-summary')).toContainText('256');
+	await expect(page.getByTestId('matrix-summary')).toContainText('1024');
 
 	const column = page
 		.getByTestId('level-current')
-		.getByRole('group', { name: /^Coluna de peso 2\^15,/ });
+		.getByRole('group', { name: /^Coluna de peso 2\^31,/ });
 	const times: number[] = [];
 	for (let i = 0; i < 25; i++) {
 		for (let k = 0; k < 3; k++) await column.getByRole('button').nth(k).click();

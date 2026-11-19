@@ -277,6 +277,18 @@ fn main() {
         &mut list,
     );
 
+    // MT-25a: the 32 x 32 multiplier with Dadda's solution, at the limits of spec 01.
+    let m32 = matrix("A*B", &[('A', 32), ('B', 32)]);
+    write(
+        dir,
+        "mult32",
+        &m32,
+        &dadda(&m32),
+        Language::PtBr,
+        "ok",
+        &mut list,
+    );
+
     // VHD-11 (MT-32a): the counters on every input, alone and in a reduction of R1.
     for (case, n, lang) in [("c73", 7, Language::PtBr), ("c154", 15, Language::En)] {
         let vars: Vec<(char, u32)> = ('A'..='O').take(n).map(|v| (v, 1)).collect();
