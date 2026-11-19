@@ -57,6 +57,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   parciais (`a0_s1`) não mudam (spec 05, MT-49).
 
 ### Alterado
+- A busca da **solução ótima** de um perfil roda no *worker* da verificação, e não mais na
+  página: abrir o maior perfil aceito (26 pontos) deixou de travar a tela por cerca de
+  0,7 s (agora 56 ms), e formar e desfazer células durante a busca seguem abaixo de 100 ms.
+  Enquanto ela roda, a tela diz "Buscando a solução ótima…"; a resposta só é aceita se
+  ainda valer para os custos em vigor e se o circuito, refeito pelas regras, atingir o
+  perfil. Sem o *worker*, a busca roda na página, como antes (AJU-12, GER-06, MT-42).
 - O núcleo mede tempos e áreas em centésimos de $T_{FA}$ e $A_{FA}$, e não mais em meias
   unidades; com o padrão, todos os números continuam os mesmos (GER-04, MT-45).
 - Decisão D-2: o custo deixa de ser fixo; a convenção da spec 00 vira o padrão (MT-45).

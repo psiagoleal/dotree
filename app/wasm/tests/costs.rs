@@ -85,12 +85,15 @@ fn ger12_solutions_are_measured_with_the_session_costs() {
 fn ger12_the_optimum_is_searched_again_under_new_costs() {
     // e) {2,2; 1,1,1}: 1 FA + 1 HA by default, 4 HA once an HA costs 0.3 (core test).
     let mut s = Session::open("{2,2; 1,1,1}", "{}").unwrap();
-    assert_eq!(s.optimal_search().as_deref(), Some("ok"));
+    assert_eq!(s.search_optimal().as_deref(), Some("ok"));
     let before = parse(s.solution(false, SolutionMethod::Optimal).snapshot());
     assert_eq!(before["metrics"]["fa"], 1);
     assert_eq!(before["metrics"]["ha"], 1);
 
     assert!(s.set_costs(&costs(100, 100, 30, 30)));
+    // New costs drop the old optimum; the page searches again (MT-42).
+    assert_eq!(s.optimal_search().as_deref(), Some("pending"));
+    s.search_optimal();
     let after = parse(
         s.shown_solution(SolutionMethod::Optimal)
             .expect("already revealed")

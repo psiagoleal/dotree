@@ -426,6 +426,7 @@
 	],
 	"optimal_applied": "Solução ótima aplicada. Desfazer traz o seu circuito de volta.",
 	"optimal_too_large": "Este perfil é grande demais para a busca da solução ótima: ela passou do limite de tentativas.",
+	"optimal_searching": "Buscando a solução ótima…",
 	"optimal_no_circuit": "Nenhum circuito de FA e HA atinge este perfil.",
 	"help_log_optimal": "solução ótima: {result} (nível a nível: {path})",
 	"help_log_optimal_applied": [

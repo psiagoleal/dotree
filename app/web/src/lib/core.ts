@@ -261,8 +261,9 @@ const WASM_METHOD: Record<Method, SolutionMethod> = {
 	optimal: SolutionMethod.Optimal
 };
 
-/** Whether the optimal circuit of the profile can be shown (AJU-12). */
-export type OptimalSearch = 'ok' | 'tooLarge' | 'noCircuit';
+/** Whether the optimal circuit of the profile can be shown (AJU-12); 'pending' while the
+ *  search runs in the worker (MT-42). */
+export type OptimalSearch = 'ok' | 'tooLarge' | 'noCircuit' | 'pending';
 
 /** The known block a profile describes (AJU-12). */
 export type Block =
@@ -456,9 +457,16 @@ export interface CompressionSession {
 	/** Already revealed helps, again and uncounted; null before their reveal. */
 	shownLowerBound(): LowerBound | null;
 	shownSolution(method: Method): CompressionSession | null;
-	/** Whether the profile's optimum can be shown; null without a profile. Reveals and
-	 *  counts nothing, but runs the search the first time (AJU-12). */
+	/** Whether the profile's optimum can be shown; null without a profile. Reveals,
+	 *  counts and searches nothing (AJU-12, MT-42). */
 	optimalSearch(): OptimalSearch | null;
+	/** What the worker needs to search the optimum (`searchOptimal` in `optimal.ts`); null
+	 *  without a profile. */
+	optimalRequest(): string | null;
+	/** Takes the worker's answer; null, keeping nothing, when it is stale or invalid. */
+	adoptOptimal(result: string): OptimalSearch | null;
+	/** Searches here, on the main thread: the fallback without a worker. */
+	searchOptimal(): OptimalSearch | null;
 	/** The block the profile describes: a counted reveal (AJU-12); null without a profile. */
 	block(): Block | null;
 	/** The block again, uncounted, once revealed; null before that. */
@@ -518,6 +526,9 @@ function wrap(s: Session): CompressionSession {
 			return o === undefined ? null : wrap(o);
 		},
 		optimalSearch: () => (s.optimalSearch() as OptimalSearch | undefined) ?? null,
+		optimalRequest: () => s.optimalRequest() ?? null,
+		adoptOptimal: (result) => (s.adoptOptimal(result) as OptimalSearch | undefined) ?? null,
+		searchOptimal: () => (s.searchOptimal() as OptimalSearch | undefined) ?? null,
 		block: () => JSON.parse(s.block()),
 		shownBlock: () => {
 			const b = s.shownBlock();

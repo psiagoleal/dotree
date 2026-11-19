@@ -190,6 +190,18 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   (1,32 contra 1,33) e com 0,34 volta o FA; com FA 0,99 e HA 0,33 as áreas empatam em
   1,32 e decide o atraso (4 HA com FA de atraso 1; FA + HA com atraso 0,4). Teste de
   ponta a ponta: o ótimo revelado é refeito ao trocar os custos, sem contar de novo.
+  *Implementação (MT-42):* a busca roda no mesmo *worker* da verificação, ao abrir o perfil
+  e de novo depois de trocar os custos; enquanto ela roda, a tela diz "Buscando a solução
+  ótima…" com uma barra de progresso indeterminada (a busca não tem etapas para contar) e
+  segue usável. A sessão só aceita a resposta se a expressão e os custos ainda forem os da
+  busca e se o circuito, refeito pelas regras como um arquivo do exercício (SAL-03),
+  atingir o perfil; uma resposta velha é descartada. Sem o *worker*, a busca roda na
+  página, como antes. Uma verificação pedida durante a busca espera ela terminar.
+  *Prova:* testes da ponte (espera, resposta aceita, grande demais, resposta de outros
+  custos ou de outro perfil descartada, circuito adulterado recusado, ótimo revelado
+  escondido enquanto a busca é refeita); testes de componente (buscando, resposta, perfil
+  grande demais, reserva sem *worker*, resposta velha descartada); teste de ponta a ponta
+  com o maior perfil aceito (26 pontos).
 - **AJU-13** — O sistema DEVE oferecer, ao lado de Dadda e Wallace, a solução
   **Dadda (Parhami)**, com o mesmo fluxo de AJU-10: duas etapas confirmadas, painel à
   parte, "Usar a solução de Dadda (Parhami)" só depois da etapa 2 dela, contagem própria no

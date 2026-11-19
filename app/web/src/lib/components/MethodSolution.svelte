@@ -110,6 +110,12 @@
 			<button type="button" class="secondary" onclick={apply}>{t.use}</button>
 		{/if}
 	</div>
+{:else if search === 'pending'}
+	<!-- MT-42: the search runs in the worker; the page stays usable meanwhile. -->
+	<p class="note searching" role="status" data-testid={`${tid}-searching`}>
+		<progress aria-label={m.optimal_searching()}></progress>
+		{m.optimal_searching()}
+	</p>
 {:else if search}
 	<p class="note" data-testid={`${tid}-unavailable`}>
 		{search === 'tooLarge' ? m.optimal_too_large() : m.optimal_no_circuit()}
@@ -194,5 +200,13 @@
 	h3 {
 		margin: 0;
 		font-size: 1rem;
+	}
+	.searching {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+	.searching progress {
+		width: 6rem;
 	}
 </style>

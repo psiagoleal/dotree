@@ -426,6 +426,7 @@
 	],
 	"optimal_applied": "Optimal solution applied. Undo brings your circuit back.",
 	"optimal_too_large": "This profile is too large for the search of the optimal solution: it passed its limit of attempts.",
+	"optimal_searching": "Searching for the optimal solution…",
 	"optimal_no_circuit": "No circuit of FA and HA reaches this profile.",
 	"help_log_optimal": "optimal solution: {result} (level by level: {path})",
 	"help_log_optimal_applied": [
