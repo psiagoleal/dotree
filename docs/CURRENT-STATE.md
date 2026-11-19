@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-19
-- **Commit:** `19ad5c3` (MT-42, #64); última *tag* `v0.2.0`.
+- **Commit:** `77be642` (MT-46, #65); última *tag* `v0.2.0`.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -228,7 +228,7 @@
       `searchOptimal` na sessão); "Buscando a solução ótima…" enquanto roda. Montar o perfil
       de 26 pontos: 767 → 56 ms; GER-06 durante a busca p95 15 ms. 336 testes Rust, 213 de
       unidade/componente, 65 e2e; 10 mutações pegas (uma depois de um teste novo).
-- [x] MT-46 preparado: otimizador (AJU-14), módulo `optimize` no núcleo. A busca exata
+- [x] MT-46 mesclado (#65): otimizador (AJU-14), módulo `optimize` no núcleo. A busca exata
       percorre a área com um limite inferior por coluna. Ela vale como exata até a
       última área terminada, quando chega ao limite de tentativas. A heurística são regras
       nível a nível mais Dadda, Dadda (Parhami) e Wallace. Na tela, duas etapas contadas,
@@ -248,7 +248,14 @@
       Verificação: 356 testes Rust, 222 de unidade/componente e 67 e2e; 16 mutações pegas
       (três depois de testes novos). Dois cortes da busca, medidos, mudavam menos de 1%
       das tentativas e foram removidos.
-- [ ] Próximo: MT-47 (publicar a v0.3.0). O MT-41 fica para depois da entrega.
+- [x] MT-47 preparado: versões em 0.3.0, README e seção `[0.3.0]` do CHANGELOG (notas
+      da release conferidas com o `awk` do `release.yml`). ModelSim ASE 10.1d: os 18 casos
+      de `vhdl_referencia` sem avisos e com o veredito esperado (14 corretos, 4 estragados
+      acusados). 356 testes Rust, 222 de unidade/componente, 67 e2e.
+- [ ] Falta (autor): *tag* `v0.3.0` depois do merge; conferir o workflow Release, a release,
+      a imagem `0.3.0` no GHCR sem login e o site com "versão 0.3.0".
+- [ ] Depois: MT-48 (vídeos pelo Playwright sobre o site da v0.3.0). O MT-41 fica para
+      depois da entrega.
 - Mensagens de commit antigas (a do MT-31a, `90df97e`, e outras) citam material não
   público; ficam no histórico, porque reescrevê-lo pede *force push* no `main` (ADR 0003).
 
@@ -295,6 +302,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-19 | `77be642` | otimizador (#65); preparação da v0.3.0 | MT-46, MT-47 |
 | 2026-11-19 | `19ad5c3` | busca do ótimo no *worker* (#64); otimizador | MT-42, MT-46 |
 | 2026-11-19 | `86a94c5` | limites e zoom (#63); busca do ótimo no *worker* | MT-25a, MT-42 |
 | 2026-11-19 | `daa45aa` | nomes de `S` e `K` (#62); limites e zoom | MT-49, MT-25a |

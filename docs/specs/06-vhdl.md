@@ -106,7 +106,11 @@ corretos nas duas versões, e o terceiro acusou 9216 casos errados só na compor
 Em 2026-11-10, para a v0.2.0, os 11 casos de `examples/vhdl_referencia.rs` (os do GHDL no
 CI, com constante e placa DE2) compilaram sem avisos no ModelSim; os 8 corretos deram todos
 os casos certos em cada versão, e os 3 estragados de propósito acusaram erro só na versão
-estragada.
+estragada. Em 2026-11-19, para a v0.3.0, os 18 casos (agora também `nomes_s_k`, `mult32`, os
+contadores `c73`, `c154`, `r1_c73` e o `r1_c73` estragado) compilaram sem avisos; os 14
+corretos deram todos os casos certos, e os 4 estragados acusaram erro só na versão
+estragada. No ModelSim, um `report` de severidade `error` não muda o código de saída do
+`vsim`, ao contrário do GHDL; o veredito sai das mensagens do testbench.
 
 No Quartus, os `*` da versão comportamental podem ser mapeados nos multiplicadores
 embutidos da FPGA. Para comparar só elementos lógicos com a versão estrutural, é preciso

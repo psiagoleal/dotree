@@ -7,20 +7,22 @@
 > didática para treinar a intuição em árvores de redução (Wallace, Dadda).
 
 [![CI](https://github.com/psiagoleal/dotree/actions/workflows/ci.yml/badge.svg)](https://github.com/psiagoleal/dotree/actions/workflows/ci.yml)
-![version](https://img.shields.io/badge/version-0.2.0-blue)
+![version](https://img.shields.io/badge/version-0.3.0-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
 
 **No ar:** <https://psiagoleal.github.io/dotree/> — sempre o que está no `main`. Última
-versão marcada: 0.2.0.
+versão marcada: 0.3.0.
 
 *Interface em português e inglês. Tudo roda no navegador: nenhum dado sai do seu
 computador.*
 
 ## Estado
 
-A v0.2.0 é o exercício da v0.1 (da expressão ao VHDL) mais constante aditiva, soluções de
-Dadda e de Wallace aplicáveis, comparação de soluções, tabela de alturas, topo para a placa
-DE2 e entrada por perfil de alturas com solução ótima.
+A v0.3.0 soma à v0.2 (constante aditiva, soluções de Dadda e de Wallace aplicáveis,
+comparação, tabela de alturas, placa DE2 e perfil de alturas com solução ótima) a solução
+Dadda (Parhami), os contadores 7:3 e 15:4, custos configuráveis, limites de até 32 bits por
+variável e 1024 pontos com zoom, e o otimizador, com as opções não dominadas em área e
+atraso.
 O contrato é uma spec só, viva ([`docs/specs/`](docs/specs/README.md), ADR
 [0004](docs/adr/0004-spec-viva-e-referencias-publicas.md)); o que vem depois está em
 [`docs/plano-pos-v0.1.md`](docs/plano-pos-v0.1.md) e no painel
@@ -37,13 +39,14 @@ O contrato é uma spec só, viva ([`docs/specs/`](docs/specs/README.md), ADR
    depois do `;`, as de saída, do bit mais significativo ao menos: a notação dos contadores
    paralelos generalizados (Parhami, cap. 8). O exercício termina quando o seu circuito
    atinge o perfil, e o app mostra a área e o atraso do bloco.
-3. **Você comprime.** Escolhe três pontos de uma coluna para um FA, dois para um HA, nível a
-   nível, pelo mouse ou pelo teclado, e fecha com um CPA. Altura das colunas, área
+3. **Você comprime.** Escolhe três pontos de uma coluna para um FA, dois para um HA (ou
+   sete e quinze para os contadores 7:3 e 15:4), nível a nível, pelo mouse ou pelo
+   teclado, e fecha com um CPA. A área e o atraso de cada célula podem ser trocados. Altura das colunas, área
    ($A_{FA}$), atraso ($T_{FA}$), caminho crítico e a tabela de alturas nível a nível
    aparecem na hora; dá para desfazer e voltar a um nível.
 4. **Ajuda só quando você pede.** Largura do resultado, dica, próxima jogada, limite
-   inferior, as soluções de Dadda e de Wallace e, nos perfis, a solução ótima e o nome do
-   bloco. O app pergunta antes de mostrar, revela em duas etapas (primeiro o resultado,
+   inferior, as soluções de Dadda, Dadda (Parhami) e Wallace, o otimizador (as opções não
+   dominadas em área e atraso) e, nos perfis, a solução ótima e o nome do bloco. O app pergunta antes de mostrar, revela em duas etapas (primeiro o resultado,
    depois o caminho) e conta cada revelação no resumo e no arquivo do exercício. Uma
    solução revelada pode substituir o seu circuito, num passo que se desfaz.
 5. **Comparação.** O seu circuito ao lado das soluções, com área, atraso, área × atraso e a
@@ -77,21 +80,24 @@ Cada uma aponta para o critério da spec ou o ticket que a trataria.
 
 - **Sem sinal:** nada de complemento de dois, subtração ou Booth (MT-33, MT-34).
 - **Células:** FA, HA e os contadores 7:3 e 15:4; o compressor 4:2 e os blocos AMM não
-  entram no exercício (MT-32), e as soluções automáticas usam só FA e HA. Na entrada por
+  entram no exercício (MT-32). As soluções automáticas usam só FA e HA; o otimizador usa
+  contadores quando custam menos que a rede de FA. Na entrada por
   alturas, o nome do bloco é só uma ajuda (AJU-12).
 - **CPA só *ripple*** (MT-36).
 - **Tamanho:** até 32 bits por variável, 64 bits de entrada e 1024 pontos (MT-24, MT-25);
   perfil até 26 pontos e 16 colunas (EXP-16).
-- **Custo é modelo, não síntese:** FA = 1 $A_{FA}$ e 1 $T_{FA}$, HA = 0,5 e 0,5, AND fora
-  da área (GER-04, decisão D-2). Os números do Quartus podem ordenar as soluções de outro
+- **Custo é modelo, não síntese:** por padrão FA = 1 $A_{FA}$ e 1 $T_{FA}$ e HA = 0,5 e
+  0,5, trocáveis em múltiplos de 0,01; AND fora da área (GER-04, GER-12, decisão D-2). Os números do Quartus podem ordenar as soluções de outro
   jeito.
 - **Verificação por amostra** acima de 24 bits de entrada (spec 04).
 - **Placa DE2:** o topo compila no Quartus II 13.0 e o testbench da placa passa no GHDL e
   no ModelSim, mas não foi conferido numa placa real nem no FPGAEmuWeb (spec 10). Acima de
   18 bits de entrada não há topo para a placa (MT-23).
 - **Perfil de alturas:** a dica e a próxima jogada seguem o Dadda até a soma completa e
-  podem sugerir reduzir além do perfil (MT-41); a busca do ótimo roda na página e pode
-  travá-la por um instante nos perfis grandes (MT-42).
+  podem sugerir reduzir além do perfil (MT-41).
+- **Otimizador:** a busca é exata só enquanto cabe no limite de tentativas; acima, a tela
+  diz até que área ela é exata, e o resto vem de uma heurística (AJU-14). Ela roda num
+  *worker*, e uma verificação pedida durante a busca espera ela terminar.
 - **Tela pequena:** abaixo de 768 px de largura o exercício fica em modo leitura (GER-10,
   decisão D-4).
 
@@ -153,7 +159,7 @@ docker run --rm -p 8080:8080 dotree    # http://localhost:8080
 Ou a imagem publicada de cada versão:
 
 ```bash
-docker run --rm -p 8080:8080 ghcr.io/psiagoleal/dotree:0.2.0
+docker run --rm -p 8080:8080 ghcr.io/psiagoleal/dotree:0.3.0
 ```
 
 ## Estrutura de diretórios

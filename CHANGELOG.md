@@ -8,6 +8,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+## [0.3.0] - 2026-11-19
+
+Terceira versão, a da entrega do mestrado: ao exercício da v0.2 somam-se a solução Dadda
+(Parhami), os contadores 7:3 e 15:4, os custos configuráveis de cada célula, limites de até
+32 bits por variável, 64 bits de entrada e 1024 pontos (o multiplicador 32 × 32) com zoom
+da matriz e do diagrama, a busca da solução ótima num *worker* e o otimizador, com as
+opções não dominadas em área e atraso. O VHDL dos 18 casos de referência foi conferido à
+mão no ModelSim ASE 10.1d: compilou sem avisos, os 14 casos corretos (entre eles os
+contadores, os nomes `S` e `K` e o 32 × 32) deram todos os casos certos nas versões
+estrutural, comportamental e da placa, e os 4 estragados de propósito acusaram erro só na
+versão estragada.
+
 ### Adicionado
 - **Otimizador**, em expressões e perfis de alturas: as opções não dominadas em área e
   atraso, com os custos em vigor, com FA, HA e os contadores que custam menos que a rede
