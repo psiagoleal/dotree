@@ -470,21 +470,76 @@
 	"guide_help_hint": "Dica: um fato sobre o estado atual, como a coluna mais alta ou quantos níveis faltam, sem dizer qual célula formar.",
 	"guide_help_next": "Próxima jogada: destaca os pontos da célula que o método de Dadda formaria agora; ela só é formada se você confirmar.",
 	"guide_help_bound": "Limite inferior: o menor número possível de FA; depois, por que não dá para usar menos.",
-	"guide_help_solutions": "Soluções de Dadda, Dadda (Parhami) e Wallace e, nos perfis de alturas, a solução ótima: primeiro área e atraso, depois os níveis. Vistos os níveis, a solução pode substituir o seu circuito num passo que se desfaz; usá-la também fica registrado.",
+	"guide_help_solutions": "Soluções de Dadda, Dadda (Parhami) e Wallace, nos perfis de alturas a solução ótima, e o otimizador, com as opções não dominadas em área e atraso: primeiro área e atraso, depois os níveis. Vistos os níveis, uma solução ou opção pode substituir o seu circuito num passo que se desfaz; usá-la também fica registrado.",
 	"guide_help_block": "Nome do bloco, só nos perfis de alturas: que bloco conhecido o perfil descreve.",
 	"guide_help_free": "Não contam: as Regras, este guia, os custos das células e a comparação de soluções, que só mostra o que você já viu.",
 	"guide_limits_title": "Limitações",
 	"guide_limit_sign": "Só números sem sinal: sem complemento de dois, subtração ou Booth.",
-	"guide_limit_cells": "As células são FA e HA, e o CPA final é de propagação simples (ripple).",
+	"guide_limit_cells": "As células são FA, HA e os contadores 7:3 e 15:4, e o CPA final é de propagação simples (ripple).",
 	"guide_limit_size": "Até 32 bits por variável, 64 bits de entrada e 1024 pontos; matriz e diagrama com zoom; perfis de alturas até 26 pontos e 16 colunas.",
 	"guide_limit_cost": "Área e atraso seguem um modelo unitário, não números de síntese: por padrão FA = 1 e HA = 0,5, e cada custo pode ser trocado em Custos das células, em múltiplos de 0,01.",
 	"guide_limit_sample": "Acima de 24 bits de entrada, a verificação é por amostra.",
-	"guide_limit_profile": "Nos perfis de alturas, a dica e a próxima jogada seguem o Dadda até a soma completa, e a busca da solução ótima pode travar a página por um instante.",
+	"guide_limit_profile": "Nos perfis de alturas, a dica e a próxima jogada seguem o Dadda até a soma completa. A solução ótima e o otimizador são buscados à parte, sem travar a página; uma verificação pedida durante a busca espera ela terminar.",
 	"guide_limit_board": "O topo para a placa DE2 foi conferido em simulação e compilado no Quartus, mas não numa placa real.",
 	"guide_limit_narrow": "Abaixo de 768 px de largura o exercício fica em modo leitura.",
 	"guide_references_title": "Referências",
 	"guide_ref_parhami": "B. Parhami, Computer Arithmetic: Algorithms and Hardware Designs, 2.ª ed., Oxford University Press, 2010: cap. 8 (adição de múltiplos operandos), 11 (multiplicadores em árvore) e 12 (variações de multiplicadores).",
 	"guide_ref_wallace": "C. S. Wallace, \"A suggestion for a fast multiplier\", IEEE Transactions on Electronic Computers, EC-13(1), pp. 14–17, 1964.",
 	"guide_ref_dadda": "L. Dadda, \"Some schemes for parallel multipliers\", Alta Frequenza, 34, pp. 349–356, 1965.",
-	"guide_ref_more": "Mais detalhes no repositório do projeto"
+	"guide_ref_more": "Mais detalhes no repositório do projeto",
+	"optimizer_ask": "Otimizador",
+	"optimizer_ask_path": "Ver as opções do otimizador nível a nível",
+	"optimizer_confirm_title": "Ver as opções do otimizador?",
+	"optimizer_confirm_body": "Primeiro, só as métricas de cada opção; os níveis ficam para um segundo pedido. O seu circuito não muda.",
+	"optimizer_confirm_path_title": "Ver as opções do otimizador nível a nível?",
+	"optimizer_use": "Usar a opção {n}",
+	"optimizer_confirm_use_title": "Trocar o seu circuito pela opção {n} do otimizador?",
+	"optimizer_confirm_use_body": "O circuito que você montou dá lugar à opção inteira. Desfazer (Ctrl+Z) traz o seu circuito de volta.",
+	"optimizer_searching": "Buscando as opções do otimizador…",
+	"optimizer_title": "Otimizador: opções não dominadas",
+	"optimizer_rule": "O otimizador procura circuitos de FA e HA, e de contadores quando custam menos que a rede de FA que os substitui, medidos com os custos em vigor, e mostra os não dominados: nenhum outro tem área e atraso menores ou iguais, com um dos dois menor. Cada célula usa os pontos mais cedo prontos da sua coluna.",
+	"optimizer_mode_exact": "Busca exata: até a maior área entre Dadda, Dadda (Parhami), Wallace e a heurística, nenhum circuito é melhor que estas opções.",
+	"optimizer_mode_exact_up_to": "Busca exata até {area} A_FA, onde ela chegou ao limite de tentativas; acima disso, as opções vêm da heurística.",
+	"optimizer_mode_heuristic": "Heurística: a matriz é grande demais para a busca exata. As opções vêm de regras nível a nível (alvos de Dadda ou de Wallace, com mais ou menos FA) e das soluções de Dadda, Dadda (Parhami) e Wallace.",
+	"optimizer_option": [
+		{
+			"declarations": ["input n", "input levels", "input cells", "input area", "input delay"],
+			"selectors": ["levels"],
+			"match": {
+				"levels=1": "Opção {n}: {levels} nível; {cells}; área {area} A_FA; atraso {delay} T_FA.",
+				"levels=*": "Opção {n}: {levels} níveis; {cells}; área {area} A_FA; atraso {delay} T_FA."
+			}
+		}
+	],
+	"optimizer_option_cpa": [
+		{
+			"declarations": ["input n", "input levels", "input cells", "input area", "input delay"],
+			"selectors": ["levels"],
+			"match": {
+				"levels=1": "Opção {n}: {levels} nível e o CPA; {cells}; área {area} A_FA; atraso {delay} T_FA.",
+				"levels=*": "Opção {n}: {levels} níveis e o CPA; {cells}; área {area} A_FA; atraso {delay} T_FA."
+			}
+		}
+	],
+	"optimizer_option_title": "Opção {n}, nível a nível",
+	"optimizer_level": "Opção {n}, nível {level}",
+	"optimizer_cpa": "Opção {n}, nível {level}: CPA",
+	"optimizer_result": "Opção {n}, resultado",
+	"optimizer_output": "Opção {n}, saída no perfil",
+	"optimizer_applied": "Opção {n} do otimizador aplicada. Desfazer traz o seu circuito de volta.",
+	"comparison_optimizer": "Otimizador, opção {n}",
+	"comparison_missing_optimizer": "As opções do otimizador entram aqui depois que você pedir as métricas delas.",
+	"comparison_heights_title_optimizer": "Tabela de alturas: opção {n} do otimizador",
+	"comparison_heights_export_optimizer": "Baixar alturas da opção {n} do otimizador (Markdown)",
+	"help_log_optimizer": "otimizador: {result} (nível a nível: {path})",
+	"help_log_optimizer_applied": [
+		{
+			"declarations": ["input count"],
+			"selectors": ["count"],
+			"match": {
+				"count=1": "opção do otimizador aplicada: {count} vez",
+				"count=*": "opção do otimizador aplicada: {count} vezes"
+			}
+		}
+	]
 }

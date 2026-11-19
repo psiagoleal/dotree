@@ -240,6 +240,10 @@ export interface HelpLog {
 	optimalPath: number;
 	optimalApplied: number;
 	block: number;
+	/** The same three counts for the optimizer's options (AJU-14). */
+	optimizer: number;
+	optimizerPath: number;
+	optimizerApplied: number;
 }
 
 /** The method of an automatic solution (AJU-05, AJU-10, AJU-13), and the optimal circuit
@@ -265,6 +269,15 @@ const WASM_METHOD: Record<Method, SolutionMethod> = {
  *  search runs in the worker (MT-42). */
 export type OptimalSearch = 'ok' | 'tooLarge' | 'noCircuit' | 'pending';
 
+/** How the optimizer found its options (AJU-14): an exact search over every area up to
+ *  the heuristic's largest, an exact one up to `upTo` (hundredths of A_FA), or only the
+ *  heuristic. */
+export type OptimizerMode =
+	{ mode: 'exact' } | { mode: 'exactUpTo'; upTo: number } | { mode: 'heuristic' };
+
+/** The optimizer's options once revealed: how they were found and how many there are. */
+export type Optimizer = OptimizerMode & { count: number };
+
 /** The known block a profile describes (AJU-12). */
 export type Block =
 	| { code: 'fullAdder' | 'halfAdder' | 'counter' | 'compressor' }
@@ -288,6 +301,7 @@ export interface Revealed {
 	wallace: RevealStage;
 	parhami: RevealStage;
 	optimal: RevealStage;
+	optimizer: RevealStage;
 	block: boolean;
 }
 
@@ -467,6 +481,25 @@ export interface CompressionSession {
 	adoptOptimal(result: string): OptimalSearch | null;
 	/** Searches here, on the main thread: the fallback without a worker. */
 	searchOptimal(): OptimalSearch | null;
+	/** 'pending' until the optimizer's search ended under the current costs (AJU-14).
+	 *  Reveals, counts and searches nothing. */
+	optimizerSearch(): 'pending' | 'ok';
+	/** What the worker needs to run the optimizer (`searchOptimizer`). */
+	optimizerRequest(): string;
+	/** Takes the worker's answer: 'ok', or null, keeping nothing, when stale or invalid. */
+	adoptOptimizer(result: string): 'ok' | null;
+	/** Runs the optimizer here, on the main thread: the fallback without a worker. */
+	searchOptimizer(): 'pending' | 'ok';
+	/** Step 1 (or, with `path`, step 2) of the optimizer: a counted reveal; null, uncounted,
+	 *  while the search runs, and for step 2 before step 1. */
+	optimizer(path: boolean): Optimizer | null;
+	/** The options again, uncounted, once step 1 was revealed; null otherwise. */
+	shownOptimizer(): Optimizer | null;
+	/** Option `index` as a separate session, uncounted, after step 1; free it after use. */
+	optimizerOption(index: number): CompressionSession | null;
+	/** Replaces the circuit with option `index` as one undo step; false before step 2, or
+	 *  when the circuit already is it. Counted when true. */
+	applyOptimizerOption(index: number): boolean;
 	/** The block the profile describes: a counted reveal (AJU-12); null without a profile. */
 	block(): Block | null;
 	/** The block again, uncounted, once revealed; null before that. */
@@ -529,6 +562,23 @@ function wrap(s: Session): CompressionSession {
 		optimalRequest: () => s.optimalRequest() ?? null,
 		adoptOptimal: (result) => (s.adoptOptimal(result) as OptimalSearch | undefined) ?? null,
 		searchOptimal: () => (s.searchOptimal() as OptimalSearch | undefined) ?? null,
+		optimizerSearch: () => s.optimizerSearch() as 'pending' | 'ok',
+		optimizerRequest: () => s.optimizerRequest(),
+		adoptOptimizer: (result) => (s.adoptOptimizer(result) as 'ok' | undefined) ?? null,
+		searchOptimizer: () => s.searchOptimizer() as 'pending' | 'ok',
+		optimizer: (path) => {
+			const o = s.optimizer(path);
+			return o === undefined ? null : JSON.parse(o);
+		},
+		shownOptimizer: () => {
+			const o = s.shownOptimizer();
+			return o === undefined ? null : JSON.parse(o);
+		},
+		optimizerOption: (index) => {
+			const o = s.optimizerOption(index);
+			return o === undefined ? null : wrap(o);
+		},
+		applyOptimizerOption: (index) => s.applyOptimizerOption(index),
 		block: () => JSON.parse(s.block()),
 		shownBlock: () => {
 			const b = s.shownBlock();

@@ -528,6 +528,58 @@ fn aju12_inconsistent_profile_reveals_are_refused() {
     }
 }
 
+// ------------------------------------------------------- AJU-14: the optimizer (MT-46)
+
+#[test]
+fn aju14_optimizer_counts_round_trip_and_old_files_still_open() {
+    let mut v = r2_file();
+    for key in ["optimizer", "optimizerPath", "optimizerApplied"] {
+        assert_eq!(v["help"][key], 0, "{key}");
+        v["help"].as_object_mut().unwrap().remove(key);
+    }
+    assert_eq!(open(&v), Ok(()));
+    let mut help = HelpLog::default();
+    for step in [
+        HelpStep::Optimizer,
+        HelpStep::OptimizerPath,
+        HelpStep::OptimizerApplied,
+    ] {
+        help.record(step);
+    }
+    // For a profile and for an expression alike.
+    let (back, _) = round_trip(&profile_exercise(help));
+    assert_eq!(
+        (
+            back.help.optimizer,
+            back.help.optimizer_path,
+            back.help.optimizer_applied
+        ),
+        (1, 1, 1)
+    );
+    let mut v = r2_file();
+    for key in ["optimizer", "optimizerPath", "optimizerApplied"] {
+        v["help"][key] = 2.into();
+    }
+    assert_eq!(open(&v), Ok(()));
+}
+
+#[test]
+fn aju14_inconsistent_optimizer_reveals_are_refused() {
+    for (set, why) in [
+        (&[("optimizerPath", 1)][..], "the path without the result"),
+        (
+            &[("optimizer", 1), ("optimizerApplied", 1)][..],
+            "applied without the path",
+        ),
+    ] {
+        let mut v = r2_file();
+        for &(key, n) in set {
+            v["help"][key] = n.into();
+        }
+        assert_eq!(open(&v), Err(StateError::InconsistentReveals), "{why}");
+    }
+}
+
 #[test]
 fn exp17_a_bad_profile_is_a_bad_expression() {
     let mut v: Value =

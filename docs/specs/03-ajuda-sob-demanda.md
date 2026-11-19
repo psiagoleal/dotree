@@ -20,6 +20,7 @@ Do mais leve ao mais completo. Cada degrau é pedido separadamente.
 | **Próxima jogada** | Destaca os pontos de uma célula que a solução Dadda formaria agora | sim | não |
 | **Limite inferior** | O menor número possível de FA | sim | sim |
 | **Solução automática** | A solução de Dadda, a de Dadda (Parhami) (AJU-13) ou a de Wallace (AJU-10), cada uma pedida à parte, a partir da matriz inicial, num painel à parte | sim | sim |
+| **Otimizador** | Os circuitos não dominados em área e atraso, numa expressão ou num perfil (AJU-14) | sim | sim |
 
 ### Catálogo de dicas (v0.1)
 
@@ -227,8 +228,68 @@ o $n$-ésimo pedido mostra a dica $n$ módulo a quantidade que se aplica agora.
   R1); teste de ponta a ponta: R1 → Dadda (Parhami) nível a nível → usar → "0 erros" e o
   registro.
 
+- **AJU-14** — O sistema DEVE oferecer o **otimizador**, numa expressão ou num perfil de
+  alturas: os circuitos que nenhum outro domina em área e atraso, medidos com os custos em
+  vigor (GER-12), da menor área para a maior (e do maior atraso para o menor). Ele segue
+  o fluxo das soluções, com contagem própria no registro de ajudas e no arquivo
+  (`help.optimizer`, `help.optimizerPath`, `help.optimizerApplied`, opcionais): a etapa 1
+  mostra as métricas de cada opção e as põe na comparação (AJU-11); a etapa 2, os níveis
+  de cada uma, com a regra numa frase, e "Usar a opção $n$", confirmado e num passo de
+  desfazer (AJU-09). A tela diz como as opções foram achadas: por busca exata; por busca
+  exata até uma área, acima da qual vêm da heurística; ou só pela heurística.
+  **Modelo:** o do AJU-12. Os pontos se distinguem só pela coluna e pela hora em que ficam
+  prontos, e cada nível escolhe quantas células de cada tipo forma em cada coluna, as
+  maiores sobre os pontos mais cedo prontos. A meta é o perfil ou, numa expressão, o
+  circuito completo, que pode fechar com o CPA (CMP-10, CMP-11). Os contadores 7:3 e 15:4
+  só entram quando custam menos, em área ou em atraso, que a rede de FA que os substitui
+  (4 FA com 3 de profundidade; 11 FA com 5; ADR 0005). Com os custos padrão, ficam de
+  fora.
+  **Busca exata:** a área sobe pelas somas que os custos das células permitem, e em cada
+  área procura o menor atraso abaixo do da opção anterior; cada resposta é um ponto novo
+  da fronteira. Uma coluna desce, por célula, o número de entradas menos 1, e cada célula
+  manda uma saída para a coluna de cima. Assim, da coluna mais baixa para a mais alta,
+  quanto cada coluna ainda precisa descer dá um limite inferior da área, que corta a
+  busca. Ela para na maior área entre as opções da heurística ou desiste depois de
+  1 000 000 de níveis tentados, o limite do AJU-12. Nesse caso, as opções valem como
+  exatas até a última área terminada. Acima de 64 pontos, só a heurística roda.
+  **Heurística:** regras nível a nível, com os alvos de Dadda ou de Wallace e uma de três
+  políticas: HA só quando falta reduzir 1 (Dadda), FA sempre que há 3 pontos livres
+  (Dadda (Parhami)) ou todos os FA que os pontos permitem (Wallace). Cada regra roda com e
+  sem os contadores que valem a pena. A elas se somam as soluções de Dadda, Dadda
+  (Parhami) e Wallace. As opções são a fronteira de tudo o que foi achado, então nenhuma
+  é dominada por esses três métodos.
+  **Onde roda:** como o AJU-12 (MT-42), no *worker*, ao abrir o exercício e depois de
+  trocar os custos. Enquanto isso, a tela diz "Buscando as opções do otimizador…". A
+  sessão só aceita a resposta da expressão, das larguras e dos custos em vigor, e cada
+  opção é refeita pelas regras e precisa estar completa (ou no perfil). Sem o *worker*,
+  roda na página. A busca acabar não recria a seção de ajuda, então um diálogo aberto
+  naquele momento continua aberto.
+  *Prova:* testes do núcleo:
+  - nos 11 perfis de referência, a opção de menor área tem a área e o atraso do ótimo do
+    AJU-12, com os custos padrão e com HA de 0,3;
+  - *proptest*: em perfis pequenos aleatórios, a opção de menor área é o ótimo do AJU-12;
+  - R1, achado pela busca e verificado exaustivamente: exata até 15,5 $A_{FA}$, com duas
+    opções, (14,5; 6), a área e o atraso do Wallace, e (15; 5,5);
+  - *proptest* com expressões aleatórias: nenhuma opção é dominada por Dadda, Dadda
+    (Parhami) ou Wallace, e todas verificam;
+  - o 32 × 32 e o perfil de 26 pontos vão pela heurística;
+  - com um 7:3 de área 2, `{7; 1,1,1}` dá um contador (2 e 3 $A_{FA}$ e $T_{FA}$);
+  - um perfil que a entrada já atinge dá uma opção sem células;
+  - o CPA da busca segue CMP-10;
+  - as regras com os alvos e a política de cada método reproduzem a área e o atraso dele
+    em R1.
+
+  Testes da ponte: espera, etapas e contagem, aplicação num passo de desfazer, contagens no
+  arquivo; resposta de outros custos, de outra expressão ou de outras larguras
+  descartada; opção adulterada ou incompleta recusada; reserva. Testes de componente:
+  buscando, as duas etapas, comparação, aplicação, custos novos, reserva, perfil,
+  exercício reaberto e o diálogo que continua aberto. Teste de ponta a ponta: R1 com
+  interação durante a busca (GER-06), a opção 2 aplicada e verificada; o 32 × 32 pela
+  heurística.
+
 ## Fora de escopo
 
-Busca da solução de menor atraso ou menor área fora do perfil de alturas (AJU-12); correção
+Comparação de várias heurísticas e o gráfico área × atraso (corte do MT-46); otimalidade
+fora do modelo do AJU-12 e do AJU-14; correção
 automática do circuito do usuário (AJU-09 substitui o circuito inteiro, não o corrige);
 ajuda por IA; "não perguntar de novo" (D-5).

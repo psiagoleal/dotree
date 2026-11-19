@@ -470,21 +470,76 @@
 	"guide_help_hint": "Hint: a fact about the current state, such as the tallest column or how many levels are left, without saying which cell to form.",
 	"guide_help_next": "Next move: highlights the dots of the cell Dadda's method would form now; it is formed only if you confirm.",
 	"guide_help_bound": "Lower bound: the smallest possible number of FAs; then, why fewer cannot do.",
-	"guide_help_solutions": "The solutions of Dadda, Dadda (Parhami) and Wallace and, for height profiles, the optimal solution: first area and delay, then the levels. Once the levels are seen, the solution can replace your circuit in one undoable step; using it is logged too.",
+	"guide_help_solutions": "The solutions of Dadda, Dadda (Parhami) and Wallace, for height profiles the optimal solution, and the optimizer, with the options not dominated in area and delay: first area and delay, then the levels. Once the levels are seen, a solution or option can replace your circuit in one undoable step; using it is logged too.",
 	"guide_help_block": "Block name, for height profiles only: which known block the profile describes.",
 	"guide_help_free": "Not counted: the Rules, this guide, the cell costs and the comparison of solutions, which only shows what you have already seen.",
 	"guide_limits_title": "Limitations",
 	"guide_limit_sign": "Unsigned numbers only: no two's complement, subtraction or Booth.",
-	"guide_limit_cells": "The cells are FAs and HAs, and the final CPA is a ripple-carry adder.",
+	"guide_limit_cells": "The cells are FA, HA and the 7:3 and 15:4 counters, and the final CPA is a ripple-carry adder.",
 	"guide_limit_size": "Up to 32 bits per variable, 64 input bits and 1024 dots; matrix and diagram with zoom; height profiles up to 26 dots and 16 columns.",
 	"guide_limit_cost": "Area and delay follow a unit model, not synthesis figures: FA = 1 and HA = 0.5 by default, and each cost can be changed in Cell costs, in multiples of 0.01.",
 	"guide_limit_sample": "Above 24 input bits, verification is by sampling.",
-	"guide_limit_profile": "For height profiles, the hint and the next move follow Dadda up to the full sum, and the search for the optimal solution may freeze the page for a moment.",
+	"guide_limit_profile": "For height profiles, the hint and the next move follow Dadda up to the full sum. The optimal solution and the optimizer are searched apart, without freezing the page; a verification asked for during the search waits for it to end.",
 	"guide_limit_board": "The DE2 board top was checked in simulation and compiled in Quartus, but not on a real board.",
 	"guide_limit_narrow": "Below 768 px of width the exercise is read-only.",
 	"guide_references_title": "References",
 	"guide_ref_parhami": "B. Parhami, Computer Arithmetic: Algorithms and Hardware Designs, 2nd ed., Oxford University Press, 2010: ch. 8 (multioperand addition), 11 (tree multipliers) and 12 (variations in multipliers).",
 	"guide_ref_wallace": "C. S. Wallace, \"A suggestion for a fast multiplier\", IEEE Transactions on Electronic Computers, EC-13(1), pp. 14–17, 1964.",
 	"guide_ref_dadda": "L. Dadda, \"Some schemes for parallel multipliers\", Alta Frequenza, 34, pp. 349–356, 1965.",
-	"guide_ref_more": "More details in the project repository"
+	"guide_ref_more": "More details in the project repository",
+	"optimizer_ask": "Optimizer",
+	"optimizer_ask_path": "See the optimizer's options level by level",
+	"optimizer_confirm_title": "See the optimizer's options?",
+	"optimizer_confirm_body": "First only the metrics of each option; the levels come with a second request. Your circuit does not change.",
+	"optimizer_confirm_path_title": "See the optimizer's options level by level?",
+	"optimizer_use": "Use option {n}",
+	"optimizer_confirm_use_title": "Replace your circuit with option {n} of the optimizer?",
+	"optimizer_confirm_use_body": "The circuit you built gives way to the whole option. Undo (Ctrl+Z) brings your circuit back.",
+	"optimizer_searching": "Searching for the optimizer's options…",
+	"optimizer_title": "Optimizer: non-dominated options",
+	"optimizer_rule": "The optimizer searches circuits of FA and HA, and of counters when they cost less than the FA network that replaces them, measured with the costs in force, and shows the non-dominated ones: no other has area and delay both lower or equal, with one of them lower. Each cell uses the earliest ready points of its column.",
+	"optimizer_mode_exact": "Exact search: up to the largest area among Dadda, Dadda (Parhami), Wallace and the heuristic, no circuit is better than these options.",
+	"optimizer_mode_exact_up_to": "Exact search up to {area} A_FA, where it reached its limit of tries; above that, the options come from the heuristic.",
+	"optimizer_mode_heuristic": "Heuristic: the matrix is too large for the exact search. The options come from level-by-level rules (Dadda's or Wallace's targets, with more or fewer FA) and from the solutions of Dadda, Dadda (Parhami) and Wallace.",
+	"optimizer_option": [
+		{
+			"declarations": ["input n", "input levels", "input cells", "input area", "input delay"],
+			"selectors": ["levels"],
+			"match": {
+				"levels=1": "Option {n}: {levels} level; {cells}; area {area} A_FA; delay {delay} T_FA.",
+				"levels=*": "Option {n}: {levels} levels; {cells}; area {area} A_FA; delay {delay} T_FA."
+			}
+		}
+	],
+	"optimizer_option_cpa": [
+		{
+			"declarations": ["input n", "input levels", "input cells", "input area", "input delay"],
+			"selectors": ["levels"],
+			"match": {
+				"levels=1": "Option {n}: {levels} level and the CPA; {cells}; area {area} A_FA; delay {delay} T_FA.",
+				"levels=*": "Option {n}: {levels} levels and the CPA; {cells}; area {area} A_FA; delay {delay} T_FA."
+			}
+		}
+	],
+	"optimizer_option_title": "Option {n}, level by level",
+	"optimizer_level": "Option {n}, level {level}",
+	"optimizer_cpa": "Option {n}, level {level}: CPA",
+	"optimizer_result": "Option {n}, result",
+	"optimizer_output": "Option {n}, output at the profile",
+	"optimizer_applied": "Option {n} of the optimizer applied. Undo brings your circuit back.",
+	"comparison_optimizer": "Optimizer, option {n}",
+	"comparison_missing_optimizer": "The optimizer's options come in here once you ask for their metrics.",
+	"comparison_heights_title_optimizer": "Height table: option {n} of the optimizer",
+	"comparison_heights_export_optimizer": "Download heights of option {n} of the optimizer (Markdown)",
+	"help_log_optimizer": "optimizer: {result} (level by level: {path})",
+	"help_log_optimizer_applied": [
+		{
+			"declarations": ["input count"],
+			"selectors": ["count"],
+			"match": {
+				"count=1": "optimizer option applied: {count} time",
+				"count=*": "optimizer option applied: {count} times"
+			}
+		}
+	]
 }

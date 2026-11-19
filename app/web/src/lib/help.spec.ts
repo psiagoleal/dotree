@@ -76,7 +76,10 @@ describe('helpLogItems (AJU-07)', () => {
 		optimal: 0,
 		optimalPath: 0,
 		optimalApplied: 0,
-		block: 0
+		block: 0,
+		optimizer: 0,
+		optimizerPath: 0,
+		optimizerApplied: 0
 	};
 
 	it('is empty when no help was used', () => {
@@ -138,6 +141,15 @@ describe('helpLogItems (AJU-07)', () => {
 		expect(helpLogItems({ ...none, optimal: 1, block: 1 }, 'en')).toEqual([
 			'optimal solution: 1 (level by level: 0)',
 			'block name: 1'
+		]);
+	});
+
+	it('counts the optimizer apart (AJU-14)', () => {
+		expect(
+			helpLogItems({ ...none, optimizer: 2, optimizerPath: 1, optimizerApplied: 1 }, 'pt-br')
+		).toEqual(['otimizador: 2 (nível a nível: 1)', 'opção do otimizador aplicada: 1 vez']);
+		expect(helpLogItems({ ...none, optimizer: 1 }, 'en')).toEqual([
+			'optimizer: 1 (level by level: 0)'
 		]);
 	});
 });

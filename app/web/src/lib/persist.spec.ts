@@ -82,8 +82,12 @@ describe('autosaving', () => {
 		s.revealWidthPath();
 		s.applySolution('dadda');
 		s.setCosts({ faArea: 100, faDelay: 100, haArea: 30, haDelay: 30 });
-		expect(save).toHaveBeenCalledTimes(14);
-		expect(save).toHaveBeenLastCalledWith('state 14');
+		// The block name (AJU-12) and the optimizer (AJU-14) are counted reveals too.
+		s.block();
+		s.optimizer(false);
+		s.applyOptimizerOption(0);
+		expect(save).toHaveBeenCalledTimes(17);
+		expect(save).toHaveBeenLastCalledWith('state 17');
 	});
 
 	it('does not save on reads', () => {

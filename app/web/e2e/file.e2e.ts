@@ -63,6 +63,9 @@ async function openFile(page: Page, name: string, text: string) {
 
 test('export, reload and open give back the same exercise (SAL-02)', async ({ page }, info) => {
 	await midExercise(page);
+	// The optimizer's search ends on both sides before they are compared (MT-46).
+	const optimizer = page.getByRole('button', { name: 'Otimizador', exact: true });
+	await expect(optimizer).toBeVisible();
 	const before = await exercise(page).innerText();
 	const text = await exportFile(page, info.outputPath('exercise.json'));
 	const file = JSON.parse(text);
@@ -87,6 +90,7 @@ test('export, reload and open give back the same exercise (SAL-02)', async ({ pa
 	await expect(page.locator('input[name="width-E"]')).toHaveValue('2');
 	await expect(page.getByTestId('lower-bound')).toBeVisible();
 	await expect(page.getByTestId('width-path')).toBeVisible();
+	await expect(optimizer).toBeVisible();
 	expect(await exercise(page).innerText()).toBe(before);
 	// The reopened exercise goes on from where it was.
 	await formByMouse(page, 2, ['s5', 'k4', 's6']);

@@ -340,6 +340,11 @@ pub enum HelpStep {
     OptimalApplied,
     /// The name of the known block a height profile describes (AJU-12).
     Block,
+    /// The same three steps for the optimizer's options (AJU-14): their metrics, their
+    /// levels, one of them applied.
+    Optimizer,
+    OptimizerPath,
+    OptimizerApplied,
 }
 
 /// How many times each help step was revealed, for the summary of a complete circuit
@@ -380,6 +385,13 @@ pub struct HelpLog {
     pub optimal_applied: u32,
     #[serde(default)]
     pub block: u32,
+    /// The optimizer (AJU-14). Absent in files before MT-46: 0, schema still 1.
+    #[serde(default)]
+    pub optimizer: u32,
+    #[serde(default)]
+    pub optimizer_path: u32,
+    #[serde(default)]
+    pub optimizer_applied: u32,
 }
 
 impl HelpLog {
@@ -402,6 +414,9 @@ impl HelpLog {
             HelpStep::OptimalPath => &mut self.optimal_path,
             HelpStep::OptimalApplied => &mut self.optimal_applied,
             HelpStep::Block => &mut self.block,
+            HelpStep::Optimizer => &mut self.optimizer,
+            HelpStep::OptimizerPath => &mut self.optimizer_path,
+            HelpStep::OptimizerApplied => &mut self.optimizer_applied,
         };
         *n += 1;
     }

@@ -67,6 +67,11 @@ arquivo.
   aplicações da solução ótima e o nome do bloco; são opcionais, então o esquema continua
   1. As regras de inconsistência são as de Wallace, e ótimo ou bloco num exercício sem
   perfil também é revelação inconsistente.
+- **Otimizador (AJU-14, MT-46).** `help.optimizer`, `help.optimizerPath` e
+  `help.optimizerApplied` contam as duas etapas e as aplicações de qualquer opção, numa
+  expressão ou num perfil; opcionais (valem 0 em arquivos anteriores), então o esquema
+  continua 1. As regras de inconsistência são as de Wallace. As opções não vão para o
+  arquivo: ao reabrir, a busca roda de novo, e o que já foi revelado volta sem contar.
 
 - **Salvamento automático (MT-15b).** O que vai para o armazenamento local é o mesmo
   arquivo do exercício, sob a chave `dotree.exercise`, gravado depois de cada ação e de

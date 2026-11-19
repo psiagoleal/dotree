@@ -594,6 +594,18 @@ Depois da entrega: MT-41 e a fila de "Depois da v0.2".
 - **Depende de:** MT-25a, MT-42
 - **Corte (2026-11-13):** busca exata em matrizes pequenas e uma heurística nas grandes;
   a comparação de várias heurísticas e o gráfico área × atraso ficam para depois.
+- **Feito (2026-11-19):** módulo `optimize` no núcleo. A busca exata percorre a área com
+  um limite inferior por coluna e, em cada área, procura o menor atraso abaixo do da opção
+  anterior. Ela para na maior área da heurística ou no limite de tentativas do AJU-12, e
+  então vale como exata até a última área terminada. A heurística são regras nível a nível
+  (alvos de Dadda ou Wallace, três políticas, com e sem contadores) mais as três
+  soluções; com o alvo e a política de cada método, reproduz a área e o atraso dele em R1.
+  Resultados: R1 é exato até 15,5 $A_{FA}$, com (14,5; 6) e (15; 5,5); nos 11 perfis, a
+  opção de menor área é o ótimo; o 32 × 32 e o perfil de 26 pontos vão pela heurística.
+  Na tela, duas etapas contadas, comparação e "Usar a opção $n$". Roda no *worker* como o
+  MT-42, com p95 de 15 ms durante a busca em R1. A primeira versão tinha dois cortes da
+  busca (um limite de atraso e outro pelas opções da heurística); medidos, mudavam menos
+  de 1% das tentativas e saíram.
 
 ### MT-47: Publicar a v0.3.0
 - **Objetivo:** como o MT-43: versões, seção do CHANGELOG, ModelSim à mão (agora com os
