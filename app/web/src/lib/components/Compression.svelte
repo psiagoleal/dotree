@@ -14,7 +14,11 @@
 	import { formatHundredths, visibleTop } from '#lib/levels.ts';
 	import { helpLogItems } from '#lib/help.ts';
 	import { methodTexts } from '#lib/methods.ts';
-	import { searchOptimalInWorker, type SearchOptimal } from '#lib/verification.ts';
+	import {
+		searchOptimalInWorker,
+		searchOptimizerInWorker,
+		type SearchOptimal
+	} from '#lib/verification.ts';
 	import type { ViewMode } from '#lib/view.ts';
 	import CircuitView from './CircuitView.svelte';
 	import Comparison from './Comparison.svelte';
@@ -35,7 +39,8 @@
 		outputWidth,
 		vMax,
 		widthRevealed,
-		searchOptimal = searchOptimalInWorker
+		searchOptimal = searchOptimalInWorker,
+		searchOptimizer = searchOptimizerInWorker
 	}: {
 		session: CompressionSession;
 		view: ViewMode;
@@ -45,6 +50,8 @@
 		widthRevealed: boolean;
 		/** Runs the search of a profile's optimum off the main thread (MT-42). */
 		searchOptimal?: SearchOptimal;
+		/** Runs the optimizer off the main thread (MT-46). */
+		searchOptimizer?: SearchOptimal;
 	} = $props();
 
 	const id = $props.id();
@@ -113,6 +120,30 @@
 		});
 		return () => {
 			searchGen++;
+		};
+	});
+	// MT-46: the optimizer runs the same way, for an expression or a profile, after the
+	// optimum's search in the same worker.
+	let optimizer = $state(untrack(() => session.optimizerSearch()));
+	let optimizerGen = 0;
+	$effect(() => {
+		void costsKey;
+		const gen = ++optimizerGen;
+		untrack(() => {
+			optimizer = session.optimizerSearch();
+			if (optimizer !== 'pending') return;
+			const settle = (found: () => 'pending' | 'ok') => {
+				if (gen !== optimizerGen) return;
+				optimizer = found();
+				helps = session.helpLog();
+			};
+			searchOptimizer(session.optimizerRequest()).then(
+				(result) => settle(() => session.adoptOptimizer(result) ?? session.searchOptimizer()),
+				() => settle(() => session.searchOptimizer())
+			);
+		});
+		return () => {
+			optimizerGen++;
 		};
 	});
 	const complete = $derived(snap.result !== null);
@@ -386,11 +417,16 @@
 			<SolutionHelp
 				{session}
 				{view}
+				{optimizer}
 				readOnly={narrow}
 				onhelp={() => (helps = session.helpLog())}
 				onapply={(method) => {
 					helps = session.helpLog();
 					refresh(methodTexts(method).applied);
+				}}
+				onapplyOption={(n) => {
+					helps = session.helpLog();
+					refresh(m.optimizer_applied({ n }));
 				}}
 			/>
 		{/key}

@@ -12,6 +12,7 @@ use dotree_core::heights::{self, HeightHeaders, RowKind};
 use dotree_core::help::{self, HelpLog, HelpStep, Hint, Method, NextMove};
 use dotree_core::matrix::{DotMatrix, MatrixError};
 use dotree_core::netlist::Netlist;
+use dotree_core::optimize::{self, Mode};
 use dotree_core::profile::{self, Block, InputError, Profile, ProfileError, SearchError};
 use dotree_core::reduce::{
     CellKind, Costs, CpaBlock, Origin, PendingCell, Point, PointId, Reduction, Rejection,
@@ -58,6 +59,64 @@ pub fn search_optimal(request: &str) -> String {
     json!({"expression": expression, "costs": v["costs"], "status": search_status(&found),
            "circuit": circuit})
     .to_string()
+}
+
+fn mode_json(mode: Mode) -> Value {
+    match mode {
+        Mode::Exact => json!({"mode": "exact"}),
+        Mode::ExactUpTo(area) => json!({"mode": "exactUpTo", "upTo": area}),
+        Mode::Heuristic => json!({"mode": "heuristic"}),
+    }
+}
+
+fn mode_from(v: &Value) -> Option<Mode> {
+    match v.get("mode")?.as_str()? {
+        "exact" => Some(Mode::Exact),
+        "exactUpTo" => Some(Mode::ExactUpTo(
+            u32::try_from(v.get("upTo")?.as_u64()?).ok()?,
+        )),
+        "heuristic" => Some(Mode::Heuristic),
+        _ => None,
+    }
+}
+
+/// The optimizer's options (AJU-14), searched where it is called: the page calls it in a
+/// worker, as the optimal search (MT-42). `request` comes from `Session.optimizerRequest`;
+/// the answer, for `Session.adoptOptimizer`, carries the request back with the mode and
+/// each option in the form of an exercise file; `null` options for a bad request.
+#[wasm_bindgen(js_name = searchOptimizer)]
+pub fn search_optimizer(request: &str) -> String {
+    let v: Value = serde_json::from_str(request).unwrap_or(Value::Null);
+    let expression = v["expression"].as_str().unwrap_or_default();
+    let widths: BTreeMap<char, u32> =
+        serde_json::from_value(v["widths"].clone()).unwrap_or_default();
+    let costs: Option<Costs> = serde_json::from_value(v["costs"].clone()).ok();
+    let input = profile::analyze_input(expression, &widths).ok();
+    let found = match (input, costs) {
+        (Some(input), Some(c)) if c.is_valid() => DotMatrix::build(&input.analysis)
+            .ok()
+            .map(|m| optimize::optimize(&m, input.profile.as_ref(), c)),
+        _ => None,
+    };
+    let mut out = json!({"expression": expression, "costs": v["costs"], "options": null});
+    if let Some(o) = found {
+        let options: Vec<Value> = o
+            .circuits
+            .iter()
+            .map(|r| {
+                serde_json::from_str(
+                    &Exercise::capture(expression, &widths, r, None, HelpLog::default()).to_json(),
+                )
+                .expect("an exercise file is JSON")
+            })
+            .collect();
+        out["options"] = options.into();
+        let mode = mode_json(o.mode);
+        out.as_object_mut()
+            .expect("an object")
+            .extend(mode.as_object().cloned().unwrap_or_default());
+    }
+    out.to_string()
 }
 
 /// Core version, used by the interface to prove the WASM module loaded.
@@ -418,6 +477,9 @@ pub struct Session {
     /// Its optimal circuit under the current costs (AJU-12): `None` until a search ends.
     /// The page runs the search in a worker and hands the result over (MT-42).
     optimal: Option<Result<Reduction, SearchError>>,
+    /// The optimizer's options under the current costs (AJU-14): `None` until a search
+    /// ends, in a worker or here.
+    optimizer: Option<(Mode, Vec<Reduction>)>,
 }
 
 impl Session {
@@ -438,6 +500,7 @@ impl Session {
             width: None,
             profile,
             optimal: None,
+            optimizer: None,
         }
     }
 
@@ -584,6 +647,7 @@ impl Session {
         if costs != self.reduction.costs() {
             self.reduction.set_costs(costs);
             self.optimal = None;
+            self.optimizer = None;
         }
         true
     }
@@ -632,6 +696,7 @@ impl Session {
                "wallace": stage(l.wallace, l.wallace_path),
                "parhami": stage(l.parhami, l.parhami_path),
                "optimal": stage(l.optimal, l.optimal_path),
+               "optimizer": stage(l.optimizer, l.optimizer_path),
                "block": l.block > 0})
         .to_string()
     }
@@ -876,6 +941,145 @@ impl Session {
         self.optimal_search()
     }
 
+    // ------------------------------------------------------------ optimizer (AJU-14, MT-46)
+
+    /// "pending" while no search of the optimizer has ended under the current costs, then
+    /// "ok". Reveals and counts nothing, and searches nothing.
+    #[wasm_bindgen(js_name = optimizerSearch)]
+    pub fn optimizer_search(&self) -> String {
+        if self.optimizer.is_some() {
+            "ok"
+        } else {
+            "pending"
+        }
+        .into()
+    }
+
+    /// What a worker needs to run the optimizer (`searchOptimizer`): the expression or
+    /// profile, the widths and the costs in force, as JSON.
+    #[wasm_bindgen(js_name = optimizerRequest)]
+    pub fn optimizer_request(&self) -> String {
+        json!({"expression": self.expression, "widths": self.widths,
+               "costs": self.reduction.costs()})
+        .to_string()
+    }
+
+    /// Takes the result of `searchOptimizer` and returns "ok", or `None`, keeping nothing,
+    /// when it was searched for other costs or another exercise, or one of its options
+    /// breaks a rule or is not complete (at the profile, for a profile): each option is
+    /// replayed through the rules, as a saved exercise is (SAL-03). Reveals and counts
+    /// nothing.
+    #[wasm_bindgen(js_name = adoptOptimizer)]
+    pub fn adopt_optimizer(&mut self, result_json: &str) -> Option<String> {
+        let v: Value = serde_json::from_str(result_json).ok()?;
+        let costs: Costs = serde_json::from_value(v.get("costs")?.clone()).ok()?;
+        if v.get("expression")?.as_str()? != self.expression || costs != self.reduction.costs() {
+            return None;
+        }
+        let mode = mode_from(&v)?;
+        let options = v.get("options")?.as_array()?;
+        if options.is_empty() {
+            return None;
+        }
+        let mut circuits = Vec::new();
+        for option in options {
+            let file = Exercise::parse(&option.to_string()).ok()?;
+            if file.expression != self.expression
+                || file.widths != self.widths
+                || file.costs != costs
+            {
+                return None;
+            }
+            let (_, r) = file.restore().ok()?;
+            let done = match &self.profile {
+                Some(p) => p.reached(&r),
+                None => r.is_complete(),
+            };
+            if !done {
+                return None;
+            }
+            circuits.push(r);
+        }
+        self.optimizer = Some((mode, circuits));
+        Some("ok".into())
+    }
+
+    /// Runs the optimizer here, on the calling thread: the fallback when the worker is gone.
+    /// Same answer as `optimizerSearch` afterwards.
+    #[wasm_bindgen(js_name = searchOptimizer)]
+    pub fn search_optimizer_here(&mut self) -> String {
+        if self.optimizer.is_none() {
+            let o = optimize::optimize(&self.matrix, self.profile.as_ref(), self.reduction.costs());
+            self.optimizer = Some((o.mode, o.circuits));
+        }
+        self.optimizer_search()
+    }
+
+    fn optimizer_json(&self) -> Option<String> {
+        let (mode, circuits) = self.optimizer.as_ref()?;
+        let mut v = mode_json(*mode);
+        v["count"] = circuits.len().into();
+        Some(v.to_string())
+    }
+
+    /// The optimizer's options as a counted reveal: step 1 (their metrics, in the
+    /// comparison) or, with `path`, step 2 (their levels). `{mode, upTo?, count}`; `None`,
+    /// uncounted, while the search runs, and for step 2 before step 1.
+    pub fn optimizer(&mut self, path: bool) -> Option<String> {
+        let out = self.optimizer_json()?;
+        if path && self.log.optimizer == 0 {
+            return None;
+        }
+        self.log.record(if path {
+            HelpStep::OptimizerPath
+        } else {
+            HelpStep::Optimizer
+        });
+        Some(out)
+    }
+
+    /// The options again, uncounted, once step 1 was revealed; `None` before that or while
+    /// a search runs again (GER-01).
+    #[wasm_bindgen(js_name = shownOptimizer)]
+    pub fn shown_optimizer(&self) -> Option<String> {
+        (self.log.optimizer > 0).then(|| self.optimizer_json())?
+    }
+
+    /// Option `index` as a session of its own, uncounted, once step 1 was revealed; `None`
+    /// otherwise.
+    #[wasm_bindgen(js_name = optimizerOption)]
+    pub fn optimizer_option(&self, index: usize) -> Option<Session> {
+        if self.log.optimizer == 0 {
+            return None;
+        }
+        let r = self.optimizer.as_ref()?.1.get(index)?;
+        Some(Session::with(
+            r.clone(),
+            self.matrix.clone(),
+            &self.expression,
+            &self.widths,
+            self.profile.clone(),
+        ))
+    }
+
+    /// Replaces the student's circuit with option `index` as one undo step (AJU-09). False,
+    /// with nothing changed or counted, before step 2, for no such option, or when the
+    /// circuit already is that option.
+    #[wasm_bindgen(js_name = applyOptimizerOption)]
+    pub fn apply_optimizer_option(&mut self, index: usize) -> bool {
+        if self.log.optimizer_path == 0 {
+            return false;
+        }
+        let Some(r) = self.optimizer.as_ref().and_then(|o| o.1.get(index)) else {
+            return false;
+        };
+        let applied = self.reduction.adopt(&r.clone());
+        if applied {
+            self.log.record(HelpStep::OptimizerApplied);
+        }
+        applied
+    }
+
     /// The known block the profile describes, as a counted reveal (AJU-12); `null` without
     /// a profile, uncounted.
     pub fn block(&mut self) -> String {
@@ -1088,7 +1292,8 @@ impl Session {
                "parhamiPath": l.parhami_path, "parhamiApplied": l.parhami_applied,
                "optimal": l.optimal,
                "optimalPath": l.optimal_path, "optimalApplied": l.optimal_applied,
-               "block": l.block})
+               "block": l.block, "optimizer": l.optimizer,
+               "optimizerPath": l.optimizer_path, "optimizerApplied": l.optimizer_applied})
         .to_string()
     }
 

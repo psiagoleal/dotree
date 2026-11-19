@@ -9,6 +9,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Não lançado]
 
 ### Adicionado
+- **Otimizador**, em expressões e perfis de alturas: as opções não dominadas em área e
+  atraso, com os custos em vigor, com FA, HA e os contadores que custam menos que a rede
+  de FA. Ele segue o fluxo das soluções: métricas, níveis e "Usar a opção $n$", cada um
+  confirmado e contado (`help.optimizer`, `help.optimizerPath`, `help.optimizerApplied`
+  no arquivo, opcionais). As opções entram na comparação. A busca é exata enquanto cabe no
+  limite de tentativas, e a tela diz até que área. Acima de 64 pontos roda uma
+  heurística, que a tela nomeia, com regras nível a nível e as soluções de Dadda, Dadda
+  (Parhami) e Wallace, e nenhuma opção é dominada por elas. Em R1, a busca é exata até
+  15,5 $A_{FA}$ e dá (14,5; 6) e (15; 5,5). Nos 11 perfis de referência, a opção de
+  menor área é o ótimo. A busca roda no *worker*, e formar e desfazer durante ela levam
+  15 ms no percentil 95 (AJU-14, GER-06, MT-46).
 - **Limites maiores:** até 32 bits por variável, 64 bits de entrada e 1024 pontos, o
   bastante para um multiplicador 32 × 32 (saída até 128 bits, sem inteiro largo). O
   Dadda do 32 × 32 (899 FA e 31 HA antes do CPA) é verificado pela amostra de $2^{20}$
@@ -46,6 +57,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   MT-32a, MT-32b).
 
 ### Corrigido
+- Revelar o nome do bloco de um perfil (AJU-12) não regravava o exercício salvo
+  automaticamente até a ação seguinte. Agora regrava na hora, como as outras ajudas.
+- "Como usar": tirada a frase que dizia que a busca da solução ótima podia travar a página,
+  o que deixou de ser verdade no MT-42; e a lista de células agora inclui os contadores.
 - VHDL de expressões com as variáveis `N`, `V`, `I`, `J` ou `W`: o VHDL não distingue
   maiúsculas, e o laço, a variável e a função do testbench e a constante `W` da versão
   comportamental escondiam essas portas, então o testbench (ou a versão comportamental)

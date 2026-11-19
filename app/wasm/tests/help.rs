@@ -40,7 +40,8 @@ fn nothing_is_counted_before_a_request() {
                "solution": 0, "solutionPath": 0, "solutionApplied": 0,
                "wallace": 0, "wallacePath": 0, "wallaceApplied": 0,
                "parhami": 0, "parhamiPath": 0, "parhamiApplied": 0,
-               "optimal": 0, "optimalPath": 0, "optimalApplied": 0, "block": 0})
+               "optimal": 0, "optimalPath": 0, "optimalApplied": 0, "block": 0,
+               "optimizer": 0, "optimizerPath": 0, "optimizerApplied": 0})
     );
 }
 

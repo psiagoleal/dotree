@@ -243,6 +243,8 @@ impl Exercise {
             || (h.parhami_applied > 0 && h.parhami_path == 0)
             || (h.optimal_path > 0 && h.optimal == 0)
             || (h.optimal_applied > 0 && h.optimal_path == 0)
+            || (h.optimizer_path > 0 && h.optimizer == 0)
+            || (h.optimizer_applied > 0 && h.optimizer_path == 0)
         {
             return Err(StateError::InconsistentReveals);
         }

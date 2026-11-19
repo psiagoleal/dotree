@@ -9,7 +9,7 @@
 
 - **Branch:** `main`
 - **Data:** 2026-11-19
-- **Commit:** `86a94c5` (MT-25a, #63); última *tag* `v0.2.0`.
+- **Commit:** `19ad5c3` (MT-42, #64); última *tag* `v0.2.0`.
 
 ## Metas cumpridas / Em andamento / Próximo passo
 
@@ -223,12 +223,32 @@
       zoom da matriz (VIS-05) e do diagrama, tabela de ligações com rolagem própria
       (DIA-08). GER-06 no 32 × 32: p95 18 ms. Aplicar/desfazer/refazer o Dadda do 32 × 32:
       ~850/270/700 ms (anotado no GER-06). GHDL com `mult32`.
-- [x] MT-42 preparado: a busca do ótimo de um perfil roda no *worker* da verificação
+- [x] MT-42 mesclado (#64): a busca do ótimo de um perfil roda no *worker* da verificação
       (`optimalRequest` → `searchOptimal` → `adoptOptimal`, reserva síncrona
       `searchOptimal` na sessão); "Buscando a solução ótima…" enquanto roda. Montar o perfil
       de 26 pontos: 767 → 56 ms; GER-06 durante a busca p95 15 ms. 336 testes Rust, 213 de
       unidade/componente, 65 e2e; 10 mutações pegas (uma depois de um teste novo).
-- [ ] Próximo: MT-46 (otimizador). O MT-41 fica para depois da entrega.
+- [x] MT-46 preparado: otimizador (AJU-14), módulo `optimize` no núcleo. A busca exata
+      percorre a área com um limite inferior por coluna. Ela vale como exata até a
+      última área terminada, quando chega ao limite de tentativas. A heurística são regras
+      nível a nível mais Dadda, Dadda (Parhami) e Wallace. Na tela, duas etapas contadas,
+      comparação e "Usar a opção $n$"; roda no *worker*. Resultados:
+      - R1: exato até 15,5 $A_{FA}$, com (14,5; 6) e (15; 5,5);
+      - nos 11 perfis de referência, a opção de menor área é o ótimo;
+      - o 32 × 32 vai pela heurística, com as opções em ~1,1 s;
+      - GER-06 em R1 durante a busca: p95 15 ms.
+
+      Correções no caminho:
+      - o salvamento automático não regravava o nome do bloco;
+      - o "Como usar" ainda dizia que a busca do ótimo travava a página e não citava os
+        contadores;
+      - a seção de ajuda não é mais recriada quando uma busca termina, então um diálogo
+        aberto continua aberto.
+
+      Verificação: 356 testes Rust, 222 de unidade/componente e 67 e2e; 16 mutações pegas
+      (três depois de testes novos). Dois cortes da busca, medidos, mudavam menos de 1%
+      das tentativas e foram removidos.
+- [ ] Próximo: MT-47 (publicar a v0.3.0). O MT-41 fica para depois da entrega.
 - Mensagens de commit antigas (a do MT-31a, `90df97e`, e outras) citam material não
   público; ficam no histórico, porque reescrevê-lo pede *force push* no `main` (ADR 0003).
 
@@ -275,6 +295,7 @@
 
 | Data | Commit | Resumo | MT |
 |------|--------|--------|----|
+| 2026-11-19 | `19ad5c3` | busca do ótimo no *worker* (#64); otimizador | MT-42, MT-46 |
 | 2026-11-19 | `86a94c5` | limites e zoom (#63); busca do ótimo no *worker* | MT-25a, MT-42 |
 | 2026-11-19 | `daa45aa` | nomes de `S` e `K` (#62); limites e zoom | MT-49, MT-25a |
 | 2026-11-19 | `615bc97` | contadores na interface (#61); nomes de `S` e `K` | MT-32b, MT-49 |

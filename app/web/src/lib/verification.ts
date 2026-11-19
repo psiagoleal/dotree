@@ -1,10 +1,11 @@
 // Caminho relativo: app/web/src/lib/verification.ts
 // Starts verifications in one shared worker and lets the page follow and cancel them
-// (VER-04). The same worker searches a profile's optimal circuit (MT-42). The worker is created when the page loads (`prewarm`), so a verification needs
+// (VER-04). The same worker searches a profile's optimal circuit (MT-42) and runs the
+// optimizer (MT-46). The worker is created when the page loads (`prewarm`), so a verification needs
 // no network afterwards (GER-05). If the worker dies, the runs in progress fail and the next
 // one starts a new worker.
 import type { VerificationProgress } from '#lib/core.ts';
-import type { FromWorker, ToWorker } from '#lib/verify.worker.ts';
+import type { FromWorker, SearchKind, ToWorker } from '#lib/verify.worker.ts';
 
 /** The part of `Worker` used here, so tests can pass a fake. */
 export interface WorkerLike {
@@ -105,11 +106,13 @@ export class Verifier {
 		return w;
 	}
 
-	search: SearchOptimal = (request) => {
+	search = (request: string, kind: SearchKind = 'optimal'): Promise<string> => {
 		const worker = this.#connect();
 		const id = this.#next++;
 		const done = new Promise<string>((finish, fail) => this.#searches.set(id, { finish, fail }));
-		worker.postMessage({ search: id, request });
+		worker.postMessage(
+			kind === 'optimal' ? { search: id, request } : { search: id, request, kind }
+		);
 		return done;
 	};
 
@@ -141,3 +144,8 @@ export const startVerification: StartVerification = (netlist, onprogress) =>
 export const prewarmVerification = (): Promise<void> => shared.prewarm();
 
 export const searchOptimalInWorker: SearchOptimal = (request) => shared.search(request);
+
+/** Runs the optimizer on `request` (`CompressionSession.optimizerRequest`) and resolves with
+ *  the answer for `adoptOptimizer`; rejects if the worker fails (AJU-14). */
+export const searchOptimizerInWorker: SearchOptimal = (request) =>
+	shared.search(request, 'optimizer');

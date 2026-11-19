@@ -52,7 +52,10 @@ const CHANGES = new Set<string>([
 	'applySolution',
 	'revealWidth',
 	'revealWidthPath',
-	'setCosts'
+	'setCosts',
+	'block',
+	'optimizer',
+	'applyOptimizerOption'
 ]);
 
 /** The same session, calling `save` with the exercise file after every change. */

@@ -48,7 +48,8 @@ fn reveals_start_hidden_and_are_kept() {
     assert_eq!(
         json(&s.revealed()),
         json!({"width": null, "lowerBound": "none", "solution": "none", "wallace": "none",
-               "parhami": "none", "optimal": "none", "block": false})
+               "parhami": "none", "optimal": "none", "optimizer": "none",
+               "block": false})
     );
     // Step 2 of the width needs step 1 first (GER-03).
     assert!(!s.reveal_width_path());
@@ -61,7 +62,7 @@ fn reveals_start_hidden_and_are_kept() {
     assert_eq!(
         json(&s.revealed()),
         json!({"width": {"answer": null, "path": true}, "lowerBound": "path",
-               "solution": "result", "wallace": "none", "parhami": "none", "optimal": "none", "block": false})
+               "solution": "result", "wallace": "none", "parhami": "none", "optimal": "none", "optimizer": "none", "block": false})
     );
 }
 

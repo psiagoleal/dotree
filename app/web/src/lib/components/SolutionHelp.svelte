@@ -2,7 +2,8 @@
 <!-- Lower bound and automatic solutions (spec 03): all depend only on the initial matrix and
      come in two steps, result first and path on a second request, each confirmed (GER-03).
      Dadda's solution (AJU-05), Wallace's (AJU-10) and, for a height profile, the optimal one
-     (AJU-12) are revealed and used apart, each in a MethodSolution. A reopened exercise shows what was already revealed, uncounted (SAL-02). -->
+     (AJU-12) are revealed and used apart, each in a MethodSolution; the optimizer's options
+     (AJU-14) in an OptimizerHelp. A reopened exercise shows what was already revealed, uncounted (SAL-02). -->
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { CompressionSession, LowerBound, Method } from '#lib/core.ts';
@@ -10,19 +11,27 @@
 	import type { ViewMode } from '#lib/view.ts';
 	import ConfirmDialog from './ConfirmDialog.svelte';
 	import MethodSolution from './MethodSolution.svelte';
+	import OptimizerHelp from './OptimizerHelp.svelte';
 
 	let {
 		session,
 		view,
+		optimizer = 'ok',
 		onhelp,
 		onapply,
+		onapplyOption = () => {},
 		readOnly = false
 	}: {
 		session: CompressionSession;
 		view: ViewMode;
+		/** Whether the optimizer's search ended (AJU-14). A prop, not a re-creation of this
+		 *  section, so a dialog open when the search ends stays open. */
+		optimizer?: 'pending' | 'ok';
 		onhelp: () => void;
 		/** The circuit was replaced by the solution of `method` (AJU-09). */
 		onapply: (method: Method) => void;
+		/** The circuit was replaced by option `n` of the optimizer (AJU-14). */
+		onapplyOption?: (n: number) => void;
 		/** Below 768 px (GER-10): the circuit cannot be changed from here either. */
 		readOnly?: boolean;
 	} = $props();
@@ -78,6 +87,8 @@
 	{#each METHODS as method (method)}
 		<MethodSolution {session} {method} {view} {onhelp} onapply={() => onapply(method)} {readOnly} />
 	{/each}
+
+	<OptimizerHelp {session} {view} search={optimizer} {onhelp} onapply={onapplyOption} {readOnly} />
 </div>
 
 <ConfirmDialog

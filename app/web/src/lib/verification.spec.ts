@@ -130,6 +130,20 @@ describe('Verifier', () => {
 		await expect(a).rejects.toThrow('boom');
 	});
 
+	it('runs the optimizer in the same worker, told apart by its kind (MT-46)', async () => {
+		const { verifier, workers } = setup();
+		const a = verifier.search('{"expression":"A*B"}', 'optimizer');
+		const b = verifier.search('{"expression":"{3; 1,1}"}');
+		expect(workers[0].sent).toEqual([
+			{ search: 1, request: '{"expression":"A*B"}', kind: 'optimizer' },
+			{ search: 2, request: '{"expression":"{3; 1,1}"}' }
+		]);
+		workers[0].emit({ search: 1, result: 'O' });
+		workers[0].emit({ search: 2, result: 'P' });
+		await expect(a).resolves.toBe('O');
+		await expect(b).resolves.toBe('P');
+	});
+
 	it('a dead worker fails the searches in progress too (MT-42)', async () => {
 		const { verifier, workers } = setup();
 		const a = verifier.search('{}');

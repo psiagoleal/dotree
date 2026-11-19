@@ -1,14 +1,20 @@
 // Caminho relativo: app/web/src/lib/verify.worker.ts
-// Runs verifications off the main thread (VER-04), and the search of a profile's optimal
-// circuit (AJU-12, MT-42), which has no chunks: it runs to its end. One worker serves the whole visit: it
+// Runs verifications off the main thread (VER-04), and the searches of a profile's optimal
+// circuit (AJU-12, MT-42) and of the optimizer (AJU-14, MT-46), which have no chunks: they
+// run to their end. One worker serves the whole visit: it
 // loads its copy of the core as soon as it starts, so nothing is fetched after the page
 // has loaded (GER-05). Each run has an id; between chunks the worker yields, so a cancel
 // message for that id stops it within one chunk.
-import init, { Verification, searchOptimal } from '#lib/wasm/dotree.js';
+import init, { Verification, searchOptimal, searchOptimizer } from '#lib/wasm/dotree.js';
 import type { VerificationProgress } from '#lib/core.ts';
 
+/** What a search looks for: the profile's optimum, or the optimizer's options. */
+export type SearchKind = 'optimal' | 'optimizer';
+
 export type ToWorker =
-	{ run: number; netlist: string } | { cancel: number } | { search: number; request: string };
+	| { run: number; netlist: string }
+	| { cancel: number }
+	| { search: number; request: string; kind?: SearchKind };
 export type FromWorker =
 	| { ready: true }
 	| { run: number; progress: VerificationProgress }
@@ -59,11 +65,12 @@ async function verify(run: number, netlist: string) {
 	}
 }
 
-async function search(id: number, request: string) {
+async function search(id: number, request: string, kind: SearchKind) {
 	try {
 		await ready.catch(() => (ready = init()));
 		await ready;
-		post({ search: id, result: searchOptimal(request) });
+		const run = kind === 'optimizer' ? searchOptimizer : searchOptimal;
+		post({ search: id, result: run(request) });
 	} catch (err) {
 		post({ search: id, error: String(err) });
 	}
@@ -72,6 +79,6 @@ async function search(id: number, request: string) {
 self.onmessage = (e: MessageEvent<ToWorker>) => {
 	const m = e.data;
 	if ('cancel' in m) cancelled.add(m.cancel);
-	else if ('search' in m) void search(m.search, m.request);
+	else if ('search' in m) void search(m.search, m.request, m.kind ?? 'optimal');
 	else void verify(m.run, m.netlist);
 };

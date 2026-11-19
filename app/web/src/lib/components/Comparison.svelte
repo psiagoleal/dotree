@@ -29,9 +29,25 @@
 	);
 
 	interface Shown {
-		method: Method;
+		key: string;
+		label: string;
 		snap: Snapshot;
 		heights: ReturnType<CompressionSession['heightTable']> | null;
+		/** The solution again, uncounted, for its height table's Markdown. */
+		again: () => CompressionSession | null;
+		heightsTitle: string;
+		heightsExport: string;
+	}
+
+	/** Reads what `open` gives and frees it; nothing when it gives nothing. */
+	function reading<T>(open: () => CompressionSession | null, use: (s: CompressionSession) => T) {
+		const s = open();
+		if (!s) return null;
+		try {
+			return use(s);
+		} finally {
+			s.free();
+		}
 	}
 
 	/** The solutions already revealed, read again uncounted. They depend on the matrix and
@@ -39,16 +55,39 @@
 	const shown = $derived.by((): Shown[] => {
 		void helps;
 		const revealed = session.revealed();
-		return METHODS.flatMap((method) => {
-			const s = session.shownSolution(method);
-			if (!s) return [];
-			try {
-				const path = revealed[STAGE_KEY[method]] === 'path';
-				return [{ method, snap: s.snapshot(), heights: path ? s.heightTable() : null }];
-			} finally {
-				s.free();
-			}
+		const methods = METHODS.flatMap((method): Shown[] => {
+			const again = () => session.shownSolution(method);
+			const path = revealed[STAGE_KEY[method]] === 'path';
+			const t = methodTexts(method);
+			const one = reading(again, (s) => ({
+				key: method,
+				label: t.comparison,
+				snap: s.snapshot(),
+				heights: path ? s.heightTable() : null,
+				again,
+				heightsTitle: t.heightsTitle,
+				heightsExport: t.heightsExport
+			}));
+			return one ? [one] : [];
 		});
+		// The optimizer's options (AJU-14): with step 1, and their height tables with step 2.
+		const optimizer = session.shownOptimizer();
+		const path = revealed.optimizer === 'path';
+		const options = Array.from({ length: optimizer?.count ?? 0 }, (_, i): Shown[] => {
+			const n = i + 1;
+			const again = () => session.optimizerOption(i);
+			const one = reading(again, (s) => ({
+				key: `optimizer-${n}`,
+				label: m.comparison_optimizer({ n }),
+				snap: s.snapshot(),
+				heights: path ? s.heightTable() : null,
+				again,
+				heightsTitle: m.comparison_heights_title_optimizer({ n }),
+				heightsExport: m.comparison_heights_export_optimizer({ n })
+			}));
+			return one ? [one] : [];
+		}).flat();
+		return [...methods, ...options];
 	});
 
 	const columns = $derived([
@@ -57,12 +96,13 @@
 			f: figures(snap)
 		},
 		...shown.map((s) => ({
-			label: methodTexts(s.method).comparison,
+			label: s.label,
 			f: figures(s.snap)
 		}))
 	]);
 	const pareto = $derived(nonDominated(columns.map((c) => c.f)));
-	const missing = $derived(METHODS.filter((method) => !shown.some((s) => s.method === method)));
+	const missing = $derived(METHODS.filter((method) => !shown.some((s) => s.key === method)));
+	const optimizerMissing = $derived(!shown.some((s) => s.key.startsWith('optimizer-')));
 
 	const number = $derived(
 		new Intl.NumberFormat(getLocale() === 'pt-br' ? 'pt-BR' : 'en', { maximumFractionDigits: 2 })
@@ -92,16 +132,9 @@
 		v === null ? '—' : v ? m.comparison_yes() : m.comparison_no();
 
 	/** The height table of a solution as Markdown, read again uncounted. */
-	function markdown(method: Method) {
-		return (headers: Parameters<CompressionSession['heightTableMarkdown']>[0]) => {
-			const s = session.shownSolution(method);
-			if (!s) return '';
-			try {
-				return s.heightTableMarkdown(headers);
-			} finally {
-				s.free();
-			}
-		};
+	function markdown(again: () => CompressionSession | null) {
+		return (headers: Parameters<CompressionSession['heightTableMarkdown']>[0]) =>
+			reading(again, (s) => s.heightTableMarkdown(headers)) ?? '';
 	}
 </script>
 
@@ -140,7 +173,7 @@
 			</table>
 		</div>
 		<p class="note">{m.comparison_pareto_note()}</p>
-		{#if shown.some((s) => s.method === 'dadda')}
+		{#if shown.some((s) => s.key === 'dadda')}
 			<p class="note">{m.comparison_dadda_note()}</p>
 		{/if}
 		{#if snap.profile}
@@ -149,15 +182,18 @@
 		{#each missing as method (method)}
 			<p class="note">{methodTexts(method).missing}</p>
 		{/each}
-		{#each shown as s (s.method)}
+		{#if optimizerMissing}
+			<p class="note">{m.comparison_missing_optimizer()}</p>
+		{/if}
+		{#each shown as s (s.key)}
 			{#if s.heights}
 				<HeightTable
 					rows={s.heights}
-					markdown={markdown(s.method)}
-					title={methodTexts(s.method).heightsTitle}
-					exportLabel={methodTexts(s.method).heightsExport}
-					filename={`dotree-alturas-${s.method}.md`}
-					testid={`height-table-${s.method}`}
+					markdown={markdown(s.again)}
+					title={s.heightsTitle}
+					exportLabel={s.heightsExport}
+					filename={`dotree-alturas-${s.key}.md`}
+					testid={`height-table-${s.key}`}
 				/>
 			{/if}
 		{/each}
