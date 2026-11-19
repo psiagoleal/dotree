@@ -41,7 +41,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   maiúsculas, e o laço, a variável e a função do testbench e a constante `W` da versão
   comportamental escondiam essas portas, então o testbench (ou a versão comportamental)
   não compilava. Os nomes locais agora têm mais de uma letra, e a constante se chama
-  `R_WIDTH`. As variáveis `S` e `K` ainda colidem com as saídas das células (MT-49).
+  `R_WIDTH`.
+- VHDL de expressões com a variável `S` ou `K` sozinha: o bit 1 de `S` se chamava `s1`,
+  o mesmo nome da soma do FA1, e o topo declarava o sinal duas vezes. O bit sozinho de `S`
+  e `K` agora se chama `s1_in` e `k1_in`, no diagrama, nas tabelas e no VHDL; os produtos
+  parciais (`a0_s1`) não mudam (spec 05, MT-49).
 
 ### Alterado
 - O núcleo mede tempos e áreas em centésimos de $T_{FA}$ e $A_{FA}$, e não mais em meias

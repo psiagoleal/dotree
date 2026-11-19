@@ -33,10 +33,15 @@ impl Signal {
     pub const ONE: &'static str = "one";
 
     /// VHDL-safe identifier shared by every artifact (spec 05, "Nomes"): `a1_b0`, `e0`,
-    /// `one`.
+    /// `one`. A lone bit of `S` or `K` is `s1_in` or `k1_in`, because `s<n>` and `k<n>` are
+    /// the outputs of cell `n` (MT-49).
     pub fn ident(&self) -> String {
-        if self.factors.is_empty() {
-            return Self::ONE.to_string();
+        match self.factors.as_slice() {
+            [] => return Self::ONE.to_string(),
+            [f] if matches!(f.var, 'S' | 'K') => {
+                return format!("{}{}_in", f.var.to_ascii_lowercase(), f.bit);
+            }
+            _ => {}
         }
         self.factors
             .iter()

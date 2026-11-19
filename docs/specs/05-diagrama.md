@@ -12,6 +12,7 @@ dois artefatos que o estudante copia para a folha de resposta.
 | O quê | Na tela (visão indexada) | Identificador (diagrama, tabela, VHDL) |
 |---|---|---|
 | Bit de entrada | $e_0$ | `e0` |
+| Bit de entrada de $S$ ou $K$ (MT-49) | `s1_in`, `k1_in` | `s1_in`, `k1_in` |
 | Produto parcial | $a_1 b_0$ | `a1_b0` |
 | Ponto fixo em 1 (constante, EXP-15) | $1$ | `one` |
 | Saídas da célula $n$ | $s_n$, $k_n$ | `s<n>`, `k<n>` |
@@ -21,6 +22,12 @@ dois artefatos que o estudante copia para a folha de resposta.
 | Contador $n$ | 7:3 / 15:4 | `C73_<n>` / `C154_<n>` |
 
 O identificador é o mesmo em todos os artefatos gerados e é um identificador VHDL válido.
+Um bit de entrada nunca tem o nome de uma saída de célula: como `s<n>` e `k<n>` são as
+saídas da célula $n$, o bit sozinho de uma variável $S$ ou $K$ ganha o sufixo `_in`, e a
+visão indexada o mostra como está escrito. Num produto parcial o nome não muda
+(`a0_s1`), porque nenhuma saída tem essa forma.
+*Prova:* teste do núcleo (com $S$ e $K$ de 2 bits, nenhum sinal de entrada coincide com
+uma saída de célula, sem distinguir maiúsculas) e o caso `nomes_s_k` no GHDL.
 
 ## Leiaute
 

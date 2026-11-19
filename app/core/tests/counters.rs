@@ -626,7 +626,7 @@ fn dia04_a_counter_row_lists_every_input_and_its_bits_2_and_3() {
         wiring_table_markdown(&rows, HEADERS),
         "| Célula | Nível | Coluna | Entradas | Soma | Vai-um | Bits 2 e 3 |\n\
          |---|---|---|---|---|---|---|\n\
-         | C154_1 | 0 | $2^0$ | `a0`, `b0`, `c0`, `d0`, `e0`, `f0`, `g0`, `h0`, `i0`, `j0`, `k0`, \
+         | C154_1 | 0 | $2^0$ | `a0`, `b0`, `c0`, `d0`, `e0`, `f0`, `g0`, `h0`, `i0`, `j0`, `k0_in`, \
          `l0`, `m0`, `n0`, `o0` | `s1` → `R(0)` | `k1` → `R(1)` | `k1_2` → `R(2)`, `k1_3` → `R(3)` |\n"
     );
 }

@@ -10,7 +10,7 @@ use common::{r1, replay_r2_tree};
 use dotree_core::diagram::Layout;
 use dotree_core::expr::analyze;
 use dotree_core::matrix::DotMatrix;
-use dotree_core::netlist::Netlist;
+use dotree_core::netlist::{Netlist, Wire};
 use dotree_core::reduce::Reduction;
 use dotree_core::verify::sample_vectors;
 use dotree_core::vhdl::{DEFAULT_NAME, Language, VhdlError, VhdlFile, generate, port_name};
@@ -564,4 +564,47 @@ fn vhd04_testbench_locals_do_not_hide_the_ports() {
             }
         }
     }
+}
+
+// ---------------------------------------------------------------- MT-49
+
+#[test]
+fn mt49_no_input_identifier_is_a_cell_output() {
+    // With S and K of 2 bits, `s1` was both the bit 1 of S and the sum of FA1, and the top
+    // declared it twice. VHDL ignores case, so the check is case-insensitive.
+    let (m, _) = build("S + K + 2S + A", &[('S', 2), ('K', 2), ('A', 2)]);
+    let r = dotree_core::help::dadda_solution(&m);
+    let n = Netlist::from_reduction(&m, &r).unwrap();
+    let inputs: BTreeSet<String> = n
+        .signals
+        .iter()
+        .map(|s| s.ident().to_ascii_lowercase())
+        .collect();
+    let mut outputs = BTreeSet::new();
+    for c in &n.cells {
+        outputs.insert(n.ident(Wire::Sum(c.number)));
+        if c.has_carry {
+            outputs.insert(n.ident(Wire::Carry(c.number)));
+        }
+    }
+    assert!(
+        outputs.contains("s1") && outputs.contains("k1"),
+        "{outputs:?}"
+    );
+    assert!(
+        inputs.contains("s1_in") && inputs.contains("k1_in"),
+        "{inputs:?}"
+    );
+    assert!(inputs.is_disjoint(&outputs), "{inputs:?} / {outputs:?}");
+
+    // Every signal of the top is declared once.
+    let fs = files(&m, &n, Language::PtBr);
+    let mut seen = BTreeSet::new();
+    for line in top(&fs).lines() {
+        if let Some(rest) = line.trim().strip_prefix("signal ") {
+            let name = rest.split([' ', ':']).next().unwrap().to_ascii_lowercase();
+            assert!(seen.insert(name.clone()), "{name} declared twice");
+        }
+    }
+    assert!(top(&fs).contains("    s1_in <= S(1);"), "{}", top(&fs));
 }

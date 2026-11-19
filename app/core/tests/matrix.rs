@@ -258,6 +258,22 @@ fn signal_identifiers() {
     assert!(!s.is_and());
 }
 
+#[test]
+fn mt49_lone_bits_of_s_and_k_do_not_take_cell_output_names() {
+    // `s<n>` and `k<n>` are the outputs of cell n (spec 05): a lone bit of S or K gets `_in`.
+    let lone = |var, bit| Signal {
+        factors: vec![Factor { var, bit }],
+    };
+    assert_eq!(lone('S', 1).ident(), "s1_in");
+    assert_eq!(lone('K', 0).ident(), "k0_in");
+    assert_eq!(lone('A', 1).ident(), "a1");
+    // A product is never a cell output: it keeps its name.
+    let s = Signal {
+        factors: vec![Factor { var: 'K', bit: 1 }, Factor { var: 'S', bit: 0 }],
+    };
+    assert_eq!(s.ident(), "k1_s0");
+}
+
 // ---------------------------------------------------------------- EXP-15 (MT-28)
 
 #[test]

@@ -20,5 +20,7 @@ describe('signalParts (VIS-01)', () => {
 		expect(signalParts('')).toBeNull();
 		expect(signalParts('a_b0')).toBeNull();
 		expect(signalParts('R(2)')).toBeNull();
+		// A lone bit of S or K (MT-49): shown as is, never as the sum s₁ of FA1.
+		expect(signalParts('s1_in')).toBeNull();
 	});
 });
